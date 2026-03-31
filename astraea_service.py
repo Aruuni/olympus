@@ -2,14 +2,24 @@
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", category=UserWarning)
+warnings.filterwarnings(
+    "ignore",
+    message=r".*disable_resource_variables.*deprecated.*",
+    category=FutureWarning,
+)
+warnings.filterwarnings(
+    "ignore",
+    message=r".*disable_resource_variables.*deprecated.*",
+    category=UserWarning,
+)
 import os
 import time
 import math
 import threading
 from os import path
 
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
-
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 import numpy as np
 import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
@@ -137,7 +147,8 @@ class AstraeaService:
     def _get_state(self):
         info = tcp_sockopt.get_tcp_deepcc_info(self.fd)
         now_us = self._now_us()
-
+        # inference state test
+        #print(f"[py] flow={self.flow_id} state={info}", flush=True)
         if self.meta is None:
             time_delta = 1
             max_tput = int(info.get("avg_thr", 0))
@@ -190,7 +201,7 @@ class AstraeaService:
             try:
                 state = self._get_state()
             except Exception as e:
-                print(f"[py] flow={flow_id} get_state failed: {e}", flush=True)
+                #print(f"[py] flow={flow_id} get_state failed: {e}", flush=True)
                 with self.lock:
                     self._cleanup_locked()
                 return
@@ -214,15 +225,15 @@ class AstraeaService:
                 t_str = "off" if elapsed_s is None else f"{elapsed_s:.3f}s"
 
                 print(
-                    f"[py] flow={flow_id} t={t_str} control={control} "
-                    f"in_cwnd={state.get('cwnd')} "
-                    f"avg_thr={state.get('avg_thr')} "
-                    f"min_rtt={state.get('min_rtt')} "
-                    f"out={reply}",
-                    flush=True,
+                   f"[py] flow={flow_id} t={t_str} control={control} "
+                   f"in_cwnd={state.get('cwnd')} "
+                   f"avg_thr={state.get('avg_thr')} "
+                   f"min_rtt={state.get('min_rtt')} "
+                      f"out={reply}",
+                   flush=True,
                 )
             except Exception as e:
-                print(f"[py] flow={flow_id} step failed: {e}", flush=True)
+                #print(f"[py] flow={flow_id} step failed: {e}", flush=True)
                 with self.lock:
                     self._cleanup_locked()
                 return
@@ -248,7 +259,7 @@ class AstraeaService:
             self.thread = th
             th.start()
 
-        print(f"[py] attached flow={flow_id} fd={fd}", flush=True)
+        #print(f"[py] attached flow={flow_id} fd={fd}", flush=True)
         return {"ok": True}
 
     def set_control(self, flow_id, control):
@@ -265,7 +276,7 @@ class AstraeaService:
 
             self.control = control
 
-        print(f"[py] flow={flow_id} control set to {control}", flush=True)
+        #print(f"[py] flow={flow_id} control set to {control}", flush=True)
         return {"ok": True, "control": control}
 
     def detach_flow(self, flow_id):
@@ -276,8 +287,34 @@ class AstraeaService:
             self.stop_event.set()
             self._cleanup_locked()
 
-        print(f"[py] detached flow={flow_id}", flush=True)
+        #print(f"[py] detached flow={flow_id}", flush=True)
         return {"ok": True}
+
+    def start_control_reader(self, control_fd):
+        self.control_pipe_fd = int(control_fd)
+
+        def _reader():
+            while True:
+                try:
+                    data = os.read(self.control_pipe_fd, 1)
+                    if not data:
+                        return
+
+                    if data == b"1":
+                        with self.lock:
+                            self.control = True
+                        print(f"[py] flow={self.flow_id} control set to True", flush=True)
+
+                    elif data == b"0":
+                        with self.lock:
+                            self.control = False
+                        print(f"[py] flow={self.flow_id} control set to False", flush=True)
+
+                except OSError:
+                    return
+
+        self.control_thread = threading.Thread(target=_reader, daemon=True)
+        self.control_thread.start()
 
 
 if __name__ == "__main__":
@@ -285,9 +322,11 @@ if __name__ == "__main__":
     fd = int(os.environ["ASTRAEA_FLOW_FD"])
     config = os.environ["ASTRAEA_CONFIG"]
     model = os.environ["ASTRAEA_MODEL"]
+    control_fd = int(os.environ["ASTRAEA_CONTROL_FD"])
 
     svc = AstraeaService(config, model)
     svc.attach_flow(flow_id, fd)
+    svc.start_control_reader(control_fd)
     svc.set_control(flow_id, True)
 
     try:
