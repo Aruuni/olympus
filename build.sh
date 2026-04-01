@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-VENV_DIR="${1:-$ROOT/venv_runtime}"
+VENV_DIR="${1:-$ROOT/venv_astraea}"
 REQ_FILE="${2:-$ROOT/requirements.txt}"
 
 echo "[1/5] create venv: $VENV_DIR"

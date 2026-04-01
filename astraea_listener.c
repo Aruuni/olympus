@@ -1,3 +1,4 @@
+// run with gcc -O2 -Wall -o astraea_listener astraea_listener.c && sudo -E env ASTRAEA_PYTHON="$(pwd)/venv_astraea/bin/python"  ./astraea_listener --mode mininet  --cc-name astraea   --script ./astraea_service.py   --config ./astraea/astraea.json   --model ./astraea/models/py  --scan-ms 10
 #define _GNU_SOURCE
 #include <ctype.h>
 #include <dirent.h>
@@ -316,8 +317,8 @@ static void* flow_thread(void* arg) {
     int cur_idx = 0;
 
     /* adjust these enum names to match your mutant command IDs */
-    static const int proto_ids[] = { ASTRAEA, CUBIC, VEGAS };
-    static const char *proto_names[] = { "astraea", "cubic", "vegas" };
+    static const int proto_ids[] = { ASTRAEA,  VEGAS, BBR3, BBR1};
+    static const char *proto_names[] = { "astraea", "vegas", "bbr", "bbr1" };
     static const int proto_count = sizeof(proto_ids) / sizeof(proto_ids[0]);
 
     char cc[64];

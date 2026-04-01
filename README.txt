@@ -1,18 +1,22 @@
-Build the Python extension:
+=== Python Environment Setup ===
 
-  python3 setup.py build_ext --inplace
+1. Create the virtualenv (Python 3.x required):
+   python3 -m venv ./venv_astraea
 
-Build the listener (adjust python-config if needed):
+2. Activate and install dependencies:
+   source ./venv_astraea/bin/activate
+   pip install --upgrade pip
+   pip install -r requirements.txt
 
-  cc -O2 -Wall -Wextra -o astraea_listener astraea_listener.c \
-     $(python3-config --includes) $(python3-config --embed --ldflags) -lpthread
+3. Build and install the tcp_sockopt C extension:
+   python setup.py build_ext --inplace
+   pip install -e .
 
-Run:
+   (Requires gcc and Python dev headers: sudo apt install python3-dev)
 
-  sudo ./astraea_listener \
-      --mode mininet \
-      --cc-name astraea \
-      --py-module astraea_service \
-      --py-class AstraeaService \
-      --config /path/to/astraea.json \
-      --model /path/to/model
+4. Deactivate when done:
+   deactivate
+
+=== Build & Run ===
+
+gcc -O2 -Wall -o astraea_listener astraea_listener.c && sudo -E env ASTRAEA_PYTHON="$(pwd)/venv_astraea/bin/python" ./astraea_listener --mode mininet --cc-name astraea --script /its/home/mm2350/Desktop/Olympusv2/astraea_service.py --config /its/home/mm2350/Desktop/Olympusv2/astraea/astraea.json --model /its/home/mm2350/Desktop/Olympusv2/astraea/models/py --scan-ms 10

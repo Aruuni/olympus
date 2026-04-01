@@ -35,7 +35,7 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 config_path = path.abspath(
     path.join(path.dirname(__file__), "astraea", "astraea.json")
 )
-model_path = path.abspath(path.join(path.dirname(__file__), "models", "exported"))
+model_path = path.abspath(path.join(path.dirname(__file__), "astraea", "models", "exported"))
 
 
 def map_action(action, cwnd):
