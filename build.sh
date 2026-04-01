@@ -6,7 +6,7 @@ VENV_DIR="${1:-$ROOT/venv_astraea}"
 REQ_FILE="${2:-$ROOT/requirements.txt}"
 
 echo "[1/5] create venv: $VENV_DIR"
-python3 -m venv "$VENV_DIR"
+python3.8 -m venv "$VENV_DIR"
 
 echo "[2/5] activate venv"
 # shellcheck disable=SC1090
