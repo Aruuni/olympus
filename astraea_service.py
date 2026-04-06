@@ -21,6 +21,16 @@ from os import path
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 import numpy as np
+
+# NumPy 1.24+ removed deprecated type aliases that TF 1.x/2.x still use.
+# Restore them before importing tensorflow.
+if not hasattr(np, 'object'):  np.object  = object   # noqa: E701
+if not hasattr(np, 'bool'):    np.bool    = bool      # noqa: E701
+if not hasattr(np, 'int'):     np.int     = int       # noqa: E701
+if not hasattr(np, 'float'):   np.float   = float     # noqa: E701
+if not hasattr(np, 'complex'): np.complex = complex   # noqa: E701
+if not hasattr(np, 'str'):     np.str     = str       # noqa: E701
+
 import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
 
@@ -148,7 +158,7 @@ class AstraeaService:
         info = tcp_sockopt.get_tcp_deepcc_info(self.fd)
         now_us = self._now_us()
         # inference state test
-        #print(f"[py] flow={self.flow_id} state={info}", flush=True)
+        # print(f"[py] flow={self.flow_id} state={info}", flush=True)
         if self.meta is None:
             time_delta = 1
             max_tput = int(info.get("avg_thr", 0))
@@ -224,14 +234,14 @@ class AstraeaService:
                 elapsed_s = None if started_at is None else (time.monotonic() - started_at)
                 t_str = "off" if elapsed_s is None else f"{elapsed_s:.3f}s"
 
-                print(
-                   f"[py] flow={flow_id} t={t_str} control={control} "
-                   f"in_cwnd={state.get('cwnd')} "
-                   f"avg_thr={state.get('avg_thr')} "
-                   f"min_rtt={state.get('min_rtt')} "
-                      f"out={reply}",
-                   flush=True,
-                )
+                # print(
+                #    f"[py] flow={flow_id} t={t_str} control={control} "
+                #    f"in_cwnd={state.get('cwnd')} "
+                #    f"avg_thr={state.get('avg_thr')} "
+                #    f"min_rtt={state.get('min_rtt')} "
+                #       f"out={reply}",
+                #    flush=True,
+                # )
             except Exception as e:
                 #print(f"[py] flow={flow_id} step failed: {e}", flush=True)
                 with self.lock:

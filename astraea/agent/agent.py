@@ -1,5 +1,4 @@
 import os
-os.environ["TF_USE_LEGACY_KERAS"] = "1"
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 import sys
 from . import context
@@ -564,4 +563,18 @@ class Agent:
             print(os.path.join(self.ckpt_dir, name))
             self.saver.restore(self.sess, os.path.join(self.ckpt_dir, name))
         else:
-            self.saver.restore(self.sess, tf.train.latest_checkpoint(self.ckpt_dir))
+            ckpt = tf.train.latest_checkpoint(self.ckpt_dir)
+            if ckpt is None:
+                # Support exported bundles that contain model.{index,meta,data}
+                # but no TensorFlow "checkpoint" manifest file.
+                fallback = os.path.join(self.ckpt_dir, "model")
+                if os.path.exists(fallback + ".index"):
+                    ckpt = fallback
+                else:
+                    raise ValueError(
+                        "No TensorFlow checkpoint found in {}. Expected either "
+                        "a checkpoint manifest or {}.index".format(
+                            self.ckpt_dir, fallback
+                        )
+                    )
+            self.saver.restore(self.sess, ckpt)

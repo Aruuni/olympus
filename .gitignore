@@ -3,3 +3,9 @@ build/*
 *.so
 astraea_listener
 venv_astraea/
+.codex
+.claude
+oc_listener
+venv*
+*.pdf
+*.png

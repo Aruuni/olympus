@@ -1,0 +1,80 @@
+# Single-env sequential training config — one Mininet episode at a time
+# sudo ./training/reset_training.sh && sudo mn -c && sudo -E env PATH="$PATH" HOME="$HOME" python training/orchestrator.py --config training/test_full_config.yaml --listener ./oc_listener --py "$(pwd)/venv_training/bin/python"
+# Checkpoint path (shared across episodes — training accumulates)
+training:
+  checkpoint:      training/oc_model_test.pt
+  batch_size:      64
+  min_replay:      64
+  lr:              3.0e-4   # initial LR
+  lr_min:          5.0e-6   # floor LR after cosine decay
+  lr_decay_steps:  30000    # steps to decay from lr → lr_min (~400 episodes)
+  target_tau:      0.005    # Polyak averaging rate for target network
+  gamma:           0.995
+  save_every:      50
+  c_entropy:       0.02     # slightly higher: compensate for more stable target
+  c_term:          0.0
+  c_dwell:         0.01
+  reward_w_bw:     0.5
+  reward_w_rtt:    0.5
+  reward_w_loss:   0.5
+  dwell_min_ms:    100
+  dwell_max_ms:    1000
+
+# Astraea background service (TF model always runs; control pipe gates cwnd writes)
+# Remove this block to disable Astraea integration entirely.
+astraea:
+  python: venv_astraea/bin/python          # Python with TF + tcp_sockopt
+  script: astraea_service.py               # main entry point
+  config: astraea/astraea.json             # Astraea hyperparameters
+  model:  astraea/models/exported          # TF SavedModel directory
+
+# CC arms available to the RL agent.
+# Must be a subset of: cubic(0), bbr1(2), vegas(5), bbr3(12), astraea(13)
+# The network always has 5 output heads; unlisted arms are masked to zero
+# probability so they are never selected. Remove an arm here to exclude it
+# without invalidating an existing checkpoint.
+arms: [cubic, bbr1, vegas, astraea]
+
+# oc_listener scan interval
+scan_ms: 20
+
+# Base cport (oc_listener matches iperf3 flows by source port)
+cport_base: 20000
+
+# Combinatorial sweep — all bw × delay × link_schedule combinations are
+# generated automatically (3 × 3 × 3 = 27 episodes per pass), then shuffled
+# each pass so the agent sees varied conditions in random order.
+#
+# To revert to a fixed ordered list, replace this block with:
+#   experiments:
+#     - {bw: 10, delay: 20, ...}
+#     - ...
+sweep:
+  # Base bandwidths (Mbps)
+  bws:    [90, 100, 110]
+
+  # Base propagation delays (ms one-way)
+  delays: [20, 30, 40]
+
+  # Common per-experiment settings
+  bdp_mult: 5
+  flows:    1
+  duration: 30
+
+  # Single link change at t=15s (episode midpoint).
+  # 9 schedules × 3 bws × 3 delays = 81 episodes per pass.
+  link_schedules:
+    - []                              # static — no change
+
+    # BW changes
+    - [{t: 15, bw_frac: 1.5}]        # bw increase ×1.5
+    - [{t: 15, bw_frac: 2.0}]        # bw increase ×2
+    - [{t: 15, bw_frac: 0.5}]        # bw decrease ×0.5
+    - [{t: 15, bw_frac: 0.25}]       # bw decrease ×0.25
+
+    # Delay changes
+    - [{t: 15, delay_frac: 1.5}]     # delay increase ×1.5
+    - [{t: 15, delay_frac: 2.0}]     # delay increase ×2
+    - [{t: 15, delay_frac: 0.5}]     # delay decrease ×0.5
+    - [{t: 15, delay_frac: 0.25}]    # delay decrease ×0.25
+

@@ -1,0 +1,11 @@
+# Training stack — install into a separate venv from the astraea venv
+# (astraea uses TF 2.4.1 / Python 3.8; torch is compatible with Python 3.8+)
+#
+#   python3.8 -m venv venv_training
+#   source venv_training/bin/activate
+#   pip install -r training/requirements.txt
+
+torch>=1.13.0,!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.*
+numpy>=1.21.0
+pyyaml>=6.0
+matplotlib>=3.5.0
