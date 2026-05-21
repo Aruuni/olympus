@@ -26,8 +26,16 @@
 #define SO_MAX_PACING_RATE 47
 #endif
 
+#ifndef TCP_MUTANT_ARM
+#define TCP_MUTANT_ARM 48
+#endif
+
 typedef uint32_t u32;
 typedef uint64_t u64;
+
+#define TCP_INFO_HAS_FIELD(info_len, field) \
+    ((info_len) >= (socklen_t)(offsetof(struct tcp_info, field) + \
+                               sizeof(((struct tcp_info*)0)->field)))
 
 struct TCPDeepCCInfo {
     u32 min_rtt;
@@ -160,6 +168,31 @@ static PyObject* py_set_cwnd(PyObject* self, PyObject* args) {
     Py_RETURN_NONE;
 }
 
+static PyObject* py_set_mutant_arm(PyObject* self, PyObject* args) {
+    (void)self;
+    PyObject* sock_or_fd = NULL;
+    unsigned long arm_ul = 0;
+
+    if (!PyArg_ParseTuple(args, "Ok", &sock_or_fd, &arm_ul)) return NULL;
+
+    int fd = PyObject_AsFileDescriptor(sock_or_fd);
+    if (fd < 0) return NULL;
+
+    if (arm_ul > 0xFFFFFFFFUL) {
+        PyErr_SetString(PyExc_ValueError, "arm_id must fit in uint32");
+        return NULL;
+    }
+
+    uint32_t arm_id = (uint32_t)arm_ul;
+    if (setsockopt(fd, IPPROTO_TCP, TCP_MUTANT_ARM, &arm_id,
+                   (socklen_t)sizeof(arm_id)) != 0) {
+        PyErr_SetFromErrno(PyExc_OSError);
+        return NULL;
+    }
+
+    Py_RETURN_NONE;
+}
+
 static PyObject* py_set_pacing_rate(PyObject* self, PyObject* args) {
     (void)self;
     PyObject* sock_or_fd = NULL;
@@ -209,24 +242,24 @@ static PyObject* py_get_tcp_getsockopt_info(PyObject* self, PyObject* args) {
     if (dict_set_u32(d, "rttvar", info.tcpi_rttvar) < 0) goto error;
     if (dict_set_u32(d, "rto", info.tcpi_rto) < 0) goto error;
     if (dict_set_u32(d, "ato", info.tcpi_ato) < 0) goto error;
-#ifdef tcpi_snd_cwnd
-    if (dict_set_u32(d, "snd_cwnd", info.tcpi_snd_cwnd) < 0) goto error;
-#endif
-#ifdef tcpi_unacked
-    if (dict_set_u32(d, "unacked", info.tcpi_unacked) < 0) goto error;
-#endif
-#ifdef tcpi_lost
-    if (dict_set_u32(d, "lost", info.tcpi_lost) < 0) goto error;
-#endif
-#ifdef tcpi_delivered
-    if (dict_set_u32(d, "delivered", info.tcpi_delivered) < 0) goto error;
-#endif
-#ifdef tcpi_bytes_acked
-    if (dict_set_u64(d, "bytes_acked", info.tcpi_bytes_acked) < 0) goto error;
-#endif
-#ifdef tcpi_bytes_sent
-    if (dict_set_u64(d, "bytes_sent", info.tcpi_bytes_sent) < 0) goto error;
-#endif
+    if (TCP_INFO_HAS_FIELD(len, tcpi_snd_cwnd) &&
+        dict_set_u32(d, "snd_cwnd", info.tcpi_snd_cwnd) < 0) goto error;
+    if (TCP_INFO_HAS_FIELD(len, tcpi_unacked) &&
+        dict_set_u32(d, "unacked", info.tcpi_unacked) < 0) goto error;
+    if (TCP_INFO_HAS_FIELD(len, tcpi_lost) &&
+        dict_set_u32(d, "lost", info.tcpi_lost) < 0) goto error;
+    if (TCP_INFO_HAS_FIELD(len, tcpi_segs_out) &&
+        dict_set_u32(d, "segs_out", info.tcpi_segs_out) < 0) goto error;
+    if (TCP_INFO_HAS_FIELD(len, tcpi_data_segs_out) &&
+        dict_set_u32(d, "data_segs_out", info.tcpi_data_segs_out) < 0) goto error;
+    if (TCP_INFO_HAS_FIELD(len, tcpi_delivered) &&
+        dict_set_u32(d, "delivered", info.tcpi_delivered) < 0) goto error;
+    if (TCP_INFO_HAS_FIELD(len, tcpi_bytes_acked) &&
+        dict_set_u64(d, "bytes_acked", info.tcpi_bytes_acked) < 0) goto error;
+    if (TCP_INFO_HAS_FIELD(len, tcpi_bytes_received) &&
+        dict_set_u64(d, "bytes_received", info.tcpi_bytes_received) < 0) goto error;
+    if (TCP_INFO_HAS_FIELD(len, tcpi_bytes_sent) &&
+        dict_set_u64(d, "bytes_sent", info.tcpi_bytes_sent) < 0) goto error;
 
     return d;
 
@@ -244,6 +277,8 @@ static PyMethodDef Methods[] = {
      "get_tcp_getsockopt_info(sock_or_fd) -> dict"},
     {"set_cwnd", py_set_cwnd, METH_VARARGS,
      "set_cwnd(sock_or_fd, cwnd_u32) -> None"},
+    {"set_mutant_arm", py_set_mutant_arm, METH_VARARGS,
+     "set_mutant_arm(sock_or_fd, arm_id) -> None  -- per-socket CC arm switch"},
     {"set_pacing_rate", py_set_pacing_rate, METH_VARARGS,
      "set_pacing_rate(sock_or_fd, bytes_per_sec_u64) -> None"},
     {NULL, NULL, 0, NULL}

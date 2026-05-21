@@ -1,6 +1,4 @@
 #!/bin/bash
-
-
 echo '--- Inserting protocols as modules ---'
 
 sudo modprobe tcp_bbr
@@ -15,6 +13,3 @@ sudo modprobe tcp_hybla
 sudo modprobe tcp_highspeed
 sudo modprobe tcp_illinois
 sudo modprobe tcp_bbr1
-
-
-# sudo modprobe tcp_pcc.ko

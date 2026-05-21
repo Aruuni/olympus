@@ -78,6 +78,8 @@ typedef struct {
     char py_config[PATH_MAX];
     char py_model[PATH_MAX];
     int scan_ms, ipv4_only, include_listen, verbose;
+    int switcher;   /* 1 = run the mutant arm-switching loop; 0 = plain astraea */
+    int idle_exit_ms; /* forwarded to python child via ASTRAEA_IDLE_EXIT_MS */
 } config_t;
 
 typedef struct flow_worker {
@@ -258,16 +260,18 @@ static pid_t spawn_python_child(const config_t* cfg, flow_worker_t* w) {
     if (child < 0) return -1;
 
     if (child == 0) {
-        char fd_s[32], flow_s[32], ctrl_s[32];
+        char fd_s[32], flow_s[32], ctrl_s[32], idle_s[32];
         snprintf(fd_s, sizeof(fd_s), "%d", w->fd);
         snprintf(flow_s, sizeof(flow_s), "%ld", w->flow_id);
         snprintf(ctrl_s, sizeof(ctrl_s), "%d", w->ctrl_pipe_rd);
+        snprintf(idle_s, sizeof(idle_s), "%d", cfg->idle_exit_ms);
 
         setenv("ASTRAEA_FLOW_FD", fd_s, 1);
         setenv("ASTRAEA_FLOW_ID", flow_s, 1);
         setenv("ASTRAEA_CONFIG", cfg->py_config, 1);
         setenv("ASTRAEA_MODEL", cfg->py_model, 1);
         setenv("ASTRAEA_CONTROL_FD", ctrl_s, 1);
+        setenv("ASTRAEA_IDLE_EXIT_MS", idle_s, 1);
 
         close(w->ctrl_pipe_wr);
 
@@ -339,6 +343,29 @@ static void* flow_thread(void* arg) {
             }
             break;
         }
+
+        /* Plain-astraea mode: skip the mutant arm-switching loop entirely.
+         * Just hand control to the Python child for the duration of the flow
+         * and let it auto-exit on idle. */
+        if (!g_cfg.switcher) {
+            if (!w->control_enabled) {
+                w->control_enabled = 1;
+            }
+            if (w->control_enabled != w->control_sent) {
+                char c = w->control_enabled ? '1' : '0';
+                if (write(w->ctrl_pipe_wr, &c, 1) == 1) {
+                    w->control_sent = w->control_enabled;
+                    fprintf(stderr, "[flow %ld] sent control=%d to python\n",
+                            w->flow_id, w->control_enabled);
+                    fflush(stderr);
+                } else {
+                    perror("write control pipe");
+                }
+            }
+            msleep_int(100);
+            continue;
+        }
+
         // set_cc_algorithm_fd(w->fd, "astraea");
         // w->control_enabled = 1;
         /* switch every 5 seconds: 100 ms sleep * 50 = 5 s */
@@ -719,7 +746,8 @@ static void usage(const char* prog) {
     fprintf(stderr,
         "Usage: %s --script PATH --config PATH --model PATH [--mode normal|mininet]\n"
         "          [--cc-name astraea] [--scan-ms 250] [--ipv4-only 1]\n"
-        "          [--include-listen 0] [--verbose 0]\n", prog);
+        "          [--include-listen 0] [--verbose 0]\n"
+        "          [--switcher 0|1] [--idle-exit-ms 500]\n", prog);
 }
 
 int main(int argc, char** argv) {
@@ -730,6 +758,8 @@ int main(int argc, char** argv) {
     g_cfg.ipv4_only = 1;
     g_cfg.include_listen = 0;
     g_cfg.verbose = 0;
+    g_cfg.switcher = 0;
+    g_cfg.idle_exit_ms = 500;
 
     for (int i = 1; i < argc; i++) {
         if (!strcmp(argv[i], "--mode") && i + 1 < argc) snprintf(g_cfg.mode, sizeof(g_cfg.mode), "%s", argv[++i]);
@@ -741,6 +771,8 @@ int main(int argc, char** argv) {
         else if (!strcmp(argv[i], "--ipv4-only") && i + 1 < argc) g_cfg.ipv4_only = atoi(argv[++i]);
         else if (!strcmp(argv[i], "--include-listen") && i + 1 < argc) g_cfg.include_listen = atoi(argv[++i]);
         else if (!strcmp(argv[i], "--verbose") && i + 1 < argc) g_cfg.verbose = atoi(argv[++i]);
+        else if (!strcmp(argv[i], "--switcher") && i + 1 < argc) g_cfg.switcher = atoi(argv[++i]);
+        else if (!strcmp(argv[i], "--idle-exit-ms") && i + 1 < argc) g_cfg.idle_exit_ms = atoi(argv[++i]);
         else { usage(argv[0]); return 2; }
     }
 

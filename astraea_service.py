@@ -47,6 +47,15 @@ config_path = path.abspath(
 )
 model_path = path.abspath(path.join(path.dirname(__file__), "astraea", "models", "exported"))
 
+_TCP_INFO_PROGRESS_KEYS = (
+    "bytes_sent",
+    "data_segs_out",
+    "segs_out",
+    "bytes_acked",
+    "delivered",
+    "bytes_received",
+)
+
 
 def map_action(action, cwnd):
     if action >= 0:
@@ -117,7 +126,7 @@ def make_agent(model_path, params, s_dim, s_dim_global, a_dim, action_scale, act
 
 
 class AstraeaService:
-    def __init__(self, config, model_path):
+    def __init__(self, config, model_path, idle_exit_ms=500):
         tf.logging.set_verbosity(tf.logging.ERROR)
 
         action_scale, action_range = get_action_info()
@@ -139,6 +148,7 @@ class AstraeaService:
         )
 
         self.interval_sec = 0.020
+        self.idle_exit_ms = int(idle_exit_ms) if idle_exit_ms is not None else 0
         self.lock = threading.RLock()
 
         # Single-flow state
@@ -150,9 +160,67 @@ class AstraeaService:
         self.thread = None
         self.started_at = None
         self.stop_event = threading.Event()
+        # Set when the flow goes idle (or otherwise terminates) so the
+        # __main__ supervisor can exit cleanly.
+        self.exit_event = threading.Event()
+        # Per-flow idle tracking (TCP_INFO progress watermark + timestamp).
+        self._last_progress_marker = None
+        self._last_progress_ms = None
+        self._warned_missing_progress_counter = False
 
     def _now_us(self):
         return int(time.monotonic() * 1_000_000)
+
+    def _now_ms(self):
+        return time.monotonic() * 1000.0
+
+    def _check_idle_locked(self, fd):
+        """Return True when the flow has been idle for >= idle_exit_ms.
+
+        Polls TCP_INFO for progress counters and connection state. A
+        non-ESTABLISHED state (closing, closed, time-wait) counts as terminal
+        immediately.
+        """
+        if self.idle_exit_ms <= 0:
+            return False
+        try:
+            info = tcp_sockopt.get_tcp_getsockopt_info(fd)
+        except OSError:
+            return True
+
+        # TCP_ESTABLISHED == 1 in include/net/tcp_states.h. Anything else means
+        # the peer or local side has begun tearing down the connection.
+        state = int(info.get("state", 0))
+        if state != 0 and state != 1:
+            return True
+
+        progress_marker = tuple(
+            int(info[key]) for key in _TCP_INFO_PROGRESS_KEYS if key in info
+        )
+        now_ms = self._now_ms()
+        if not progress_marker:
+            if not self._warned_missing_progress_counter:
+                print(
+                    f"[py] flow={self.flow_id} TCP_INFO has no progress counters; "
+                    "idle-byte exit disabled until socket closes",
+                    flush=True,
+                )
+                self._warned_missing_progress_counter = True
+            self._last_progress_marker = None
+            self._last_progress_ms = now_ms
+            return False
+
+        if (
+            self._last_progress_marker is None
+            or progress_marker != self._last_progress_marker
+        ):
+            self._last_progress_marker = progress_marker
+            self._last_progress_ms = now_ms
+            return False
+        if self._last_progress_ms is None:
+            self._last_progress_ms = now_ms
+            return False
+        return (now_ms - self._last_progress_ms) >= float(self.idle_exit_ms)
 
     def _get_state(self):
         info = tcp_sockopt.get_tcp_deepcc_info(self.fd)
@@ -190,12 +258,18 @@ class AstraeaService:
         self.thread = None
         self.started_at = None
         self.stop_event = threading.Event()
+        self._last_progress_marker = None
+        self._last_progress_ms = None
+        self._warned_missing_progress_counter = False
 
         if fd is not None:
             try:
                 os.close(fd)
             except OSError:
                 pass
+
+        # Wake the __main__ supervisor so it can exit when the only flow is gone.
+        self.exit_event.set()
 
     def _run_flow(self):
         while not self.stop_event.is_set():
@@ -207,6 +281,15 @@ class AstraeaService:
                 control = self.control
                 rec_buf = self.rec_buf
                 started_at = self.started_at
+
+            if self._check_idle_locked(fd):
+                print(
+                    f"[py] flow={flow_id} idle for {self.idle_exit_ms}ms; exiting",
+                    flush=True,
+                )
+                with self.lock:
+                    self._cleanup_locked()
+                return
 
             try:
                 state = self._get_state()
@@ -313,12 +396,10 @@ class AstraeaService:
                     if data == b"1":
                         with self.lock:
                             self.control = True
-                        print(f"[py] flow={self.flow_id} control set to True", flush=True)
 
                     elif data == b"0":
                         with self.lock:
                             self.control = False
-                        print(f"[py] flow={self.flow_id} control set to False", flush=True)
 
                 except OSError:
                     return
@@ -333,14 +414,14 @@ if __name__ == "__main__":
     config = os.environ["ASTRAEA_CONFIG"]
     model = os.environ["ASTRAEA_MODEL"]
     control_fd = int(os.environ["ASTRAEA_CONTROL_FD"])
+    idle_exit_ms = int(os.environ.get("ASTRAEA_IDLE_EXIT_MS", "500"))
 
-    svc = AstraeaService(config, model)
+    svc = AstraeaService(config, model, idle_exit_ms=idle_exit_ms)
     svc.attach_flow(flow_id, fd)
     svc.start_control_reader(control_fd)
     svc.set_control(flow_id, True)
 
     try:
-        while True:
-            time.sleep(60)
+        svc.exit_event.wait()
     except KeyboardInterrupt:
         svc.detach_flow(flow_id)

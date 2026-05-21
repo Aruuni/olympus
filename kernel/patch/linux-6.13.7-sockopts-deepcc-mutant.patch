@@ -1,8 +1,8 @@
 diff --git a/include/linux/tcp.h b/include/linux/tcp.h
-index e569fd1ed7e8..5d7d1ca1052c 100644
+index e569fd1ed7e8..0f7c9da349c0 100644
 --- a/include/linux/tcp.h
 +++ b/include/linux/tcp.h
-@@ -502,6 +502,22 @@ struct tcp_sock {
+@@ -502,6 +502,27 @@ struct tcp_sock {
  	 */
  	struct request_sock __rcu *fastopen_rsk;
  	struct saved_syn *saved_syn;
@@ -22,11 +22,16 @@ index e569fd1ed7e8..5d7d1ca1052c 100644
 +	/* Orca: min. cwnd*/
 +	u32  cwnd_min;
 +	/* End of DeepCC Parameters */
++
++	/* Mutant per-socket arm control (set via TCP_MUTANT_ARM setsockopt) */
++	u32  mutant_arm;          /* requested CC arm id */
++	u8   mutant_arm_pending;  /* 1 when a switch is queued for this socket */
++	/* End of Mutant */
  };
  
  enum tsq_enum {
 diff --git a/include/net/tcp.h b/include/net/tcp.h
-index cde248b77270..9cde0cd8063c 100644
+index cde248b77270..5d7604a16f93 100644
 --- a/include/net/tcp.h
 +++ b/include/net/tcp.h
 @@ -260,6 +260,8 @@ static_assert((1 << ATO_BITS) > TCP_DELACK_MAX);
@@ -38,7 +43,7 @@ index cde248b77270..9cde0cd8063c 100644
  
  #define TCP_RACK_LOSS_DETECTION  0x1 /* Use RACK to detect losses */
  #define TCP_RACK_STATIC_REO_WND  0x2 /* Use static RACK reo wnd */
-@@ -1235,9 +1237,19 @@ struct tcp_congestion_ops {
+@@ -1235,9 +1237,16 @@ struct tcp_congestion_ops {
  	u32 (*sndbuf_expand)(struct sock *sk);
  
  /* control/slow paths put last */
@@ -50,15 +55,12 @@ index cde248b77270..9cde0cd8063c 100644
  	/* get info for inet_diag (optional) */
  	size_t (*get_info)(struct sock *sk, u32 ext, int *attr,
  			   union tcp_cc_info *info);
-+	/*NATCP*/
-+	void (*update_by_app)(struct sock *sk);
-+ 
 +	/*RL-C2TCP*/
 +	void (*get_rate_sample)(struct sock *sk, const struct rate_sample *rs);
  
  	char 			name[TCP_CA_NAME_MAX];
  	struct module		*owner;
-@@ -1310,6 +1322,14 @@ static inline void tcp_ca_event(struct sock *sk, const enum tcp_ca_event event)
+@@ -1310,6 +1319,13 @@ static inline void tcp_ca_event(struct sock *sk, const enum tcp_ca_event event)
  		icsk->icsk_ca_ops->cwnd_event(sk, event);
  }
  
@@ -69,12 +71,11 @@ index cde248b77270..9cde0cd8063c 100644
 +void deepcc_update_cwnd(struct sock *sk);
 +void deepcc_pkts_acked(struct sock *sk, const struct ack_sample *sample);
 +
-+
  /* From tcp_cong.c */
  void tcp_set_ca_state(struct sock *sk, const u8 ca_state);
  
 diff --git a/include/uapi/linux/inet_diag.h b/include/uapi/linux/inet_diag.h
-index 9d9a3eb2ce9b..f6db94932ce3 100644
+index 9d9a3eb2ce9b..b5c0f0865c31 100644
 --- a/include/uapi/linux/inet_diag.h
 +++ b/include/uapi/linux/inet_diag.h
 @@ -158,6 +158,7 @@ enum {
@@ -85,12 +86,11 @@ index 9d9a3eb2ce9b..f6db94932ce3 100644
  	INET_DIAG_SK_BPF_STORAGES,
  	INET_DIAG_CGROUP_ID,
  	INET_DIAG_SOCKOPT,
-@@ -242,6 +243,25 @@ struct tcp_bbr_info {
+@@ -242,6 +243,24 @@ struct tcp_bbr_info {
  	__u32	bbr_extra_acked;	/* max excess packets ACKed in epoch */
  };
  
 +/* INET_DIAG_DEEPCCINFO */
-+
 +struct tcp_deepcc_info {
 +	__u32	min_rtt;		/* min-filtered RTT in uSec */
 +	__u32	avg_urtt;		/* averaged RTT in uSec from the previous info request till now*/
@@ -111,7 +111,7 @@ index 9d9a3eb2ce9b..f6db94932ce3 100644
  /* TCP BBR congestion control bbr_phase as reported in netlink/ss stats. */
  enum tcp_bbr_phase {
  	BBR_PHASE_INVALID		= 0,
-@@ -258,5 +278,6 @@ union tcp_cc_info {
+@@ -258,5 +277,6 @@ union tcp_cc_info {
  	struct tcpvegas_info	vegas;
  	struct tcp_dctcp_info	dctcp;
  	struct tcp_bbr_info	bbr;
@@ -133,10 +133,10 @@ index 8981f00204db..59eb6edf3a47 100644
  
  enum {
 diff --git a/include/uapi/linux/tcp.h b/include/uapi/linux/tcp.h
-index 92b6d6472951..47f3cf592cc2 100644
+index 92b6d6472951..f0e8982660a7 100644
 --- a/include/uapi/linux/tcp.h
 +++ b/include/uapi/linux/tcp.h
-@@ -141,6 +141,15 @@ enum {
+@@ -141,6 +141,16 @@ enum {
  #define TCP_REPAIR_OFF		0
  #define TCP_REPAIR_OFF_NO_WP	-1	/* Turn off without window probes */
  
@@ -147,6 +147,7 @@ index 92b6d6472951..47f3cf592cc2 100644
 +#define TCP_CWND_CAP 45
 +#define TCP_DEEPCC_INFO	46	/* Get Congestion Control (optional) DeepCC info */
 +#define TCP_CWND_MIN 47
++#define TCP_MUTANT_ARM 48  /* per-socket mutant CC arm (arm_id u32) */
 +/* End of Custom Socket Defines */
 +
  struct tcp_repair_opt {
@@ -165,14 +166,14 @@ index 1733e2df22eb..6b4496e126ea 100644
  	     udp_offload.o arp.o icmp.o devinet.o af_inet.o igmp.o \
  	     fib_frontend.o fib_semantics.o fib_trie.o fib_notifier.o \
 diff --git a/net/ipv4/sysctl_net_ipv4.c b/net/ipv4/sysctl_net_ipv4.c
-index a79b2a52ce01..70e8bf1265df 100644
+index a79b2a52ce01..abd3cdc2fea4 100644
 --- a/net/ipv4/sysctl_net_ipv4.c
 +++ b/net/ipv4/sysctl_net_ipv4.c
 @@ -1369,6 +1369,20 @@ static struct ctl_table ipv4_net_table[] = {
  		.mode		= 0644,
  		.proc_handler	= proc_dointvec_ms_jiffies,
  	},
-+	{
++{
 +		.procname	= "tcp_bbr_init_cwnd",
 +		.data		= &sysctl_tcp_bbr_init_cwnd,
 +		.maxlen		= sizeof(unsigned int),
@@ -190,7 +191,7 @@ index a79b2a52ce01..70e8bf1265df 100644
  		.procname	= "tcp_pacing_ss_ratio",
  		.data		= &init_net.ipv4.sysctl_tcp_pacing_ss_ratio,
 diff --git a/net/ipv4/tcp.c b/net/ipv4/tcp.c
-index 61aa756120ad..27f9835abcc4 100644
+index 61aa756120ad..66f49fb31a3c 100644
 --- a/net/ipv4/tcp.c
 +++ b/net/ipv4/tcp.c
 @@ -302,6 +302,13 @@ EXPORT_PER_CPU_SYMBOL_GPL(tcp_tw_isn);
@@ -207,17 +208,21 @@ index 61aa756120ad..27f9835abcc4 100644
  atomic_long_t tcp_memory_allocated ____cacheline_aligned_in_smp;	/* Current allocated memory. */
  EXPORT_SYMBOL(tcp_memory_allocated);
  DEFINE_PER_CPU(int, tcp_memory_per_cpu_fw_alloc);
-@@ -455,6 +462,9 @@ void tcp_init_sock(struct sock *sk)
- 	tp->snd_ssthresh = TCP_INFINITE_SSTHRESH;
+@@ -456,6 +463,13 @@ void tcp_init_sock(struct sock *sk)
  	tp->snd_cwnd_clamp = ~0;
  	tp->mss_cache = TCP_MSS_DEFAULT;
-+	
+ 
 +	/* DeepCC Cwnd_coef init. to 1 */
 +	tp->cwnd_min = 1;
- 
++
++	/* Mutant per-socket arm — start on CUBIC (arm 0), no switch pending */
++	tp->mutant_arm         = 0;
++	tp->mutant_arm_pending = 0;
++
  	tp->reordering = READ_ONCE(sock_net(sk)->ipv4.sysctl_tcp_reordering);
  	tcp_assign_congestion_control(sk);
-@@ -4006,6 +4016,44 @@ int do_tcp_setsockopt(struct sock *sk, int level, int optname,
+ 
+@@ -4006,6 +4020,45 @@ int do_tcp_setsockopt(struct sock *sk, int level, int optname,
  			tcp_enable_tx_delay();
  		WRITE_ONCE(tp->tcp_tx_delay, val);
  		break;
@@ -240,9 +245,6 @@ index 61aa756120ad..27f9835abcc4 100644
 +		else{
 +			tp->snd_cwnd = min(sysctl_tcp_bbr_init_cwnd, tp->snd_cwnd_clamp);
 +		}
-+		if (icsk->icsk_ca_ops->update_by_app) {
-+			icsk->icsk_ca_ops->update_by_app(sk);
-+		}
 +		tcp_push_pending_frames(sk);
 +		break;
 +	case TCP_CWND_MIN:
@@ -254,15 +256,19 @@ index 61aa756120ad..27f9835abcc4 100644
 +		}
 +		tp->snd_cwnd = max(tp->cwnd_min, tp->snd_cwnd);
 +		tp->snd_cwnd = min(tp->snd_cwnd, tp->snd_cwnd_clamp);
-+		if (icsk->icsk_ca_ops->update_by_app) {
-+			icsk->icsk_ca_ops->update_by_app(sk);
-+		}
 +		tcp_push_pending_frames(sk);
++		break;
++	case TCP_MUTANT_ARM:
++		/* Queue a per-socket CC arm switch for the mutant module.
++		 * The mutant pkts_acked callback consumes mutant_arm_pending
++		 * and switches only this socket — no global state is touched. */
++		WRITE_ONCE(tp->mutant_arm, (u32)val);
++		WRITE_ONCE(tp->mutant_arm_pending, 1);
 +		break;
  	default:
  		err = -ENOPROTOOPT;
  		break;
-@@ -4384,6 +4432,28 @@ int do_tcp_getsockopt(struct sock *sk, int level,
+@@ -4384,6 +4437,28 @@ int do_tcp_getsockopt(struct sock *sk, int level,
  			return -EFAULT;
  		return 0;
  	}
@@ -292,7 +298,7 @@ index 61aa756120ad..27f9835abcc4 100644
  		val = !inet_csk_in_pingpong_mode(sk);
  		break;
 diff --git a/net/ipv4/tcp_bbr.c b/net/ipv4/tcp_bbr.c
-index e09389c378cc..2e2887c149c1 100644
+index e09389c378cc..7037cb94b483 100644
 --- a/net/ipv4/tcp_bbr.c
 +++ b/net/ipv4/tcp_bbr.c
 @@ -2340,7 +2340,7 @@ __bpf_kfunc static void bbr_set_state(struct sock *sk, u8 new_state)
@@ -304,16 +310,15 @@ index e09389c378cc..2e2887c149c1 100644
  	.flags		= TCP_CONG_NON_RESTRICTED | TCP_CONG_WANTS_CE_EVENTS,
  	.name		= "bbr",
  	.owner		= THIS_MODULE,
-@@ -2356,6 +2356,8 @@ static struct tcp_congestion_ops tcp_bbr_cong_ops __read_mostly = {
+@@ -2356,6 +2356,7 @@ static struct tcp_congestion_ops tcp_bbr_cong_ops __read_mostly = {
  	.set_state	= bbr_set_state,
  };
  
 +EXPORT_SYMBOL_GPL(tcp_bbr3_cong_ops);
-+
  BTF_KFUNCS_START(tcp_bbr_check_kfunc_ids)
  BTF_ID_FLAGS(func, bbr_init)
  BTF_ID_FLAGS(func, bbr_main)
-@@ -2382,12 +2384,12 @@ static int __init bbr_register(void)
+@@ -2382,12 +2383,12 @@ static int __init bbr_register(void)
  	ret = register_btf_kfunc_id_set(BPF_PROG_TYPE_STRUCT_OPS, &tcp_bbr_kfunc_set);
  	if (ret < 0)
  		return ret;
@@ -329,7 +334,7 @@ index e09389c378cc..2e2887c149c1 100644
  
  module_init(bbr_register);
 diff --git a/net/ipv4/tcp_bbr1.c b/net/ipv4/tcp_bbr1.c
-index 0992ec0b4d89..8c323fe3c313 100644
+index 0992ec0b4d89..90dfe8f2e3bb 100644
 --- a/net/ipv4/tcp_bbr1.c
 +++ b/net/ipv4/tcp_bbr1.c
 @@ -1149,7 +1149,7 @@ __bpf_kfunc static void bbr1_set_state(struct sock *sk, u8 new_state)
@@ -341,16 +346,15 @@ index 0992ec0b4d89..8c323fe3c313 100644
  	.flags		= TCP_CONG_NON_RESTRICTED,
  	.name		= "bbr1",
  	.owner		= THIS_MODULE,
-@@ -1164,6 +1164,8 @@ static struct tcp_congestion_ops tcp_bbr_cong_ops __read_mostly = {
+@@ -1164,6 +1164,7 @@ static struct tcp_congestion_ops tcp_bbr_cong_ops __read_mostly = {
  	.set_state	= bbr1_set_state,
  };
  
 +EXPORT_SYMBOL_GPL(tcp_bbr1_cong_ops);
-+
  BTF_KFUNCS_START(tcp_bbr1_check_kfunc_ids)
  BTF_ID_FLAGS(func, bbr1_init)
  BTF_ID_FLAGS(func, bbr1_main)
-@@ -1190,12 +1192,12 @@ static int __init bbr_register(void)
+@@ -1190,12 +1191,12 @@ static int __init bbr_register(void)
  					&tcp_bbr1_kfunc_set);
  	if (ret < 0)
  		return ret;
@@ -421,52 +425,37 @@ index ba4d98e510e0..ae4a95eb1b76 100644
  {
  	if (backoff_beta > 1024 || window < 1 || window > 256)
 diff --git a/net/ipv4/tcp_cong.c b/net/ipv4/tcp_cong.c
-index e98e5dbc050e..387c8402a38e 100644
+index e98e5dbc050e..bfcc3bb4a7a1 100644
 --- a/net/ipv4/tcp_cong.c
 +++ b/net/ipv4/tcp_cong.c
-@@ -236,6 +236,9 @@ void tcp_init_congestion_control(struct sock *sk)
+@@ -235,7 +235,8 @@ void tcp_assign_congestion_control(struct sock *sk)
+ void tcp_init_congestion_control(struct sock *sk)
  {
  	struct inet_connection_sock *icsk = inet_csk(sk);
- 
+-
 +	/* DeepCC Initialization */
 +	tcp_sk(sk)->deepcc_enable = 0;
-+
  	tcp_sk(sk)->prior_ssthresh = 0;
  	tcp_sk(sk)->fast_ack_mode = 0;
  	if (icsk->icsk_ca_ops->init)
 diff --git a/net/ipv4/tcp_cubic.c b/net/ipv4/tcp_cubic.c
-index 76c23675ae50..2d204d8c500b 100644
+index 76c23675ae50..4d58fd892def 100644
 --- a/net/ipv4/tcp_cubic.c
 +++ b/net/ipv4/tcp_cubic.c
-@@ -475,18 +475,30 @@ __bpf_kfunc static void cubictcp_acked(struct sock *sk, const struct ack_sample
+@@ -475,7 +475,7 @@ __bpf_kfunc static void cubictcp_acked(struct sock *sk, const struct ack_sample
  		hystart_update(sk, delay);
  }
  
 -static struct tcp_congestion_ops cubictcp __read_mostly = {
-+static inline void natcp_update_by_app(struct sock *sk)
-+{
-+	struct tcp_sock *tp = tcp_sk(sk);
-+	printk("natcp_update_by_app:snd_cwnd:%d\cwnd_clamp:%d\n",
-+			tp->snd_cwnd,tp->snd_cwnd_clamp);
-+	tp->snd_cwnd =min(tp->snd_cwnd,tp->snd_cwnd_clamp);
-+}
-+
 +struct tcp_congestion_ops cubictcp __read_mostly = {
  	.init		= cubictcp_init,
  	.ssthresh	= cubictcp_recalc_ssthresh,
  	.cong_avoid	= cubictcp_cong_avoid,
- 	.set_state	= cubictcp_state,
- 	.undo_cwnd	= tcp_reno_undo_cwnd,
- 	.cwnd_event	= cubictcp_cwnd_event,
-+	//S.A: To support NATCP
-+	.update_by_app	= natcp_update_by_app,
- 	.pkts_acked     = cubictcp_acked,
- 	.owner		= THIS_MODULE,
+@@ -487,6 +487,7 @@ static struct tcp_congestion_ops cubictcp __read_mostly = {
  	.name		= "cubic",
  };
  
 +EXPORT_SYMBOL(cubictcp);
-+
  BTF_KFUNCS_START(tcp_cubic_check_kfunc_ids)
  BTF_ID_FLAGS(func, cubictcp_init)
  BTF_ID_FLAGS(func, cubictcp_recalc_ssthresh)
@@ -559,13 +548,14 @@ index c0c81a2c77fa..f10fb66e8dc6 100644
  {
  	BUILD_BUG_ON(sizeof(struct illinois) > ICSK_CA_PRIV_SIZE);
 diff --git a/net/ipv4/tcp_input.c b/net/ipv4/tcp_input.c
-index 492c143aed1b..1cfd77b2e668 100644
+index 492c143aed1b..88d2f9d9e1bf 100644
 --- a/net/ipv4/tcp_input.c
 +++ b/net/ipv4/tcp_input.c
-@@ -3529,6 +3529,16 @@ static int tcp_clean_rtx_queue(struct sock *sk, const struct sk_buff *ack_skb,
+@@ -3529,7 +3529,15 @@ static int tcp_clean_rtx_queue(struct sock *sk, const struct sk_buff *ack_skb,
  		 */
  		flag |= FLAG_SET_XMIT_TIMER;  /* set TLP or RTO timer */
  	}
+-
 +	/* DeepCC sampling: Some schemes such as BBR does not have ->pkt_acked function! */
 +	// So let's don't use next if{} ;)
 +	// struct net *net = sock_net(sk);
@@ -575,11 +565,10 @@ index 492c143aed1b..1cfd77b2e668 100644
 +					     .in_flight = sample.in_flight };
 +		deepcc_pkts_acked(sk,&sample);
 +	}
-+ 
- 
  	if (icsk->icsk_ca_ops->pkts_acked) {
  		struct ack_sample sample = { .pkts_acked = pkts_acked,
-@@ -3621,6 +3631,18 @@ static void tcp_cong_control(struct sock *sk, u32 ack, u32 acked_sacked,
+ 					     .rtt_us = sack->rate->rtt_us };
+@@ -3621,6 +3629,17 @@ static void tcp_cong_control(struct sock *sk, u32 ack, u32 acked_sacked,
  {
  	const struct inet_connection_sock *icsk = inet_csk(sk);
  
@@ -592,34 +581,29 @@ index 492c143aed1b..1cfd77b2e668 100644
 +	if (icsk->icsk_ca_ops->mutant_tcp_cong_control) {
 +		if (icsk->icsk_ca_ops->mutant_tcp_cong_control(sk, rs, ack, acked_sacked, flag) == 0)
 +			return;
-+
 +	}
 +
  	if (icsk->icsk_ca_ops->cong_control) {
  		icsk->icsk_ca_ops->cong_control(sk, ack, flag, rs);
  		return;
-@@ -3633,6 +3655,13 @@ static void tcp_cong_control(struct sock *sk, u32 ack, u32 acked_sacked,
+@@ -3633,6 +3652,11 @@ static void tcp_cong_control(struct sock *sk, u32 ack, u32 acked_sacked,
  		/* Advance cwnd if state allows */
  		tcp_cong_avoid(sk, ack, acked_sacked);
  	}
-+
 +	/* DeepCC: Time to apply the DRL-Agent's action */
 +	if (tp->deepcc_enable || sysctl_tcp_deepcc_enable) {
 +		deepcc_update_cwnd(sk);
 +		return;
 +	}
-+
  	tcp_update_pacing_rate(sk);
  }
  
-@@ -6335,6 +6364,10 @@ void tcp_init_transfer(struct sock *sk, int bpf_op, struct sk_buff *skb)
+@@ -6335,6 +6359,8 @@ void tcp_init_transfer(struct sock *sk, int bpf_op, struct sk_buff *skb)
  	/* Initialize congestion control unless BPF initialized it already: */
  	if (!icsk->icsk_ca_initialized)
  		tcp_init_congestion_control(sk);
-+
-+		/* DeepCC Initialization */
++	/* DeepCC Initialization */
 +	deepcc_init(sk);
-+	
  	tcp_init_buffer_space(sk);
  }
  

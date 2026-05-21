@@ -1,0 +1,164 @@
+# Shared benchmark approach catalog.
+#
+# This file lists the trained approaches that benchmark_responsiveness,
+# benchmark_convergence, and future benchmark folders can reuse.
+#
+# Set `data_folder` on each entry when you want a stable benchmark data folder.
+# If `data_folder`
+# is omitted, the older behavior is used: `name`, then
+# <algorithm>_<state>_<reward>_<environment>.
+# Benchmark runners now run every listed/selected approach whose data folder
+# does not already contain a populated metrics.csv.
+
+base_config: ../config.yaml
+
+approaches:
+  # Fill in one entry per trained model. `data_folder` is the benchmark data
+  # folder under output_root. `plot_label` is only used in graph legends.
+
+  # # CONTROL NO RL 
+  # - data_folder: bbr3
+  #   name: bbr3
+  #   kind: kernel
+  #   algorithm: bbr3
+  #   kernel_cc: bbr
+  #   state: kernel
+  #   reward: none
+  #   environment: dynamic
+  #   plot_label: BBR3
+
+  # - data_folder: cubic
+  #   name: cubic
+  #   kind: kernel
+  #   algorithm: cubic
+  #   kernel_cc: cubic
+  #   state: kernel
+  #   reward: none
+  #   environment: dynamic
+  #   plot_label: CUBIC
+
+
+  # CONTROL BASE REWARD MBPO 
+  - data_folder: mbpo_td3_kalman_sage_dynamic
+    algorithm: mbpo_td3
+    state: kalman
+    reward: sage
+    environment: dynamic
+    plot_label: MBPO-TD3 / Kalman State / SAGE / dynamic
+    checkpoint: single_agent_olympus/data/mbpo_td3_kalman_sage_dynamic_new/checkpoints/mbpo_td3_cwnd_model.pt
+
+  # ADD ONE MORE CONTROL REWARD
+  - data_folder: mbpo_td3_kalman_sage_dynamic_overshoot
+    algorithm: mbpo_td3
+    state: kalman
+    reward: sage_overshoot
+    environment: dynamic
+    plot_label: MBPO-TD3 / Kalman State / SAGE + Overshoot / dynamic
+    checkpoint: single_agent_olympus/data/mbpo_td3_kalman_sage_dynamic_overshoot/checkpoints/mbpo_td3_cwnd_model.pt
+
+  - data_folder: mbpo_td3_kalman_sage_dynamic_sparse
+    algorithm: mbpo_td3
+    state: kalman
+    reward: sage_sparse
+    environment: dynamic
+    plot_label: MBPO-TD3 / Kalman State / Tempest (sparse) / dynamic
+    checkpoint: single_agent_olympus/data/mbpo_td3_kalman_sage_dynamic_sparse/checkpoints/mbpo_td3_cwnd_model.pt
+
+
+
+
+# STATIC 
+  - data_folder: mbpo_td3_kalman_kalman_fit_static
+    algorithm: mbpo_td3
+    state: kalman
+    reward: kalman_fit
+    environment: static
+    plot_label: MBPO-TD3 / Kalman State / Kalman-Fit / static
+    checkpoint: single_agent_olympus/data/mbpo_td3_kalman_kalman_fit_static/checkpoints/mbpo_td3_cwnd_model.pt
+
+
+
+  - data_folder: tempest
+    algorithm: mbpo_td3
+    state: tempest
+    reward: tempest
+    environment: dynamic
+    plot_label: MBPO-TD3 / Tempest State / Tempest Reward / dynamic
+    checkpoint: single_agent_olympus/data/mbpo_td3_20260509-234909/checkpoints/mbpo_td3_cwnd_model.pt
+
+    
+  - data_folder: mbpo_td3_sage_probe_dynamic
+    algorithm: mbpo_td3
+    state: kalman
+    reward: sage
+    environment: dynamic
+    plot_label: MBPO-TD3 / Kalman State / Tempest + bbr3 probe / dynamic
+    checkpoint: single_agent_olympus/data/mbpo_td3_sage_probe_dynamic/checkpoints/mbpo_td3_cwnd_model.pt
+
+
+  - data_folder: oracle
+    algorithm: mbpo_td3
+    state: oracle
+    reward: sage
+    environment: dynamic
+    plot_label: ORACLE (MBPO-TD3 / Oracle State / Tempest Reward / dynamic)
+    checkpoint: single_agent_olympus/data/mbpo_td3_oracle/checkpoints/mbpo_td3_cwnd_model.pt
+
+  - data_folder: mbpo_td3_sage_min_rtt_dynamic
+    algorithm: mbpo_td3
+    state: min_rtt
+    reward: sage_min_rtt
+    environment: dynamic
+    plot_label: Sage Original Reward
+    checkpoint: single_agent_olympus/data/mbpo_td3_sage_min_rtt_dynamic/checkpoints/mbpo_td3_cwnd_model.pt
+
+  # Astraea baseline: the benchmark runner spawns astraea_listener once per
+  # approach, then runs iperf flows with `-C astraea`. The listener attaches
+  # to each flow, runs inference, and each per-flow Python child auto-exits
+  # after `astraea.idle_exit_ms` (default 500ms) of no progress on bytes_sent.
+  - data_folder: astraea
+    kind: astraea
+    algorithm: astraea
+    state: kernel
+    reward: none
+    environment: dynamic
+    plot_label: Astraea
+    astraea:
+      binary: astraea_listener
+      script: astraea_service.py
+      config: astraea/astraea.json
+      model: astraea/models/py
+      idle_exit_ms: 500
+      scan_ms: 10
+
+  # Real Orca baseline (the original SIGCOMM'20 C++/TF1 implementation, NOT
+  # the `orca` PyTorch re-creation above). No iperf3/RL listener: each sender
+  # c{i} runs orca-server-mahimahi (data source + a TF1 actor) via sender.sh
+  # and each receiver x{i} runs clientThr via receiver.sh, exactly as
+  # cctestbed launches them (wrapped in `sudo -u <user>`). clientThr's
+  # per-interval throughput is parsed into the same csvs/x{f}.csv the iperf3
+  # path produces, so all metrics/plots are unchanged. clientThr does not
+  # report RTT, so RTT-derived metrics are NaN for this approach. The TF1
+  # actor needs a slow warmup (model load) before the duration timer starts;
+  # `orca.warmup_slack_s` adds wall time for it and the leading idle prefix
+  # is trimmed so Orca's active window aligns with the benchmark window.
+  # Orca is heavy (a TF1 python actor per concurrent flow) -- lower the
+  # benchmark's n_parallel if the host can't sustain slots*flows actors.
+  - data_folder: orca_real
+    kind: orca
+    algorithm: orca
+    state: kernel
+    reward: none
+    environment: dynamic
+    plot_label: Orca (original)
+    orca:
+      install_dir: /its/home/mm2350/Desktop/mininettestbed/CC/Orca
+      port_base: 47000
+      warmup_slack_s: 60
+      server_lead_s: 1.0
+      warmup_trim: true
+      warmup_trim_eps_mbps: 0.05
+
+
+
+    

@@ -1,0 +1,242 @@
+# Single-agent Olympus configuration.
+# 
+# Run:
+#   sudo mn -c
+#   sudo -E env PATH="$PATH" HOME="$HOME" python3 single_agent_olympus/orchestrator.py --config single_agent_olympus/config.yaml
+
+runtime:
+  algorithm: dreamer_v3  # maps to algorithms/mbpo_td3
+  reward: tempest     # rewards/sage_drift_sparse_overshoot.py
+  state: kalman      # common/algorithm-local state plugin, e.g. kalman/tempest_nosrtt/orca
+
+
+reward:
+  w_overshoot: 2.0
+  w_kalman_drift: 2.0
+  overshoot_cap: 10.0
+  overshoot_threshold: 2
+  kalman_drift_cap: 4.0
+  delay_margin_coef: 1.25
+
+# BBR3-style independent cwnd probe. Algorithm- and reward-agnostic — every
+# worker (orca, td3, mbpo_td3, option_critic, recurrent_ppo, dreamer_v3)
+# honours it when enabled. Every interval_s the worker drops cwnd to
+# factor*cwnd for duration_s, then restores it; the agent cannot change cwnd
+# while the probe is active. Maintains a windowed min-RTT filter internally
+# — NOT exposed to the agent's observation.
+bbr_probe:
+  enabled: false
+  interval_s: 5.0
+  duration_s: 0.2
+  factor: 0.5
+  min_rtt_window_s: 5.0
+
+
+environment:
+  # Built-in environment files live in single_agent_olympus/environments/.
+  # Use `name: static` for a steady-link BW/RTT sweep with no link changes.
+  name: dynamic
+
+state_options:
+  # Used only by runtime.state: orca. This is Orca's fixed delay target feature,
+  # not the scheduled/emulated RTT.
+  orca_target_ms: 50.0
+
+paths:
+  listener: single_agent_olympus/oc_listener
+  py: ./venv_training/bin/python
+
+outputs:
+  # Each invocation creates:
+  #   <root>/<runtime.algorithm>_<YYYYmmdd-HHMMSS>/
+  #     checkpoints/
+  #     episodes/
+  #     plots/
+  #     telemetry/
+  root: single_agent_olympus/data
+  # Optional: set run_name to force a specific folder name under root.
+  # run_name: debug_run
+  # Set false to skip per-episode PDFs in plots/ (episode_returns.csv and
+  # telemetry/episode_returns.pdf are still generated).
+  plot_episodes: true
+
+n_parallel: 30
+
+# Hard cap on total dispatched episodes. The orchestrator stops handing out new
+# work once this many have been launched and lets in-flight slots drain. Omit
+# (or set null) to run until interrupted.
+episodes: 2000
+
+algorithms:
+
+  td3:
+    training:
+      # The orchestrator rewrites checkpoint and log_path into the current run dir.
+      # Set to resume from an existing TD3 checkpoint without overwriting it.
+      resume_from: null
+      # Vanilla TD3 uses the same tuned TD3 settings as mbpo_td3. MBPO-only
+      # forward-model and imagined-rollout knobs stay in the mbpo_td3 block.
+      batch_size: 256
+      seq_len: 32
+      min_replay: 5000
+      replay_capacity: 400000
+      gamma: 0.99
+      target_tau: 0.005
+      lr_actor: 1.0e-4
+      lr_critic: 1.0e-3
+      # Step-decay critic LR after this many gradient updates to slow TD3
+      # underestimation drift. ~250k steps ≈ 500 episodes at our throughput.
+      # Set lr_critic_decay_after_steps: 0 to disable.
+      lr_critic_decay_after_steps: 250000
+      lr_critic_final: 3.0e-4
+      policy_delay: 2
+      target_noise_std: 0.2
+      target_noise_clip: 0.5
+      grad_clip: 5.0
+      updates_per_step: 1
+      save_every: 500
+      # In addition to the rolling checkpoint above, the orchestrator copies
+      # immutable episode snapshots like checkpoints/td3_500_cwnd_model.pt.
+      save_every_episodes: 500
+      param_broadcast_every: 50
+      # Set false to train on raw reward magnitudes instead of dividing TD
+      # targets by the running reward std.
+      use_reward_normalizer: true
+    agent:
+      hidden: 128
+      interval_ms: 20
+      cwnd_min: 10
+      cwnd_max: 10000
+      dead_flow_ms: 500
+      # Generic recurrent TD3 exploration schedule.
+      noise_start: 0.3
+      noise_end: 0.05
+      noise_decay_episodes: 300
+
+  mbpo_td3:
+    training:
+      # The orchestrator rewrites checkpoint and log_path into the current run dir.
+      resume_from: null
+      batch_size: 256
+      seq_len: 32
+      min_replay: 5000
+      replay_capacity: 400000
+      gamma: 0.99
+      target_tau: 0.005
+      lr_actor: 1.0e-4
+      lr_critic: 1.0e-3
+      lr_critic_decay_after_steps: 250000
+      lr_critic_final: 3.0e-4
+      policy_delay: 2
+      target_noise_std: 0.2
+      target_noise_clip: 0.5
+      grad_clip: 5.0
+      updates_per_step: 1
+      save_every: 500
+      # In addition to the rolling checkpoint above, the orchestrator copies
+      # immutable episode snapshots like checkpoints/mbpo_td3_200_cwnd_model.pt.
+      save_every_episodes: 200
+      param_broadcast_every: 50
+      # ── MBPO knobs ────────────────────────────────────────────────────────
+      # Forward-model ensemble that imagines short rollouts to refresh the
+      # critic with on-policy targets. See algorithms/mbpo_td3/learner.py.
+      model_hidden: 200
+      model_ensemble_size: 5
+      model_lr: 1.0e-3
+      model_batch_size: 256
+      model_train_every: 250        # gradient updates between model-train cycles
+      model_epochs: 5               # epochs per model-train cycle
+      rollout_horizon: 5            # imagined steps per branched trajectory
+      rollouts_per_cycle: 1000      # number of real states branched each cycle
+      rollout_every: 250            # gradient updates between rollout cycles
+      rollout_noise_std: 0.1        # exploration noise added to imagined actions
+      model_buffer_capacity: 400000
+      real_ratio: 0.5               # fraction of each TD3 batch drawn from real
+      model_min_real: 5000          # don't train model until real_buf >= this
+    agent:
+      hidden: 128
+      interval_ms: 20
+      cwnd_min: 4
+      cwnd_max: 10000
+      dead_flow_ms: 500
+      noise_start: 0.3
+      noise_end: 0.05
+      noise_decay_episodes: 300
+
+  dreamer_v3:
+    training:
+      # The orchestrator rewrites checkpoint and log_path into the current run dir.
+      resume_from: null
+      # Sequence batch shape: B sequences of length T. With our 50 Hz collection
+      # 16 × 48 ≈ 1 second of trace per sequence — wide enough to capture a few
+      # link schedule effects, narrow enough to keep RSSM unrolls fast.
+      batch_size: 16
+      seq_len: 48
+      min_replay: 5000
+      replay_capacity: 400000
+      grad_clip: 1000.0
+      updates_per_step: 1
+      save_every: 500
+      save_every_episodes: 500
+      param_broadcast_every: 50
+      # World model joint loss weights + KL settings (DreamerV3 defaults).
+      kl_weight: 1.0
+      kl_balance: 0.8
+      kl_free_bits: 1.0
+      recon_weight: 1.0
+      reward_weight: 1.0
+      continue_weight: 1.0
+      # Optimisers: world model gets the largest LR; actor/critic are gentler.
+      lr_world: 1.0e-4
+      lr_actor: 3.0e-5
+      lr_critic: 3.0e-5
+      # Imagination + actor-critic
+      horizon: 15
+      gamma: 0.99
+      lam: 0.95
+      entropy_coef: 3.0e-3
+      action_l2_coef: 2.0e-2
+      action_smooth_coef: 2.0e-2
+      actor_log_std_min: -2.0
+      actor_log_std_max: 0.0
+      target_tau: 0.02
+      actor_warmup_steps: 1000
+      # Twohot value/reward bin grid (in symlog space).
+      value_bins: 255
+      value_low: -20.0
+      value_high: 20.0
+      reward_bins: 255
+    agent:
+      hidden: 256          # MLP / head width for everything in the world model
+      embed_dim: 128       # encoder output dim that feeds the RSSM posterior
+      h_dim: 256           # GRU deterministic state width
+      latent_groups: 8     # K — number of categorical groups in the stochastic latent
+      latent_classes: 8    # C — classes per group; latent_dim = K × C
+      reward_bins: 255
+      interval_ms: 20
+      cwnd_min: 10
+      cwnd_max: 10000
+      dead_flow_ms: 500
+      # Exploration is built into the actor's TanhNormal sample at rollout time;
+      # the noise_decay schedule is inherited from the orchestrator only for
+      # consistency with other algorithms (the worker ignores noise_std).
+      noise_start: 0.2
+      noise_end: 0.05
+      noise_decay_episodes: 300
+
+
+
+learner:
+  port: 6301
+
+scan_ms: 20
+# When true, oc_listener attaches the first matching worker, stops scanning
+# `ss`, and never connects another worker during that listener lifetime.
+listener_single_flow: true
+# Workers read TCP state from tcp_sockopt directly, so the listener does not
+# need to emit and the workers do not need to drain OC_STATE_FD frames.
+listener_state_pipe: false
+# Congestion-control name that the local listener scans for. This is exported
+# to the listener through the environment, not as a listener CLI argument.
+listener_cc: astraea
+cport_base: 23000

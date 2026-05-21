@@ -1,0 +1,59 @@
+name: dynamic
+description: Current training sweep with the existing BW/RTT link schedules.
+shuffle: true
+
+sweep:
+  bws: [10, 20, 40, 60, 80, 100]
+  delays: [10, 20, 40, 60, 80]
+  bdp_mult: 4
+  flows: 1
+  duration: 120
+  link_schedules:
+    # 7-change / 15s cadence: BW only
+    - [{t: 15, bw_frac: 0.5},  {t: 30, bw_frac: 1.0}, {t: 45, bw_frac: 0.5},  {t: 60, bw_frac: 1.0}, {t: 75, bw_frac: 0.5},  {t: 90, bw_frac: 1.0}, {t: 105, bw_frac: 0.5}]
+    - [{t: 15, bw_frac: 2.0},  {t: 30, bw_frac: 1.0}, {t: 45, bw_frac: 2.0},  {t: 60, bw_frac: 1.0}, {t: 75, bw_frac: 2.0},  {t: 90, bw_frac: 1.0}, {t: 105, bw_frac: 2.0}]
+    - [{t: 15, bw_frac: 0.5},  {t: 30, bw_frac: 2.0}, {t: 45, bw_frac: 0.5},  {t: 60, bw_frac: 2.0}, {t: 75, bw_frac: 0.5},  {t: 90, bw_frac: 2.0}, {t: 105, bw_frac: 0.5}]
+    - [{t: 15, bw_frac: 2.0},  {t: 30, bw_frac: 0.5}, {t: 45, bw_frac: 2.0},  {t: 60, bw_frac: 0.5}, {t: 75, bw_frac: 2.0},  {t: 90, bw_frac: 0.5}, {t: 105, bw_frac: 2.0}]
+    - [{t: 15, bw_frac: 0.75}, {t: 30, bw_frac: 1.5}, {t: 45, bw_frac: 0.5},  {t: 60, bw_frac: 2.0}, {t: 75, bw_frac: 0.75}, {t: 90, bw_frac: 1.5}, {t: 105, bw_frac: 0.5}]
+    # 7-change / 15s cadence: RTT only
+    - [{t: 15, delay_frac: 2.0}, {t: 30, delay_frac: 1.0}, {t: 45, delay_frac: 2.0}, {t: 60, delay_frac: 1.0}, {t: 75, delay_frac: 2.0}, {t: 90, delay_frac: 1.0}, {t: 105, delay_frac: 2.0}]
+    - [{t: 15, delay_frac: 3.0}, {t: 30, delay_frac: 1.0}, {t: 45, delay_frac: 3.0}, {t: 60, delay_frac: 1.0}, {t: 75, delay_frac: 3.0}, {t: 90, delay_frac: 1.0}, {t: 105, delay_frac: 3.0}]
+    - [{t: 15, delay_frac: 0.5}, {t: 30, delay_frac: 2.0}, {t: 45, delay_frac: 0.5}, {t: 60, delay_frac: 2.0}, {t: 75, delay_frac: 0.5}, {t: 90, delay_frac: 2.0}, {t: 105, delay_frac: 0.5}]
+    - [{t: 15, delay_frac: 2.0}, {t: 30, delay_frac: 0.5}, {t: 45, delay_frac: 2.0}, {t: 60, delay_frac: 0.5}, {t: 75, delay_frac: 2.0}, {t: 90, delay_frac: 0.5}, {t: 105, delay_frac: 2.0}]
+    - [{t: 15, delay_frac: 1.5}, {t: 30, delay_frac: 3.0}, {t: 45, delay_frac: 1.0}, {t: 60, delay_frac: 2.0}, {t: 75, delay_frac: 0.5}, {t: 90, delay_frac: 1.5}, {t: 105, delay_frac: 3.0}]
+    # 7-change / 15s cadence: BW + RTT both change
+    - [{t: 15, bw_frac: 0.5, delay_frac: 2.0}, {t: 30, bw_frac: 1.0, delay_frac: 1.0}, {t: 45, bw_frac: 0.5, delay_frac: 2.0}, {t: 60, bw_frac: 1.0, delay_frac: 1.0}, {t: 75, bw_frac: 0.5, delay_frac: 2.0}, {t: 90, bw_frac: 1.0, delay_frac: 1.0}, {t: 105, bw_frac: 0.5, delay_frac: 2.0}]
+    - [{t: 15, bw_frac: 2.0, delay_frac: 0.5}, {t: 30, bw_frac: 1.0, delay_frac: 1.0}, {t: 45, bw_frac: 2.0, delay_frac: 0.5}, {t: 60, bw_frac: 1.0, delay_frac: 1.0}, {t: 75, bw_frac: 2.0, delay_frac: 0.5}, {t: 90, bw_frac: 1.0, delay_frac: 1.0}, {t: 105, bw_frac: 2.0, delay_frac: 0.5}]
+    - [{t: 15, bw_frac: 0.5, delay_frac: 1.0}, {t: 30, bw_frac: 1.0, delay_frac: 2.0}, {t: 45, bw_frac: 2.0, delay_frac: 0.5}, {t: 60, bw_frac: 0.5, delay_frac: 3.0}, {t: 75, bw_frac: 1.0, delay_frac: 1.0}, {t: 90, bw_frac: 2.0, delay_frac: 2.0}, {t: 105, bw_frac: 0.5, delay_frac: 1.0}]
+    - [{t: 15, bw_frac: 2.0, delay_frac: 2.0}, {t: 30, bw_frac: 0.5, delay_frac: 0.5}, {t: 45, bw_frac: 2.0, delay_frac: 2.0}, {t: 60, bw_frac: 0.5, delay_frac: 0.5}, {t: 75, bw_frac: 2.0, delay_frac: 2.0}, {t: 90, bw_frac: 0.5, delay_frac: 0.5}, {t: 105, bw_frac: 2.0, delay_frac: 2.0}]
+    - [{t: 15, bw_frac: 1.5, delay_frac: 2.0}, {t: 30, bw_frac: 0.5, delay_frac: 3.0}, {t: 45, bw_frac: 2.0, delay_frac: 1.0}, {t: 60, bw_frac: 0.75, delay_frac: 0.5}, {t: 75, bw_frac: 1.5, delay_frac: 2.0}, {t: 90, bw_frac: 0.5, delay_frac: 3.0}, {t: 105, bw_frac: 1.0, delay_frac: 1.0}]
+    # 7-change / 15s cadence: absolute BW + delay
+    - [{t: 15, bw:  50, delay: 10}, {t: 30, bw:  20, delay: 60}, {t: 45, bw: 100, delay: 20}, {t: 60, bw:  30, delay: 80}, {t: 75, bw:  70, delay: 40}, {t: 90, bw:  20, delay: 10}, {t: 105, bw: 120, delay: 50}]
+    - [{t: 15, bw:  20, delay: 80}, {t: 30, bw: 100, delay: 10}, {t: 45, bw:  40, delay: 50}, {t: 60, bw:  60, delay: 90}, {t: 75, bw:  20, delay: 20}, {t: 90, bw: 130, delay: 60}, {t: 105, bw:  40, delay: 30}]
+    - [{t: 15, bw: 100, delay: 20}, {t: 30, bw:  30, delay: 70}, {t: 45, bw: 150, delay: 10}, {t: 60, bw:  50, delay: 90}, {t: 75, bw: 100, delay: 40}, {t: 90, bw:  20, delay: 30}, {t: 105, bw:  80, delay: 60}]
+    - [{t: 15, bw:  40, delay: 40}, {t: 30, bw:  80, delay: 40}, {t: 45, bw:  20, delay: 40}, {t: 60, bw: 120, delay: 40}, {t: 75, bw:  40, delay: 40}, {t: 90, bw:  60, delay: 40}, {t: 105, bw: 100, delay: 40}]
+    - [{t: 15, bw:  50, delay: 10}, {t: 30, bw:  50, delay: 50}, {t: 45, bw:  50, delay: 90}, {t: 60, bw:  50, delay: 20}, {t: 75, bw:  50, delay: 70}, {t: 90, bw:  50, delay: 30}, {t: 105, bw:  50, delay: 60}]
+    - [{t: 15, bw:  30, delay: 90}, {t: 30, bw: 120, delay: 10}, {t: 45, bw:  20, delay: 70}, {t: 60, bw:  90, delay: 30}, {t: 75, bw: 150, delay: 20}, {t: 90, bw:  40, delay: 80}, {t: 105, bw:  70, delay: 50}]
+    - [{t: 15, bw:  80, delay: 30}, {t: 30, bw:  40, delay: 30}, {t: 45, bw: 100, delay: 70}, {t: 60, bw:  20, delay: 20}, {t: 75, bw: 110, delay: 50}, {t: 90, bw:  30, delay: 90}, {t: 105, bw:  60, delay: 10}]
+    - [{t: 15, bw:  20, delay: 10}, {t: 30, bw:  40, delay: 20}, {t: 45, bw:  60, delay: 30}, {t: 60, bw:  80, delay: 40}, {t: 75, bw: 100, delay: 50}, {t: 90, bw: 120, delay: 60}, {t: 105, bw: 140, delay: 70}]
+    - [{t: 15, bw: 140, delay: 70}, {t: 30, bw: 120, delay: 60}, {t: 45, bw: 100, delay: 50}, {t: 60, bw:  80, delay: 40}, {t: 75, bw:  60, delay: 30}, {t: 90, bw:  40, delay: 20}, {t: 105, bw:  20, delay: 10}]
+    - [{t: 15, bw:  25, delay: 85}, {t: 30, bw: 110, delay: 15}, {t: 45, bw:  45, delay: 55}, {t: 60, bw:  75, delay: 25}, {t: 75, bw: 135, delay: 75}, {t: 90, bw:  35, delay: 45}, {t: 105, bw:  95, delay: 35}]
+    # 10s cadence: absolute BW + delay, faster independent jumps
+    - [{t: 10, bw:  50, delay: 10}, {t: 20, bw:  20, delay: 60}, {t: 30, bw: 100, delay: 20}, {t: 40, bw:  30, delay: 80}, {t: 50, bw:  70, delay: 40}, {t: 60, bw:  20, delay: 10}, {t: 70, bw: 120, delay: 50}, {t: 80, bw:  40, delay: 30}, {t: 90, bw:  60, delay: 90}, {t: 100, bw:  20, delay: 20}, {t: 110, bw: 100, delay: 70}]
+    - [{t: 10, bw: 100, delay: 20}, {t: 20, bw:  30, delay: 70}, {t: 30, bw: 150, delay: 10}, {t: 40, bw:  50, delay: 90}, {t: 50, bw: 100, delay: 40}, {t: 60, bw:  20, delay: 30}, {t: 70, bw:  80, delay: 60}, {t: 80, bw:  40, delay: 20}, {t: 90, bw: 120, delay: 80}, {t: 100, bw:  25, delay: 50}, {t: 110, bw:  70, delay: 10}]
+    # 10s cadence: faster changes for robustness
+    - [{t: 10, bw_frac: 0.5},  {t: 20, bw_frac: 1.0}, {t: 30, bw_frac: 0.5},  {t: 40, bw_frac: 1.0}, {t: 50, bw_frac: 0.5},  {t: 60, bw_frac: 1.0}, {t: 70, bw_frac: 0.5}, {t: 80, bw_frac: 1.0}, {t: 90, bw_frac: 0.5}, {t: 100, bw_frac: 1.0}, {t: 110, bw_frac: 0.5}]
+    - [{t: 10, delay_frac: 2.0}, {t: 20, delay_frac: 1.0}, {t: 30, delay_frac: 2.0}, {t: 40, delay_frac: 1.0}, {t: 50, delay_frac: 2.0}, {t: 60, delay_frac: 1.0}, {t: 70, delay_frac: 2.0}, {t: 80, delay_frac: 1.0}, {t: 90, delay_frac: 2.0}, {t: 100, delay_frac: 1.0}, {t: 110, delay_frac: 2.0}]
+    - [{t: 10, bw_frac: 0.5, delay_frac: 2.0}, {t: 20, bw_frac: 1.0, delay_frac: 1.0}, {t: 30, bw_frac: 2.0, delay_frac: 0.5}, {t: 40, bw_frac: 1.0, delay_frac: 1.0}, {t: 50, bw_frac: 0.5, delay_frac: 3.0}, {t: 60, bw_frac: 1.0, delay_frac: 1.0}, {t: 70, bw_frac: 2.0, delay_frac: 2.0}, {t: 80, bw_frac: 0.5, delay_frac: 0.5}, {t: 90, bw_frac: 1.0, delay_frac: 2.0}, {t: 100, bw_frac: 2.0, delay_frac: 1.0}, {t: 110, bw_frac: 0.5, delay_frac: 0.5}]
+    # 20s cadence: slower changes, longer stabilisation time
+    - [{t: 20, bw_frac: 0.5}, {t: 40, bw_frac: 2.0}, {t: 60, bw_frac: 0.5}, {t: 80, bw_frac: 2.0}, {t: 100, bw_frac: 0.5}]
+    - [{t: 20, delay_frac: 2.0}, {t: 40, delay_frac: 0.5}, {t: 60, delay_frac: 3.0}, {t: 80, delay_frac: 1.0}, {t: 100, delay_frac: 2.0}]
+    - [{t: 20, bw_frac: 0.5, delay_frac: 2.0}, {t: 40, bw_frac: 2.0, delay_frac: 0.5}, {t: 60, bw_frac: 0.5, delay_frac: 3.0}, {t: 80, bw_frac: 1.0, delay_frac: 1.0}, {t: 100, bw_frac: 2.0, delay_frac: 2.0}]
+    # Single change: basic regime learning
+    - [{t: 15, bw_frac: 0.5}]
+    - [{t: 15, bw_frac: 2.0}]
+    - [{t: 15, delay_frac: 2.0}]
+    - [{t: 15, delay_frac: 0.5}]
+    - [{t: 15, bw_frac: 0.5, delay_frac: 2.0}]
+    - [{t: 15, bw_frac: 2.0, delay_frac: 0.5}]
+    - []

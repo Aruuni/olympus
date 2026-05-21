@@ -6,10 +6,21 @@
 
 #define MAX_PAYLOAD 256
 
-#define COMM_END 0
+#define COMM_END   0
 #define COMM_BEGIN 1
-#define COMM_SELECT_ARM 2
+/* COMM_SELECT_ARM (2) retired — use TCP_MUTANT_ARM setsockopt */
 #define TEST 3
+
+/*
+ * TCP_MUTANT_ARM — setsockopt optname for per-socket arm switching.
+ *
+ * setsockopt(fd, IPPROTO_TCP, TCP_MUTANT_ARM, &arm_id, sizeof(arm_id))
+ *
+ * The kernel stores the request in tp->mutant_arm / tp->mutant_arm_pending.
+ * The mutant CC module consumes the pending flag in pkts_acked and performs
+ * the switch only on that specific socket's CC private state.
+ */
+#define TCP_MUTANT_ARM 48
 
 #define CUBIC      0
 #define HYBLA      1
@@ -310,36 +321,6 @@ struct astraea {
     u32 prior_cwnd;
 };
 
-/* prototypes */
-static void send_msg(char *message, int socketId);
-static void start_connection(struct nlmsghdr *nlh);
-static void end_connection(struct nlmsghdr *nlh);
-static void receive_msg(struct sk_buff *skb);
-static int netlink_init(void);
-static void netlink_exit(void);
-
-static void save_state(struct sock *sk);
-static void load_state(struct sock *sk);
-static void init_saved_states(void);
-static void print_bictcp(struct bictcp *cubic);
-static void print_hybla(struct hybla *hybla);
-static void print_bbr(struct bbr *bbr);
-static void print_mutant_state(struct sock *sk);
-
-static void mutant_switch_congestion_control(void);
-static void send_net_params(struct tcp_sock *tp, struct sock *sk, int socketId);
-static void mutant_tcp_init(struct sock *sk);
-static void mutant_tcp_cong_avoid(struct sock *sk, u32 ack, u32 acked);
-static u32 mutant_tcp_ssthresh(struct sock *sk);
-static void mutant_tcp_set_state(struct sock *sk, u8 new_state);
-static u32 mutant_tcp_undo_cwnd(struct sock *sk);
-static void mutant_tcp_cwnd_event(struct sock *sk, enum tcp_ca_event event);
-static void mutant_tcp_pkts_acked(struct sock *sk, const struct ack_sample *sample);
-static u32 mutant_tcp_cong_control(struct sock *sk, const struct rate_sample *rs, u32 ack, u32 acked, int flag);
-static u32 mutant_tcp_sndbuf_expand(struct sock *sk);
-static u32 mutant_tcp_min_tso_segs(struct sock *sk, unsigned int mss);
-static size_t mutant_tcp_get_info(struct sock *sk, u32 ext, int *attr, union tcp_cc_info *info);
-static void mutant_tcp_release(struct sock *sk);
-static void send_info(struct mutant_info *info);
+/* All functions are file-scoped (static) in mutant.c — no prototypes needed here. */
 
 #endif

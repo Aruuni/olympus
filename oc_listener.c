@@ -12,6 +12,7 @@
  *
  * ── Per-flow pipe protocol ───────────────────────────────────────────────────
  *  state_pipe  [C → Py]  oc_state_t  (44 bytes) sent every --scan-ms
+ *                         disabled with --no-state-pipe 1
  *  action_pipe [Py → C]  oc_action_t ( 8 bytes) sent by Python to switch arm
  *
  * Python layout:
@@ -54,7 +55,6 @@
 #include <sys/wait.h>
 #include <time.h>
 #include <unistd.h>
-#include <linux/netlink.h>
 #include <linux/tcp.h>
 #include <sys/uio.h>
 
@@ -75,15 +75,9 @@
 #ifndef TCP_DEEPCC_ENABLE
 #define TCP_DEEPCC_ENABLE 44
 #endif
-
-/* ── Netlink / mutant constants ──────────────────────────────────────────── */
-
-#ifndef NETLINK_TEST
-#define NETLINK_TEST 25
+#ifndef TCP_MUTANT_ARM
+#define TCP_MUTANT_ARM 48   /* per-socket arm switch — must match mutant.h */
 #endif
-
-#define COMM_BEGIN      1
-#define COMM_SELECT_ARM 2
 
 /* Arm IDs — must match mutant.h */
 #define CUBIC   0
@@ -140,6 +134,8 @@ typedef struct {
     int  scan_ms;
     int  ipv4_only;
     int  verbose;
+    int  single_flow;       /* stop scanning after first worker is spawned */
+    int  no_state_pipe;     /* worker reads TCP state directly; don't emit pipe frames */
 } config_t;
 
 /* ── ss record ───────────────────────────────────────────────────────────── */
@@ -184,6 +180,8 @@ static flow_worker_t        *g_workers    = NULL;
 static long                  g_next_flow_id = 1;
 
 config_t g_cfg;
+
+static int any_workers(void);
 
 /* ── Utilities ───────────────────────────────────────────────────────────── */
 
@@ -268,53 +266,19 @@ static void remove_worker_locked(flow_worker_t *victim) {
     }
 }
 
-/* ── Mutant netlink ──────────────────────────────────────────────────────── */
+/* ── Mutant arm switching ────────────────────────────────────────────────── */
 
-static int mutant_open_nl(void) {
-    int nl_fd = socket(AF_NETLINK, SOCK_RAW, NETLINK_TEST);
-    if (nl_fd < 0) return -1;
-
-    struct sockaddr_nl addr;
-    memset(&addr, 0, sizeof(addr));
-    addr.nl_family = AF_NETLINK;
-    addr.nl_pid    = (uint32_t)getpid();
-
-    if (bind(nl_fd, (struct sockaddr *)&addr, sizeof(addr)) != 0) {
-        close(nl_fd);
-        return -1;
-    }
-    return nl_fd;
-}
-
-static int mutant_send(int nl_fd, uint16_t flags, uint32_t seq,
-                       const char *payload) {
-    struct {
-        struct nlmsghdr nlh;
-        char            buf[64];
-    } req;
-    struct sockaddr_nl dst;
-
-    memset(&req, 0, sizeof(req));
-    memset(&dst, 0, sizeof(dst));
-    dst.nl_family = AF_NETLINK;
-
-    size_t plen = strlen(payload) + 1;
-    req.nlh.nlmsg_len   = (uint32_t)NLMSG_LENGTH(plen);
-    req.nlh.nlmsg_flags = flags;
-    req.nlh.nlmsg_seq   = seq;
-    req.nlh.nlmsg_pid   = (uint32_t)getpid();
-    memcpy(NLMSG_DATA(&req.nlh), payload, plen);
-
-    return (int)sendto(nl_fd, &req, req.nlh.nlmsg_len, 0,
-                       (struct sockaddr *)&dst, sizeof(dst));
-}
-
-static int mutant_begin(int nl_fd) {
-    return mutant_send(nl_fd, COMM_BEGIN, 0, "INIT_COMMUNICATION");
-}
-
-static int mutant_switch_arm(int nl_fd, uint32_t arm_id) {
-    return mutant_send(nl_fd, COMM_SELECT_ARM, arm_id, "SENDING ACTION");
+/*
+ * mutant_set_arm — switch the CC arm on a specific socket fd.
+ *
+ * Uses TCP_MUTANT_ARM setsockopt, which sets tp->mutant_arm_pending on
+ * exactly this socket.  The mutant pkts_acked callback picks it up and
+ * switches only that socket's per-socket CC state.  No global state is
+ * touched, so multiple concurrent flows switch independently.
+ */
+static int mutant_set_arm(int sock_fd, uint32_t arm_id) {
+    return setsockopt(sock_fd, IPPROTO_TCP, TCP_MUTANT_ARM,
+                      &arm_id, sizeof(arm_id));
 }
 
 /* ── State collection ────────────────────────────────────────────────────── */
@@ -347,7 +311,7 @@ static int fill_state(int fd, uint32_t cur_arm, oc_state_t *s) {
  * flows.
  *
  * Env vars passed to worker:
- *   OC_STATE_FD   — fd to read oc_state_t from  (pipe read end)
+ *   OC_STATE_FD   — fd to read oc_state_t from, or -1 when disabled
  *   OC_ACTION_FD  — fd to write oc_action_t to  (pipe write end)
  *   OC_FLOW_FD    — duplicated TCP socket fd (for Astraea DeepCC cwnd writes)
  *   OC_FLOW_ID    — monotonic flow identifier
@@ -381,11 +345,14 @@ static pid_t spawn_worker(const config_t *cfg, flow_worker_t *w,
         if (mgr_key)  setenv("OC_MANAGER_KEY",  mgr_key,  1);
 
         /* All pipe fds were created with O_CLOEXEC so they auto-close on
-         * execl.  Explicitly clear CLOEXEC only on the three fds the child
-         * actually uses: state_rd (read state from C), action_wr (write action
+         * execl.  Explicitly clear CLOEXEC only on the fds the child actually
+         * uses: optional state_rd (read state from C), action_wr (write action
          * to C), and w->fd (TCP socket for DeepCC cwnd writes). */
         int cfl;
-        cfl = fcntl(state_rd,  F_GETFD); if (cfl >= 0) fcntl(state_rd,  F_SETFD, cfl & ~FD_CLOEXEC);
+        if (state_rd >= 0) {
+            cfl = fcntl(state_rd, F_GETFD);
+            if (cfl >= 0) fcntl(state_rd, F_SETFD, cfl & ~FD_CLOEXEC);
+        }
         cfl = fcntl(action_wr, F_GETFD); if (cfl >= 0) fcntl(action_wr, F_SETFD, cfl & ~FD_CLOEXEC);
         cfl = fcntl(w->fd,     F_GETFD); if (cfl >= 0) fcntl(w->fd,     F_SETFD, cfl & ~FD_CLOEXEC);
 
@@ -415,23 +382,10 @@ static void *flow_thread(void *arg) {
      * the Python-side control pipe gates whether cwnd writes are applied. */
     enable_deepcc(w->fd, 2);
 
-    int nl_fd = mutant_open_nl();
-    if (nl_fd < 0) {
-        perror("[oc] mutant_open_nl");
-        goto done;
-    }
-
-    if (mutant_begin(nl_fd) < 0) {
-        perror("[oc] mutant_begin");
-        close(nl_fd);
-        goto done;
-    }
-
-    /* Start on CUBIC until Python sends the first action.
-     * DeepCC off — CUBIC manages cwnd in the kernel. */
-    w->cur_arm = CUBIC;
-    if (mutant_switch_arm(nl_fd, CUBIC) < 0)
-        perror("[oc] mutant_switch_arm(initial)");
+    /* mutant starts on CUBIC by default (mutant_tcp_init sets arm=CUBIC).
+     * Python applies arm switches directly via TCP_MUTANT_ARM setsockopt;
+     * we track cur_arm here only for the state struct sent back to Python. */
+    w->cur_arm = BBR1;
 
     fprintf(stderr, "[oc flow %ld] cport=%d mutant ready, waiting for worker\n",
             w->flow_id, g_cfg.cport);
@@ -449,40 +403,39 @@ static void *flow_thread(void *arg) {
             break;
         }
 
-        /* Send current state to Python worker. */
-        oc_state_t state;
-        if (fill_state(w->fd, w->cur_arm, &state) == 0) {
-            /* Non-blocking write: drop frame if pipe is full.
-             * A full pipe means the worker is behind; it will catch up on
-             * the next tick.  We never block here to keep the scan loop
-             * responsive. */
-            ssize_t wr = write(w->state_pipe_wr, &state, sizeof(state));
-            (void)wr;
+        if (w->state_pipe_wr >= 0) {
+            /* Send current state to Python worker. */
+            oc_state_t state;
+            if (fill_state(w->fd, w->cur_arm, &state) == 0) {
+                /* Non-blocking write: drop frame if pipe is full.
+                 * A full pipe means the worker is behind; it will catch up on
+                 * the next tick.  We never block here to keep the scan loop
+                 * responsive. */
+                ssize_t wr = write(w->state_pipe_wr, &state, sizeof(state));
+                (void)wr;
+            }
         }
 
         /* Non-blocking read for a new action from Python.
          * The action_pipe_rd fd is set O_NONBLOCK in spawn setup below. */
+        /* Python applies the arm switch directly via TCP_MUTANT_ARM setsockopt
+         * (tcp_sockopt.set_mutant_arm).  We also call it here as a fallback
+         * so arm switching works even when the tcp_sockopt extension is not
+         * available.  A double setsockopt with the same value is harmless. */
         oc_action_t action;
         ssize_t rd = read(w->action_pipe_rd, &action, sizeof(action));
         if (rd == (ssize_t)sizeof(oc_action_t)) {
-            if (mutant_switch_arm(nl_fd, action.arm_id) >= 0) {
-                /* DeepCC stays enabled; the Python-side control pipe gates
-                 * whether astraea_service actually applies cwnd writes. */
-                enable_deepcc(w->fd, 2);
-                fprintf(stderr,
-                    "[oc flow %ld] arm %u → %u  dwell=%ums\n",
-                    w->flow_id, w->cur_arm, action.arm_id, action.dwell_ms);
-                fflush(stderr);
-                w->cur_arm = action.arm_id;
-            } else {
-                perror("[oc] mutant_switch_arm");
-            }
+            mutant_set_arm(w->fd, action.arm_id);
+            enable_deepcc(w->fd, 2);
+            fprintf(stderr,
+                "[oc flow %ld] arm %u → %u  dwell=%ums\n",
+                w->flow_id, w->cur_arm, action.arm_id, action.dwell_ms);
+            fflush(stderr);
+            w->cur_arm = action.arm_id;
         }
 
         msleep_int(g_cfg.scan_ms);
     }
-
-    close(nl_fd);
 
 done:
     if (w->child_pid > 0) {
@@ -495,7 +448,7 @@ done:
     remove_worker_locked(w);
     pthread_mutex_unlock(&g_workers_mu);
 
-    close(w->state_pipe_wr);
+    if (w->state_pipe_wr >= 0) close(w->state_pipe_wr);
     close(w->action_pipe_rd);
     if (w->fd >= 0) close(w->fd);
     free(w);
@@ -504,21 +457,21 @@ done:
 
 /* ── Flow spawning ───────────────────────────────────────────────────────── */
 
-static void maybe_spawn_flow(const config_t *cfg, const ss_record_t *rec) {
+static int maybe_spawn_flow(const config_t *cfg, const ss_record_t *rec) {
     char key[512];
     make_key(key, sizeof(key), rec);
-    if (worker_is_active(key)) return;
+    if (worker_is_active(key)) return 0;
 
     /* Duplicate the TCP socket fd into our namespace. */
     int fd = dup_fd_from_pid(rec->pid, rec->fd);
-    if (fd < 0) return;
+    if (fd < 0) return 0;
 
     /* Match astraea_listener.c: enable DeepCC before the Python worker starts
      * so astraea_service can immediately read TCP_DEEPCC_INFO on its inherited
      * socket fd without racing the flow thread setup below. */
     if (enable_deepcc(fd, 2) != 0) {
         close(fd);
-        return;
+        return 0;
     }
 
     /* Set CLOEXEC on the duplicated socket — spawn_worker will clear it
@@ -530,15 +483,18 @@ static void maybe_spawn_flow(const config_t *cfg, const ss_record_t *rec) {
      * O_CLOEXEC on both ends — child only inherits state_pfd[0] after we
      * explicitly clear CLOEXEC on it in spawn_worker.  All other pipe ends
      * are automatically closed on execl so they never leak into sibling workers. */
-    int state_pfd[2];
-    if (pipe2(state_pfd, O_CLOEXEC) != 0) { close(fd); return; }
+    int state_pfd[2] = {-1, -1};
+    if (!cfg->no_state_pipe) {
+        if (pipe2(state_pfd, O_CLOEXEC) != 0) { close(fd); return 0; }
+    }
 
     /* action_pipe: Python writes, C reads */
     int action_pfd[2];
     if (pipe2(action_pfd, O_CLOEXEC) != 0) {
-        close(state_pfd[0]); close(state_pfd[1]);
+        if (state_pfd[0] >= 0) close(state_pfd[0]);
+        if (state_pfd[1] >= 0) close(state_pfd[1]);
         close(fd);
-        return;
+        return 0;
     }
 
     /* C reads actions non-blocking so the flow thread never stalls. */
@@ -547,10 +503,11 @@ static void maybe_spawn_flow(const config_t *cfg, const ss_record_t *rec) {
 
     flow_worker_t *w = calloc(1, sizeof(*w));
     if (!w) {
-        close(state_pfd[0]); close(state_pfd[1]);
+        if (state_pfd[0] >= 0) close(state_pfd[0]);
+        if (state_pfd[1] >= 0) close(state_pfd[1]);
         close(action_pfd[0]); close(action_pfd[1]);
         close(fd);
-        return;
+        return 0;
     }
 
     snprintf(w->key,   sizeof(w->key),   "%s", key);
@@ -573,11 +530,12 @@ static void maybe_spawn_flow(const config_t *cfg, const ss_record_t *rec) {
     if (find_worker_locked(key) != NULL) {
         /* Race: another thread beat us. */
         pthread_mutex_unlock(&g_workers_mu);
-        close(state_pfd[0]); close(state_pfd[1]);
+        if (state_pfd[0] >= 0) close(state_pfd[0]);
+        if (state_pfd[1] >= 0) close(state_pfd[1]);
         close(action_pfd[0]); close(action_pfd[1]);
         close(fd);
         free(w);
-        return;
+        return 0;
     }
     add_worker_locked(w);
     pthread_mutex_unlock(&g_workers_mu);
@@ -589,15 +547,16 @@ static void maybe_spawn_flow(const config_t *cfg, const ss_record_t *rec) {
         pthread_mutex_lock(&g_workers_mu);
         remove_worker_locked(w);
         pthread_mutex_unlock(&g_workers_mu);
-        close(state_pfd[0]); close(state_pfd[1]);
+        if (state_pfd[0] >= 0) close(state_pfd[0]);
+        if (state_pfd[1] >= 0) close(state_pfd[1]);
         close(action_pfd[0]); close(action_pfd[1]);
         close(fd);
         free(w);
-        return;
+        return 0;
     }
 
     /* Parent closes the child's ends after fork. */
-    close(state_pfd[0]);
+    if (state_pfd[0] >= 0) close(state_pfd[0]);
     close(action_pfd[1]);
 
     fprintf(stderr, "[oc] new flow %ld  %s  pid=%d child=%d\n",
@@ -611,13 +570,14 @@ static void maybe_spawn_flow(const config_t *cfg, const ss_record_t *rec) {
         pthread_mutex_lock(&g_workers_mu);
         remove_worker_locked(w);
         pthread_mutex_unlock(&g_workers_mu);
-        close(w->state_pipe_wr);
+        if (w->state_pipe_wr >= 0) close(w->state_pipe_wr);
         close(w->action_pipe_rd);
         close(fd);
         free(w);
-        return;
+        return 0;
     }
     pthread_detach(w->thr);
+    return 1;
 }
 
 /* ── ss scanning ─────────────────────────────────────────────────────────── */
@@ -760,34 +720,47 @@ static int discover_netns(int *pids, unsigned long long *inos, int max_out) {
     return count;
 }
 
-static void scan_ns_once(const config_t *cfg, int ns_pid,
+static int scan_ns_once(const config_t *cfg, int ns_pid,
                           unsigned long long ns_ino) {
     char *ss_text = NULL;
-    if (run_ss_in_ns(ns_pid, cfg->ipv4_only, &ss_text) != 0) return;
+    if (run_ss_in_ns(ns_pid, cfg->ipv4_only, &ss_text) != 0) return 0;
 
     ss_record_t recs[4096];
     int n = scan_ss_text(ss_text, ns_ino, ns_pid, recs, 4096);
     free(ss_text);
 
+    int spawned = 0;
     for (int i = 0; i < n; i++) {
         if (recs[i].pid <= 0 || recs[i].fd < 0) continue;
         if (strcmp(recs[i].state, "ESTAB") != 0) continue;
         /* Match by iperf3 client source port. */
         if (port_from_addr(recs[i].local) != cfg->cport) continue;
-        maybe_spawn_flow(cfg, &recs[i]);
+        spawned += maybe_spawn_flow(cfg, &recs[i]);
+        if (cfg->single_flow && spawned > 0) break;
     }
+    return spawned;
 }
 
 static void scan_loop(const config_t *cfg) {
     while (!g_stop) {
+        int spawned = 0;
         if (strcmp(cfg->mode, "mininet") == 0) {
             int              pids[1024];
             unsigned long long inos[1024];
             int n = discover_netns(pids, inos, 1024);
-            for (int i = 0; i < n; i++)
-                scan_ns_once(cfg, pids[i], inos[i]);
+            for (int i = 0; i < n; i++) {
+                spawned += scan_ns_once(cfg, pids[i], inos[i]);
+                if (cfg->single_flow && spawned > 0) break;
+            }
         } else {
-            scan_ns_once(cfg, 0, 0);
+            spawned += scan_ns_once(cfg, 0, 0);
+        }
+
+        if (cfg->single_flow && spawned > 0) {
+            fprintf(stderr, "[oc] single-flow mode: attached first worker; stopping ss scans\n");
+            fflush(stderr);
+            while (!g_stop && any_workers()) msleep_int(100);
+            break;
         }
         msleep_int(cfg->scan_ms);
     }
@@ -816,6 +789,7 @@ static void usage(const char *prog) {
     fprintf(stderr,
         "Usage: %s --cport PORT --worker SCRIPT\n"
         "          [--mode normal|mininet] [--scan-ms 100]\n"
+        "          [--single-flow 0] [--no-state-pipe 0]\n"
         "          [--ipv4-only 1] [--verbose 0]\n"
         "\n"
         "Env:  OC_PYTHON   path to Python interpreter (default /usr/bin/python3)\n"
@@ -830,6 +804,8 @@ int main(int argc, char **argv) {
     g_cfg.scan_ms    = 100;
     g_cfg.ipv4_only  = 1;
     g_cfg.verbose    = 0;
+    g_cfg.single_flow = 0;
+    g_cfg.no_state_pipe = 0;
     g_cfg.cport      = 0;
 
     for (int i = 1; i < argc; i++) {
@@ -837,6 +813,9 @@ int main(int argc, char **argv) {
         else if (!strcmp(argv[i], "--worker")   && i+1 < argc) snprintf(g_cfg.py_worker, sizeof(g_cfg.py_worker), "%s", argv[++i]);
         else if (!strcmp(argv[i], "--mode")     && i+1 < argc) snprintf(g_cfg.mode, sizeof(g_cfg.mode), "%s", argv[++i]);
         else if (!strcmp(argv[i], "--scan-ms")  && i+1 < argc) g_cfg.scan_ms  = atoi(argv[++i]);
+        else if (!strcmp(argv[i], "--single-flow") && i+1 < argc) g_cfg.single_flow = atoi(argv[++i]);
+        else if (!strcmp(argv[i], "--once")     && i+1 < argc) g_cfg.single_flow = atoi(argv[++i]);
+        else if (!strcmp(argv[i], "--no-state-pipe") && i+1 < argc) g_cfg.no_state_pipe = atoi(argv[++i]);
         else if (!strcmp(argv[i], "--ipv4-only")&& i+1 < argc) g_cfg.ipv4_only = atoi(argv[++i]);
         else if (!strcmp(argv[i], "--verbose")  && i+1 < argc) g_cfg.verbose  = atoi(argv[++i]);
         else { usage(argv[0]); return 2; }
@@ -850,8 +829,10 @@ int main(int argc, char **argv) {
     signal(SIGINT,  on_sig);
     signal(SIGTERM, on_sig);
 
-    fprintf(stderr, "[oc] listening on cport=%d  worker=%s  scan=%dms\n",
-            g_cfg.cport, g_cfg.py_worker, g_cfg.scan_ms);
+    fprintf(stderr, "[oc] listening on cport=%d  worker=%s  scan=%dms  "
+            "single_flow=%d  no_state_pipe=%d\n",
+            g_cfg.cport, g_cfg.py_worker, g_cfg.scan_ms,
+            g_cfg.single_flow, g_cfg.no_state_pipe);
     fflush(stderr);
 
     scan_loop(&g_cfg);

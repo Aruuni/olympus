@@ -1,6 +1,6 @@
+ifneq ($(KERNELRELEASE),)
 KBUILD_EXTRA_SYMBOLS := ../tcp-astraea/Module.symvers
 
-ifneq ($(KERNELRELEASE),)
 
 obj-m := mutant.o
 # mutant-objs := protocol/tcp_pcc.o
