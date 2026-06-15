@@ -44,11 +44,11 @@ sys.path.insert(0, _ROOT)
 sys.path.insert(0, _HERE)
 
 from olympus.common.mininet_env import MininetEnv
-from olympus.common.episode_plot import (
+from olympus.plots.episode_plot import (
     plot as _plot_episode,
     episode_return as _episode_return,
 )
-from olympus.common.multi_flow_episode_plot import (
+from olympus.plots.multi_flow_episode_plot import (
     plot as _plot_multi_episode,
     episode_return as _multi_episode_return,
 )
@@ -1832,7 +1832,7 @@ def main():
 
     def _generate_returns_plot():
         try:
-            from olympus.common.plot_returns_watcher import generate_plot
+            from olympus.plots.plot_returns_watcher import generate_plot
             generate_plot(
                 csv_path    = returns_csv,
                 output      = os.path.join(telemetry_dir, 'episode_returns.pdf'),

@@ -37,7 +37,7 @@ _ROOT = os.path.dirname(_HERE)
 sys.path.insert(0, _ROOT)
 sys.path.insert(0, _HERE)
 
-from olympus.common.multi_flow_episode_plot import (
+from olympus.plots.multi_flow_episode_plot import (
     fairness_series,
     load_agent_traces,
 )
