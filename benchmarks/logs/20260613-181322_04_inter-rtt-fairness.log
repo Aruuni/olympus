@@ -1,0 +1,824 @@
+[inter_rtt_bench] output_root=/its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data
+[inter_rtt_bench] benchmark=inter_rtt_fairness_two_flow_join20_final20 duration=60s flow1_start=0s flow2_start=20s fixed_flow_rtt=20ms score_window=20s
+[inter_rtt_bench] bw_grid=20,40,60,80,100
+[inter_rtt_bench] flow2_rtt_grid=20,40,60,80,100
+[inter_rtt_bench] runs_per_cell=4 n_parallel=20
+[inter_rtt_bench] approaches_to_run=cubic, bbr, bbr1, frcc
+[inter_rtt_bench] slot=0 cubic bw=20 f1_rtt=20 f2_rtt=20 run=1 -C cubic
+[inter_rtt_bench] slot=1 cubic bw=20 f1_rtt=20 f2_rtt=20 run=2 -C cubic
+[inter_rtt_bench] slot=2 cubic bw=20 f1_rtt=20 f2_rtt=20 run=3 -C cubic
+[inter_rtt_bench] slot=3 cubic bw=20 f1_rtt=20 f2_rtt=20 run=4 -C cubic
+[inter_rtt_bench] slot=4 cubic bw=40 f1_rtt=20 f2_rtt=20 run=1 -C cubic
+[inter_rtt_bench] slot=5 cubic bw=40 f1_rtt=20 f2_rtt=20 run=2 -C cubic
+[inter_rtt_bench] slot=6 cubic bw=40 f1_rtt=20 f2_rtt=20 run=3 -C cubic
+[inter_rtt_bench] slot=7 cubic bw=40 f1_rtt=20 f2_rtt=20 run=4 -C cubic
+[inter_rtt_bench] slot=8 cubic bw=60 f1_rtt=20 f2_rtt=20 run=1 -C cubic
+[inter_rtt_bench] slot=9 cubic bw=60 f1_rtt=20 f2_rtt=20 run=2 -C cubic
+[inter_rtt_bench] slot=10 cubic bw=60 f1_rtt=20 f2_rtt=20 run=3 -C cubic
+[inter_rtt_bench] slot=11 cubic bw=60 f1_rtt=20 f2_rtt=20 run=4 -C cubic
+[inter_rtt_bench] slot=12 cubic bw=80 f1_rtt=20 f2_rtt=20 run=1 -C cubic
+[inter_rtt_bench] slot=13 cubic bw=80 f1_rtt=20 f2_rtt=20 run=2 -C cubic
+[inter_rtt_bench] slot=14 cubic bw=80 f1_rtt=20 f2_rtt=20 run=3 -C cubic
+[inter_rtt_bench] slot=15 cubic bw=80 f1_rtt=20 f2_rtt=20 run=4 -C cubic
+[inter_rtt_bench] slot=16 cubic bw=100 f1_rtt=20 f2_rtt=20 run=1 -C cubic
+[inter_rtt_bench] slot=17 cubic bw=100 f1_rtt=20 f2_rtt=20 run=2 -C cubic
+[inter_rtt_bench] slot=18 cubic bw=100 f1_rtt=20 f2_rtt=20 run=3 -C cubic
+[inter_rtt_bench] slot=19 cubic bw=100 f1_rtt=20 f2_rtt=20 run=4 -C cubic
+[inter_rtt_bench] slot=0 cubic bw=20 f1_rtt=20 f2_rtt=40 run=1 -C cubic
+[inter_rtt_bench] cubic cell=1 bw=20 f2_rtt=20 run=1/4 done (1/100)
+[inter_rtt_bench] slot=2 cubic bw=20 f1_rtt=20 f2_rtt=40 run=2 -C cubic
+[inter_rtt_bench] cubic cell=1 bw=20 f2_rtt=20 run=3/4 done (2/100)
+[inter_rtt_bench] slot=4 cubic bw=20 f1_rtt=20 f2_rtt=40 run=3 -C cubic
+[inter_rtt_bench] cubic cell=2 bw=40 f2_rtt=20 run=1/4 done (3/100)
+[inter_rtt_bench] slot=12 cubic bw=20 f1_rtt=20 f2_rtt=40 run=4 -C cubic
+[inter_rtt_bench] cubic cell=4 bw=80 f2_rtt=20 run=1/4 done (4/100)
+[inter_rtt_bench] slot=11 cubic bw=40 f1_rtt=20 f2_rtt=40 run=1 -C cubic
+[inter_rtt_bench] cubic cell=3 bw=60 f2_rtt=20 run=4/4 done (5/100)
+[inter_rtt_bench] slot=3 cubic bw=40 f1_rtt=20 f2_rtt=40 run=2 -C cubic
+[inter_rtt_bench] cubic cell=1 bw=20 f2_rtt=20 run=4/4 done (6/100)
+[inter_rtt_bench] slot=10 cubic bw=40 f1_rtt=20 f2_rtt=40 run=3 -C cubic
+[inter_rtt_bench] cubic cell=3 bw=60 f2_rtt=20 run=3/4 done (7/100)
+[inter_rtt_bench] slot=8 cubic bw=40 f1_rtt=20 f2_rtt=40 run=4 -C cubic
+[inter_rtt_bench] cubic cell=3 bw=60 f2_rtt=20 run=1/4 done (8/100)
+[inter_rtt_bench] slot=14 cubic bw=60 f1_rtt=20 f2_rtt=40 run=1 -C cubic
+[inter_rtt_bench] cubic cell=4 bw=80 f2_rtt=20 run=3/4 done (9/100)
+[inter_rtt_bench] slot=9 cubic bw=60 f1_rtt=20 f2_rtt=40 run=2 -C cubic
+[inter_rtt_bench] cubic cell=3 bw=60 f2_rtt=20 run=2/4 done (10/100)
+[inter_rtt_bench] cubic cell=1 bw=20 f2_rtt=20 run=2/4 done (11/100)
+[inter_rtt_bench] slot=1 cubic bw=60 f1_rtt=20 f2_rtt=40 run=3 -C cubic
+[inter_rtt_bench] slot=19 cubic bw=60 f1_rtt=20 f2_rtt=40 run=4 -C cubic
+[inter_rtt_bench] cubic cell=5 bw=100 f2_rtt=20 run=4/4 done (12/100)
+[inter_rtt_bench] slot=17 cubic bw=80 f1_rtt=20 f2_rtt=40 run=1 -C cubic
+[inter_rtt_bench] cubic cell=5 bw=100 f2_rtt=20 run=2/4 done (13/100)
+[inter_rtt_bench] slot=13 cubic bw=80 f1_rtt=20 f2_rtt=40 run=2 -C cubic
+[inter_rtt_bench] cubic cell=4 bw=80 f2_rtt=20 run=2/4 done (14/100)
+[inter_rtt_bench] slot=5 cubic bw=80 f1_rtt=20 f2_rtt=40 run=3 -C cubic
+[inter_rtt_bench] cubic cell=2 bw=40 f2_rtt=20 run=2/4 done (15/100)
+[inter_rtt_bench] slot=15 cubic bw=80 f1_rtt=20 f2_rtt=40 run=4 -C cubic
+[inter_rtt_bench] cubic cell=4 bw=80 f2_rtt=20 run=4/4 done (16/100)
+[inter_rtt_bench] slot=6 cubic bw=100 f1_rtt=20 f2_rtt=40 run=1 -C cubic
+[inter_rtt_bench] cubic cell=2 bw=40 f2_rtt=20 run=3/4 done (17/100)
+[inter_rtt_bench] slot=18 cubic bw=100 f1_rtt=20 f2_rtt=40 run=2 -C cubic
+[inter_rtt_bench] cubic cell=5 bw=100 f2_rtt=20 run=3/4 done (18/100)
+[inter_rtt_bench] slot=16 cubic bw=100 f1_rtt=20 f2_rtt=40 run=3 -C cubic
+[inter_rtt_bench] cubic cell=5 bw=100 f2_rtt=20 run=1/4 done (19/100)
+[inter_rtt_bench] slot=7 cubic bw=100 f1_rtt=20 f2_rtt=40 run=4 -C cubic
+[inter_rtt_bench] cubic cell=2 bw=40 f2_rtt=20 run=4/4 done (20/100)
+[inter_rtt_bench] slot=12 cubic bw=20 f1_rtt=20 f2_rtt=60 run=1 -C cubic
+[inter_rtt_bench] cubic cell=6 bw=20 f2_rtt=40 run=4/4 done (21/100)
+[inter_rtt_bench] slot=0 cubic bw=20 f1_rtt=20 f2_rtt=60 run=2 -C cubic
+[inter_rtt_bench] cubic cell=6 bw=20 f2_rtt=40 run=1/4 done (22/100)
+[inter_rtt_bench] slot=11 cubic bw=20 f1_rtt=20 f2_rtt=60 run=3 -C cubic
+[inter_rtt_bench] cubic cell=7 bw=40 f2_rtt=40 run=1/4 done (23/100)
+[inter_rtt_bench] slot=2 cubic bw=20 f1_rtt=20 f2_rtt=60 run=4 -C cubic
+[inter_rtt_bench] cubic cell=6 bw=20 f2_rtt=40 run=2/4 done (24/100)
+[inter_rtt_bench] slot=4 cubic bw=40 f1_rtt=20 f2_rtt=60 run=1 -C cubic
+[inter_rtt_bench] cubic cell=6 bw=20 f2_rtt=40 run=3/4 done (25/100)
+[inter_rtt_bench] slot=10 cubic bw=40 f1_rtt=20 f2_rtt=60 run=2 -C cubic
+[inter_rtt_bench] cubic cell=7 bw=40 f2_rtt=40 run=3/4 done (26/100)
+[inter_rtt_bench] slot=8 cubic bw=40 f1_rtt=20 f2_rtt=60 run=3 -C cubic
+[inter_rtt_bench] cubic cell=7 bw=40 f2_rtt=40 run=4/4 done (27/100)
+[inter_rtt_bench] slot=3 cubic bw=40 f1_rtt=20 f2_rtt=60 run=4 -C cubic
+[inter_rtt_bench] cubic cell=7 bw=40 f2_rtt=40 run=2/4 done (28/100)
+[inter_rtt_bench] slot=9 cubic bw=60 f1_rtt=20 f2_rtt=60 run=1 -C cubic
+[inter_rtt_bench] cubic cell=8 bw=60 f2_rtt=40 run=2/4 done (29/100)
+[inter_rtt_bench] slot=14 cubic bw=60 f1_rtt=20 f2_rtt=60 run=2 -C cubic
+[inter_rtt_bench] cubic cell=8 bw=60 f2_rtt=40 run=1/4 done (30/100)
+[inter_rtt_bench] slot=1 cubic bw=60 f1_rtt=20 f2_rtt=60 run=3 -C cubic
+[inter_rtt_bench] cubic cell=8 bw=60 f2_rtt=40 run=3/4 done (31/100)
+[inter_rtt_bench] slot=5 cubic bw=60 f1_rtt=20 f2_rtt=60 run=4 -C cubic
+[inter_rtt_bench] cubic cell=9 bw=80 f2_rtt=40 run=3/4 done (32/100)
+[inter_rtt_bench] slot=7 cubic bw=80 f1_rtt=20 f2_rtt=60 run=1 -C cubic
+[inter_rtt_bench] cubic cell=10 bw=100 f2_rtt=40 run=4/4 done (33/100)
+[inter_rtt_bench] slot=17 cubic bw=80 f1_rtt=20 f2_rtt=60 run=2 -C cubic
+[inter_rtt_bench] cubic cell=9 bw=80 f2_rtt=40 run=1/4 done (34/100)
+[inter_rtt_bench] slot=6 cubic bw=80 f1_rtt=20 f2_rtt=60 run=3 -C cubic
+[inter_rtt_bench] cubic cell=10 bw=100 f2_rtt=40 run=1/4 done (35/100)
+[inter_rtt_bench] slot=15 cubic bw=80 f1_rtt=20 f2_rtt=60 run=4 -C cubic
+[inter_rtt_bench] cubic cell=9 bw=80 f2_rtt=40 run=4/4 done (36/100)
+[inter_rtt_bench] slot=13 cubic bw=100 f1_rtt=20 f2_rtt=60 run=1 -C cubic
+[inter_rtt_bench] cubic cell=9 bw=80 f2_rtt=40 run=2/4 done (37/100)
+[inter_rtt_bench] slot=16 cubic bw=100 f1_rtt=20 f2_rtt=60 run=2 -C cubic
+[inter_rtt_bench] cubic cell=10 bw=100 f2_rtt=40 run=3/4 done (38/100)
+[inter_rtt_bench] cubic cell=8 bw=60 f2_rtt=40 run=4/4 done (39/100)
+[inter_rtt_bench] slot=19 cubic bw=100 f1_rtt=20 f2_rtt=60 run=3 -C cubic
+[inter_rtt_bench] slot=18 cubic bw=100 f1_rtt=20 f2_rtt=60 run=4 -C cubic
+[inter_rtt_bench] cubic cell=10 bw=100 f2_rtt=40 run=2/4 done (40/100)
+[inter_rtt_bench] slot=12 cubic bw=20 f1_rtt=20 f2_rtt=80 run=1 -C cubic
+[inter_rtt_bench] cubic cell=11 bw=20 f2_rtt=60 run=1/4 done (41/100)
+[inter_rtt_bench] slot=0 cubic bw=20 f1_rtt=20 f2_rtt=80 run=2 -C cubic
+[inter_rtt_bench] cubic cell=11 bw=20 f2_rtt=60 run=2/4 done (42/100)
+[inter_rtt_bench] slot=2 cubic bw=20 f1_rtt=20 f2_rtt=80 run=3 -C cubic
+[inter_rtt_bench] cubic cell=11 bw=20 f2_rtt=60 run=4/4 done (43/100)
+[inter_rtt_bench] slot=11 cubic bw=20 f1_rtt=20 f2_rtt=80 run=4 -C cubic
+[inter_rtt_bench] cubic cell=11 bw=20 f2_rtt=60 run=3/4 done (44/100)
+[inter_rtt_bench] cubic cell=12 bw=40 f2_rtt=60 run=4/4 done (45/100)
+[inter_rtt_bench] slot=3 cubic bw=40 f1_rtt=20 f2_rtt=80 run=1 -C cubic
+[inter_rtt_bench] slot=10 cubic bw=40 f1_rtt=20 f2_rtt=80 run=2 -C cubic
+[inter_rtt_bench] cubic cell=12 bw=40 f2_rtt=60 run=2/4 done (46/100)
+[inter_rtt_bench] slot=1 cubic bw=40 f1_rtt=20 f2_rtt=80 run=3 -C cubic
+[inter_rtt_bench] cubic cell=13 bw=60 f2_rtt=60 run=3/4 done (47/100)
+[inter_rtt_bench] slot=4 cubic bw=40 f1_rtt=20 f2_rtt=80 run=4 -C cubic
+[inter_rtt_bench] cubic cell=12 bw=40 f2_rtt=60 run=1/4 done (48/100)
+[inter_rtt_bench] slot=14 cubic bw=60 f1_rtt=20 f2_rtt=80 run=1 -C cubic
+[inter_rtt_bench] cubic cell=13 bw=60 f2_rtt=60 run=2/4 done (49/100)
+[inter_rtt_bench] slot=9 cubic bw=60 f1_rtt=20 f2_rtt=80 run=2 -C cubic
+[inter_rtt_bench] cubic cell=13 bw=60 f2_rtt=60 run=1/4 done (50/100)
+[inter_rtt_bench] slot=8 cubic bw=60 f1_rtt=20 f2_rtt=80 run=3 -C cubic
+[inter_rtt_bench] cubic cell=12 bw=40 f2_rtt=60 run=3/4 done (51/100)
+[inter_rtt_bench] slot=5 cubic bw=60 f1_rtt=20 f2_rtt=80 run=4 -C cubic
+[inter_rtt_bench] cubic cell=13 bw=60 f2_rtt=60 run=4/4 done (52/100)
+[inter_rtt_bench] slot=17 cubic bw=80 f1_rtt=20 f2_rtt=80 run=1 -C cubic
+[inter_rtt_bench] cubic cell=14 bw=80 f2_rtt=60 run=2/4 done (53/100)
+[inter_rtt_bench] slot=16 cubic bw=80 f1_rtt=20 f2_rtt=80 run=2 -C cubic
+[inter_rtt_bench] cubic cell=15 bw=100 f2_rtt=60 run=2/4 done (54/100)
+[inter_rtt_bench] slot=13 cubic bw=80 f1_rtt=20 f2_rtt=80 run=3 -C cubic
+[inter_rtt_bench] cubic cell=15 bw=100 f2_rtt=60 run=1/4 done (55/100)
+[inter_rtt_bench] slot=7 cubic bw=80 f1_rtt=20 f2_rtt=80 run=4 -C cubic
+[inter_rtt_bench] cubic cell=14 bw=80 f2_rtt=60 run=1/4 done (56/100)
+[inter_rtt_bench] slot=6 cubic bw=100 f1_rtt=20 f2_rtt=80 run=1 -C cubic
+[inter_rtt_bench] cubic cell=14 bw=80 f2_rtt=60 run=3/4 done (57/100)
+[inter_rtt_bench] slot=19 cubic bw=100 f1_rtt=20 f2_rtt=80 run=2 -C cubic
+[inter_rtt_bench] cubic cell=15 bw=100 f2_rtt=60 run=3/4 done (58/100)
+[inter_rtt_bench] slot=15 cubic bw=100 f1_rtt=20 f2_rtt=80 run=3 -C cubic
+[inter_rtt_bench] cubic cell=14 bw=80 f2_rtt=60 run=4/4 done (59/100)
+[inter_rtt_bench] cubic cell=15 bw=100 f2_rtt=60 run=4/4 done (60/100)
+[inter_rtt_bench] slot=18 cubic bw=100 f1_rtt=20 f2_rtt=80 run=4 -C cubic
+[inter_rtt_bench] slot=12 cubic bw=20 f1_rtt=20 f2_rtt=100 run=1 -C cubic
+[inter_rtt_bench] cubic cell=16 bw=20 f2_rtt=80 run=1/4 done (61/100)
+[inter_rtt_bench] slot=0 cubic bw=20 f1_rtt=20 f2_rtt=100 run=2 -C cubic
+[inter_rtt_bench] cubic cell=16 bw=20 f2_rtt=80 run=2/4 done (62/100)
+[inter_rtt_bench] slot=3 cubic bw=20 f1_rtt=20 f2_rtt=100 run=3 -C cubic
+[inter_rtt_bench] cubic cell=17 bw=40 f2_rtt=80 run=1/4 done (63/100)
+[inter_rtt_bench] slot=2 cubic bw=20 f1_rtt=20 f2_rtt=100 run=4 -C cubic
+[inter_rtt_bench] cubic cell=16 bw=20 f2_rtt=80 run=3/4 done (64/100)
+[inter_rtt_bench] slot=8 cubic bw=40 f1_rtt=20 f2_rtt=100 run=1 -C cubic
+[inter_rtt_bench] cubic cell=18 bw=60 f2_rtt=80 run=3/4 done (65/100)
+[inter_rtt_bench] slot=11 cubic bw=40 f1_rtt=20 f2_rtt=100 run=2 -C cubic
+[inter_rtt_bench] cubic cell=16 bw=20 f2_rtt=80 run=4/4 done (66/100)
+[inter_rtt_bench] slot=5 cubic bw=40 f1_rtt=20 f2_rtt=100 run=3 -C cubic
+[inter_rtt_bench] cubic cell=18 bw=60 f2_rtt=80 run=4/4 done (67/100)
+[inter_rtt_bench] slot=4 cubic bw=40 f1_rtt=20 f2_rtt=100 run=4 -C cubic
+[inter_rtt_bench] cubic cell=17 bw=40 f2_rtt=80 run=4/4 done (68/100)
+[inter_rtt_bench] slot=10 cubic bw=60 f1_rtt=20 f2_rtt=100 run=1 -C cubic
+[inter_rtt_bench] cubic cell=17 bw=40 f2_rtt=80 run=2/4 done (69/100)
+[inter_rtt_bench] slot=1 cubic bw=60 f1_rtt=20 f2_rtt=100 run=2 -C cubic
+[inter_rtt_bench] cubic cell=17 bw=40 f2_rtt=80 run=3/4 done (70/100)
+[inter_rtt_bench] slot=14 cubic bw=60 f1_rtt=20 f2_rtt=100 run=3 -C cubic
+[inter_rtt_bench] cubic cell=18 bw=60 f2_rtt=80 run=1/4 done (71/100)
+[inter_rtt_bench] slot=9 cubic bw=60 f1_rtt=20 f2_rtt=100 run=4 -C cubic
+[inter_rtt_bench] cubic cell=18 bw=60 f2_rtt=80 run=2/4 done (72/100)
+[inter_rtt_bench] slot=17 cubic bw=80 f1_rtt=20 f2_rtt=100 run=1 -C cubic
+[inter_rtt_bench] cubic cell=19 bw=80 f2_rtt=80 run=1/4 done (73/100)
+[inter_rtt_bench] slot=7 cubic bw=80 f1_rtt=20 f2_rtt=100 run=2 -C cubic
+[inter_rtt_bench] cubic cell=19 bw=80 f2_rtt=80 run=4/4 done (74/100)
+[inter_rtt_bench] slot=16 cubic bw=80 f1_rtt=20 f2_rtt=100 run=3 -C cubic
+[inter_rtt_bench] cubic cell=19 bw=80 f2_rtt=80 run=2/4 done (75/100)
+[inter_rtt_bench] slot=19 cubic bw=80 f1_rtt=20 f2_rtt=100 run=4 -C cubic
+[inter_rtt_bench] cubic cell=20 bw=100 f2_rtt=80 run=2/4 done (76/100)
+[inter_rtt_bench] slot=6 cubic bw=100 f1_rtt=20 f2_rtt=100 run=1 -C cubic
+[inter_rtt_bench] cubic cell=20 bw=100 f2_rtt=80 run=1/4 done (77/100)
+[inter_rtt_bench] slot=13 cubic bw=100 f1_rtt=20 f2_rtt=100 run=2 -C cubic
+[inter_rtt_bench] cubic cell=19 bw=80 f2_rtt=80 run=3/4 done (78/100)
+[inter_rtt_bench] slot=15 cubic bw=100 f1_rtt=20 f2_rtt=100 run=3 -C cubic
+[inter_rtt_bench] cubic cell=20 bw=100 f2_rtt=80 run=3/4 done (79/100)
+[inter_rtt_bench] slot=18 cubic bw=100 f1_rtt=20 f2_rtt=100 run=4 -C cubic
+[inter_rtt_bench] cubic cell=20 bw=100 f2_rtt=80 run=4/4 done (80/100)
+[inter_rtt_bench] cubic cell=21 bw=20 f2_rtt=100 run=1/4 done (81/100)
+[inter_rtt_bench] cubic cell=21 bw=20 f2_rtt=100 run=2/4 done (82/100)
+[inter_rtt_bench] cubic cell=21 bw=20 f2_rtt=100 run=4/4 done (83/100)
+[inter_rtt_bench] cubic cell=21 bw=20 f2_rtt=100 run=3/4 done (84/100)
+[inter_rtt_bench] cubic cell=22 bw=40 f2_rtt=100 run=1/4 done (85/100)
+[inter_rtt_bench] cubic cell=22 bw=40 f2_rtt=100 run=4/4 done (86/100)
+[inter_rtt_bench] cubic cell=22 bw=40 f2_rtt=100 run=3/4 done (87/100)
+[inter_rtt_bench] cubic cell=22 bw=40 f2_rtt=100 run=2/4 done (88/100)
+[inter_rtt_bench] cubic cell=23 bw=60 f2_rtt=100 run=1/4 done (89/100)
+[inter_rtt_bench] cubic cell=23 bw=60 f2_rtt=100 run=4/4 done (90/100)
+[inter_rtt_bench] cubic cell=24 bw=80 f2_rtt=100 run=1/4 done (91/100)
+[inter_rtt_bench] cubic cell=23 bw=60 f2_rtt=100 run=2/4 done (92/100)
+[inter_rtt_bench] cubic cell=23 bw=60 f2_rtt=100 run=3/4 done (93/100)
+[inter_rtt_bench] cubic cell=24 bw=80 f2_rtt=100 run=4/4 done (94/100)
+[inter_rtt_bench] cubic cell=24 bw=80 f2_rtt=100 run=2/4 done (95/100)
+[inter_rtt_bench] cubic cell=24 bw=80 f2_rtt=100 run=3/4 done (96/100)
+[inter_rtt_bench] cubic cell=25 bw=100 f2_rtt=100 run=1/4 done (97/100)
+[inter_rtt_bench] cubic cell=25 bw=100 f2_rtt=100 run=2/4 done (98/100)
+[inter_rtt_bench] cubic cell=25 bw=100 f2_rtt=100 run=3/4 done (99/100)
+[inter_rtt_bench] cubic cell=25 bw=100 f2_rtt=100 run=4/4 done (100/100)
+[inter_rtt_bench] heatmap -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/cubic/fairness_heatmap.pdf
+[orch] runtime cleanup sweep
+[inter_rtt_bench] slot=0 bbr bw=20 f1_rtt=20 f2_rtt=20 run=1 -C bbr
+[inter_rtt_bench] slot=1 bbr bw=20 f1_rtt=20 f2_rtt=20 run=2 -C bbr
+[inter_rtt_bench] slot=2 bbr bw=20 f1_rtt=20 f2_rtt=20 run=3 -C bbr
+[inter_rtt_bench] slot=3 bbr bw=20 f1_rtt=20 f2_rtt=20 run=4 -C bbr
+[inter_rtt_bench] slot=4 bbr bw=40 f1_rtt=20 f2_rtt=20 run=1 -C bbr
+[inter_rtt_bench] slot=5 bbr bw=40 f1_rtt=20 f2_rtt=20 run=2 -C bbr
+[inter_rtt_bench] slot=6 bbr bw=40 f1_rtt=20 f2_rtt=20 run=3 -C bbr
+[inter_rtt_bench] slot=7 bbr bw=40 f1_rtt=20 f2_rtt=20 run=4 -C bbr
+[inter_rtt_bench] slot=8 bbr bw=60 f1_rtt=20 f2_rtt=20 run=1 -C bbr
+[inter_rtt_bench] slot=9 bbr bw=60 f1_rtt=20 f2_rtt=20 run=2 -C bbr
+[inter_rtt_bench] slot=10 bbr bw=60 f1_rtt=20 f2_rtt=20 run=3 -C bbr
+[inter_rtt_bench] slot=11 bbr bw=60 f1_rtt=20 f2_rtt=20 run=4 -C bbr
+[inter_rtt_bench] slot=12 bbr bw=80 f1_rtt=20 f2_rtt=20 run=1 -C bbr
+[inter_rtt_bench] slot=13 bbr bw=80 f1_rtt=20 f2_rtt=20 run=2 -C bbr
+[inter_rtt_bench] slot=14 bbr bw=80 f1_rtt=20 f2_rtt=20 run=3 -C bbr
+[inter_rtt_bench] slot=15 bbr bw=80 f1_rtt=20 f2_rtt=20 run=4 -C bbr
+[inter_rtt_bench] slot=16 bbr bw=100 f1_rtt=20 f2_rtt=20 run=1 -C bbr
+[inter_rtt_bench] slot=17 bbr bw=100 f1_rtt=20 f2_rtt=20 run=2 -C bbr
+[inter_rtt_bench] slot=18 bbr bw=100 f1_rtt=20 f2_rtt=20 run=3 -C bbr
+[inter_rtt_bench] slot=19 bbr bw=100 f1_rtt=20 f2_rtt=20 run=4 -C bbr
+[inter_rtt_bench] slot=4 bbr bw=20 f1_rtt=20 f2_rtt=40 run=1 -C bbr
+[inter_rtt_bench] bbr cell=2 bw=40 f2_rtt=20 run=1/4 done (1/100)
+[inter_rtt_bench] slot=3 bbr bw=20 f1_rtt=20 f2_rtt=40 run=2 -C bbr
+[inter_rtt_bench] bbr cell=1 bw=20 f2_rtt=20 run=4/4 done (2/100)
+[inter_rtt_bench] slot=8 bbr bw=20 f1_rtt=20 f2_rtt=40 run=3 -C bbr
+[inter_rtt_bench] bbr cell=3 bw=60 f2_rtt=20 run=1/4 done (3/100)
+[inter_rtt_bench] slot=9 bbr bw=20 f1_rtt=20 f2_rtt=40 run=4 -C bbr
+[inter_rtt_bench] bbr cell=3 bw=60 f2_rtt=20 run=2/4 done (4/100)
+[inter_rtt_bench] slot=7 bbr bw=40 f1_rtt=20 f2_rtt=40 run=1 -C bbr
+[inter_rtt_bench] bbr cell=2 bw=40 f2_rtt=20 run=4/4 done (5/100)
+[inter_rtt_bench] slot=1 bbr bw=40 f1_rtt=20 f2_rtt=40 run=2 -C bbr
+[inter_rtt_bench] bbr cell=1 bw=20 f2_rtt=20 run=2/4 done (6/100)
+[inter_rtt_bench] slot=15 bbr bw=40 f1_rtt=20 f2_rtt=40 run=3 -C bbr
+[inter_rtt_bench] bbr cell=4 bw=80 f2_rtt=20 run=4/4 done (7/100)
+[inter_rtt_bench] slot=0 bbr bw=40 f1_rtt=20 f2_rtt=40 run=4 -C bbr
+[inter_rtt_bench] bbr cell=1 bw=20 f2_rtt=20 run=1/4 done (8/100)
+[inter_rtt_bench] slot=14 bbr bw=60 f1_rtt=20 f2_rtt=40 run=1 -C bbr
+[inter_rtt_bench] bbr cell=4 bw=80 f2_rtt=20 run=3/4 done (9/100)
+[inter_rtt_bench] slot=5 bbr bw=60 f1_rtt=20 f2_rtt=40 run=2 -C bbr
+[inter_rtt_bench] bbr cell=2 bw=40 f2_rtt=20 run=2/4 done (10/100)
+[inter_rtt_bench] slot=16 bbr bw=60 f1_rtt=20 f2_rtt=40 run=3 -C bbr
+[inter_rtt_bench] bbr cell=5 bw=100 f2_rtt=20 run=1/4 done (11/100)
+[inter_rtt_bench] bbr cell=5 bw=100 f2_rtt=20 run=3/4 done (12/100)
+[inter_rtt_bench] slot=18 bbr bw=60 f1_rtt=20 f2_rtt=40 run=4 -C bbr
+[inter_rtt_bench] slot=6 bbr bw=80 f1_rtt=20 f2_rtt=40 run=1 -C bbr
+[inter_rtt_bench] bbr cell=2 bw=40 f2_rtt=20 run=3/4 done (13/100)
+[inter_rtt_bench] slot=2 bbr bw=80 f1_rtt=20 f2_rtt=40 run=2 -C bbr
+[inter_rtt_bench] bbr cell=1 bw=20 f2_rtt=20 run=3/4 done (14/100)
+[inter_rtt_bench] slot=13 bbr bw=80 f1_rtt=20 f2_rtt=40 run=3 -C bbr
+[inter_rtt_bench] bbr cell=4 bw=80 f2_rtt=20 run=2/4 done (15/100)
+[inter_rtt_bench] slot=10 bbr bw=80 f1_rtt=20 f2_rtt=40 run=4 -C bbr
+[inter_rtt_bench] bbr cell=3 bw=60 f2_rtt=20 run=3/4 done (16/100)
+[inter_rtt_bench] slot=11 bbr bw=100 f1_rtt=20 f2_rtt=40 run=1 -C bbr
+[inter_rtt_bench] bbr cell=3 bw=60 f2_rtt=20 run=4/4 done (17/100)
+[inter_rtt_bench] slot=12 bbr bw=100 f1_rtt=20 f2_rtt=40 run=2 -C bbr
+[inter_rtt_bench] bbr cell=4 bw=80 f2_rtt=20 run=1/4 done (18/100)
+[inter_rtt_bench] slot=19 bbr bw=100 f1_rtt=20 f2_rtt=40 run=3 -C bbr
+[inter_rtt_bench] bbr cell=5 bw=100 f2_rtt=20 run=4/4 done (19/100)
+[inter_rtt_bench] slot=17 bbr bw=100 f1_rtt=20 f2_rtt=40 run=4 -C bbr
+[inter_rtt_bench] bbr cell=5 bw=100 f2_rtt=20 run=2/4 done (20/100)
+[inter_rtt_bench] slot=3 bbr bw=20 f1_rtt=20 f2_rtt=60 run=1 -C bbr
+[inter_rtt_bench] bbr cell=6 bw=20 f2_rtt=40 run=2/4 done (21/100)
+[inter_rtt_bench] slot=0 bbr bw=20 f1_rtt=20 f2_rtt=60 run=2 -C bbr
+[inter_rtt_bench] bbr cell=7 bw=40 f2_rtt=40 run=4/4 done (22/100)
+[inter_rtt_bench] slot=4 bbr bw=20 f1_rtt=20 f2_rtt=60 run=3 -C bbr
+[inter_rtt_bench] bbr cell=6 bw=20 f2_rtt=40 run=1/4 done (23/100)
+[inter_rtt_bench] slot=7 bbr bw=20 f1_rtt=20 f2_rtt=60 run=4 -C bbr
+[inter_rtt_bench] bbr cell=7 bw=40 f2_rtt=40 run=1/4 done (24/100)
+[inter_rtt_bench] slot=1 bbr bw=40 f1_rtt=20 f2_rtt=60 run=1 -C bbr
+[inter_rtt_bench] bbr cell=7 bw=40 f2_rtt=40 run=2/4 done (25/100)
+[inter_rtt_bench] slot=8 bbr bw=40 f1_rtt=20 f2_rtt=60 run=2 -C bbr
+[inter_rtt_bench] bbr cell=6 bw=20 f2_rtt=40 run=3/4 done (26/100)
+[inter_rtt_bench] slot=15 bbr bw=40 f1_rtt=20 f2_rtt=60 run=3 -C bbr
+[inter_rtt_bench] bbr cell=7 bw=40 f2_rtt=40 run=3/4 done (27/100)
+[inter_rtt_bench] slot=9 bbr bw=40 f1_rtt=20 f2_rtt=60 run=4 -C bbr
+[inter_rtt_bench] bbr cell=6 bw=20 f2_rtt=40 run=4/4 done (28/100)
+[inter_rtt_bench] slot=14 bbr bw=60 f1_rtt=20 f2_rtt=60 run=1 -C bbr
+[inter_rtt_bench] bbr cell=8 bw=60 f2_rtt=40 run=1/4 done (29/100)
+[inter_rtt_bench] slot=5 bbr bw=60 f1_rtt=20 f2_rtt=60 run=2 -C bbr
+[inter_rtt_bench] bbr cell=8 bw=60 f2_rtt=40 run=2/4 done (30/100)
+[inter_rtt_bench] slot=10 bbr bw=60 f1_rtt=20 f2_rtt=60 run=3 -C bbr
+[inter_rtt_bench] bbr cell=9 bw=80 f2_rtt=40 run=4/4 done (31/100)
+[inter_rtt_bench] bbr cell=8 bw=60 f2_rtt=40 run=4/4 done (32/100)
+[inter_rtt_bench] slot=18 bbr bw=60 f1_rtt=20 f2_rtt=60 run=4 -C bbr
+[inter_rtt_bench] slot=12 bbr bw=80 f1_rtt=20 f2_rtt=60 run=1 -C bbr
+[inter_rtt_bench] bbr cell=10 bw=100 f2_rtt=40 run=2/4 done (33/100)
+[inter_rtt_bench] slot=17 bbr bw=80 f1_rtt=20 f2_rtt=60 run=2 -C bbr
+[inter_rtt_bench] bbr cell=10 bw=100 f2_rtt=40 run=4/4 done (34/100)
+[inter_rtt_bench] slot=19 bbr bw=80 f1_rtt=20 f2_rtt=60 run=3 -C bbr
+[inter_rtt_bench] bbr cell=10 bw=100 f2_rtt=40 run=3/4 done (35/100)
+[inter_rtt_bench] slot=6 bbr bw=80 f1_rtt=20 f2_rtt=60 run=4 -C bbr
+[inter_rtt_bench] bbr cell=9 bw=80 f2_rtt=40 run=1/4 done (36/100)
+[inter_rtt_bench] slot=16 bbr bw=100 f1_rtt=20 f2_rtt=60 run=1 -C bbr
+[inter_rtt_bench] bbr cell=8 bw=60 f2_rtt=40 run=3/4 done (37/100)
+[inter_rtt_bench] slot=2 bbr bw=100 f1_rtt=20 f2_rtt=60 run=2 -C bbr
+[inter_rtt_bench] bbr cell=9 bw=80 f2_rtt=40 run=2/4 done (38/100)
+[inter_rtt_bench] slot=13 bbr bw=100 f1_rtt=20 f2_rtt=60 run=3 -C bbr
+[inter_rtt_bench] bbr cell=9 bw=80 f2_rtt=40 run=3/4 done (39/100)
+[inter_rtt_bench] bbr cell=10 bw=100 f2_rtt=40 run=1/4 done (40/100)
+[inter_rtt_bench] slot=11 bbr bw=100 f1_rtt=20 f2_rtt=60 run=4 -C bbr
+[inter_rtt_bench] slot=0 bbr bw=20 f1_rtt=20 f2_rtt=80 run=1 -C bbr
+[inter_rtt_bench] bbr cell=11 bw=20 f2_rtt=60 run=2/4 done (41/100)
+[inter_rtt_bench] slot=7 bbr bw=20 f1_rtt=20 f2_rtt=80 run=2 -C bbr
+[inter_rtt_bench] bbr cell=11 bw=20 f2_rtt=60 run=4/4 done (42/100)
+[inter_rtt_bench] slot=4 bbr bw=20 f1_rtt=20 f2_rtt=80 run=3 -C bbr
+[inter_rtt_bench] bbr cell=11 bw=20 f2_rtt=60 run=3/4 done (43/100)
+[inter_rtt_bench] slot=9 bbr bw=20 f1_rtt=20 f2_rtt=80 run=4 -C bbr
+[inter_rtt_bench] bbr cell=12 bw=40 f2_rtt=60 run=4/4 done (44/100)
+[inter_rtt_bench] slot=1 bbr bw=40 f1_rtt=20 f2_rtt=80 run=1 -C bbr
+[inter_rtt_bench] bbr cell=12 bw=40 f2_rtt=60 run=1/4 done (45/100)
+[inter_rtt_bench] slot=14 bbr bw=40 f1_rtt=20 f2_rtt=80 run=2 -C bbr
+[inter_rtt_bench] bbr cell=13 bw=60 f2_rtt=60 run=1/4 done (46/100)
+[inter_rtt_bench] slot=8 bbr bw=40 f1_rtt=20 f2_rtt=80 run=3 -C bbr
+[inter_rtt_bench] bbr cell=12 bw=40 f2_rtt=60 run=2/4 done (47/100)
+[inter_rtt_bench] slot=15 bbr bw=40 f1_rtt=20 f2_rtt=80 run=4 -C bbr
+[inter_rtt_bench] bbr cell=12 bw=40 f2_rtt=60 run=3/4 done (48/100)
+[inter_rtt_bench] slot=3 bbr bw=60 f1_rtt=20 f2_rtt=80 run=1 -C bbr
+[inter_rtt_bench] bbr cell=11 bw=20 f2_rtt=60 run=1/4 done (49/100)
+[inter_rtt_bench] slot=6 bbr bw=60 f1_rtt=20 f2_rtt=80 run=2 -C bbr
+[inter_rtt_bench] bbr cell=14 bw=80 f2_rtt=60 run=4/4 done (50/100)
+[inter_rtt_bench] slot=5 bbr bw=60 f1_rtt=20 f2_rtt=80 run=3 -C bbr
+[inter_rtt_bench] bbr cell=13 bw=60 f2_rtt=60 run=2/4 done (51/100)
+[inter_rtt_bench] slot=17 bbr bw=60 f1_rtt=20 f2_rtt=80 run=4 -C bbr
+[inter_rtt_bench] bbr cell=14 bw=80 f2_rtt=60 run=2/4 done (52/100)
+[inter_rtt_bench] slot=19 bbr bw=80 f1_rtt=20 f2_rtt=80 run=1 -C bbr
+[inter_rtt_bench] bbr cell=14 bw=80 f2_rtt=60 run=3/4 done (53/100)
+[inter_rtt_bench] slot=18 bbr bw=80 f1_rtt=20 f2_rtt=80 run=2 -C bbr
+[inter_rtt_bench] bbr cell=13 bw=60 f2_rtt=60 run=4/4 done (54/100)
+[inter_rtt_bench] slot=10 bbr bw=80 f1_rtt=20 f2_rtt=80 run=3 -C bbr
+[inter_rtt_bench] bbr cell=13 bw=60 f2_rtt=60 run=3/4 done (55/100)
+[inter_rtt_bench] slot=11 bbr bw=80 f1_rtt=20 f2_rtt=80 run=4 -C bbr
+[inter_rtt_bench] bbr cell=15 bw=100 f2_rtt=60 run=4/4 done (56/100)
+[inter_rtt_bench] slot=13 bbr bw=100 f1_rtt=20 f2_rtt=80 run=1 -C bbr
+[inter_rtt_bench] bbr cell=15 bw=100 f2_rtt=60 run=3/4 done (57/100)
+[inter_rtt_bench] slot=16 bbr bw=100 f1_rtt=20 f2_rtt=80 run=2 -C bbr
+[inter_rtt_bench] bbr cell=15 bw=100 f2_rtt=60 run=1/4 done (58/100)
+[inter_rtt_bench] slot=12 bbr bw=100 f1_rtt=20 f2_rtt=80 run=3 -C bbr
+[inter_rtt_bench] bbr cell=14 bw=80 f2_rtt=60 run=1/4 done (59/100)
+[inter_rtt_bench] slot=2 bbr bw=100 f1_rtt=20 f2_rtt=80 run=4 -C bbr
+[inter_rtt_bench] bbr cell=15 bw=100 f2_rtt=60 run=2/4 done (60/100)
+[inter_rtt_bench] slot=0 bbr bw=20 f1_rtt=20 f2_rtt=100 run=1 -C bbr
+[inter_rtt_bench] bbr cell=16 bw=20 f2_rtt=80 run=1/4 done (61/100)
+[inter_rtt_bench] slot=14 bbr bw=20 f1_rtt=20 f2_rtt=100 run=2 -C bbr
+[inter_rtt_bench] bbr cell=17 bw=40 f2_rtt=80 run=2/4 done (62/100)
+[inter_rtt_bench] slot=8 bbr bw=20 f1_rtt=20 f2_rtt=100 run=3 -C bbr
+[inter_rtt_bench] bbr cell=17 bw=40 f2_rtt=80 run=3/4 done (63/100)
+[inter_rtt_bench] slot=4 bbr bw=20 f1_rtt=20 f2_rtt=100 run=4 -C bbr
+[inter_rtt_bench] bbr cell=16 bw=20 f2_rtt=80 run=3/4 done (64/100)
+[inter_rtt_bench] slot=1 bbr bw=40 f1_rtt=20 f2_rtt=100 run=1 -C bbr
+[inter_rtt_bench] bbr cell=17 bw=40 f2_rtt=80 run=1/4 done (65/100)
+[inter_rtt_bench] slot=7 bbr bw=40 f1_rtt=20 f2_rtt=100 run=2 -C bbr
+[inter_rtt_bench] bbr cell=16 bw=20 f2_rtt=80 run=2/4 done (66/100)
+[inter_rtt_bench] slot=9 bbr bw=40 f1_rtt=20 f2_rtt=100 run=3 -C bbr
+[inter_rtt_bench] bbr cell=16 bw=20 f2_rtt=80 run=4/4 done (67/100)
+[inter_rtt_bench] slot=15 bbr bw=40 f1_rtt=20 f2_rtt=100 run=4 -C bbr
+[inter_rtt_bench] bbr cell=17 bw=40 f2_rtt=80 run=4/4 done (68/100)
+[inter_rtt_bench] slot=3 bbr bw=60 f1_rtt=20 f2_rtt=100 run=1 -C bbr
+[inter_rtt_bench] bbr cell=18 bw=60 f2_rtt=80 run=1/4 done (69/100)
+[inter_rtt_bench] slot=6 bbr bw=60 f1_rtt=20 f2_rtt=100 run=2 -C bbr
+[inter_rtt_bench] bbr cell=18 bw=60 f2_rtt=80 run=2/4 done (70/100)
+[inter_rtt_bench] slot=5 bbr bw=60 f1_rtt=20 f2_rtt=100 run=3 -C bbr
+[inter_rtt_bench] bbr cell=18 bw=60 f2_rtt=80 run=3/4 done (71/100)
+[inter_rtt_bench] slot=17 bbr bw=60 f1_rtt=20 f2_rtt=100 run=4 -C bbr
+[inter_rtt_bench] bbr cell=18 bw=60 f2_rtt=80 run=4/4 done (72/100)
+[inter_rtt_bench] slot=19 bbr bw=80 f1_rtt=20 f2_rtt=100 run=1 -C bbr
+[inter_rtt_bench] bbr cell=19 bw=80 f2_rtt=80 run=1/4 done (73/100)
+[inter_rtt_bench] slot=18 bbr bw=80 f1_rtt=20 f2_rtt=100 run=2 -C bbr
+[inter_rtt_bench] bbr cell=19 bw=80 f2_rtt=80 run=2/4 done (74/100)
+[inter_rtt_bench] slot=11 bbr bw=80 f1_rtt=20 f2_rtt=100 run=3 -C bbr
+[inter_rtt_bench] bbr cell=19 bw=80 f2_rtt=80 run=4/4 done (75/100)
+[inter_rtt_bench] slot=10 bbr bw=80 f1_rtt=20 f2_rtt=100 run=4 -C bbr
+[inter_rtt_bench] bbr cell=19 bw=80 f2_rtt=80 run=3/4 done (76/100)
+[inter_rtt_bench] slot=12 bbr bw=100 f1_rtt=20 f2_rtt=100 run=1 -C bbr
+[inter_rtt_bench] bbr cell=20 bw=100 f2_rtt=80 run=3/4 done (77/100)
+[inter_rtt_bench] slot=16 bbr bw=100 f1_rtt=20 f2_rtt=100 run=2 -C bbr
+[inter_rtt_bench] bbr cell=20 bw=100 f2_rtt=80 run=2/4 done (78/100)
+[inter_rtt_bench] slot=13 bbr bw=100 f1_rtt=20 f2_rtt=100 run=3 -C bbr
+[inter_rtt_bench] bbr cell=20 bw=100 f2_rtt=80 run=1/4 done (79/100)
+[inter_rtt_bench] slot=2 bbr bw=100 f1_rtt=20 f2_rtt=100 run=4 -C bbr
+[inter_rtt_bench] bbr cell=20 bw=100 f2_rtt=80 run=4/4 done (80/100)
+[inter_rtt_bench] bbr cell=21 bw=20 f2_rtt=100 run=1/4 done (81/100)
+[inter_rtt_bench] bbr cell=21 bw=20 f2_rtt=100 run=2/4 done (82/100)
+[inter_rtt_bench] bbr cell=21 bw=20 f2_rtt=100 run=4/4 done (83/100)
+[inter_rtt_bench] bbr cell=22 bw=40 f2_rtt=100 run=1/4 done (84/100)
+[inter_rtt_bench] bbr cell=22 bw=40 f2_rtt=100 run=4/4 done (85/100)
+[inter_rtt_bench] bbr cell=23 bw=60 f2_rtt=100 run=1/4 done (86/100)
+[inter_rtt_bench] bbr cell=22 bw=40 f2_rtt=100 run=3/4 done (87/100)
+[inter_rtt_bench] bbr cell=24 bw=80 f2_rtt=100 run=1/4 done (88/100)
+[inter_rtt_bench] bbr cell=23 bw=60 f2_rtt=100 run=2/4 done (89/100)
+[inter_rtt_bench] bbr cell=23 bw=60 f2_rtt=100 run=3/4 done (90/100)
+[inter_rtt_bench] bbr cell=22 bw=40 f2_rtt=100 run=2/4 done (91/100)
+[inter_rtt_bench] bbr cell=21 bw=20 f2_rtt=100 run=3/4 done (92/100)
+[inter_rtt_bench] bbr cell=23 bw=60 f2_rtt=100 run=4/4 done (93/100)
+[inter_rtt_bench] bbr cell=24 bw=80 f2_rtt=100 run=2/4 done (94/100)
+[inter_rtt_bench] bbr cell=24 bw=80 f2_rtt=100 run=4/4 done (95/100)
+[inter_rtt_bench] bbr cell=24 bw=80 f2_rtt=100 run=3/4 done (96/100)
+[inter_rtt_bench] bbr cell=25 bw=100 f2_rtt=100 run=4/4 done (97/100)
+[inter_rtt_bench] bbr cell=25 bw=100 f2_rtt=100 run=3/4 done (98/100)
+[inter_rtt_bench] bbr cell=25 bw=100 f2_rtt=100 run=2/4 done (99/100)
+[inter_rtt_bench] bbr cell=25 bw=100 f2_rtt=100 run=1/4 done (100/100)
+[inter_rtt_bench] heatmap -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/bbr/fairness_heatmap.pdf
+[orch] runtime cleanup sweep
+[inter_rtt_bench] slot=0 bbr1 bw=20 f1_rtt=20 f2_rtt=20 run=1 -C bbr1
+[inter_rtt_bench] slot=1 bbr1 bw=20 f1_rtt=20 f2_rtt=20 run=2 -C bbr1
+[inter_rtt_bench] slot=2 bbr1 bw=20 f1_rtt=20 f2_rtt=20 run=3 -C bbr1
+[inter_rtt_bench] slot=3 bbr1 bw=20 f1_rtt=20 f2_rtt=20 run=4 -C bbr1
+[inter_rtt_bench] slot=4 bbr1 bw=40 f1_rtt=20 f2_rtt=20 run=1 -C bbr1
+[inter_rtt_bench] slot=5 bbr1 bw=40 f1_rtt=20 f2_rtt=20 run=2 -C bbr1
+[inter_rtt_bench] slot=6 bbr1 bw=40 f1_rtt=20 f2_rtt=20 run=3 -C bbr1
+[inter_rtt_bench] slot=7 bbr1 bw=40 f1_rtt=20 f2_rtt=20 run=4 -C bbr1
+[inter_rtt_bench] slot=8 bbr1 bw=60 f1_rtt=20 f2_rtt=20 run=1 -C bbr1
+[inter_rtt_bench] slot=9 bbr1 bw=60 f1_rtt=20 f2_rtt=20 run=2 -C bbr1
+[inter_rtt_bench] slot=10 bbr1 bw=60 f1_rtt=20 f2_rtt=20 run=3 -C bbr1
+[inter_rtt_bench] slot=11 bbr1 bw=60 f1_rtt=20 f2_rtt=20 run=4 -C bbr1
+[inter_rtt_bench] slot=12 bbr1 bw=80 f1_rtt=20 f2_rtt=20 run=1 -C bbr1
+[inter_rtt_bench] slot=13 bbr1 bw=80 f1_rtt=20 f2_rtt=20 run=2 -C bbr1
+[inter_rtt_bench] slot=14 bbr1 bw=80 f1_rtt=20 f2_rtt=20 run=3 -C bbr1
+[inter_rtt_bench] slot=15 bbr1 bw=80 f1_rtt=20 f2_rtt=20 run=4 -C bbr1
+[inter_rtt_bench] slot=16 bbr1 bw=100 f1_rtt=20 f2_rtt=20 run=1 -C bbr1
+[inter_rtt_bench] slot=17 bbr1 bw=100 f1_rtt=20 f2_rtt=20 run=2 -C bbr1
+[inter_rtt_bench] slot=18 bbr1 bw=100 f1_rtt=20 f2_rtt=20 run=3 -C bbr1
+[inter_rtt_bench] slot=19 bbr1 bw=100 f1_rtt=20 f2_rtt=20 run=4 -C bbr1
+[inter_rtt_bench] slot=8 bbr1 bw=20 f1_rtt=20 f2_rtt=40 run=1 -C bbr1
+[inter_rtt_bench] bbr1 cell=3 bw=60 f2_rtt=20 run=1/4 done (1/100)
+[inter_rtt_bench] slot=1 bbr1 bw=20 f1_rtt=20 f2_rtt=40 run=2 -C bbr1
+[inter_rtt_bench] bbr1 cell=1 bw=20 f2_rtt=20 run=2/4 done (2/100)
+[inter_rtt_bench] slot=15 bbr1 bw=20 f1_rtt=20 f2_rtt=40 run=3 -C bbr1
+[inter_rtt_bench] bbr1 cell=4 bw=80 f2_rtt=20 run=4/4 done (3/100)
+[inter_rtt_bench] bbr1 cell=3 bw=60 f2_rtt=20 run=3/4 done (4/100)
+[inter_rtt_bench] slot=10 bbr1 bw=20 f1_rtt=20 f2_rtt=40 run=4 -C bbr1
+[inter_rtt_bench] slot=4 bbr1 bw=40 f1_rtt=20 f2_rtt=40 run=1 -C bbr1
+[inter_rtt_bench] bbr1 cell=2 bw=40 f2_rtt=20 run=1/4 done (5/100)
+[inter_rtt_bench] slot=3 bbr1 bw=40 f1_rtt=20 f2_rtt=40 run=2 -C bbr1
+[inter_rtt_bench] bbr1 cell=1 bw=20 f2_rtt=20 run=4/4 done (6/100)
+[inter_rtt_bench] bbr1 cell=2 bw=40 f2_rtt=20 run=2/4 done (7/100)
+[inter_rtt_bench] slot=5 bbr1 bw=40 f1_rtt=20 f2_rtt=40 run=3 -C bbr1
+[inter_rtt_bench] slot=17 bbr1 bw=40 f1_rtt=20 f2_rtt=40 run=4 -C bbr1
+[inter_rtt_bench] bbr1 cell=5 bw=100 f2_rtt=20 run=2/4 done (8/100)
+[inter_rtt_bench] bbr1 cell=1 bw=20 f2_rtt=20 run=1/4 done (9/100)
+[inter_rtt_bench] slot=0 bbr1 bw=60 f1_rtt=20 f2_rtt=40 run=1 -C bbr1
+[inter_rtt_bench] slot=18 bbr1 bw=60 f1_rtt=20 f2_rtt=40 run=2 -C bbr1
+[inter_rtt_bench] bbr1 cell=5 bw=100 f2_rtt=20 run=3/4 done (10/100)
+[inter_rtt_bench] slot=2 bbr1 bw=60 f1_rtt=20 f2_rtt=40 run=3 -C bbr1
+[inter_rtt_bench] bbr1 cell=1 bw=20 f2_rtt=20 run=3/4 done (11/100)
+[inter_rtt_bench] slot=11 bbr1 bw=60 f1_rtt=20 f2_rtt=40 run=4 -C bbr1
+[inter_rtt_bench] bbr1 cell=3 bw=60 f2_rtt=20 run=4/4 done (12/100)
+[inter_rtt_bench] slot=16 bbr1 bw=80 f1_rtt=20 f2_rtt=40 run=1 -C bbr1
+[inter_rtt_bench] bbr1 cell=5 bw=100 f2_rtt=20 run=1/4 done (13/100)
+[inter_rtt_bench] slot=14 bbr1 bw=80 f1_rtt=20 f2_rtt=40 run=2 -C bbr1
+[inter_rtt_bench] bbr1 cell=4 bw=80 f2_rtt=20 run=3/4 done (14/100)
+[inter_rtt_bench] slot=19 bbr1 bw=80 f1_rtt=20 f2_rtt=40 run=3 -C bbr1
+[inter_rtt_bench] bbr1 cell=5 bw=100 f2_rtt=20 run=4/4 done (15/100)
+[inter_rtt_bench] slot=13 bbr1 bw=80 f1_rtt=20 f2_rtt=40 run=4 -C bbr1
+[inter_rtt_bench] bbr1 cell=4 bw=80 f2_rtt=20 run=2/4 done (16/100)
+[inter_rtt_bench] slot=9 bbr1 bw=100 f1_rtt=20 f2_rtt=40 run=1 -C bbr1
+[inter_rtt_bench] bbr1 cell=3 bw=60 f2_rtt=20 run=2/4 done (17/100)
+[inter_rtt_bench] slot=12 bbr1 bw=100 f1_rtt=20 f2_rtt=40 run=2 -C bbr1
+[inter_rtt_bench] bbr1 cell=4 bw=80 f2_rtt=20 run=1/4 done (18/100)
+[inter_rtt_bench] slot=6 bbr1 bw=100 f1_rtt=20 f2_rtt=40 run=3 -C bbr1
+[inter_rtt_bench] bbr1 cell=2 bw=40 f2_rtt=20 run=3/4 done (19/100)
+[inter_rtt_bench] bbr1 cell=2 bw=40 f2_rtt=20 run=4/4 done (20/100)
+[inter_rtt_bench] slot=7 bbr1 bw=100 f1_rtt=20 f2_rtt=40 run=4 -C bbr1
+[inter_rtt_bench] slot=4 bbr1 bw=20 f1_rtt=20 f2_rtt=60 run=1 -C bbr1
+[inter_rtt_bench] bbr1 cell=7 bw=40 f2_rtt=40 run=1/4 done (21/100)
+[inter_rtt_bench] slot=8 bbr1 bw=20 f1_rtt=20 f2_rtt=60 run=2 -C bbr1
+[inter_rtt_bench] bbr1 cell=6 bw=20 f2_rtt=40 run=1/4 done (22/100)
+[inter_rtt_bench] bbr1 cell=6 bw=20 f2_rtt=40 run=4/4 done (23/100)
+[inter_rtt_bench] slot=10 bbr1 bw=20 f1_rtt=20 f2_rtt=60 run=3 -C bbr1
+[inter_rtt_bench] slot=1 bbr1 bw=20 f1_rtt=20 f2_rtt=60 run=4 -C bbr1
+[inter_rtt_bench] bbr1 cell=6 bw=20 f2_rtt=40 run=2/4 done (24/100)
+[inter_rtt_bench] slot=15 bbr1 bw=40 f1_rtt=20 f2_rtt=60 run=1 -C bbr1
+[inter_rtt_bench] bbr1 cell=6 bw=20 f2_rtt=40 run=3/4 done (25/100)
+[inter_rtt_bench] slot=3 bbr1 bw=40 f1_rtt=20 f2_rtt=60 run=2 -C bbr1
+[inter_rtt_bench] bbr1 cell=7 bw=40 f2_rtt=40 run=2/4 done (26/100)
+[inter_rtt_bench] slot=5 bbr1 bw=40 f1_rtt=20 f2_rtt=60 run=3 -C bbr1
+[inter_rtt_bench] bbr1 cell=7 bw=40 f2_rtt=40 run=3/4 done (27/100)
+[inter_rtt_bench] slot=0 bbr1 bw=40 f1_rtt=20 f2_rtt=60 run=4 -C bbr1
+[inter_rtt_bench] bbr1 cell=8 bw=60 f2_rtt=40 run=1/4 done (28/100)
+[inter_rtt_bench] slot=18 bbr1 bw=60 f1_rtt=20 f2_rtt=60 run=1 -C bbr1
+[inter_rtt_bench] bbr1 cell=8 bw=60 f2_rtt=40 run=2/4 done (29/100)
+[inter_rtt_bench] slot=2 bbr1 bw=60 f1_rtt=20 f2_rtt=60 run=2 -C bbr1
+[inter_rtt_bench] bbr1 cell=8 bw=60 f2_rtt=40 run=3/4 done (30/100)
+[inter_rtt_bench] slot=17 bbr1 bw=60 f1_rtt=20 f2_rtt=60 run=3 -C bbr1
+[inter_rtt_bench] bbr1 cell=7 bw=40 f2_rtt=40 run=4/4 done (31/100)
+[inter_rtt_bench] bbr1 cell=9 bw=80 f2_rtt=40 run=1/4 done (32/100)
+[inter_rtt_bench] slot=16 bbr1 bw=60 f1_rtt=20 f2_rtt=60 run=4 -C bbr1
+[inter_rtt_bench] slot=11 bbr1 bw=80 f1_rtt=20 f2_rtt=60 run=1 -C bbr1
+[inter_rtt_bench] bbr1 cell=8 bw=60 f2_rtt=40 run=4/4 done (33/100)
+[inter_rtt_bench] slot=14 bbr1 bw=80 f1_rtt=20 f2_rtt=60 run=2 -C bbr1
+[inter_rtt_bench] bbr1 cell=9 bw=80 f2_rtt=40 run=2/4 done (34/100)
+[inter_rtt_bench] bbr1 cell=10 bw=100 f2_rtt=40 run=4/4 done (35/100)
+[inter_rtt_bench] slot=7 bbr1 bw=80 f1_rtt=20 f2_rtt=60 run=3 -C bbr1
+[inter_rtt_bench] slot=6 bbr1 bw=80 f1_rtt=20 f2_rtt=60 run=4 -C bbr1
+[inter_rtt_bench] bbr1 cell=10 bw=100 f2_rtt=40 run=3/4 done (36/100)
+[inter_rtt_bench] slot=13 bbr1 bw=100 f1_rtt=20 f2_rtt=60 run=1 -C bbr1
+[inter_rtt_bench] bbr1 cell=9 bw=80 f2_rtt=40 run=4/4 done (37/100)
+[inter_rtt_bench] slot=12 bbr1 bw=100 f1_rtt=20 f2_rtt=60 run=2 -C bbr1
+[inter_rtt_bench] bbr1 cell=10 bw=100 f2_rtt=40 run=2/4 done (38/100)
+[inter_rtt_bench] slot=19 bbr1 bw=100 f1_rtt=20 f2_rtt=60 run=3 -C bbr1
+[inter_rtt_bench] bbr1 cell=9 bw=80 f2_rtt=40 run=3/4 done (39/100)
+[inter_rtt_bench] slot=9 bbr1 bw=100 f1_rtt=20 f2_rtt=60 run=4 -C bbr1
+[inter_rtt_bench] bbr1 cell=10 bw=100 f2_rtt=40 run=1/4 done (40/100)
+[inter_rtt_bench] slot=4 bbr1 bw=20 f1_rtt=20 f2_rtt=80 run=1 -C bbr1
+[inter_rtt_bench] bbr1 cell=11 bw=20 f2_rtt=60 run=1/4 done (41/100)
+[inter_rtt_bench] slot=15 bbr1 bw=20 f1_rtt=20 f2_rtt=80 run=2 -C bbr1
+[inter_rtt_bench] bbr1 cell=12 bw=40 f2_rtt=60 run=1/4 done (42/100)
+[inter_rtt_bench] slot=10 bbr1 bw=20 f1_rtt=20 f2_rtt=80 run=3 -C bbr1
+[inter_rtt_bench] bbr1 cell=11 bw=20 f2_rtt=60 run=3/4 done (43/100)
+[inter_rtt_bench] bbr1 cell=12 bw=40 f2_rtt=60 run=2/4 done (44/100)
+[inter_rtt_bench] slot=3 bbr1 bw=20 f1_rtt=20 f2_rtt=80 run=4 -C bbr1
+[inter_rtt_bench] slot=8 bbr1 bw=40 f1_rtt=20 f2_rtt=80 run=1 -C bbr1
+[inter_rtt_bench] bbr1 cell=11 bw=20 f2_rtt=60 run=2/4 done (45/100)
+[inter_rtt_bench] slot=5 bbr1 bw=40 f1_rtt=20 f2_rtt=80 run=2 -C bbr1
+[inter_rtt_bench] bbr1 cell=12 bw=40 f2_rtt=60 run=3/4 done (46/100)
+[inter_rtt_bench] slot=2 bbr1 bw=40 f1_rtt=20 f2_rtt=80 run=3 -C bbr1
+[inter_rtt_bench] bbr1 cell=13 bw=60 f2_rtt=60 run=2/4 done (47/100)
+[inter_rtt_bench] slot=1 bbr1 bw=40 f1_rtt=20 f2_rtt=80 run=4 -C bbr1
+[inter_rtt_bench] bbr1 cell=11 bw=20 f2_rtt=60 run=4/4 done (48/100)
+[inter_rtt_bench] slot=18 bbr1 bw=60 f1_rtt=20 f2_rtt=80 run=1 -C bbr1
+[inter_rtt_bench] bbr1 cell=13 bw=60 f2_rtt=60 run=1/4 done (49/100)
+[inter_rtt_bench] bbr1 cell=13 bw=60 f2_rtt=60 run=3/4 done (50/100)
+[inter_rtt_bench] slot=17 bbr1 bw=60 f1_rtt=20 f2_rtt=80 run=2 -C bbr1
+[inter_rtt_bench] bbr1 cell=12 bw=40 f2_rtt=60 run=4/4 done (51/100)
+[inter_rtt_bench] slot=0 bbr1 bw=60 f1_rtt=20 f2_rtt=80 run=3 -C bbr1
+[inter_rtt_bench] slot=11 bbr1 bw=60 f1_rtt=20 f2_rtt=80 run=4 -C bbr1
+[inter_rtt_bench] bbr1 cell=14 bw=80 f2_rtt=60 run=1/4 done (52/100)
+[inter_rtt_bench] slot=16 bbr1 bw=80 f1_rtt=20 f2_rtt=80 run=1 -C bbr1
+[inter_rtt_bench] bbr1 cell=13 bw=60 f2_rtt=60 run=4/4 done (53/100)
+[inter_rtt_bench] slot=14 bbr1 bw=80 f1_rtt=20 f2_rtt=80 run=2 -C bbr1
+[inter_rtt_bench] bbr1 cell=14 bw=80 f2_rtt=60 run=2/4 done (54/100)
+[inter_rtt_bench] slot=13 bbr1 bw=80 f1_rtt=20 f2_rtt=80 run=3 -C bbr1
+[inter_rtt_bench] bbr1 cell=15 bw=100 f2_rtt=60 run=1/4 done (55/100)
+[inter_rtt_bench] slot=6 bbr1 bw=80 f1_rtt=20 f2_rtt=80 run=4 -C bbr1
+[inter_rtt_bench] bbr1 cell=14 bw=80 f2_rtt=60 run=4/4 done (56/100)
+[inter_rtt_bench] slot=7 bbr1 bw=100 f1_rtt=20 f2_rtt=80 run=1 -C bbr1
+[inter_rtt_bench] bbr1 cell=14 bw=80 f2_rtt=60 run=3/4 done (57/100)
+[inter_rtt_bench] slot=19 bbr1 bw=100 f1_rtt=20 f2_rtt=80 run=2 -C bbr1
+[inter_rtt_bench] bbr1 cell=15 bw=100 f2_rtt=60 run=3/4 done (58/100)
+[inter_rtt_bench] slot=12 bbr1 bw=100 f1_rtt=20 f2_rtt=80 run=3 -C bbr1
+[inter_rtt_bench] bbr1 cell=15 bw=100 f2_rtt=60 run=2/4 done (59/100)
+[inter_rtt_bench] slot=9 bbr1 bw=100 f1_rtt=20 f2_rtt=80 run=4 -C bbr1
+[inter_rtt_bench] bbr1 cell=15 bw=100 f2_rtt=60 run=4/4 done (60/100)
+[inter_rtt_bench] slot=4 bbr1 bw=20 f1_rtt=20 f2_rtt=100 run=1 -C bbr1
+[inter_rtt_bench] bbr1 cell=16 bw=20 f2_rtt=80 run=1/4 done (61/100)
+[inter_rtt_bench] slot=1 bbr1 bw=20 f1_rtt=20 f2_rtt=100 run=2 -C bbr1
+[inter_rtt_bench] bbr1 cell=17 bw=40 f2_rtt=80 run=4/4 done (62/100)
+[inter_rtt_bench] slot=3 bbr1 bw=20 f1_rtt=20 f2_rtt=100 run=3 -C bbr1
+[inter_rtt_bench] bbr1 cell=17 bw=40 f2_rtt=80 run=1/4 done (63/100)
+[inter_rtt_bench] slot=8 bbr1 bw=20 f1_rtt=20 f2_rtt=100 run=4 -C bbr1
+[inter_rtt_bench] bbr1 cell=16 bw=20 f2_rtt=80 run=4/4 done (64/100)
+[inter_rtt_bench] slot=5 bbr1 bw=40 f1_rtt=20 f2_rtt=100 run=1 -C bbr1
+[inter_rtt_bench] bbr1 cell=17 bw=40 f2_rtt=80 run=2/4 done (65/100)
+[inter_rtt_bench] slot=10 bbr1 bw=40 f1_rtt=20 f2_rtt=100 run=2 -C bbr1
+[inter_rtt_bench] bbr1 cell=16 bw=20 f2_rtt=80 run=3/4 done (66/100)
+[inter_rtt_bench] slot=11 bbr1 bw=40 f1_rtt=20 f2_rtt=100 run=3 -C bbr1
+[inter_rtt_bench] bbr1 cell=18 bw=60 f2_rtt=80 run=4/4 done (67/100)
+[inter_rtt_bench] slot=2 bbr1 bw=40 f1_rtt=20 f2_rtt=100 run=4 -C bbr1
+[inter_rtt_bench] bbr1 cell=17 bw=40 f2_rtt=80 run=3/4 done (68/100)
+[inter_rtt_bench] slot=15 bbr1 bw=60 f1_rtt=20 f2_rtt=100 run=1 -C bbr1
+[inter_rtt_bench] bbr1 cell=16 bw=20 f2_rtt=80 run=2/4 done (69/100)
+[inter_rtt_bench] slot=18 bbr1 bw=60 f1_rtt=20 f2_rtt=100 run=2 -C bbr1
+[inter_rtt_bench] bbr1 cell=18 bw=60 f2_rtt=80 run=1/4 done (70/100)
+[inter_rtt_bench] bbr1 cell=18 bw=60 f2_rtt=80 run=3/4 done (71/100)
+[inter_rtt_bench] slot=0 bbr1 bw=60 f1_rtt=20 f2_rtt=100 run=3 -C bbr1
+[inter_rtt_bench] slot=17 bbr1 bw=60 f1_rtt=20 f2_rtt=100 run=4 -C bbr1
+[inter_rtt_bench] bbr1 cell=18 bw=60 f2_rtt=80 run=2/4 done (72/100)
+[inter_rtt_bench] slot=16 bbr1 bw=80 f1_rtt=20 f2_rtt=100 run=1 -C bbr1
+[inter_rtt_bench] bbr1 cell=19 bw=80 f2_rtt=80 run=1/4 done (73/100)
+[inter_rtt_bench] slot=14 bbr1 bw=80 f1_rtt=20 f2_rtt=100 run=2 -C bbr1
+[inter_rtt_bench] bbr1 cell=19 bw=80 f2_rtt=80 run=2/4 done (74/100)
+[inter_rtt_bench] slot=13 bbr1 bw=80 f1_rtt=20 f2_rtt=100 run=3 -C bbr1
+[inter_rtt_bench] bbr1 cell=19 bw=80 f2_rtt=80 run=3/4 done (75/100)
+[inter_rtt_bench] slot=7 bbr1 bw=80 f1_rtt=20 f2_rtt=100 run=4 -C bbr1
+[inter_rtt_bench] bbr1 cell=20 bw=100 f2_rtt=80 run=1/4 done (76/100)
+[inter_rtt_bench] slot=9 bbr1 bw=100 f1_rtt=20 f2_rtt=100 run=1 -C bbr1
+[inter_rtt_bench] bbr1 cell=20 bw=100 f2_rtt=80 run=4/4 done (77/100)
+[inter_rtt_bench] bbr1 cell=19 bw=80 f2_rtt=80 run=4/4 done (78/100)
+[inter_rtt_bench] slot=6 bbr1 bw=100 f1_rtt=20 f2_rtt=100 run=2 -C bbr1
+[inter_rtt_bench] slot=12 bbr1 bw=100 f1_rtt=20 f2_rtt=100 run=3 -C bbr1
+[inter_rtt_bench] bbr1 cell=20 bw=100 f2_rtt=80 run=3/4 done (79/100)
+[inter_rtt_bench] slot=19 bbr1 bw=100 f1_rtt=20 f2_rtt=100 run=4 -C bbr1
+[inter_rtt_bench] bbr1 cell=20 bw=100 f2_rtt=80 run=2/4 done (80/100)
+[inter_rtt_bench] bbr1 cell=21 bw=20 f2_rtt=100 run=1/4 done (81/100)
+[inter_rtt_bench] bbr1 cell=21 bw=20 f2_rtt=100 run=2/4 done (82/100)
+[inter_rtt_bench] bbr1 cell=23 bw=60 f2_rtt=100 run=1/4 done (83/100)
+[inter_rtt_bench] bbr1 cell=21 bw=20 f2_rtt=100 run=4/4 done (84/100)
+[inter_rtt_bench] bbr1 cell=21 bw=20 f2_rtt=100 run=3/4 done (85/100)
+[inter_rtt_bench] bbr1 cell=22 bw=40 f2_rtt=100 run=4/4 done (86/100)
+[inter_rtt_bench] bbr1 cell=22 bw=40 f2_rtt=100 run=2/4 done (87/100)
+[inter_rtt_bench] bbr1 cell=22 bw=40 f2_rtt=100 run=3/4 done (88/100)
+[inter_rtt_bench] bbr1 cell=23 bw=60 f2_rtt=100 run=2/4 done (89/100)
+[inter_rtt_bench] bbr1 cell=22 bw=40 f2_rtt=100 run=1/4 done (90/100)
+[inter_rtt_bench] bbr1 cell=23 bw=60 f2_rtt=100 run=3/4 done (91/100)
+[inter_rtt_bench] bbr1 cell=23 bw=60 f2_rtt=100 run=4/4 done (92/100)
+[inter_rtt_bench] bbr1 cell=24 bw=80 f2_rtt=100 run=1/4 done (93/100)
+[inter_rtt_bench] bbr1 cell=24 bw=80 f2_rtt=100 run=3/4 done (94/100)
+[inter_rtt_bench] bbr1 cell=24 bw=80 f2_rtt=100 run=2/4 done (95/100)
+[inter_rtt_bench] bbr1 cell=25 bw=100 f2_rtt=100 run=1/4 done (96/100)
+[inter_rtt_bench] bbr1 cell=24 bw=80 f2_rtt=100 run=4/4 done (97/100)
+[inter_rtt_bench] bbr1 cell=25 bw=100 f2_rtt=100 run=4/4 done (98/100)
+[inter_rtt_bench] bbr1 cell=25 bw=100 f2_rtt=100 run=2/4 done (99/100)
+[inter_rtt_bench] bbr1 cell=25 bw=100 f2_rtt=100 run=3/4 done (100/100)
+[inter_rtt_bench] heatmap -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/bbr1/fairness_heatmap.pdf
+[orch] runtime cleanup sweep
+[inter_rtt_bench] slot=0 frcc bw=20 f1_rtt=20 f2_rtt=20 run=1 -C frcc
+[inter_rtt_bench] slot=1 frcc bw=20 f1_rtt=20 f2_rtt=20 run=2 -C frcc
+[inter_rtt_bench] slot=2 frcc bw=20 f1_rtt=20 f2_rtt=20 run=3 -C frcc
+[inter_rtt_bench] slot=3 frcc bw=20 f1_rtt=20 f2_rtt=20 run=4 -C frcc
+[inter_rtt_bench] slot=4 frcc bw=40 f1_rtt=20 f2_rtt=20 run=1 -C frcc
+[inter_rtt_bench] slot=5 frcc bw=40 f1_rtt=20 f2_rtt=20 run=2 -C frcc
+[inter_rtt_bench] slot=6 frcc bw=40 f1_rtt=20 f2_rtt=20 run=3 -C frcc
+[inter_rtt_bench] slot=7 frcc bw=40 f1_rtt=20 f2_rtt=20 run=4 -C frcc
+[inter_rtt_bench] slot=8 frcc bw=60 f1_rtt=20 f2_rtt=20 run=1 -C frcc
+[inter_rtt_bench] slot=9 frcc bw=60 f1_rtt=20 f2_rtt=20 run=2 -C frcc
+[inter_rtt_bench] slot=10 frcc bw=60 f1_rtt=20 f2_rtt=20 run=3 -C frcc
+[inter_rtt_bench] slot=11 frcc bw=60 f1_rtt=20 f2_rtt=20 run=4 -C frcc
+[inter_rtt_bench] slot=12 frcc bw=80 f1_rtt=20 f2_rtt=20 run=1 -C frcc
+[inter_rtt_bench] slot=13 frcc bw=80 f1_rtt=20 f2_rtt=20 run=2 -C frcc
+[inter_rtt_bench] slot=14 frcc bw=80 f1_rtt=20 f2_rtt=20 run=3 -C frcc
+[inter_rtt_bench] slot=15 frcc bw=80 f1_rtt=20 f2_rtt=20 run=4 -C frcc
+[inter_rtt_bench] slot=16 frcc bw=100 f1_rtt=20 f2_rtt=20 run=1 -C frcc
+[inter_rtt_bench] slot=17 frcc bw=100 f1_rtt=20 f2_rtt=20 run=2 -C frcc
+[inter_rtt_bench] slot=18 frcc bw=100 f1_rtt=20 f2_rtt=20 run=3 -C frcc
+[inter_rtt_bench] slot=19 frcc bw=100 f1_rtt=20 f2_rtt=20 run=4 -C frcc
+[inter_rtt_bench] slot=1 frcc bw=20 f1_rtt=20 f2_rtt=40 run=1 -C frcc
+[inter_rtt_bench] frcc cell=1 bw=20 f2_rtt=20 run=2/4 done (1/100)
+[inter_rtt_bench] slot=15 frcc bw=20 f1_rtt=20 f2_rtt=40 run=2 -C frcc
+[inter_rtt_bench] frcc cell=4 bw=80 f2_rtt=20 run=4/4 done (2/100)
+[inter_rtt_bench] slot=2 frcc bw=20 f1_rtt=20 f2_rtt=40 run=3 -C frcc
+[inter_rtt_bench] frcc cell=1 bw=20 f2_rtt=20 run=3/4 done (3/100)
+[inter_rtt_bench] slot=4 frcc bw=20 f1_rtt=20 f2_rtt=40 run=4 -C frcc
+[inter_rtt_bench] frcc cell=2 bw=40 f2_rtt=20 run=1/4 done (4/100)
+[inter_rtt_bench] frcc cell=2 bw=40 f2_rtt=20 run=2/4 done (5/100)
+[inter_rtt_bench] slot=5 frcc bw=40 f1_rtt=20 f2_rtt=40 run=1 -C frcc
+[inter_rtt_bench] slot=18 frcc bw=40 f1_rtt=20 f2_rtt=40 run=2 -C frcc
+[inter_rtt_bench] slot=13 frcc bw=40 f1_rtt=20 f2_rtt=40 run=3 -C frcc
+[inter_rtt_bench] frcc cell=4 bw=80 f2_rtt=20 run=2/4 done (6/100)
+[inter_rtt_bench] frcc cell=5 bw=100 f2_rtt=20 run=3/4 done (7/100)
+[inter_rtt_bench] slot=9 frcc bw=40 f1_rtt=20 f2_rtt=40 run=4 -C frcc
+[inter_rtt_bench] frcc cell=3 bw=60 f2_rtt=20 run=2/4 done (8/100)
+[inter_rtt_bench] slot=10 frcc bw=60 f1_rtt=20 f2_rtt=40 run=1 -C frcc
+[inter_rtt_bench] frcc cell=3 bw=60 f2_rtt=20 run=3/4 done (9/100)
+[inter_rtt_bench] frcc cell=2 bw=40 f2_rtt=20 run=4/4 done (10/100)
+[inter_rtt_bench] slot=7 frcc bw=60 f1_rtt=20 f2_rtt=40 run=2 -C frcc
+[inter_rtt_bench] slot=6 frcc bw=60 f1_rtt=20 f2_rtt=40 run=3 -C frcc
+[inter_rtt_bench] frcc cell=2 bw=40 f2_rtt=20 run=3/4 done (11/100)
+[inter_rtt_bench] slot=3 frcc bw=60 f1_rtt=20 f2_rtt=40 run=4 -C frcc
+[inter_rtt_bench] frcc cell=1 bw=20 f2_rtt=20 run=4/4 done (12/100)
+[inter_rtt_bench] slot=16 frcc bw=80 f1_rtt=20 f2_rtt=40 run=1 -C frcc
+[inter_rtt_bench] frcc cell=5 bw=100 f2_rtt=20 run=1/4 done (13/100)
+[inter_rtt_bench] slot=11 frcc bw=80 f1_rtt=20 f2_rtt=40 run=2 -C frcc
+[inter_rtt_bench] frcc cell=3 bw=60 f2_rtt=20 run=4/4 done (14/100)
+[inter_rtt_bench] slot=12 frcc bw=80 f1_rtt=20 f2_rtt=40 run=3 -C frcc
+[inter_rtt_bench] frcc cell=4 bw=80 f2_rtt=20 run=1/4 done (15/100)
+[inter_rtt_bench] slot=0 frcc bw=80 f1_rtt=20 f2_rtt=40 run=4 -C frcc
+[inter_rtt_bench] frcc cell=1 bw=20 f2_rtt=20 run=1/4 done (16/100)
+[inter_rtt_bench] slot=14 frcc bw=100 f1_rtt=20 f2_rtt=40 run=1 -C frcc
+[inter_rtt_bench] frcc cell=4 bw=80 f2_rtt=20 run=3/4 done (17/100)
+[inter_rtt_bench] slot=19 frcc bw=100 f1_rtt=20 f2_rtt=40 run=2 -C frcc
+[inter_rtt_bench] frcc cell=5 bw=100 f2_rtt=20 run=4/4 done (18/100)
+[inter_rtt_bench] slot=17 frcc bw=100 f1_rtt=20 f2_rtt=40 run=3 -C frcc
+[inter_rtt_bench] frcc cell=5 bw=100 f2_rtt=20 run=2/4 done (19/100)
+[inter_rtt_bench] slot=8 frcc bw=100 f1_rtt=20 f2_rtt=40 run=4 -C frcc
+[inter_rtt_bench] frcc cell=3 bw=60 f2_rtt=20 run=1/4 done (20/100)
+[inter_rtt_bench] slot=15 frcc bw=20 f1_rtt=20 f2_rtt=60 run=1 -C frcc
+[inter_rtt_bench] frcc cell=6 bw=20 f2_rtt=40 run=2/4 done (21/100)
+[inter_rtt_bench] slot=2 frcc bw=20 f1_rtt=20 f2_rtt=60 run=2 -C frcc
+[inter_rtt_bench] frcc cell=6 bw=20 f2_rtt=40 run=3/4 done (22/100)
+[inter_rtt_bench] slot=1 frcc bw=20 f1_rtt=20 f2_rtt=60 run=3 -C frcc
+[inter_rtt_bench] frcc cell=6 bw=20 f2_rtt=40 run=1/4 done (23/100)
+[inter_rtt_bench] slot=4 frcc bw=20 f1_rtt=20 f2_rtt=60 run=4 -C frcc
+[inter_rtt_bench] frcc cell=6 bw=20 f2_rtt=40 run=4/4 done (24/100)
+[inter_rtt_bench] slot=5 frcc bw=40 f1_rtt=20 f2_rtt=60 run=1 -C frcc
+[inter_rtt_bench] frcc cell=7 bw=40 f2_rtt=40 run=1/4 done (25/100)
+[inter_rtt_bench] slot=9 frcc bw=40 f1_rtt=20 f2_rtt=60 run=2 -C frcc
+[inter_rtt_bench] frcc cell=7 bw=40 f2_rtt=40 run=4/4 done (26/100)
+[inter_rtt_bench] slot=13 frcc bw=40 f1_rtt=20 f2_rtt=60 run=3 -C frcc
+[inter_rtt_bench] frcc cell=7 bw=40 f2_rtt=40 run=3/4 done (27/100)
+[inter_rtt_bench] slot=10 frcc bw=40 f1_rtt=20 f2_rtt=60 run=4 -C frcc
+[inter_rtt_bench] frcc cell=8 bw=60 f2_rtt=40 run=1/4 done (28/100)
+[inter_rtt_bench] slot=18 frcc bw=60 f1_rtt=20 f2_rtt=60 run=1 -C frcc
+[inter_rtt_bench] frcc cell=7 bw=40 f2_rtt=40 run=2/4 done (29/100)
+[inter_rtt_bench] slot=7 frcc bw=60 f1_rtt=20 f2_rtt=60 run=2 -C frcc
+[inter_rtt_bench] frcc cell=8 bw=60 f2_rtt=40 run=2/4 done (30/100)
+[inter_rtt_bench] slot=6 frcc bw=60 f1_rtt=20 f2_rtt=60 run=3 -C frcc
+[inter_rtt_bench] frcc cell=8 bw=60 f2_rtt=40 run=3/4 done (31/100)
+[inter_rtt_bench] slot=11 frcc bw=60 f1_rtt=20 f2_rtt=60 run=4 -C frcc
+[inter_rtt_bench] frcc cell=9 bw=80 f2_rtt=40 run=2/4 done (32/100)
+[inter_rtt_bench] slot=16 frcc bw=80 f1_rtt=20 f2_rtt=60 run=1 -C frcc
+[inter_rtt_bench] frcc cell=9 bw=80 f2_rtt=40 run=1/4 done (33/100)
+[inter_rtt_bench] slot=17 frcc bw=80 f1_rtt=20 f2_rtt=60 run=2 -C frcc
+[inter_rtt_bench] frcc cell=10 bw=100 f2_rtt=40 run=3/4 done (34/100)
+[inter_rtt_bench] slot=3 frcc bw=80 f1_rtt=20 f2_rtt=60 run=3 -C frcc
+[inter_rtt_bench] frcc cell=8 bw=60 f2_rtt=40 run=4/4 done (35/100)
+[inter_rtt_bench] slot=0 frcc bw=80 f1_rtt=20 f2_rtt=60 run=4 -C frcc
+[inter_rtt_bench] frcc cell=9 bw=80 f2_rtt=40 run=4/4 done (36/100)
+[inter_rtt_bench] slot=8 frcc bw=100 f1_rtt=20 f2_rtt=60 run=1 -C frcc
+[inter_rtt_bench] frcc cell=10 bw=100 f2_rtt=40 run=4/4 done (37/100)
+[inter_rtt_bench] slot=12 frcc bw=100 f1_rtt=20 f2_rtt=60 run=2 -C frcc
+[inter_rtt_bench] frcc cell=9 bw=80 f2_rtt=40 run=3/4 done (38/100)
+[inter_rtt_bench] slot=19 frcc bw=100 f1_rtt=20 f2_rtt=60 run=3 -C frcc
+[inter_rtt_bench] frcc cell=10 bw=100 f2_rtt=40 run=2/4 done (39/100)
+[inter_rtt_bench] slot=14 frcc bw=100 f1_rtt=20 f2_rtt=60 run=4 -C frcc
+[inter_rtt_bench] frcc cell=10 bw=100 f2_rtt=40 run=1/4 done (40/100)
+[inter_rtt_bench] slot=15 frcc bw=20 f1_rtt=20 f2_rtt=80 run=1 -C frcc
+[inter_rtt_bench] frcc cell=11 bw=20 f2_rtt=60 run=1/4 done (41/100)
+[inter_rtt_bench] slot=5 frcc bw=20 f1_rtt=20 f2_rtt=80 run=2 -C frcc
+[inter_rtt_bench] frcc cell=12 bw=40 f2_rtt=60 run=1/4 done (42/100)
+[inter_rtt_bench] slot=9 frcc bw=20 f1_rtt=20 f2_rtt=80 run=3 -C frcc
+[inter_rtt_bench] frcc cell=12 bw=40 f2_rtt=60 run=2/4 done (43/100)
+[inter_rtt_bench] slot=1 frcc bw=20 f1_rtt=20 f2_rtt=80 run=4 -C frcc
+[inter_rtt_bench] frcc cell=11 bw=20 f2_rtt=60 run=3/4 done (44/100)
+[inter_rtt_bench] slot=4 frcc bw=40 f1_rtt=20 f2_rtt=80 run=1 -C frcc
+[inter_rtt_bench] frcc cell=11 bw=20 f2_rtt=60 run=4/4 done (45/100)
+[inter_rtt_bench] slot=18 frcc bw=40 f1_rtt=20 f2_rtt=80 run=2 -C frcc
+[inter_rtt_bench] frcc cell=13 bw=60 f2_rtt=60 run=1/4 done (46/100)
+[inter_rtt_bench] slot=2 frcc bw=40 f1_rtt=20 f2_rtt=80 run=3 -C frcc
+[inter_rtt_bench] frcc cell=11 bw=20 f2_rtt=60 run=2/4 done (47/100)
+[inter_rtt_bench] slot=10 frcc bw=40 f1_rtt=20 f2_rtt=80 run=4 -C frcc
+[inter_rtt_bench] frcc cell=12 bw=40 f2_rtt=60 run=4/4 done (48/100)
+[inter_rtt_bench] slot=7 frcc bw=60 f1_rtt=20 f2_rtt=80 run=1 -C frcc
+[inter_rtt_bench] frcc cell=13 bw=60 f2_rtt=60 run=2/4 done (49/100)
+[inter_rtt_bench] slot=13 frcc bw=60 f1_rtt=20 f2_rtt=80 run=2 -C frcc
+[inter_rtt_bench] frcc cell=12 bw=40 f2_rtt=60 run=3/4 done (50/100)
+[inter_rtt_bench] slot=6 frcc bw=60 f1_rtt=20 f2_rtt=80 run=3 -C frcc
+[inter_rtt_bench] frcc cell=13 bw=60 f2_rtt=60 run=3/4 done (51/100)
+[inter_rtt_bench] frcc cell=14 bw=80 f2_rtt=60 run=4/4 done (52/100)
+[inter_rtt_bench] slot=0 frcc bw=60 f1_rtt=20 f2_rtt=80 run=4 -C frcc
+[inter_rtt_bench] slot=3 frcc bw=80 f1_rtt=20 f2_rtt=80 run=1 -C frcc
+[inter_rtt_bench] frcc cell=14 bw=80 f2_rtt=60 run=3/4 done (53/100)
+[inter_rtt_bench] slot=16 frcc bw=80 f1_rtt=20 f2_rtt=80 run=2 -C frcc
+[inter_rtt_bench] frcc cell=14 bw=80 f2_rtt=60 run=1/4 done (54/100)
+[inter_rtt_bench] slot=14 frcc bw=80 f1_rtt=20 f2_rtt=80 run=3 -C frcc
+[inter_rtt_bench] frcc cell=15 bw=100 f2_rtt=60 run=4/4 done (55/100)
+[inter_rtt_bench] frcc cell=15 bw=100 f2_rtt=60 run=1/4 done (56/100)
+[inter_rtt_bench] slot=8 frcc bw=80 f1_rtt=20 f2_rtt=80 run=4 -C frcc
+[inter_rtt_bench] slot=12 frcc bw=100 f1_rtt=20 f2_rtt=80 run=1 -C frcc
+[inter_rtt_bench] frcc cell=15 bw=100 f2_rtt=60 run=2/4 done (57/100)
+[inter_rtt_bench] slot=17 frcc bw=100 f1_rtt=20 f2_rtt=80 run=2 -C frcc
+[inter_rtt_bench] frcc cell=14 bw=80 f2_rtt=60 run=2/4 done (58/100)
+[inter_rtt_bench] slot=19 frcc bw=100 f1_rtt=20 f2_rtt=80 run=3 -C frcc
+[inter_rtt_bench] frcc cell=15 bw=100 f2_rtt=60 run=3/4 done (59/100)
+[inter_rtt_bench] slot=11 frcc bw=100 f1_rtt=20 f2_rtt=80 run=4 -C frcc
+[inter_rtt_bench] frcc cell=13 bw=60 f2_rtt=60 run=4/4 done (60/100)
+[inter_rtt_bench] slot=1 frcc bw=20 f1_rtt=20 f2_rtt=100 run=1 -C frcc
+[inter_rtt_bench] frcc cell=16 bw=20 f2_rtt=80 run=4/4 done (61/100)
+[inter_rtt_bench] slot=4 frcc bw=20 f1_rtt=20 f2_rtt=100 run=2 -C frcc
+[inter_rtt_bench] frcc cell=17 bw=40 f2_rtt=80 run=1/4 done (62/100)
+[inter_rtt_bench] slot=10 frcc bw=20 f1_rtt=20 f2_rtt=100 run=3 -C frcc
+[inter_rtt_bench] frcc cell=17 bw=40 f2_rtt=80 run=4/4 done (63/100)
+[inter_rtt_bench] slot=5 frcc bw=20 f1_rtt=20 f2_rtt=100 run=4 -C frcc
+[inter_rtt_bench] frcc cell=16 bw=20 f2_rtt=80 run=2/4 done (64/100)
+[inter_rtt_bench] frcc cell=16 bw=20 f2_rtt=80 run=3/4 done (65/100)
+[inter_rtt_bench] slot=9 frcc bw=40 f1_rtt=20 f2_rtt=100 run=1 -C frcc
+[inter_rtt_bench] slot=13 frcc bw=40 f1_rtt=20 f2_rtt=100 run=2 -C frcc
+[inter_rtt_bench] frcc cell=18 bw=60 f2_rtt=80 run=2/4 done (66/100)
+[inter_rtt_bench] slot=7 frcc bw=40 f1_rtt=20 f2_rtt=100 run=3 -C frcc
+[inter_rtt_bench] frcc cell=18 bw=60 f2_rtt=80 run=1/4 done (67/100)
+[inter_rtt_bench] slot=18 frcc bw=40 f1_rtt=20 f2_rtt=100 run=4 -C frcc
+[inter_rtt_bench] frcc cell=17 bw=40 f2_rtt=80 run=2/4 done (68/100)
+[inter_rtt_bench] slot=15 frcc bw=60 f1_rtt=20 f2_rtt=100 run=1 -C frcc
+[inter_rtt_bench] frcc cell=16 bw=20 f2_rtt=80 run=1/4 done (69/100)
+[inter_rtt_bench] slot=2 frcc bw=60 f1_rtt=20 f2_rtt=100 run=2 -C frcc
+[inter_rtt_bench] frcc cell=17 bw=40 f2_rtt=80 run=3/4 done (70/100)
+[inter_rtt_bench] slot=6 frcc bw=60 f1_rtt=20 f2_rtt=100 run=3 -C frcc
+[inter_rtt_bench] frcc cell=18 bw=60 f2_rtt=80 run=3/4 done (71/100)
+[inter_rtt_bench] slot=0 frcc bw=60 f1_rtt=20 f2_rtt=100 run=4 -C frcc
+[inter_rtt_bench] frcc cell=18 bw=60 f2_rtt=80 run=4/4 done (72/100)
+[inter_rtt_bench] frcc cell=19 bw=80 f2_rtt=80 run=3/4 done (73/100)
+[inter_rtt_bench] slot=14 frcc bw=80 f1_rtt=20 f2_rtt=100 run=1 -C frcc
+[inter_rtt_bench] slot=16 frcc bw=80 f1_rtt=20 f2_rtt=100 run=2 -C frcc
+[inter_rtt_bench] frcc cell=19 bw=80 f2_rtt=80 run=2/4 done (74/100)
+[inter_rtt_bench] slot=12 frcc bw=80 f1_rtt=20 f2_rtt=100 run=3 -C frcc
+[inter_rtt_bench] frcc cell=20 bw=100 f2_rtt=80 run=1/4 done (75/100)
+[inter_rtt_bench] slot=3 frcc bw=80 f1_rtt=20 f2_rtt=100 run=4 -C frcc
+[inter_rtt_bench] frcc cell=19 bw=80 f2_rtt=80 run=1/4 done (76/100)
+[inter_rtt_bench] slot=17 frcc bw=100 f1_rtt=20 f2_rtt=100 run=1 -C frcc
+[inter_rtt_bench] frcc cell=20 bw=100 f2_rtt=80 run=2/4 done (77/100)
+[inter_rtt_bench] slot=19 frcc bw=100 f1_rtt=20 f2_rtt=100 run=2 -C frcc
+[inter_rtt_bench] frcc cell=20 bw=100 f2_rtt=80 run=3/4 done (78/100)
+[inter_rtt_bench] slot=11 frcc bw=100 f1_rtt=20 f2_rtt=100 run=3 -C frcc
+[inter_rtt_bench] frcc cell=20 bw=100 f2_rtt=80 run=4/4 done (79/100)
+[inter_rtt_bench] frcc cell=19 bw=80 f2_rtt=80 run=4/4 done (80/100)
+[inter_rtt_bench] slot=8 frcc bw=100 f1_rtt=20 f2_rtt=100 run=4 -C frcc
+[inter_rtt_bench] frcc cell=22 bw=40 f2_rtt=100 run=3/4 done (81/100)
+[inter_rtt_bench] frcc cell=22 bw=40 f2_rtt=100 run=1/4 done (82/100)
+[inter_rtt_bench] frcc cell=21 bw=20 f2_rtt=100 run=4/4 done (83/100)
+[inter_rtt_bench] frcc cell=21 bw=20 f2_rtt=100 run=2/4 done (84/100)
+[inter_rtt_bench] frcc cell=21 bw=20 f2_rtt=100 run=1/4 done (85/100)
+[inter_rtt_bench] frcc cell=23 bw=60 f2_rtt=100 run=4/4 done (86/100)
+[inter_rtt_bench] frcc cell=23 bw=60 f2_rtt=100 run=1/4 done (87/100)
+[inter_rtt_bench] frcc cell=21 bw=20 f2_rtt=100 run=3/4 done (88/100)
+[inter_rtt_bench] frcc cell=22 bw=40 f2_rtt=100 run=4/4 done (89/100)
+[inter_rtt_bench] frcc cell=23 bw=60 f2_rtt=100 run=3/4 done (90/100)
+[inter_rtt_bench] frcc cell=23 bw=60 f2_rtt=100 run=2/4 done (91/100)
+[inter_rtt_bench] frcc cell=22 bw=40 f2_rtt=100 run=2/4 done (92/100)
+[inter_rtt_bench] frcc cell=24 bw=80 f2_rtt=100 run=1/4 done (93/100)
+[inter_rtt_bench] frcc cell=24 bw=80 f2_rtt=100 run=3/4 done (94/100)
+[inter_rtt_bench] frcc cell=24 bw=80 f2_rtt=100 run=2/4 done (95/100)
+[inter_rtt_bench] frcc cell=25 bw=100 f2_rtt=100 run=1/4 done (96/100)
+[inter_rtt_bench] frcc cell=25 bw=100 f2_rtt=100 run=2/4 done (97/100)
+[inter_rtt_bench] frcc cell=25 bw=100 f2_rtt=100 run=3/4 done (98/100)
+[inter_rtt_bench] frcc cell=25 bw=100 f2_rtt=100 run=4/4 done (99/100)
+[inter_rtt_bench] frcc cell=24 bw=80 f2_rtt=100 run=4/4 done (100/100)
+[inter_rtt_bench] heatmap -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/frcc/fairness_heatmap.pdf
+[orch] runtime cleanup sweep
+[inter_rtt_bench] heatmap -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/bbr/fairness_heatmap.pdf
+[inter_rtt_bench] heatmap -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/bbr1/fairness_heatmap.pdf
+[inter_rtt_bench] heatmap -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/cubic/fairness_heatmap.pdf
+[inter_rtt_bench] heatmap -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/frcc/fairness_heatmap.pdf
+[inter_rtt_bench] heatmap -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_20260609-022904/fairness_heatmap.pdf
+[inter_rtt_bench] heatmap -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/sa_dreamer_20260521-145020/fairness_heatmap.pdf
+[inter_rtt_bench] heatmap -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/self_play_dreamer_20260525-152636/fairness_heatmap.pdf
+[inter_rtt_bench] heatmap -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/fairness_heatmap.pdf
+[inter_rtt_bench] replotted rows=700 total_rows=700 individual_plots=700 approach_heatmaps=7
+[inter_rtt_bench] done metrics=/its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/metrics.csv

@@ -1,0 +1,1616 @@
+[responsive_fairness] output_root=/its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsive_fairness/data
+[responsive_fairness] duration=345s score_window=(45,345] cadence=15s flow_counts=[2, 4, 5, 7] trials/approach=200
+[responsive_fairness] 2_flow_starts=0,45
+[responsive_fairness] 4_flow_starts=0,15,30,45
+[responsive_fairness] 5_flow_starts=0,11.25,22.5,33.75,45
+[responsive_fairness] 7_flow_starts=0,7.5,15,22.5,30,37.5,45
+[responsive_fairness] approaches_to_run=cubic, bbr, bbr1, frcc
+[responsive_fairness] cubic resuming missing=200/200 by_flow=2:50, 4:50, 5:50, 7:50
+[responsive_fairness] slot=0 cubic flows=2 run=1
+[responsive_fairness] slot=1 cubic flows=2 run=2
+[responsive_fairness] slot=2 cubic flows=2 run=3
+[responsive_fairness] slot=3 cubic flows=2 run=4
+[responsive_fairness] slot=4 cubic flows=2 run=5
+[responsive_fairness] slot=5 cubic flows=2 run=6
+[responsive_fairness] slot=6 cubic flows=2 run=7
+[responsive_fairness] slot=7 cubic flows=2 run=8
+[responsive_fairness] slot=8 cubic flows=2 run=9
+[responsive_fairness] slot=9 cubic flows=2 run=10
+[responsive_fairness] slot=10 cubic flows=2 run=11
+[responsive_fairness] slot=11 cubic flows=2 run=12
+[responsive_fairness] slot=12 cubic flows=2 run=13
+[responsive_fairness] slot=13 cubic flows=2 run=14
+[responsive_fairness] slot=14 cubic flows=2 run=15
+[responsive_fairness] slot=15 cubic flows=2 run=16
+[responsive_fairness] slot=16 cubic flows=2 run=17
+[responsive_fairness] slot=17 cubic flows=2 run=18
+[responsive_fairness] slot=18 cubic flows=2 run=19
+[responsive_fairness] slot=19 cubic flows=2 run=20
+[responsive_fairness] slot=20 cubic flows=2 run=21
+[responsive_fairness] slot=21 cubic flows=2 run=22
+[responsive_fairness] slot=22 cubic flows=2 run=23
+[responsive_fairness] slot=23 cubic flows=2 run=24
+[responsive_fairness] slot=24 cubic flows=2 run=25
+[responsive_fairness] slot=25 cubic flows=2 run=26
+[responsive_fairness] slot=26 cubic flows=2 run=27
+[responsive_fairness] slot=27 cubic flows=2 run=28
+[responsive_fairness] slot=28 cubic flows=2 run=29
+[responsive_fairness] slot=29 cubic flows=2 run=30
+[responsive_fairness] slot=7 cubic flows=2 run=31
+[responsive_fairness] cubic flows=2 run=8 done (1/200)
+[responsive_fairness] slot=0 cubic flows=2 run=32
+[responsive_fairness] cubic flows=2 run=1 done (2/200)
+[responsive_fairness] slot=20 cubic flows=2 run=33
+[responsive_fairness] cubic flows=2 run=21 done (3/200)
+[responsive_fairness] slot=13 cubic flows=2 run=34
+[responsive_fairness] cubic flows=2 run=14 done (4/200)
+[responsive_fairness] slot=22 cubic flows=2 run=35
+[responsive_fairness] cubic flows=2 run=23 done (5/200)
+[responsive_fairness] slot=1 cubic flows=2 run=36
+[responsive_fairness] cubic flows=2 run=2 done (6/200)
+[responsive_fairness] slot=10 cubic flows=2 run=37
+[responsive_fairness] cubic flows=2 run=11 done (7/200)
+[responsive_fairness] slot=14 cubic flows=2 run=38
+[responsive_fairness] cubic flows=2 run=15 done (8/200)
+[responsive_fairness] slot=5 cubic flows=2 run=39
+[responsive_fairness] cubic flows=2 run=6 done (9/200)
+[responsive_fairness] slot=23 cubic flows=2 run=40
+[responsive_fairness] cubic flows=2 run=24 done (10/200)
+[responsive_fairness] slot=8 cubic flows=2 run=41
+[responsive_fairness] cubic flows=2 run=9 done (11/200)
+[responsive_fairness] slot=4 cubic flows=2 run=42
+[responsive_fairness] cubic flows=2 run=5 done (12/200)
+[responsive_fairness] slot=16 cubic flows=2 run=43
+[responsive_fairness] cubic flows=2 run=17 done (13/200)
+[responsive_fairness] slot=2 cubic flows=2 run=44
+[responsive_fairness] cubic flows=2 run=3 done (14/200)
+[responsive_fairness] slot=18 cubic flows=2 run=45
+[responsive_fairness] cubic flows=2 run=19 done (15/200)
+[responsive_fairness] slot=9 cubic flows=2 run=46
+[responsive_fairness] cubic flows=2 run=10 done (16/200)
+[responsive_fairness] slot=3 cubic flows=2 run=47
+[responsive_fairness] cubic flows=2 run=4 done (17/200)
+[responsive_fairness] slot=17 cubic flows=2 run=48
+[responsive_fairness] cubic flows=2 run=18 done (18/200)
+[responsive_fairness] slot=26 cubic flows=2 run=49
+[responsive_fairness] cubic flows=2 run=27 done (19/200)
+[responsive_fairness] slot=15 cubic flows=2 run=50
+[responsive_fairness] cubic flows=2 run=16 done (20/200)
+[responsive_fairness] slot=6 cubic flows=4 run=1
+[responsive_fairness] cubic flows=2 run=7 done (21/200)
+[responsive_fairness] slot=29 cubic flows=4 run=2
+[responsive_fairness] cubic flows=2 run=30 done (22/200)
+[responsive_fairness] slot=28 cubic flows=4 run=3
+[responsive_fairness] cubic flows=2 run=29 done (23/200)
+[responsive_fairness] slot=21 cubic flows=4 run=4
+[responsive_fairness] cubic flows=2 run=22 done (24/200)
+[responsive_fairness] slot=12 cubic flows=4 run=5
+[responsive_fairness] cubic flows=2 run=13 done (25/200)
+[responsive_fairness] slot=11 cubic flows=4 run=6
+[responsive_fairness] cubic flows=2 run=12 done (26/200)
+[responsive_fairness] slot=25 cubic flows=4 run=7
+[responsive_fairness] cubic flows=2 run=26 done (27/200)
+[responsive_fairness] slot=19 cubic flows=4 run=8
+[responsive_fairness] cubic flows=2 run=20 done (28/200)
+[responsive_fairness] slot=27 cubic flows=4 run=9
+[responsive_fairness] cubic flows=2 run=28 done (29/200)
+[responsive_fairness] slot=24 cubic flows=4 run=10
+[responsive_fairness] cubic flows=2 run=25 done (30/200)
+[responsive_fairness] slot=7 cubic flows=4 run=11
+[responsive_fairness] cubic flows=2 run=31 done (31/200)
+[responsive_fairness] slot=1 cubic flows=4 run=12
+[responsive_fairness] cubic flows=2 run=36 done (32/200)
+[responsive_fairness] slot=23 cubic flows=4 run=13
+[responsive_fairness] cubic flows=2 run=40 done (33/200)
+[responsive_fairness] slot=13 cubic flows=4 run=14
+[responsive_fairness] cubic flows=2 run=34 done (34/200)
+[responsive_fairness] slot=10 cubic flows=4 run=15
+[responsive_fairness] cubic flows=2 run=37 done (35/200)
+[responsive_fairness] slot=20 cubic flows=4 run=16
+[responsive_fairness] cubic flows=2 run=33 done (36/200)
+[responsive_fairness] slot=3 cubic flows=4 run=17
+[responsive_fairness] cubic flows=2 run=47 done (37/200)
+[responsive_fairness] slot=9 cubic flows=4 run=18
+[responsive_fairness] cubic flows=2 run=46 done (38/200)
+[responsive_fairness] slot=14 cubic flows=4 run=19
+[responsive_fairness] cubic flows=2 run=38 done (39/200)
+[responsive_fairness] slot=8 cubic flows=4 run=20
+[responsive_fairness] cubic flows=2 run=41 done (40/200)
+[responsive_fairness] slot=0 cubic flows=4 run=21
+[responsive_fairness] cubic flows=2 run=32 done (41/200)
+[responsive_fairness] slot=26 cubic flows=4 run=22
+[responsive_fairness] cubic flows=2 run=49 done (42/200)
+[responsive_fairness] slot=18 cubic flows=4 run=23
+[responsive_fairness] cubic flows=2 run=45 done (43/200)
+[responsive_fairness] slot=16 cubic flows=4 run=24
+[responsive_fairness] cubic flows=2 run=43 done (44/200)
+[responsive_fairness] slot=17 cubic flows=4 run=25
+[responsive_fairness] cubic flows=2 run=48 done (45/200)
+[responsive_fairness] slot=22 cubic flows=4 run=26
+[responsive_fairness] cubic flows=2 run=35 done (46/200)
+[responsive_fairness] slot=5 cubic flows=4 run=27
+[responsive_fairness] cubic flows=2 run=39 done (47/200)
+[responsive_fairness] slot=2 cubic flows=4 run=28
+[responsive_fairness] cubic flows=2 run=44 done (48/200)
+[responsive_fairness] slot=4 cubic flows=4 run=29
+[responsive_fairness] cubic flows=2 run=42 done (49/200)
+[responsive_fairness] slot=15 cubic flows=4 run=30
+[responsive_fairness] cubic flows=2 run=50 done (50/200)
+[responsive_fairness] slot=6 cubic flows=4 run=31
+[responsive_fairness] cubic flows=4 run=1 done (51/200)
+[responsive_fairness] slot=28 cubic flows=4 run=32
+[responsive_fairness] cubic flows=4 run=3 done (52/200)
+[responsive_fairness] slot=21 cubic flows=4 run=33
+[responsive_fairness] cubic flows=4 run=4 done (53/200)
+[responsive_fairness] slot=27 cubic flows=4 run=34
+[responsive_fairness] cubic flows=4 run=9 done (54/200)
+[responsive_fairness] slot=11 cubic flows=4 run=35
+[responsive_fairness] cubic flows=4 run=6 done (55/200)
+[responsive_fairness] slot=12 cubic flows=4 run=36
+[responsive_fairness] cubic flows=4 run=5 done (56/200)
+[responsive_fairness] slot=29 cubic flows=4 run=37
+[responsive_fairness] cubic flows=4 run=2 done (57/200)
+[responsive_fairness] slot=19 cubic flows=4 run=38
+[responsive_fairness] cubic flows=4 run=8 done (58/200)
+[responsive_fairness] slot=25 cubic flows=4 run=39
+[responsive_fairness] cubic flows=4 run=7 done (59/200)
+[responsive_fairness] slot=24 cubic flows=4 run=40
+[responsive_fairness] cubic flows=4 run=10 done (60/200)
+[responsive_fairness] slot=10 cubic flows=4 run=41
+[responsive_fairness] cubic flows=4 run=15 done (61/200)
+[responsive_fairness] slot=13 cubic flows=4 run=42
+[responsive_fairness] cubic flows=4 run=14 done (62/200)
+[responsive_fairness] slot=7 cubic flows=4 run=43
+[responsive_fairness] cubic flows=4 run=11 done (63/200)
+[responsive_fairness] slot=3 cubic flows=4 run=44
+[responsive_fairness] cubic flows=4 run=17 done (64/200)
+[responsive_fairness] slot=23 cubic flows=4 run=45
+[responsive_fairness] cubic flows=4 run=13 done (65/200)
+[responsive_fairness] slot=14 cubic flows=4 run=46
+[responsive_fairness] cubic flows=4 run=19 done (66/200)
+[responsive_fairness] slot=1 cubic flows=4 run=47
+[responsive_fairness] cubic flows=4 run=12 done (67/200)
+[responsive_fairness] slot=9 cubic flows=4 run=48
+[responsive_fairness] cubic flows=4 run=18 done (68/200)
+[responsive_fairness] slot=8 cubic flows=4 run=49
+[responsive_fairness] cubic flows=4 run=20 done (69/200)
+[responsive_fairness] slot=20 cubic flows=4 run=50
+[responsive_fairness] cubic flows=4 run=16 done (70/200)
+[responsive_fairness] slot=0 cubic flows=5 run=1
+[responsive_fairness] cubic flows=4 run=21 done (71/200)
+[responsive_fairness] slot=4 cubic flows=5 run=2
+[responsive_fairness] cubic flows=4 run=29 done (72/200)
+[responsive_fairness] slot=15 cubic flows=5 run=3
+[responsive_fairness] cubic flows=4 run=30 done (73/200)
+[responsive_fairness] slot=18 cubic flows=5 run=4
+[responsive_fairness] cubic flows=4 run=23 done (74/200)
+[responsive_fairness] slot=26 cubic flows=5 run=5
+[responsive_fairness] cubic flows=4 run=22 done (75/200)
+[responsive_fairness] slot=17 cubic flows=5 run=6
+[responsive_fairness] cubic flows=4 run=25 done (76/200)
+[responsive_fairness] slot=22 cubic flows=5 run=7
+[responsive_fairness] cubic flows=4 run=26 done (77/200)
+[responsive_fairness] slot=16 cubic flows=5 run=8
+[responsive_fairness] cubic flows=4 run=24 done (78/200)
+[responsive_fairness] slot=21 cubic flows=5 run=9
+[responsive_fairness] cubic flows=4 run=33 done (79/200)
+[responsive_fairness] slot=2 cubic flows=5 run=10
+[responsive_fairness] cubic flows=4 run=28 done (80/200)
+[responsive_fairness] slot=5 cubic flows=5 run=11
+[responsive_fairness] cubic flows=4 run=27 done (81/200)
+[responsive_fairness] slot=6 cubic flows=5 run=12
+[responsive_fairness] cubic flows=4 run=31 done (82/200)
+[responsive_fairness] slot=27 cubic flows=5 run=13
+[responsive_fairness] cubic flows=4 run=34 done (83/200)
+[responsive_fairness] slot=28 cubic flows=5 run=14
+[responsive_fairness] cubic flows=4 run=32 done (84/200)
+[responsive_fairness] slot=11 cubic flows=5 run=15
+[responsive_fairness] cubic flows=4 run=35 done (85/200)
+[responsive_fairness] slot=24 cubic flows=5 run=16
+[responsive_fairness] cubic flows=4 run=40 done (86/200)
+[responsive_fairness] slot=12 cubic flows=5 run=17
+[responsive_fairness] cubic flows=4 run=36 done (87/200)
+[responsive_fairness] slot=25 cubic flows=5 run=18
+[responsive_fairness] cubic flows=4 run=39 done (88/200)
+[responsive_fairness] slot=19 cubic flows=5 run=19
+[responsive_fairness] cubic flows=4 run=38 done (89/200)
+[responsive_fairness] slot=29 cubic flows=5 run=20
+[responsive_fairness] cubic flows=4 run=37 done (90/200)
+[responsive_fairness] slot=13 cubic flows=5 run=21
+[responsive_fairness] cubic flows=4 run=42 done (91/200)
+[responsive_fairness] slot=3 cubic flows=5 run=22
+[responsive_fairness] cubic flows=4 run=44 done (92/200)
+[responsive_fairness] slot=23 cubic flows=5 run=23
+[responsive_fairness] cubic flows=4 run=45 done (93/200)
+[responsive_fairness] slot=10 cubic flows=5 run=24
+[responsive_fairness] cubic flows=4 run=41 done (94/200)
+[responsive_fairness] slot=7 cubic flows=5 run=25
+[responsive_fairness] cubic flows=4 run=43 done (95/200)
+[responsive_fairness] slot=14 cubic flows=5 run=26
+[responsive_fairness] cubic flows=4 run=46 done (96/200)
+[responsive_fairness] slot=9 cubic flows=5 run=27
+[responsive_fairness] cubic flows=4 run=48 done (97/200)
+[responsive_fairness] slot=1 cubic flows=5 run=28
+[responsive_fairness] cubic flows=4 run=47 done (98/200)
+[responsive_fairness] slot=8 cubic flows=5 run=29
+[responsive_fairness] cubic flows=4 run=49 done (99/200)
+[responsive_fairness] slot=20 cubic flows=5 run=30
+[responsive_fairness] cubic flows=4 run=50 done (100/200)
+[responsive_fairness] slot=4 cubic flows=5 run=31
+[responsive_fairness] cubic flows=5 run=2 done (101/200)
+[responsive_fairness] slot=17 cubic flows=5 run=32
+[responsive_fairness] cubic flows=5 run=6 done (102/200)
+[responsive_fairness] slot=0 cubic flows=5 run=33
+[responsive_fairness] cubic flows=5 run=1 done (103/200)
+[responsive_fairness] slot=22 cubic flows=5 run=34
+[responsive_fairness] cubic flows=5 run=7 done (104/200)
+[responsive_fairness] slot=16 cubic flows=5 run=35
+[responsive_fairness] cubic flows=5 run=8 done (105/200)
+[responsive_fairness] slot=6 cubic flows=5 run=36
+[responsive_fairness] cubic flows=5 run=12 done (106/200)
+[responsive_fairness] slot=15 cubic flows=5 run=37
+[responsive_fairness] cubic flows=5 run=3 done (107/200)
+[responsive_fairness] slot=5 cubic flows=5 run=38
+[responsive_fairness] cubic flows=5 run=11 done (108/200)
+[responsive_fairness] slot=28 cubic flows=5 run=39
+[responsive_fairness] cubic flows=5 run=14 done (109/200)
+[responsive_fairness] slot=18 cubic flows=5 run=40
+[responsive_fairness] cubic flows=5 run=4 done (110/200)
+[responsive_fairness] slot=2 cubic flows=5 run=41
+[responsive_fairness] cubic flows=5 run=10 done (111/200)
+[responsive_fairness] slot=12 cubic flows=5 run=42
+[responsive_fairness] cubic flows=5 run=17 done (112/200)
+[responsive_fairness] slot=21 cubic flows=5 run=43
+[responsive_fairness] cubic flows=5 run=9 done (113/200)
+[responsive_fairness] slot=27 cubic flows=5 run=44
+[responsive_fairness] cubic flows=5 run=13 done (114/200)
+[responsive_fairness] slot=29 cubic flows=5 run=45
+[responsive_fairness] cubic flows=5 run=20 done (115/200)
+[responsive_fairness] slot=26 cubic flows=5 run=46
+[responsive_fairness] cubic flows=5 run=5 done (116/200)
+[responsive_fairness] slot=25 cubic flows=5 run=47
+[responsive_fairness] cubic flows=5 run=18 done (117/200)
+[responsive_fairness] slot=19 cubic flows=5 run=48
+[responsive_fairness] cubic flows=5 run=19 done (118/200)
+[responsive_fairness] slot=11 cubic flows=5 run=49
+[responsive_fairness] cubic flows=5 run=15 done (119/200)
+[responsive_fairness] slot=24 cubic flows=5 run=50
+[responsive_fairness] cubic flows=5 run=16 done (120/200)
+[responsive_fairness] slot=13 cubic flows=7 run=1
+[responsive_fairness] cubic flows=5 run=21 done (121/200)
+[responsive_fairness] slot=23 cubic flows=7 run=2
+[responsive_fairness] cubic flows=5 run=23 done (122/200)
+[responsive_fairness] slot=3 cubic flows=7 run=3
+[responsive_fairness] cubic flows=5 run=22 done (123/200)
+[responsive_fairness] slot=7 cubic flows=7 run=4
+[responsive_fairness] cubic flows=5 run=25 done (124/200)
+[responsive_fairness] slot=10 cubic flows=7 run=5
+[responsive_fairness] cubic flows=5 run=24 done (125/200)
+[responsive_fairness] slot=14 cubic flows=7 run=6
+[responsive_fairness] cubic flows=5 run=26 done (126/200)
+[responsive_fairness] slot=9 cubic flows=7 run=7
+[responsive_fairness] cubic flows=5 run=27 done (127/200)
+[responsive_fairness] slot=20 cubic flows=7 run=8
+[responsive_fairness] cubic flows=5 run=30 done (128/200)
+[responsive_fairness] slot=0 cubic flows=7 run=9
+[responsive_fairness] cubic flows=5 run=33 done (129/200)
+[responsive_fairness] slot=12 cubic flows=7 run=10
+[responsive_fairness] cubic flows=5 run=42 done (130/200)
+[responsive_fairness] slot=17 cubic flows=7 run=11
+[responsive_fairness] cubic flows=5 run=32 done (131/200)
+[responsive_fairness] slot=18 cubic flows=7 run=12
+[responsive_fairness] cubic flows=5 run=40 done (132/200)
+[responsive_fairness] slot=15 cubic flows=7 run=13
+[responsive_fairness] cubic flows=5 run=37 done (133/200)
+[responsive_fairness] slot=21 cubic flows=7 run=14
+[responsive_fairness] cubic flows=5 run=43 done (134/200)
+[responsive_fairness] slot=8 cubic flows=7 run=15
+[responsive_fairness] cubic flows=5 run=29 done (135/200)
+[responsive_fairness] slot=5 cubic flows=7 run=16
+[responsive_fairness] cubic flows=5 run=38 done (136/200)
+[responsive_fairness] slot=6 cubic flows=7 run=17
+[responsive_fairness] cubic flows=5 run=36 done (137/200)
+[responsive_fairness] slot=1 cubic flows=7 run=18
+[responsive_fairness] cubic flows=5 run=28 done (138/200)
+[responsive_fairness] slot=28 cubic flows=7 run=19
+[responsive_fairness] cubic flows=5 run=39 done (139/200)
+[responsive_fairness] slot=16 cubic flows=7 run=20
+[responsive_fairness] cubic flows=5 run=35 done (140/200)
+[responsive_fairness] slot=2 cubic flows=7 run=21
+[responsive_fairness] cubic flows=5 run=41 done (141/200)
+[responsive_fairness] slot=22 cubic flows=7 run=22
+[responsive_fairness] cubic flows=5 run=34 done (142/200)
+[responsive_fairness] slot=4 cubic flows=7 run=23
+[responsive_fairness] cubic flows=5 run=31 done (143/200)
+[responsive_fairness] slot=29 cubic flows=7 run=24
+[responsive_fairness] cubic flows=5 run=45 done (144/200)
+[responsive_fairness] slot=24 cubic flows=7 run=25
+[responsive_fairness] cubic flows=5 run=50 done (145/200)
+[responsive_fairness] slot=11 cubic flows=7 run=26
+[responsive_fairness] cubic flows=5 run=49 done (146/200)
+[responsive_fairness] slot=25 cubic flows=7 run=27
+[responsive_fairness] cubic flows=5 run=47 done (147/200)
+[responsive_fairness] slot=19 cubic flows=7 run=28
+[responsive_fairness] cubic flows=5 run=48 done (148/200)
+[responsive_fairness] slot=27 cubic flows=7 run=29
+[responsive_fairness] cubic flows=5 run=44 done (149/200)
+[responsive_fairness] slot=26 cubic flows=7 run=30
+[responsive_fairness] cubic flows=5 run=46 done (150/200)
+[responsive_fairness] slot=3 cubic flows=7 run=31
+[responsive_fairness] cubic flows=7 run=3 done (151/200)
+[responsive_fairness] slot=13 cubic flows=7 run=32
+[responsive_fairness] cubic flows=7 run=1 done (152/200)
+[responsive_fairness] slot=23 cubic flows=7 run=33
+[responsive_fairness] cubic flows=7 run=2 done (153/200)
+[responsive_fairness] slot=7 cubic flows=7 run=34
+[responsive_fairness] cubic flows=7 run=4 done (154/200)
+[responsive_fairness] slot=10 cubic flows=7 run=35
+[responsive_fairness] cubic flows=7 run=5 done (155/200)
+[responsive_fairness] slot=0 cubic flows=7 run=36
+[responsive_fairness] cubic flows=7 run=9 done (156/200)
+[responsive_fairness] slot=15 cubic flows=7 run=37
+[responsive_fairness] cubic flows=7 run=13 done (157/200)
+[responsive_fairness] slot=17 cubic flows=7 run=38
+[responsive_fairness] cubic flows=7 run=11 done (158/200)
+[responsive_fairness] slot=14 cubic flows=7 run=39
+[responsive_fairness] cubic flows=7 run=6 done (159/200)
+[responsive_fairness] slot=12 cubic flows=7 run=40
+[responsive_fairness] cubic flows=7 run=10 done (160/200)
+[responsive_fairness] slot=9 cubic flows=7 run=41
+[responsive_fairness] cubic flows=7 run=7 done (161/200)
+[responsive_fairness] slot=20 cubic flows=7 run=42
+[responsive_fairness] cubic flows=7 run=8 done (162/200)
+[responsive_fairness] slot=1 cubic flows=7 run=43
+[responsive_fairness] cubic flows=7 run=18 done (163/200)
+[responsive_fairness] slot=18 cubic flows=7 run=44
+[responsive_fairness] cubic flows=7 run=12 done (164/200)
+[responsive_fairness] slot=8 cubic flows=7 run=45
+[responsive_fairness] cubic flows=7 run=15 done (165/200)
+[responsive_fairness] slot=6 cubic flows=7 run=46
+[responsive_fairness] cubic flows=7 run=17 done (166/200)
+[responsive_fairness] slot=16 cubic flows=7 run=47
+[responsive_fairness] cubic flows=7 run=20 done (167/200)
+[responsive_fairness] slot=28 cubic flows=7 run=48
+[responsive_fairness] cubic flows=7 run=19 done (168/200)
+[responsive_fairness] slot=2 cubic flows=7 run=49
+[responsive_fairness] cubic flows=7 run=21 done (169/200)
+[responsive_fairness] slot=22 cubic flows=7 run=50
+[responsive_fairness] cubic flows=7 run=22 done (170/200)
+[responsive_fairness] cubic flows=7 run=27 done (171/200)
+[responsive_fairness] cubic flows=7 run=29 done (172/200)
+[responsive_fairness] cubic flows=7 run=14 done (173/200)
+[responsive_fairness] cubic flows=7 run=23 done (174/200)
+[responsive_fairness] cubic flows=7 run=25 done (175/200)
+[responsive_fairness] cubic flows=7 run=16 done (176/200)
+[responsive_fairness] cubic flows=7 run=28 done (177/200)
+[responsive_fairness] cubic flows=7 run=26 done (178/200)
+[responsive_fairness] cubic flows=7 run=24 done (179/200)
+[responsive_fairness] cubic flows=7 run=30 done (180/200)
+[responsive_fairness] cubic flows=7 run=31 done (181/200)
+[responsive_fairness] cubic flows=7 run=32 done (182/200)
+[responsive_fairness] cubic flows=7 run=33 done (183/200)
+[responsive_fairness] cubic flows=7 run=37 done (184/200)
+[responsive_fairness] cubic flows=7 run=36 done (185/200)
+[responsive_fairness] cubic flows=7 run=35 done (186/200)
+[responsive_fairness] cubic flows=7 run=34 done (187/200)
+[responsive_fairness] cubic flows=7 run=39 done (188/200)
+[responsive_fairness] cubic flows=7 run=45 done (189/200)
+[responsive_fairness] cubic flows=7 run=38 done (190/200)
+[responsive_fairness] cubic flows=7 run=44 done (191/200)
+[responsive_fairness] cubic flows=7 run=40 done (192/200)
+[responsive_fairness] cubic flows=7 run=41 done (193/200)
+[responsive_fairness] cubic flows=7 run=43 done (194/200)
+[responsive_fairness] cubic flows=7 run=47 done (195/200)
+[responsive_fairness] cubic flows=7 run=49 done (196/200)
+[responsive_fairness] cubic flows=7 run=46 done (197/200)
+[responsive_fairness] cubic flows=7 run=42 done (198/200)
+[responsive_fairness] cubic flows=7 run=48 done (199/200)
+[responsive_fairness] cubic flows=7 run=50 done (200/200)
+[orch] runtime cleanup sweep
+[responsive_fairness] bbr resuming missing=200/200 by_flow=2:50, 4:50, 5:50, 7:50
+[responsive_fairness] slot=0 bbr flows=2 run=1
+[responsive_fairness] slot=1 bbr flows=2 run=2
+[responsive_fairness] slot=2 bbr flows=2 run=3
+[responsive_fairness] slot=3 bbr flows=2 run=4
+[responsive_fairness] slot=4 bbr flows=2 run=5
+[responsive_fairness] slot=5 bbr flows=2 run=6
+[responsive_fairness] slot=6 bbr flows=2 run=7
+[responsive_fairness] slot=7 bbr flows=2 run=8
+[responsive_fairness] slot=8 bbr flows=2 run=9
+[responsive_fairness] slot=9 bbr flows=2 run=10
+[responsive_fairness] slot=10 bbr flows=2 run=11
+[responsive_fairness] slot=11 bbr flows=2 run=12
+[responsive_fairness] slot=12 bbr flows=2 run=13
+[responsive_fairness] slot=13 bbr flows=2 run=14
+[responsive_fairness] slot=14 bbr flows=2 run=15
+[responsive_fairness] slot=15 bbr flows=2 run=16
+[responsive_fairness] slot=16 bbr flows=2 run=17
+[responsive_fairness] slot=17 bbr flows=2 run=18
+[responsive_fairness] slot=18 bbr flows=2 run=19
+[responsive_fairness] slot=19 bbr flows=2 run=20
+[responsive_fairness] slot=20 bbr flows=2 run=21
+[responsive_fairness] slot=21 bbr flows=2 run=22
+[responsive_fairness] slot=22 bbr flows=2 run=23
+[responsive_fairness] slot=23 bbr flows=2 run=24
+[responsive_fairness] slot=24 bbr flows=2 run=25
+[responsive_fairness] slot=25 bbr flows=2 run=26
+[responsive_fairness] slot=26 bbr flows=2 run=27
+[responsive_fairness] slot=27 bbr flows=2 run=28
+[responsive_fairness] slot=28 bbr flows=2 run=29
+[responsive_fairness] slot=29 bbr flows=2 run=30
+[responsive_fairness] slot=8 bbr flows=2 run=31
+[responsive_fairness] bbr flows=2 run=9 done (1/200)
+[responsive_fairness] slot=24 bbr flows=2 run=32
+[responsive_fairness] bbr flows=2 run=25 done (2/200)
+[responsive_fairness] slot=4 bbr flows=2 run=33
+[responsive_fairness] bbr flows=2 run=5 done (3/200)
+[responsive_fairness] slot=0 bbr flows=2 run=34
+[responsive_fairness] bbr flows=2 run=1 done (4/200)
+[responsive_fairness] slot=18 bbr flows=2 run=35
+[responsive_fairness] bbr flows=2 run=19 done (5/200)
+[responsive_fairness] slot=12 bbr flows=2 run=36
+[responsive_fairness] bbr flows=2 run=13 done (6/200)
+[responsive_fairness] slot=27 bbr flows=2 run=37
+[responsive_fairness] bbr flows=2 run=28 done (7/200)
+[responsive_fairness] slot=5 bbr flows=2 run=38
+[responsive_fairness] bbr flows=2 run=6 done (8/200)
+[responsive_fairness] slot=6 bbr flows=2 run=39
+[responsive_fairness] bbr flows=2 run=7 done (9/200)
+[responsive_fairness] slot=28 bbr flows=2 run=40
+[responsive_fairness] bbr flows=2 run=29 done (10/200)
+[responsive_fairness] slot=15 bbr flows=2 run=41
+[responsive_fairness] bbr flows=2 run=16 done (11/200)
+[responsive_fairness] slot=2 bbr flows=2 run=42
+[responsive_fairness] bbr flows=2 run=3 done (12/200)
+[responsive_fairness] slot=14 bbr flows=2 run=43
+[responsive_fairness] bbr flows=2 run=15 done (13/200)
+[responsive_fairness] slot=20 bbr flows=2 run=44
+[responsive_fairness] bbr flows=2 run=21 done (14/200)
+[responsive_fairness] slot=16 bbr flows=2 run=45
+[responsive_fairness] bbr flows=2 run=17 done (15/200)
+[responsive_fairness] slot=17 bbr flows=2 run=46
+[responsive_fairness] bbr flows=2 run=18 done (16/200)
+[responsive_fairness] slot=3 bbr flows=2 run=47
+[responsive_fairness] bbr flows=2 run=4 done (17/200)
+[responsive_fairness] slot=7 bbr flows=2 run=48
+[responsive_fairness] bbr flows=2 run=8 done (18/200)
+[responsive_fairness] slot=11 bbr flows=2 run=49
+[responsive_fairness] bbr flows=2 run=12 done (19/200)
+[responsive_fairness] slot=10 bbr flows=2 run=50
+[responsive_fairness] bbr flows=2 run=11 done (20/200)
+[responsive_fairness] slot=13 bbr flows=4 run=1
+[responsive_fairness] bbr flows=2 run=14 done (21/200)
+[responsive_fairness] slot=25 bbr flows=4 run=2
+[responsive_fairness] bbr flows=2 run=26 done (22/200)
+[responsive_fairness] slot=19 bbr flows=4 run=3
+[responsive_fairness] bbr flows=2 run=20 done (23/200)
+[responsive_fairness] slot=9 bbr flows=4 run=4
+[responsive_fairness] bbr flows=2 run=10 done (24/200)
+[responsive_fairness] slot=1 bbr flows=4 run=5
+[responsive_fairness] bbr flows=2 run=2 done (25/200)
+[responsive_fairness] slot=22 bbr flows=4 run=6
+[responsive_fairness] bbr flows=2 run=23 done (26/200)
+[responsive_fairness] slot=21 bbr flows=4 run=7
+[responsive_fairness] bbr flows=2 run=22 done (27/200)
+[responsive_fairness] slot=26 bbr flows=4 run=8
+[responsive_fairness] bbr flows=2 run=27 done (28/200)
+[responsive_fairness] slot=23 bbr flows=4 run=9
+[responsive_fairness] bbr flows=2 run=24 done (29/200)
+[responsive_fairness] slot=29 bbr flows=4 run=10
+[responsive_fairness] bbr flows=2 run=30 done (30/200)
+[responsive_fairness] slot=12 bbr flows=4 run=11
+[responsive_fairness] bbr flows=2 run=36 done (31/200)
+[responsive_fairness] slot=18 bbr flows=4 run=12
+[responsive_fairness] bbr flows=2 run=35 done (32/200)
+[responsive_fairness] slot=5 bbr flows=4 run=13
+[responsive_fairness] bbr flows=2 run=38 done (33/200)
+[responsive_fairness] slot=3 bbr flows=4 run=14
+[responsive_fairness] bbr flows=2 run=47 done (34/200)
+[responsive_fairness] slot=20 bbr flows=4 run=15
+[responsive_fairness] bbr flows=2 run=44 done (35/200)
+[responsive_fairness] slot=16 bbr flows=4 run=16
+[responsive_fairness] bbr flows=2 run=45 done (36/200)
+[responsive_fairness] slot=0 bbr flows=4 run=17
+[responsive_fairness] bbr flows=2 run=34 done (37/200)
+[responsive_fairness] slot=15 bbr flows=4 run=18
+[responsive_fairness] bbr flows=2 run=41 done (38/200)
+[responsive_fairness] slot=2 bbr flows=4 run=19
+[responsive_fairness] bbr flows=2 run=42 done (39/200)
+[responsive_fairness] slot=24 bbr flows=4 run=20
+[responsive_fairness] bbr flows=2 run=32 done (40/200)
+[responsive_fairness] slot=4 bbr flows=4 run=21
+[responsive_fairness] bbr flows=2 run=33 done (41/200)
+[responsive_fairness] slot=27 bbr flows=4 run=22
+[responsive_fairness] bbr flows=2 run=37 done (42/200)
+[responsive_fairness] slot=6 bbr flows=4 run=23
+[responsive_fairness] bbr flows=2 run=39 done (43/200)
+[responsive_fairness] slot=7 bbr flows=4 run=24
+[responsive_fairness] bbr flows=2 run=48 done (44/200)
+[responsive_fairness] slot=14 bbr flows=4 run=25
+[responsive_fairness] bbr flows=2 run=43 done (45/200)
+[responsive_fairness] slot=17 bbr flows=4 run=26
+[responsive_fairness] bbr flows=2 run=46 done (46/200)
+[responsive_fairness] slot=28 bbr flows=4 run=27
+[responsive_fairness] bbr flows=2 run=40 done (47/200)
+[responsive_fairness] slot=8 bbr flows=4 run=28
+[responsive_fairness] bbr flows=2 run=31 done (48/200)
+[responsive_fairness] slot=11 bbr flows=4 run=29
+[responsive_fairness] bbr flows=2 run=49 done (49/200)
+[responsive_fairness] slot=10 bbr flows=4 run=30
+[responsive_fairness] bbr flows=2 run=50 done (50/200)
+[responsive_fairness] slot=13 bbr flows=4 run=31
+[responsive_fairness] bbr flows=4 run=1 done (51/200)
+[responsive_fairness] slot=19 bbr flows=4 run=32
+[responsive_fairness] bbr flows=4 run=3 done (52/200)
+[responsive_fairness] slot=1 bbr flows=4 run=33
+[responsive_fairness] bbr flows=4 run=5 done (53/200)
+[responsive_fairness] slot=9 bbr flows=4 run=34
+[responsive_fairness] bbr flows=4 run=4 done (54/200)
+[responsive_fairness] slot=21 bbr flows=4 run=35
+[responsive_fairness] bbr flows=4 run=7 done (55/200)
+[responsive_fairness] slot=25 bbr flows=4 run=36
+[responsive_fairness] bbr flows=4 run=2 done (56/200)
+[responsive_fairness] slot=26 bbr flows=4 run=37
+[responsive_fairness] bbr flows=4 run=8 done (57/200)
+[responsive_fairness] bbr flows=4 run=10 done (58/200)
+[responsive_fairness] slot=29 bbr flows=4 run=38
+[responsive_fairness] slot=22 bbr flows=4 run=39
+[responsive_fairness] bbr flows=4 run=6 done (59/200)
+[responsive_fairness] slot=23 bbr flows=4 run=40
+[responsive_fairness] bbr flows=4 run=9 done (60/200)
+[responsive_fairness] slot=3 bbr flows=4 run=41
+[responsive_fairness] bbr flows=4 run=14 done (61/200)
+[responsive_fairness] slot=16 bbr flows=4 run=42
+[responsive_fairness] bbr flows=4 run=16 done (62/200)
+[responsive_fairness] slot=12 bbr flows=4 run=43
+[responsive_fairness] bbr flows=4 run=11 done (63/200)
+[responsive_fairness] slot=15 bbr flows=4 run=44
+[responsive_fairness] bbr flows=4 run=18 done (64/200)
+[responsive_fairness] slot=24 bbr flows=4 run=45
+[responsive_fairness] bbr flows=4 run=20 done (65/200)
+[responsive_fairness] slot=0 bbr flows=4 run=46
+[responsive_fairness] bbr flows=4 run=17 done (66/200)
+[responsive_fairness] slot=20 bbr flows=4 run=47
+[responsive_fairness] bbr flows=4 run=15 done (67/200)
+[responsive_fairness] slot=4 bbr flows=4 run=48
+[responsive_fairness] bbr flows=4 run=21 done (68/200)
+[responsive_fairness] slot=5 bbr flows=4 run=49
+[responsive_fairness] bbr flows=4 run=13 done (69/200)
+[responsive_fairness] slot=2 bbr flows=4 run=50
+[responsive_fairness] bbr flows=4 run=19 done (70/200)
+[responsive_fairness] slot=18 bbr flows=5 run=1
+[responsive_fairness] bbr flows=4 run=12 done (71/200)
+[responsive_fairness] slot=27 bbr flows=5 run=2
+[responsive_fairness] bbr flows=4 run=22 done (72/200)
+[responsive_fairness] slot=6 bbr flows=5 run=3
+[responsive_fairness] bbr flows=4 run=23 done (73/200)
+[responsive_fairness] slot=8 bbr flows=5 run=4
+[responsive_fairness] bbr flows=4 run=28 done (74/200)
+[responsive_fairness] slot=14 bbr flows=5 run=5
+[responsive_fairness] bbr flows=4 run=25 done (75/200)
+[responsive_fairness] slot=17 bbr flows=5 run=6
+[responsive_fairness] bbr flows=4 run=26 done (76/200)
+[responsive_fairness] slot=28 bbr flows=5 run=7
+[responsive_fairness] bbr flows=4 run=27 done (77/200)
+[responsive_fairness] slot=7 bbr flows=5 run=8
+[responsive_fairness] bbr flows=4 run=24 done (78/200)
+[responsive_fairness] slot=10 bbr flows=5 run=9
+[responsive_fairness] bbr flows=4 run=30 done (79/200)
+[responsive_fairness] slot=11 bbr flows=5 run=10
+[responsive_fairness] bbr flows=4 run=29 done (80/200)
+[responsive_fairness] slot=19 bbr flows=5 run=11
+[responsive_fairness] bbr flows=4 run=32 done (81/200)
+[responsive_fairness] slot=13 bbr flows=5 run=12
+[responsive_fairness] bbr flows=4 run=31 done (82/200)
+[responsive_fairness] slot=1 bbr flows=5 run=13
+[responsive_fairness] bbr flows=4 run=33 done (83/200)
+[responsive_fairness] slot=26 bbr flows=5 run=14
+[responsive_fairness] bbr flows=4 run=37 done (84/200)
+[responsive_fairness] slot=22 bbr flows=5 run=15
+[responsive_fairness] bbr flows=4 run=39 done (85/200)
+[responsive_fairness] slot=9 bbr flows=5 run=16
+[responsive_fairness] bbr flows=4 run=34 done (86/200)
+[responsive_fairness] slot=25 bbr flows=5 run=17
+[responsive_fairness] bbr flows=4 run=36 done (87/200)
+[responsive_fairness] slot=29 bbr flows=5 run=18
+[responsive_fairness] bbr flows=4 run=38 done (88/200)
+[responsive_fairness] slot=23 bbr flows=5 run=19
+[responsive_fairness] bbr flows=4 run=40 done (89/200)
+[responsive_fairness] slot=21 bbr flows=5 run=20
+[responsive_fairness] bbr flows=4 run=35 done (90/200)
+[responsive_fairness] slot=16 bbr flows=5 run=21
+[responsive_fairness] bbr flows=4 run=42 done (91/200)
+[responsive_fairness] slot=12 bbr flows=5 run=22
+[responsive_fairness] bbr flows=4 run=43 done (92/200)
+[responsive_fairness] slot=20 bbr flows=5 run=23
+[responsive_fairness] bbr flows=4 run=47 done (93/200)
+[responsive_fairness] slot=2 bbr flows=5 run=24
+[responsive_fairness] bbr flows=4 run=50 done (94/200)
+[responsive_fairness] slot=4 bbr flows=5 run=25
+[responsive_fairness] bbr flows=4 run=48 done (95/200)
+[responsive_fairness] slot=3 bbr flows=5 run=26
+[responsive_fairness] bbr flows=4 run=41 done (96/200)
+[responsive_fairness] slot=15 bbr flows=5 run=27
+[responsive_fairness] bbr flows=4 run=44 done (97/200)
+[responsive_fairness] slot=5 bbr flows=5 run=28
+[responsive_fairness] bbr flows=4 run=49 done (98/200)
+[responsive_fairness] slot=24 bbr flows=5 run=29
+[responsive_fairness] bbr flows=4 run=45 done (99/200)
+[responsive_fairness] slot=0 bbr flows=5 run=30
+[responsive_fairness] bbr flows=4 run=46 done (100/200)
+[responsive_fairness] slot=8 bbr flows=5 run=31
+[responsive_fairness] bbr flows=5 run=4 done (101/200)
+[responsive_fairness] slot=27 bbr flows=5 run=32
+[responsive_fairness] bbr flows=5 run=2 done (102/200)
+[responsive_fairness] slot=10 bbr flows=5 run=33
+[responsive_fairness] bbr flows=5 run=9 done (103/200)
+[responsive_fairness] slot=18 bbr flows=5 run=34
+[responsive_fairness] bbr flows=5 run=1 done (104/200)
+[responsive_fairness] slot=1 bbr flows=5 run=35
+[responsive_fairness] bbr flows=5 run=13 done (105/200)
+[responsive_fairness] slot=19 bbr flows=5 run=36
+[responsive_fairness] bbr flows=5 run=11 done (106/200)
+[responsive_fairness] slot=6 bbr flows=5 run=37
+[responsive_fairness] bbr flows=5 run=3 done (107/200)
+[responsive_fairness] slot=14 bbr flows=5 run=38
+[responsive_fairness] bbr flows=5 run=5 done (108/200)
+[responsive_fairness] slot=9 bbr flows=5 run=39
+[responsive_fairness] bbr flows=5 run=16 done (109/200)
+[responsive_fairness] slot=7 bbr flows=5 run=40
+[responsive_fairness] bbr flows=5 run=8 done (110/200)
+[responsive_fairness] slot=28 bbr flows=5 run=41
+[responsive_fairness] bbr flows=5 run=7 done (111/200)
+[responsive_fairness] slot=23 bbr flows=5 run=42
+[responsive_fairness] bbr flows=5 run=19 done (112/200)
+[responsive_fairness] slot=25 bbr flows=5 run=43
+[responsive_fairness] bbr flows=5 run=17 done (113/200)
+[responsive_fairness] slot=29 bbr flows=5 run=44
+[responsive_fairness] bbr flows=5 run=18 done (114/200)
+[responsive_fairness] slot=22 bbr flows=5 run=45
+[responsive_fairness] bbr flows=5 run=15 done (115/200)
+[responsive_fairness] slot=13 bbr flows=5 run=46
+[responsive_fairness] bbr flows=5 run=12 done (116/200)
+[responsive_fairness] slot=11 bbr flows=5 run=47
+[responsive_fairness] bbr flows=5 run=10 done (117/200)
+[responsive_fairness] slot=17 bbr flows=5 run=48
+[responsive_fairness] bbr flows=5 run=6 done (118/200)
+[responsive_fairness] slot=26 bbr flows=5 run=49
+[responsive_fairness] bbr flows=5 run=14 done (119/200)
+[responsive_fairness] slot=21 bbr flows=5 run=50
+[responsive_fairness] bbr flows=5 run=20 done (120/200)
+[responsive_fairness] slot=16 bbr flows=7 run=1
+[responsive_fairness] bbr flows=5 run=21 done (121/200)
+[responsive_fairness] slot=20 bbr flows=7 run=2
+[responsive_fairness] bbr flows=5 run=23 done (122/200)
+[responsive_fairness] slot=2 bbr flows=7 run=3
+[responsive_fairness] bbr flows=5 run=24 done (123/200)
+[responsive_fairness] slot=12 bbr flows=7 run=4
+[responsive_fairness] bbr flows=5 run=22 done (124/200)
+[responsive_fairness] slot=5 bbr flows=7 run=5
+[responsive_fairness] bbr flows=5 run=28 done (125/200)
+[responsive_fairness] slot=4 bbr flows=7 run=6
+[responsive_fairness] bbr flows=5 run=25 done (126/200)
+[responsive_fairness] slot=15 bbr flows=7 run=7
+[responsive_fairness] bbr flows=5 run=27 done (127/200)
+[responsive_fairness] slot=18 bbr flows=7 run=8
+[responsive_fairness] bbr flows=5 run=34 done (128/200)
+[responsive_fairness] slot=3 bbr flows=7 run=9
+[responsive_fairness] bbr flows=5 run=26 done (129/200)
+[responsive_fairness] slot=6 bbr flows=7 run=10
+[responsive_fairness] bbr flows=5 run=37 done (130/200)
+[responsive_fairness] slot=8 bbr flows=7 run=11
+[responsive_fairness] bbr flows=5 run=31 done (131/200)
+[responsive_fairness] slot=1 bbr flows=7 run=12
+[responsive_fairness] bbr flows=5 run=35 done (132/200)
+[responsive_fairness] slot=24 bbr flows=7 run=13
+[responsive_fairness] bbr flows=5 run=29 done (133/200)
+[responsive_fairness] slot=28 bbr flows=7 run=14
+[responsive_fairness] bbr flows=5 run=41 done (134/200)
+[responsive_fairness] slot=19 bbr flows=7 run=15
+[responsive_fairness] bbr flows=5 run=36 done (135/200)
+[responsive_fairness] slot=0 bbr flows=7 run=16
+[responsive_fairness] bbr flows=5 run=30 done (136/200)
+[responsive_fairness] slot=11 bbr flows=7 run=17
+[responsive_fairness] bbr flows=5 run=47 done (137/200)
+[responsive_fairness] slot=10 bbr flows=7 run=18
+[responsive_fairness] bbr flows=5 run=33 done (138/200)
+[responsive_fairness] slot=27 bbr flows=7 run=19
+[responsive_fairness] bbr flows=5 run=32 done (139/200)
+[responsive_fairness] slot=14 bbr flows=7 run=20
+[responsive_fairness] bbr flows=5 run=38 done (140/200)
+[responsive_fairness] slot=7 bbr flows=7 run=21
+[responsive_fairness] bbr flows=5 run=40 done (141/200)
+[responsive_fairness] slot=13 bbr flows=7 run=22
+[responsive_fairness] bbr flows=5 run=46 done (142/200)
+[responsive_fairness] slot=25 bbr flows=7 run=23
+[responsive_fairness] bbr flows=5 run=43 done (143/200)
+[responsive_fairness] slot=23 bbr flows=7 run=24
+[responsive_fairness] bbr flows=5 run=42 done (144/200)
+[responsive_fairness] slot=9 bbr flows=7 run=25
+[responsive_fairness] bbr flows=5 run=39 done (145/200)
+[responsive_fairness] slot=26 bbr flows=7 run=26
+[responsive_fairness] bbr flows=5 run=49 done (146/200)
+[responsive_fairness] slot=21 bbr flows=7 run=27
+[responsive_fairness] bbr flows=5 run=50 done (147/200)
+[responsive_fairness] slot=29 bbr flows=7 run=28
+[responsive_fairness] bbr flows=5 run=44 done (148/200)
+[responsive_fairness] slot=17 bbr flows=7 run=29
+[responsive_fairness] bbr flows=5 run=48 done (149/200)
+[responsive_fairness] slot=22 bbr flows=7 run=30
+[responsive_fairness] bbr flows=5 run=45 done (150/200)
+[responsive_fairness] slot=16 bbr flows=7 run=31
+[responsive_fairness] bbr flows=7 run=1 done (151/200)
+[responsive_fairness] slot=20 bbr flows=7 run=32
+[responsive_fairness] bbr flows=7 run=2 done (152/200)
+[responsive_fairness] slot=5 bbr flows=7 run=33
+[responsive_fairness] bbr flows=7 run=5 done (153/200)
+[responsive_fairness] slot=12 bbr flows=7 run=34
+[responsive_fairness] bbr flows=7 run=4 done (154/200)
+[responsive_fairness] slot=2 bbr flows=7 run=35
+[responsive_fairness] bbr flows=7 run=3 done (155/200)
+[responsive_fairness] slot=3 bbr flows=7 run=36
+[responsive_fairness] bbr flows=7 run=9 done (156/200)
+[responsive_fairness] slot=18 bbr flows=7 run=37
+[responsive_fairness] bbr flows=7 run=8 done (157/200)
+[responsive_fairness] slot=4 bbr flows=7 run=38
+[responsive_fairness] bbr flows=7 run=6 done (158/200)
+[responsive_fairness] slot=28 bbr flows=7 run=39
+[responsive_fairness] bbr flows=7 run=14 done (159/200)
+[responsive_fairness] slot=1 bbr flows=7 run=40
+[responsive_fairness] bbr flows=7 run=12 done (160/200)
+[responsive_fairness] slot=19 bbr flows=7 run=41
+[responsive_fairness] bbr flows=7 run=15 done (161/200)
+[responsive_fairness] slot=8 bbr flows=7 run=42
+[responsive_fairness] bbr flows=7 run=11 done (162/200)
+[responsive_fairness] slot=24 bbr flows=7 run=43
+[responsive_fairness] bbr flows=7 run=13 done (163/200)
+[responsive_fairness] slot=15 bbr flows=7 run=44
+[responsive_fairness] bbr flows=7 run=7 done (164/200)
+[responsive_fairness] slot=14 bbr flows=7 run=45
+[responsive_fairness] bbr flows=7 run=20 done (165/200)
+[responsive_fairness] slot=0 bbr flows=7 run=46
+[responsive_fairness] bbr flows=7 run=16 done (166/200)
+[responsive_fairness] slot=10 bbr flows=7 run=47
+[responsive_fairness] bbr flows=7 run=18 done (167/200)
+[responsive_fairness] slot=6 bbr flows=7 run=48
+[responsive_fairness] bbr flows=7 run=10 done (168/200)
+[responsive_fairness] slot=7 bbr flows=7 run=49
+[responsive_fairness] bbr flows=7 run=21 done (169/200)
+[responsive_fairness] slot=27 bbr flows=7 run=50
+[responsive_fairness] bbr flows=7 run=19 done (170/200)
+[responsive_fairness] bbr flows=7 run=25 done (171/200)
+[responsive_fairness] bbr flows=7 run=29 done (172/200)
+[responsive_fairness] bbr flows=7 run=22 done (173/200)
+[responsive_fairness] bbr flows=7 run=27 done (174/200)
+[responsive_fairness] bbr flows=7 run=17 done (175/200)
+[responsive_fairness] bbr flows=7 run=30 done (176/200)
+[responsive_fairness] bbr flows=7 run=26 done (177/200)
+[responsive_fairness] bbr flows=7 run=24 done (178/200)
+[responsive_fairness] bbr flows=7 run=28 done (179/200)
+[responsive_fairness] bbr flows=7 run=23 done (180/200)
+[responsive_fairness] bbr flows=7 run=31 done (181/200)
+[responsive_fairness] bbr flows=7 run=32 done (182/200)
+[responsive_fairness] bbr flows=7 run=33 done (183/200)
+[responsive_fairness] bbr flows=7 run=35 done (184/200)
+[responsive_fairness] bbr flows=7 run=37 done (185/200)
+[responsive_fairness] bbr flows=7 run=34 done (186/200)
+[responsive_fairness] bbr flows=7 run=36 done (187/200)
+[responsive_fairness] bbr flows=7 run=42 done (188/200)
+[responsive_fairness] bbr flows=7 run=39 done (189/200)
+[responsive_fairness] bbr flows=7 run=49 done (190/200)
+[responsive_fairness] bbr flows=7 run=38 done (191/200)
+[responsive_fairness] bbr flows=7 run=41 done (192/200)
+[responsive_fairness] bbr flows=7 run=44 done (193/200)
+[responsive_fairness] bbr flows=7 run=50 done (194/200)
+[responsive_fairness] bbr flows=7 run=45 done (195/200)
+[responsive_fairness] bbr flows=7 run=48 done (196/200)
+[responsive_fairness] bbr flows=7 run=40 done (197/200)
+[responsive_fairness] bbr flows=7 run=47 done (198/200)
+[responsive_fairness] bbr flows=7 run=43 done (199/200)
+[responsive_fairness] bbr flows=7 run=46 done (200/200)
+[orch] runtime cleanup sweep
+[responsive_fairness] bbr1 resuming missing=200/200 by_flow=2:50, 4:50, 5:50, 7:50
+[responsive_fairness] slot=0 bbr1 flows=2 run=1
+[responsive_fairness] slot=1 bbr1 flows=2 run=2
+[responsive_fairness] slot=2 bbr1 flows=2 run=3
+[responsive_fairness] slot=3 bbr1 flows=2 run=4
+[responsive_fairness] slot=4 bbr1 flows=2 run=5
+[responsive_fairness] slot=5 bbr1 flows=2 run=6
+[responsive_fairness] slot=6 bbr1 flows=2 run=7
+[responsive_fairness] slot=7 bbr1 flows=2 run=8
+[responsive_fairness] slot=8 bbr1 flows=2 run=9
+[responsive_fairness] slot=9 bbr1 flows=2 run=10
+[responsive_fairness] slot=10 bbr1 flows=2 run=11
+[responsive_fairness] slot=11 bbr1 flows=2 run=12
+[responsive_fairness] slot=12 bbr1 flows=2 run=13
+[responsive_fairness] slot=13 bbr1 flows=2 run=14
+[responsive_fairness] slot=14 bbr1 flows=2 run=15
+[responsive_fairness] slot=15 bbr1 flows=2 run=16
+[responsive_fairness] slot=16 bbr1 flows=2 run=17
+[responsive_fairness] slot=17 bbr1 flows=2 run=18
+[responsive_fairness] slot=18 bbr1 flows=2 run=19
+[responsive_fairness] slot=19 bbr1 flows=2 run=20
+[responsive_fairness] slot=20 bbr1 flows=2 run=21
+[responsive_fairness] slot=21 bbr1 flows=2 run=22
+[responsive_fairness] slot=22 bbr1 flows=2 run=23
+[responsive_fairness] slot=23 bbr1 flows=2 run=24
+[responsive_fairness] slot=24 bbr1 flows=2 run=25
+[responsive_fairness] slot=25 bbr1 flows=2 run=26
+[responsive_fairness] slot=26 bbr1 flows=2 run=27
+[responsive_fairness] slot=27 bbr1 flows=2 run=28
+[responsive_fairness] slot=28 bbr1 flows=2 run=29
+[responsive_fairness] slot=29 bbr1 flows=2 run=30
+[responsive_fairness] slot=9 bbr1 flows=2 run=31
+[responsive_fairness] bbr1 flows=2 run=10 done (1/200)
+[responsive_fairness] slot=12 bbr1 flows=2 run=32
+[responsive_fairness] bbr1 flows=2 run=13 done (2/200)
+[responsive_fairness] slot=5 bbr1 flows=2 run=33
+[responsive_fairness] bbr1 flows=2 run=6 done (3/200)
+[responsive_fairness] slot=3 bbr1 flows=2 run=34
+[responsive_fairness] bbr1 flows=2 run=4 done (4/200)
+[responsive_fairness] slot=17 bbr1 flows=2 run=35
+[responsive_fairness] bbr1 flows=2 run=18 done (5/200)
+[responsive_fairness] slot=6 bbr1 flows=2 run=36
+[responsive_fairness] bbr1 flows=2 run=7 done (6/200)
+[responsive_fairness] slot=26 bbr1 flows=2 run=37
+[responsive_fairness] bbr1 flows=2 run=27 done (7/200)
+[responsive_fairness] slot=19 bbr1 flows=2 run=38
+[responsive_fairness] bbr1 flows=2 run=20 done (8/200)
+[responsive_fairness] slot=2 bbr1 flows=2 run=39
+[responsive_fairness] bbr1 flows=2 run=3 done (9/200)
+[responsive_fairness] slot=18 bbr1 flows=2 run=40
+[responsive_fairness] bbr1 flows=2 run=19 done (10/200)
+[responsive_fairness] slot=4 bbr1 flows=2 run=41
+[responsive_fairness] bbr1 flows=2 run=5 done (11/200)
+[responsive_fairness] slot=11 bbr1 flows=2 run=42
+[responsive_fairness] bbr1 flows=2 run=12 done (12/200)
+[responsive_fairness] slot=25 bbr1 flows=2 run=43
+[responsive_fairness] bbr1 flows=2 run=26 done (13/200)
+[responsive_fairness] slot=8 bbr1 flows=2 run=44
+[responsive_fairness] bbr1 flows=2 run=9 done (14/200)
+[responsive_fairness] slot=0 bbr1 flows=2 run=45
+[responsive_fairness] bbr1 flows=2 run=1 done (15/200)
+[responsive_fairness] slot=10 bbr1 flows=2 run=46
+[responsive_fairness] bbr1 flows=2 run=11 done (16/200)
+[responsive_fairness] slot=27 bbr1 flows=2 run=47
+[responsive_fairness] bbr1 flows=2 run=28 done (17/200)
+[responsive_fairness] slot=16 bbr1 flows=2 run=48
+[responsive_fairness] bbr1 flows=2 run=17 done (18/200)
+[responsive_fairness] slot=22 bbr1 flows=2 run=49
+[responsive_fairness] bbr1 flows=2 run=23 done (19/200)
+[responsive_fairness] slot=20 bbr1 flows=2 run=50
+[responsive_fairness] bbr1 flows=2 run=21 done (20/200)
+[responsive_fairness] slot=21 bbr1 flows=4 run=1
+[responsive_fairness] bbr1 flows=2 run=22 done (21/200)
+[responsive_fairness] slot=15 bbr1 flows=4 run=2
+[responsive_fairness] bbr1 flows=2 run=16 done (22/200)
+[responsive_fairness] slot=23 bbr1 flows=4 run=3
+[responsive_fairness] bbr1 flows=2 run=24 done (23/200)
+[responsive_fairness] slot=7 bbr1 flows=4 run=4
+[responsive_fairness] bbr1 flows=2 run=8 done (24/200)
+[responsive_fairness] slot=29 bbr1 flows=4 run=5
+[responsive_fairness] bbr1 flows=2 run=30 done (25/200)
+[responsive_fairness] slot=13 bbr1 flows=4 run=6
+[responsive_fairness] bbr1 flows=2 run=14 done (26/200)
+[responsive_fairness] slot=24 bbr1 flows=4 run=7
+[responsive_fairness] bbr1 flows=2 run=25 done (27/200)
+[responsive_fairness] slot=1 bbr1 flows=4 run=8
+[responsive_fairness] bbr1 flows=2 run=2 done (28/200)
+[responsive_fairness] slot=14 bbr1 flows=4 run=9
+[responsive_fairness] bbr1 flows=2 run=15 done (29/200)
+[responsive_fairness] slot=28 bbr1 flows=4 run=10
+[responsive_fairness] bbr1 flows=2 run=29 done (30/200)
+[responsive_fairness] slot=17 bbr1 flows=4 run=11
+[responsive_fairness] bbr1 flows=2 run=35 done (31/200)
+[responsive_fairness] slot=9 bbr1 flows=4 run=12
+[responsive_fairness] bbr1 flows=2 run=31 done (32/200)
+[responsive_fairness] slot=10 bbr1 flows=4 run=13
+[responsive_fairness] bbr1 flows=2 run=46 done (33/200)
+[responsive_fairness] slot=19 bbr1 flows=4 run=14
+[responsive_fairness] bbr1 flows=2 run=38 done (34/200)
+[responsive_fairness] slot=18 bbr1 flows=4 run=15
+[responsive_fairness] bbr1 flows=2 run=40 done (35/200)
+[responsive_fairness] slot=26 bbr1 flows=4 run=16
+[responsive_fairness] bbr1 flows=2 run=37 done (36/200)
+[responsive_fairness] slot=11 bbr1 flows=4 run=17
+[responsive_fairness] bbr1 flows=2 run=42 done (37/200)
+[responsive_fairness] slot=2 bbr1 flows=4 run=18
+[responsive_fairness] bbr1 flows=2 run=39 done (38/200)
+[responsive_fairness] slot=0 bbr1 flows=4 run=19
+[responsive_fairness] bbr1 flows=2 run=45 done (39/200)
+[responsive_fairness] slot=6 bbr1 flows=4 run=20
+[responsive_fairness] bbr1 flows=2 run=36 done (40/200)
+[responsive_fairness] slot=12 bbr1 flows=4 run=21
+[responsive_fairness] bbr1 flows=2 run=32 done (41/200)
+[responsive_fairness] slot=3 bbr1 flows=4 run=22
+[responsive_fairness] bbr1 flows=2 run=34 done (42/200)
+[responsive_fairness] slot=8 bbr1 flows=4 run=23
+[responsive_fairness] bbr1 flows=2 run=44 done (43/200)
+[responsive_fairness] slot=25 bbr1 flows=4 run=24
+[responsive_fairness] bbr1 flows=2 run=43 done (44/200)
+[responsive_fairness] slot=27 bbr1 flows=4 run=25
+[responsive_fairness] bbr1 flows=2 run=47 done (45/200)
+[responsive_fairness] slot=4 bbr1 flows=4 run=26
+[responsive_fairness] bbr1 flows=2 run=41 done (46/200)
+[responsive_fairness] slot=5 bbr1 flows=4 run=27
+[responsive_fairness] bbr1 flows=2 run=33 done (47/200)
+[responsive_fairness] slot=22 bbr1 flows=4 run=28
+[responsive_fairness] bbr1 flows=2 run=49 done (48/200)
+[responsive_fairness] slot=16 bbr1 flows=4 run=29
+[responsive_fairness] bbr1 flows=2 run=48 done (49/200)
+[responsive_fairness] slot=20 bbr1 flows=4 run=30
+[responsive_fairness] bbr1 flows=2 run=50 done (50/200)
+[responsive_fairness] slot=29 bbr1 flows=4 run=31
+[responsive_fairness] bbr1 flows=4 run=5 done (51/200)
+[responsive_fairness] slot=13 bbr1 flows=4 run=32
+[responsive_fairness] bbr1 flows=4 run=6 done (52/200)
+[responsive_fairness] slot=14 bbr1 flows=4 run=33
+[responsive_fairness] bbr1 flows=4 run=9 done (53/200)
+[responsive_fairness] slot=7 bbr1 flows=4 run=34
+[responsive_fairness] bbr1 flows=4 run=4 done (54/200)
+[responsive_fairness] slot=21 bbr1 flows=4 run=35
+[responsive_fairness] bbr1 flows=4 run=1 done (55/200)
+[responsive_fairness] slot=1 bbr1 flows=4 run=36
+[responsive_fairness] bbr1 flows=4 run=8 done (56/200)
+[responsive_fairness] slot=24 bbr1 flows=4 run=37
+[responsive_fairness] bbr1 flows=4 run=7 done (57/200)
+[responsive_fairness] slot=23 bbr1 flows=4 run=38
+[responsive_fairness] bbr1 flows=4 run=3 done (58/200)
+[responsive_fairness] slot=15 bbr1 flows=4 run=39
+[responsive_fairness] bbr1 flows=4 run=2 done (59/200)
+[responsive_fairness] slot=28 bbr1 flows=4 run=40
+[responsive_fairness] bbr1 flows=4 run=10 done (60/200)
+[responsive_fairness] slot=9 bbr1 flows=4 run=41
+[responsive_fairness] bbr1 flows=4 run=12 done (61/200)
+[responsive_fairness] slot=26 bbr1 flows=4 run=42
+[responsive_fairness] bbr1 flows=4 run=16 done (62/200)
+[responsive_fairness] slot=6 bbr1 flows=4 run=43
+[responsive_fairness] bbr1 flows=4 run=20 done (63/200)
+[responsive_fairness] slot=17 bbr1 flows=4 run=44
+[responsive_fairness] bbr1 flows=4 run=11 done (64/200)
+[responsive_fairness] slot=18 bbr1 flows=4 run=45
+[responsive_fairness] bbr1 flows=4 run=15 done (65/200)
+[responsive_fairness] slot=10 bbr1 flows=4 run=46
+[responsive_fairness] bbr1 flows=4 run=13 done (66/200)
+[responsive_fairness] slot=12 bbr1 flows=4 run=47
+[responsive_fairness] bbr1 flows=4 run=21 done (67/200)
+[responsive_fairness] slot=11 bbr1 flows=4 run=48
+[responsive_fairness] bbr1 flows=4 run=17 done (68/200)
+[responsive_fairness] slot=19 bbr1 flows=4 run=49
+[responsive_fairness] bbr1 flows=4 run=14 done (69/200)
+[responsive_fairness] slot=3 bbr1 flows=4 run=50
+[responsive_fairness] bbr1 flows=4 run=22 done (70/200)
+[responsive_fairness] slot=0 bbr1 flows=5 run=1
+[responsive_fairness] bbr1 flows=4 run=19 done (71/200)
+[responsive_fairness] slot=2 bbr1 flows=5 run=2
+[responsive_fairness] bbr1 flows=4 run=18 done (72/200)
+[responsive_fairness] slot=22 bbr1 flows=5 run=3
+[responsive_fairness] bbr1 flows=4 run=28 done (73/200)
+[responsive_fairness] slot=25 bbr1 flows=5 run=4
+[responsive_fairness] bbr1 flows=4 run=24 done (74/200)
+[responsive_fairness] slot=8 bbr1 flows=5 run=5
+[responsive_fairness] bbr1 flows=4 run=23 done (75/200)
+[responsive_fairness] slot=27 bbr1 flows=5 run=6
+[responsive_fairness] bbr1 flows=4 run=25 done (76/200)
+[responsive_fairness] slot=16 bbr1 flows=5 run=7
+[responsive_fairness] bbr1 flows=4 run=29 done (77/200)
+[responsive_fairness] slot=4 bbr1 flows=5 run=8
+[responsive_fairness] bbr1 flows=4 run=26 done (78/200)
+[responsive_fairness] slot=5 bbr1 flows=5 run=9
+[responsive_fairness] bbr1 flows=4 run=27 done (79/200)
+[responsive_fairness] slot=20 bbr1 flows=5 run=10
+[responsive_fairness] bbr1 flows=4 run=30 done (80/200)
+[responsive_fairness] slot=1 bbr1 flows=5 run=11
+[responsive_fairness] bbr1 flows=4 run=36 done (81/200)
+[responsive_fairness] slot=29 bbr1 flows=5 run=12
+[responsive_fairness] bbr1 flows=4 run=31 done (82/200)
+[responsive_fairness] slot=13 bbr1 flows=5 run=13
+[responsive_fairness] bbr1 flows=4 run=32 done (83/200)
+[responsive_fairness] slot=14 bbr1 flows=5 run=14
+[responsive_fairness] bbr1 flows=4 run=33 done (84/200)
+[responsive_fairness] slot=7 bbr1 flows=5 run=15
+[responsive_fairness] bbr1 flows=4 run=34 done (85/200)
+[responsive_fairness] slot=23 bbr1 flows=5 run=16
+[responsive_fairness] bbr1 flows=4 run=38 done (86/200)
+[responsive_fairness] slot=21 bbr1 flows=5 run=17
+[responsive_fairness] bbr1 flows=4 run=35 done (87/200)
+[responsive_fairness] slot=28 bbr1 flows=5 run=18
+[responsive_fairness] bbr1 flows=4 run=40 done (88/200)
+[responsive_fairness] slot=15 bbr1 flows=5 run=19
+[responsive_fairness] bbr1 flows=4 run=39 done (89/200)
+[responsive_fairness] slot=24 bbr1 flows=5 run=20
+[responsive_fairness] bbr1 flows=4 run=37 done (90/200)
+[responsive_fairness] slot=10 bbr1 flows=5 run=21
+[responsive_fairness] bbr1 flows=4 run=46 done (91/200)
+[responsive_fairness] slot=26 bbr1 flows=5 run=22
+[responsive_fairness] bbr1 flows=4 run=42 done (92/200)
+[responsive_fairness] slot=12 bbr1 flows=5 run=23
+[responsive_fairness] bbr1 flows=4 run=47 done (93/200)
+[responsive_fairness] slot=9 bbr1 flows=5 run=24
+[responsive_fairness] bbr1 flows=4 run=41 done (94/200)
+[responsive_fairness] slot=17 bbr1 flows=5 run=25
+[responsive_fairness] bbr1 flows=4 run=44 done (95/200)
+[responsive_fairness] slot=19 bbr1 flows=5 run=26
+[responsive_fairness] bbr1 flows=4 run=49 done (96/200)
+[responsive_fairness] slot=18 bbr1 flows=5 run=27
+[responsive_fairness] bbr1 flows=4 run=45 done (97/200)
+[responsive_fairness] slot=11 bbr1 flows=5 run=28
+[responsive_fairness] bbr1 flows=4 run=48 done (98/200)
+[responsive_fairness] slot=3 bbr1 flows=5 run=29
+[responsive_fairness] bbr1 flows=4 run=50 done (99/200)
+[responsive_fairness] slot=6 bbr1 flows=5 run=30
+[responsive_fairness] bbr1 flows=4 run=43 done (100/200)
+[responsive_fairness] slot=25 bbr1 flows=5 run=31
+[responsive_fairness] bbr1 flows=5 run=4 done (101/200)
+[responsive_fairness] slot=20 bbr1 flows=5 run=32
+[responsive_fairness] bbr1 flows=5 run=10 done (102/200)
+[responsive_fairness] slot=8 bbr1 flows=5 run=33
+[responsive_fairness] bbr1 flows=5 run=5 done (103/200)
+[responsive_fairness] slot=14 bbr1 flows=5 run=34
+[responsive_fairness] bbr1 flows=5 run=14 done (104/200)
+[responsive_fairness] slot=13 bbr1 flows=5 run=35
+[responsive_fairness] bbr1 flows=5 run=13 done (105/200)
+[responsive_fairness] slot=16 bbr1 flows=5 run=36
+[responsive_fairness] bbr1 flows=5 run=7 done (106/200)
+[responsive_fairness] slot=27 bbr1 flows=5 run=37
+[responsive_fairness] bbr1 flows=5 run=6 done (107/200)
+[responsive_fairness] slot=2 bbr1 flows=5 run=38
+[responsive_fairness] bbr1 flows=5 run=2 done (108/200)
+[responsive_fairness] slot=4 bbr1 flows=5 run=39
+[responsive_fairness] bbr1 flows=5 run=8 done (109/200)
+[responsive_fairness] slot=0 bbr1 flows=5 run=40
+[responsive_fairness] bbr1 flows=5 run=1 done (110/200)
+[responsive_fairness] slot=15 bbr1 flows=5 run=41
+[responsive_fairness] bbr1 flows=5 run=19 done (111/200)
+[responsive_fairness] slot=1 bbr1 flows=5 run=42
+[responsive_fairness] bbr1 flows=5 run=11 done (112/200)
+[responsive_fairness] slot=29 bbr1 flows=5 run=43
+[responsive_fairness] bbr1 flows=5 run=12 done (113/200)
+[responsive_fairness] slot=21 bbr1 flows=5 run=44
+[responsive_fairness] bbr1 flows=5 run=17 done (114/200)
+[responsive_fairness] slot=7 bbr1 flows=5 run=45
+[responsive_fairness] bbr1 flows=5 run=15 done (115/200)
+[responsive_fairness] slot=22 bbr1 flows=5 run=46
+[responsive_fairness] bbr1 flows=5 run=3 done (116/200)
+[responsive_fairness] slot=5 bbr1 flows=5 run=47
+[responsive_fairness] bbr1 flows=5 run=9 done (117/200)
+[responsive_fairness] slot=23 bbr1 flows=5 run=48
+[responsive_fairness] bbr1 flows=5 run=16 done (118/200)
+[responsive_fairness] slot=28 bbr1 flows=5 run=49
+[responsive_fairness] bbr1 flows=5 run=18 done (119/200)
+[responsive_fairness] slot=24 bbr1 flows=5 run=50
+[responsive_fairness] bbr1 flows=5 run=20 done (120/200)
+[responsive_fairness] slot=26 bbr1 flows=7 run=1
+[responsive_fairness] bbr1 flows=5 run=22 done (121/200)
+[responsive_fairness] slot=10 bbr1 flows=7 run=2
+[responsive_fairness] bbr1 flows=5 run=21 done (122/200)
+[responsive_fairness] slot=9 bbr1 flows=7 run=3
+[responsive_fairness] bbr1 flows=5 run=24 done (123/200)
+[responsive_fairness] slot=12 bbr1 flows=7 run=4
+[responsive_fairness] bbr1 flows=5 run=23 done (124/200)
+[responsive_fairness] slot=17 bbr1 flows=7 run=5
+[responsive_fairness] bbr1 flows=5 run=25 done (125/200)
+[responsive_fairness] slot=3 bbr1 flows=7 run=6
+[responsive_fairness] bbr1 flows=5 run=29 done (126/200)
+[responsive_fairness] slot=11 bbr1 flows=7 run=7
+[responsive_fairness] bbr1 flows=5 run=28 done (127/200)
+[responsive_fairness] slot=19 bbr1 flows=7 run=8
+[responsive_fairness] bbr1 flows=5 run=26 done (128/200)
+[responsive_fairness] slot=6 bbr1 flows=7 run=9
+[responsive_fairness] bbr1 flows=5 run=30 done (129/200)
+[responsive_fairness] slot=16 bbr1 flows=7 run=10
+[responsive_fairness] bbr1 flows=5 run=36 done (130/200)
+[responsive_fairness] slot=18 bbr1 flows=7 run=11
+[responsive_fairness] bbr1 flows=5 run=27 done (131/200)
+[responsive_fairness] slot=0 bbr1 flows=7 run=12
+[responsive_fairness] bbr1 flows=5 run=40 done (132/200)
+[responsive_fairness] slot=25 bbr1 flows=7 run=13
+[responsive_fairness] bbr1 flows=5 run=31 done (133/200)
+[responsive_fairness] slot=13 bbr1 flows=7 run=14
+[responsive_fairness] bbr1 flows=5 run=35 done (134/200)
+[responsive_fairness] slot=4 bbr1 flows=7 run=15
+[responsive_fairness] bbr1 flows=5 run=39 done (135/200)
+[responsive_fairness] slot=27 bbr1 flows=7 run=16
+[responsive_fairness] bbr1 flows=5 run=37 done (136/200)
+[responsive_fairness] slot=20 bbr1 flows=7 run=17
+[responsive_fairness] bbr1 flows=5 run=32 done (137/200)
+[responsive_fairness] slot=8 bbr1 flows=7 run=18
+[responsive_fairness] bbr1 flows=5 run=33 done (138/200)
+[responsive_fairness] slot=29 bbr1 flows=7 run=19
+[responsive_fairness] bbr1 flows=5 run=43 done (139/200)
+[responsive_fairness] slot=2 bbr1 flows=7 run=20
+[responsive_fairness] bbr1 flows=5 run=38 done (140/200)
+[responsive_fairness] slot=14 bbr1 flows=7 run=21
+[responsive_fairness] bbr1 flows=5 run=34 done (141/200)
+[responsive_fairness] slot=22 bbr1 flows=7 run=22
+[responsive_fairness] bbr1 flows=5 run=46 done (142/200)
+[responsive_fairness] slot=28 bbr1 flows=7 run=23
+[responsive_fairness] bbr1 flows=5 run=49 done (143/200)
+[responsive_fairness] slot=7 bbr1 flows=7 run=24
+[responsive_fairness] bbr1 flows=5 run=45 done (144/200)
+[responsive_fairness] slot=15 bbr1 flows=7 run=25
+[responsive_fairness] bbr1 flows=5 run=41 done (145/200)
+[responsive_fairness] slot=23 bbr1 flows=7 run=26
+[responsive_fairness] bbr1 flows=5 run=48 done (146/200)
+[responsive_fairness] slot=1 bbr1 flows=7 run=27
+[responsive_fairness] bbr1 flows=5 run=42 done (147/200)
+[responsive_fairness] slot=24 bbr1 flows=7 run=28
+[responsive_fairness] bbr1 flows=5 run=50 done (148/200)
+[responsive_fairness] slot=21 bbr1 flows=7 run=29
+[responsive_fairness] bbr1 flows=5 run=44 done (149/200)
+[responsive_fairness] slot=5 bbr1 flows=7 run=30
+[responsive_fairness] bbr1 flows=5 run=47 done (150/200)
+[responsive_fairness] slot=26 bbr1 flows=7 run=31
+[responsive_fairness] bbr1 flows=7 run=1 done (151/200)
+[responsive_fairness] slot=9 bbr1 flows=7 run=32
+[responsive_fairness] bbr1 flows=7 run=3 done (152/200)
+[responsive_fairness] slot=10 bbr1 flows=7 run=33
+[responsive_fairness] bbr1 flows=7 run=2 done (153/200)
+[responsive_fairness] slot=12 bbr1 flows=7 run=34
+[responsive_fairness] bbr1 flows=7 run=4 done (154/200)
+[responsive_fairness] slot=17 bbr1 flows=7 run=35
+[responsive_fairness] bbr1 flows=7 run=5 done (155/200)
+[responsive_fairness] slot=25 bbr1 flows=7 run=36
+[responsive_fairness] bbr1 flows=7 run=13 done (156/200)
+[responsive_fairness] slot=11 bbr1 flows=7 run=37
+[responsive_fairness] bbr1 flows=7 run=7 done (157/200)
+[responsive_fairness] slot=4 bbr1 flows=7 run=38
+[responsive_fairness] bbr1 flows=7 run=15 done (158/200)
+[responsive_fairness] slot=3 bbr1 flows=7 run=39
+[responsive_fairness] bbr1 flows=7 run=6 done (159/200)
+[responsive_fairness] slot=19 bbr1 flows=7 run=40
+[responsive_fairness] bbr1 flows=7 run=8 done (160/200)
+[responsive_fairness] slot=27 bbr1 flows=7 run=41
+[responsive_fairness] bbr1 flows=7 run=16 done (161/200)
+[responsive_fairness] slot=6 bbr1 flows=7 run=42
+[responsive_fairness] bbr1 flows=7 run=9 done (162/200)
+[responsive_fairness] slot=16 bbr1 flows=7 run=43
+[responsive_fairness] bbr1 flows=7 run=10 done (163/200)
+[responsive_fairness] slot=0 bbr1 flows=7 run=44
+[responsive_fairness] bbr1 flows=7 run=12 done (164/200)
+[responsive_fairness] slot=29 bbr1 flows=7 run=45
+[responsive_fairness] bbr1 flows=7 run=19 done (165/200)
+[responsive_fairness] slot=13 bbr1 flows=7 run=46
+[responsive_fairness] bbr1 flows=7 run=14 done (166/200)
+[responsive_fairness] slot=20 bbr1 flows=7 run=47
+[responsive_fairness] bbr1 flows=7 run=17 done (167/200)
+[responsive_fairness] slot=2 bbr1 flows=7 run=48
+[responsive_fairness] bbr1 flows=7 run=20 done (168/200)
+[responsive_fairness] slot=18 bbr1 flows=7 run=49
+[responsive_fairness] bbr1 flows=7 run=11 done (169/200)
+[responsive_fairness] slot=14 bbr1 flows=7 run=50
+[responsive_fairness] bbr1 flows=7 run=21 done (170/200)
+[responsive_fairness] bbr1 flows=7 run=26 done (171/200)
+[responsive_fairness] bbr1 flows=7 run=30 done (172/200)
+[responsive_fairness] bbr1 flows=7 run=22 done (173/200)
+[responsive_fairness] bbr1 flows=7 run=25 done (174/200)
+[responsive_fairness] bbr1 flows=7 run=28 done (175/200)
+[responsive_fairness] bbr1 flows=7 run=18 done (176/200)
+[responsive_fairness] bbr1 flows=7 run=24 done (177/200)
+[responsive_fairness] bbr1 flows=7 run=27 done (178/200)
+[responsive_fairness] bbr1 flows=7 run=23 done (179/200)
+[responsive_fairness] bbr1 flows=7 run=29 done (180/200)
+[responsive_fairness] bbr1 flows=7 run=31 done (181/200)
+[responsive_fairness] bbr1 flows=7 run=32 done (182/200)
+[responsive_fairness] bbr1 flows=7 run=33 done (183/200)
+[responsive_fairness] bbr1 flows=7 run=34 done (184/200)
+[responsive_fairness] bbr1 flows=7 run=35 done (185/200)
+[responsive_fairness] bbr1 flows=7 run=50 done (186/200)
+[responsive_fairness] bbr1 flows=7 run=39 done (187/200)
+[responsive_fairness] bbr1 flows=7 run=37 done (188/200)
+[responsive_fairness] bbr1 flows=7 run=42 done (189/200)
+[responsive_fairness] bbr1 flows=7 run=41 done (190/200)
+[responsive_fairness] bbr1 flows=7 run=36 done (191/200)
+[responsive_fairness] bbr1 flows=7 run=38 done (192/200)
+[responsive_fairness] bbr1 flows=7 run=40 done (193/200)
+[responsive_fairness] bbr1 flows=7 run=45 done (194/200)
+[responsive_fairness] bbr1 flows=7 run=43 done (195/200)
+[responsive_fairness] bbr1 flows=7 run=49 done (196/200)
+[responsive_fairness] bbr1 flows=7 run=46 done (197/200)
+[responsive_fairness] bbr1 flows=7 run=48 done (198/200)
+[responsive_fairness] bbr1 flows=7 run=47 done (199/200)
+[responsive_fairness] bbr1 flows=7 run=44 done (200/200)
+[orch] runtime cleanup sweep
+[responsive_fairness] frcc resuming missing=200/200 by_flow=2:50, 4:50, 5:50, 7:50
+[responsive_fairness] slot=0 frcc flows=2 run=1
+[responsive_fairness] slot=1 frcc flows=2 run=2
+[responsive_fairness] slot=2 frcc flows=2 run=3
+[responsive_fairness] slot=3 frcc flows=2 run=4
+[responsive_fairness] slot=4 frcc flows=2 run=5
+[responsive_fairness] slot=5 frcc flows=2 run=6
+[responsive_fairness] slot=6 frcc flows=2 run=7
+[responsive_fairness] slot=7 frcc flows=2 run=8
+[responsive_fairness] slot=8 frcc flows=2 run=9
+[responsive_fairness] slot=9 frcc flows=2 run=10
+[responsive_fairness] slot=10 frcc flows=2 run=11
+[responsive_fairness] slot=11 frcc flows=2 run=12
+[responsive_fairness] slot=12 frcc flows=2 run=13
+[responsive_fairness] slot=13 frcc flows=2 run=14
+[responsive_fairness] slot=14 frcc flows=2 run=15
+[responsive_fairness] slot=15 frcc flows=2 run=16
+[responsive_fairness] slot=16 frcc flows=2 run=17
+[responsive_fairness] slot=17 frcc flows=2 run=18
+[responsive_fairness] slot=18 frcc flows=2 run=19
+[responsive_fairness] slot=19 frcc flows=2 run=20
+[responsive_fairness] slot=20 frcc flows=2 run=21
+[responsive_fairness] slot=21 frcc flows=2 run=22
+[responsive_fairness] slot=22 frcc flows=2 run=23
+[responsive_fairness] slot=23 frcc flows=2 run=24
+[responsive_fairness] slot=24 frcc flows=2 run=25
+[responsive_fairness] slot=25 frcc flows=2 run=26
+[responsive_fairness] slot=26 frcc flows=2 run=27
+[responsive_fairness] slot=27 frcc flows=2 run=28
+[responsive_fairness] slot=28 frcc flows=2 run=29
+[responsive_fairness] slot=29 frcc flows=2 run=30
+[responsive_fairness] slot=0 frcc flows=2 run=31
+[responsive_fairness] frcc flows=2 run=1 done (1/200)
+[responsive_fairness] slot=3 frcc flows=2 run=32
+[responsive_fairness] frcc flows=2 run=4 done (2/200)
+[responsive_fairness] slot=10 frcc flows=2 run=33
+[responsive_fairness] frcc flows=2 run=11 done (3/200)
+[responsive_fairness] slot=4 frcc flows=2 run=34
+[responsive_fairness] frcc flows=2 run=5 done (4/200)
+[responsive_fairness] slot=25 frcc flows=2 run=35
+[responsive_fairness] frcc flows=2 run=26 done (5/200)
+[responsive_fairness] slot=1 frcc flows=2 run=36
+[responsive_fairness] frcc flows=2 run=2 done (6/200)
+[responsive_fairness] slot=24 frcc flows=2 run=37
+[responsive_fairness] frcc flows=2 run=25 done (7/200)
+[responsive_fairness] slot=8 frcc flows=2 run=38
+[responsive_fairness] frcc flows=2 run=9 done (8/200)
+[responsive_fairness] slot=27 frcc flows=2 run=39
+[responsive_fairness] frcc flows=2 run=28 done (9/200)
+[responsive_fairness] slot=15 frcc flows=2 run=40
+[responsive_fairness] frcc flows=2 run=16 done (10/200)
+[responsive_fairness] slot=6 frcc flows=2 run=41
+[responsive_fairness] frcc flows=2 run=7 done (11/200)
+[responsive_fairness] slot=17 frcc flows=2 run=42
+[responsive_fairness] frcc flows=2 run=18 done (12/200)
+[responsive_fairness] slot=20 frcc flows=2 run=43
+[responsive_fairness] frcc flows=2 run=21 done (13/200)
+[responsive_fairness] slot=2 frcc flows=2 run=44
+[responsive_fairness] frcc flows=2 run=3 done (14/200)
+[responsive_fairness] slot=9 frcc flows=2 run=45
+[responsive_fairness] frcc flows=2 run=10 done (15/200)
+[responsive_fairness] slot=13 frcc flows=2 run=46
+[responsive_fairness] frcc flows=2 run=14 done (16/200)
+[responsive_fairness] slot=19 frcc flows=2 run=47
+[responsive_fairness] frcc flows=2 run=20 done (17/200)
+[responsive_fairness] slot=18 frcc flows=2 run=48
+[responsive_fairness] frcc flows=2 run=19 done (18/200)
+[responsive_fairness] slot=12 frcc flows=2 run=49
+[responsive_fairness] frcc flows=2 run=13 done (19/200)
+[responsive_fairness] slot=16 frcc flows=2 run=50
+[responsive_fairness] frcc flows=2 run=17 done (20/200)
+[responsive_fairness] slot=26 frcc flows=4 run=1
+[responsive_fairness] frcc flows=2 run=27 done (21/200)
+[responsive_fairness] slot=29 frcc flows=4 run=2
+[responsive_fairness] frcc flows=2 run=30 done (22/200)
+[responsive_fairness] slot=5 frcc flows=4 run=3
+[responsive_fairness] frcc flows=2 run=6 done (23/200)
+[responsive_fairness] slot=21 frcc flows=4 run=4
+[responsive_fairness] frcc flows=2 run=22 done (24/200)
+[responsive_fairness] slot=28 frcc flows=4 run=5
+[responsive_fairness] frcc flows=2 run=29 done (25/200)
+[responsive_fairness] slot=23 frcc flows=4 run=6
+[responsive_fairness] frcc flows=2 run=24 done (26/200)
+[responsive_fairness] slot=14 frcc flows=4 run=7
+[responsive_fairness] frcc flows=2 run=15 done (27/200)
+[responsive_fairness] slot=7 frcc flows=4 run=8
+[responsive_fairness] frcc flows=2 run=8 done (28/200)
+[responsive_fairness] slot=22 frcc flows=4 run=9
+[responsive_fairness] frcc flows=2 run=23 done (29/200)
+[responsive_fairness] slot=11 frcc flows=4 run=10
+[responsive_fairness] frcc flows=2 run=12 done (30/200)
+[responsive_fairness] slot=0 frcc flows=4 run=11
+[responsive_fairness] frcc flows=2 run=31 done (31/200)
+[responsive_fairness] slot=3 frcc flows=4 run=12
+[responsive_fairness] frcc flows=2 run=32 done (32/200)
+[responsive_fairness] slot=24 frcc flows=4 run=13
+[responsive_fairness] frcc flows=2 run=37 done (33/200)
+[responsive_fairness] slot=9 frcc flows=4 run=14
+[responsive_fairness] frcc flows=2 run=45 done (34/200)
+[responsive_fairness] slot=8 frcc flows=4 run=15
+[responsive_fairness] frcc flows=2 run=38 done (35/200)
+[responsive_fairness] slot=1 frcc flows=4 run=16
+[responsive_fairness] frcc flows=2 run=36 done (36/200)
+[responsive_fairness] slot=4 frcc flows=4 run=17
+[responsive_fairness] frcc flows=2 run=34 done (37/200)
+[responsive_fairness] slot=27 frcc flows=4 run=18
+[responsive_fairness] frcc flows=2 run=39 done (38/200)
+[responsive_fairness] slot=2 frcc flows=4 run=19
+[responsive_fairness] frcc flows=2 run=44 done (39/200)
+[responsive_fairness] slot=6 frcc flows=4 run=20
+[responsive_fairness] frcc flows=2 run=41 done (40/200)
+[responsive_fairness] slot=10 frcc flows=4 run=21
+[responsive_fairness] frcc flows=2 run=33 done (41/200)
+[responsive_fairness] slot=15 frcc flows=4 run=22
+[responsive_fairness] frcc flows=2 run=40 done (42/200)
+[responsive_fairness] slot=13 frcc flows=4 run=23
+[responsive_fairness] frcc flows=2 run=46 done (43/200)
+[responsive_fairness] slot=19 frcc flows=4 run=24
+[responsive_fairness] frcc flows=2 run=47 done (44/200)
+[responsive_fairness] slot=18 frcc flows=4 run=25
+[responsive_fairness] frcc flows=2 run=48 done (45/200)
+[responsive_fairness] slot=25 frcc flows=4 run=26
+[responsive_fairness] frcc flows=2 run=35 done (46/200)
+[responsive_fairness] slot=20 frcc flows=4 run=27
+[responsive_fairness] frcc flows=2 run=43 done (47/200)
+[responsive_fairness] slot=16 frcc flows=4 run=28
+[responsive_fairness] frcc flows=2 run=50 done (48/200)
+[responsive_fairness] slot=12 frcc flows=4 run=29
+[responsive_fairness] frcc flows=2 run=49 done (49/200)
+[responsive_fairness] slot=17 frcc flows=4 run=30
+[responsive_fairness] frcc flows=2 run=42 done (50/200)
+[responsive_fairness] slot=14 frcc flows=4 run=31
+[responsive_fairness] frcc flows=4 run=7 done (51/200)
+[responsive_fairness] slot=26 frcc flows=4 run=32
+[responsive_fairness] frcc flows=4 run=1 done (52/200)
+[responsive_fairness] slot=21 frcc flows=4 run=33
+[responsive_fairness] frcc flows=4 run=4 done (53/200)
+[responsive_fairness] slot=22 frcc flows=4 run=34
+[responsive_fairness] frcc flows=4 run=9 done (54/200)
+[responsive_fairness] slot=11 frcc flows=4 run=35
+[responsive_fairness] frcc flows=4 run=10 done (55/200)
+[responsive_fairness] slot=7 frcc flows=4 run=36
+[responsive_fairness] frcc flows=4 run=8 done (56/200)
+[responsive_fairness] slot=23 frcc flows=4 run=37
+[responsive_fairness] frcc flows=4 run=6 done (57/200)
+[responsive_fairness] slot=28 frcc flows=4 run=38
+[responsive_fairness] frcc flows=4 run=5 done (58/200)
+[responsive_fairness] slot=5 frcc flows=4 run=39
+[responsive_fairness] frcc flows=4 run=3 done (59/200)
+[responsive_fairness] slot=29 frcc flows=4 run=40
+[responsive_fairness] frcc flows=4 run=2 done (60/200)
+[responsive_fairness] slot=0 frcc flows=4 run=41
+[responsive_fairness] frcc flows=4 run=11 done (61/200)
+[responsive_fairness] slot=24 frcc flows=4 run=42
+[responsive_fairness] frcc flows=4 run=13 done (62/200)
+[responsive_fairness] slot=8 frcc flows=4 run=43
+[responsive_fairness] frcc flows=4 run=15 done (63/200)
+[responsive_fairness] slot=1 frcc flows=4 run=44
+[responsive_fairness] frcc flows=4 run=16 done (64/200)
+[responsive_fairness] slot=6 frcc flows=4 run=45
+[responsive_fairness] frcc flows=4 run=20 done (65/200)
+[responsive_fairness] slot=15 frcc flows=4 run=46
+[responsive_fairness] frcc flows=4 run=22 done (66/200)
+[responsive_fairness] slot=9 frcc flows=4 run=47
+[responsive_fairness] frcc flows=4 run=14 done (67/200)
+[responsive_fairness] slot=3 frcc flows=4 run=48
+[responsive_fairness] frcc flows=4 run=12 done (68/200)
+[responsive_fairness] slot=10 frcc flows=4 run=49
+[responsive_fairness] frcc flows=4 run=21 done (69/200)
+[responsive_fairness] slot=2 frcc flows=4 run=50
+[responsive_fairness] frcc flows=4 run=19 done (70/200)
+[responsive_fairness] slot=4 frcc flows=5 run=1
+[responsive_fairness] frcc flows=4 run=17 done (71/200)
+[responsive_fairness] slot=27 frcc flows=5 run=2
+[responsive_fairness] frcc flows=4 run=18 done (72/200)
+[responsive_fairness] slot=19 frcc flows=5 run=3
+[responsive_fairness] frcc flows=4 run=24 done (73/200)
+[responsive_fairness] slot=17 frcc flows=5 run=4
+[responsive_fairness] frcc flows=4 run=30 done (74/200)
+[responsive_fairness] slot=13 frcc flows=5 run=5
+[responsive_fairness] frcc flows=4 run=23 done (75/200)
+[responsive_fairness] slot=16 frcc flows=5 run=6
+[responsive_fairness] frcc flows=4 run=28 done (76/200)
+[responsive_fairness] slot=20 frcc flows=5 run=7
+[responsive_fairness] frcc flows=4 run=27 done (77/200)
+[responsive_fairness] slot=14 frcc flows=5 run=8
+[responsive_fairness] frcc flows=4 run=31 done (78/200)
+[responsive_fairness] slot=18 frcc flows=5 run=9
+[responsive_fairness] frcc flows=4 run=25 done (79/200)
+[responsive_fairness] slot=12 frcc flows=5 run=10
+[responsive_fairness] frcc flows=4 run=29 done (80/200)
+[responsive_fairness] slot=25 frcc flows=5 run=11
+[responsive_fairness] frcc flows=4 run=26 done (81/200)
+[responsive_fairness] slot=26 frcc flows=5 run=12
+[responsive_fairness] frcc flows=4 run=32 done (82/200)
+[responsive_fairness] slot=23 frcc flows=5 run=13
+[responsive_fairness] frcc flows=4 run=37 done (83/200)
+[responsive_fairness] slot=29 frcc flows=5 run=14
+[responsive_fairness] frcc flows=4 run=40 done (84/200)
+[responsive_fairness] slot=21 frcc flows=5 run=15
+[responsive_fairness] frcc flows=4 run=33 done (85/200)
+[responsive_fairness] slot=7 frcc flows=5 run=16
+[responsive_fairness] frcc flows=4 run=36 done (86/200)
+[responsive_fairness] slot=5 frcc flows=5 run=17
+[responsive_fairness] frcc flows=4 run=39 done (87/200)
+[responsive_fairness] slot=22 frcc flows=5 run=18
+[responsive_fairness] frcc flows=4 run=34 done (88/200)
+[responsive_fairness] slot=28 frcc flows=5 run=19
+[responsive_fairness] frcc flows=4 run=38 done (89/200)
+[responsive_fairness] slot=11 frcc flows=5 run=20
+[responsive_fairness] frcc flows=4 run=35 done (90/200)
+[responsive_fairness] slot=0 frcc flows=5 run=21
+[responsive_fairness] frcc flows=4 run=41 done (91/200)
+[responsive_fairness] slot=15 frcc flows=5 run=22
+[responsive_fairness] frcc flows=4 run=46 done (92/200)
+[responsive_fairness] slot=6 frcc flows=5 run=23
+[responsive_fairness] frcc flows=4 run=45 done (93/200)
+[responsive_fairness] slot=1 frcc flows=5 run=24
+[responsive_fairness] frcc flows=4 run=44 done (94/200)
+[responsive_fairness] slot=8 frcc flows=5 run=25
+[responsive_fairness] frcc flows=4 run=43 done (95/200)
+[responsive_fairness] slot=24 frcc flows=5 run=26
+[responsive_fairness] frcc flows=4 run=42 done (96/200)
+[responsive_fairness] slot=9 frcc flows=5 run=27
+[responsive_fairness] frcc flows=4 run=47 done (97/200)
+[responsive_fairness] slot=10 frcc flows=5 run=28
+[responsive_fairness] frcc flows=4 run=49 done (98/200)
+[responsive_fairness] slot=2 frcc flows=5 run=29
+[responsive_fairness] frcc flows=4 run=50 done (99/200)
+[responsive_fairness] slot=3 frcc flows=5 run=30
+[responsive_fairness] frcc flows=4 run=48 done (100/200)
+[responsive_fairness] slot=20 frcc flows=5 run=31
+[responsive_fairness] frcc flows=5 run=7 done (101/200)
+[responsive_fairness] slot=27 frcc flows=5 run=32
+[responsive_fairness] frcc flows=5 run=2 done (102/200)
+[responsive_fairness] slot=14 frcc flows=5 run=33
+[responsive_fairness] frcc flows=5 run=8 done (103/200)
+[responsive_fairness] slot=19 frcc flows=5 run=34
+[responsive_fairness] frcc flows=5 run=3 done (104/200)
+[responsive_fairness] slot=16 frcc flows=5 run=35
+[responsive_fairness] frcc flows=5 run=6 done (105/200)
+[responsive_fairness] slot=12 frcc flows=5 run=36
+[responsive_fairness] frcc flows=5 run=10 done (106/200)
+[responsive_fairness] slot=13 frcc flows=5 run=37
+[responsive_fairness] frcc flows=5 run=5 done (107/200)
+[responsive_fairness] slot=17 frcc flows=5 run=38
+[responsive_fairness] frcc flows=5 run=4 done (108/200)
+[responsive_fairness] slot=4 frcc flows=5 run=39
+[responsive_fairness] frcc flows=5 run=1 done (109/200)
+[responsive_fairness] slot=5 frcc flows=5 run=40
+[responsive_fairness] frcc flows=5 run=17 done (110/200)
+[responsive_fairness] slot=25 frcc flows=5 run=41
+[responsive_fairness] frcc flows=5 run=11 done (111/200)
+[responsive_fairness] slot=23 frcc flows=5 run=42
+[responsive_fairness] frcc flows=5 run=13 done (112/200)
+[responsive_fairness] slot=18 frcc flows=5 run=43
+[responsive_fairness] frcc flows=5 run=9 done (113/200)
+[responsive_fairness] slot=26 frcc flows=5 run=44
+[responsive_fairness] frcc flows=5 run=12 done (114/200)
+[responsive_fairness] slot=29 frcc flows=5 run=45
+[responsive_fairness] frcc flows=5 run=14 done (115/200)
+[responsive_fairness] slot=11 frcc flows=5 run=46
+[responsive_fairness] frcc flows=5 run=20 done (116/200)
+[responsive_fairness] slot=7 frcc flows=5 run=47
+[responsive_fairness] frcc flows=5 run=16 done (117/200)
+[responsive_fairness] slot=21 frcc flows=5 run=48
+[responsive_fairness] frcc flows=5 run=15 done (118/200)
+[responsive_fairness] slot=28 frcc flows=5 run=49
+[responsive_fairness] frcc flows=5 run=19 done (119/200)
+[responsive_fairness] slot=22 frcc flows=5 run=50
+[responsive_fairness] frcc flows=5 run=18 done (120/200)
+[responsive_fairness] slot=1 frcc flows=7 run=1
+[responsive_fairness] frcc flows=5 run=24 done (121/200)
+[responsive_fairness] slot=6 frcc flows=7 run=2
+[responsive_fairness] frcc flows=5 run=23 done (122/200)
+[responsive_fairness] slot=15 frcc flows=7 run=3
+[responsive_fairness] frcc flows=5 run=22 done (123/200)
+[responsive_fairness] slot=8 frcc flows=7 run=4
+[responsive_fairness] frcc flows=5 run=25 done (124/200)
+[responsive_fairness] slot=0 frcc flows=7 run=5
+[responsive_fairness] frcc flows=5 run=21 done (125/200)
+[responsive_fairness] slot=24 frcc flows=7 run=6
+[responsive_fairness] frcc flows=5 run=26 done (126/200)
+[responsive_fairness] slot=10 frcc flows=7 run=7
+[responsive_fairness] frcc flows=5 run=28 done (127/200)
+[responsive_fairness] slot=3 frcc flows=7 run=8
+[responsive_fairness] frcc flows=5 run=30 done (128/200)
+[responsive_fairness] slot=2 frcc flows=7 run=9
+[responsive_fairness] frcc flows=5 run=29 done (129/200)
+[responsive_fairness] slot=12 frcc flows=7 run=10
+[responsive_fairness] frcc flows=5 run=36 done (130/200)
+[responsive_fairness] slot=20 frcc flows=7 run=11
+[responsive_fairness] frcc flows=5 run=31 done (131/200)
+[responsive_fairness] slot=13 frcc flows=7 run=12
+[responsive_fairness] frcc flows=5 run=37 done (132/200)
+[responsive_fairness] slot=9 frcc flows=7 run=13
+[responsive_fairness] frcc flows=5 run=27 done (133/200)
+[responsive_fairness] slot=27 frcc flows=7 run=14
+[responsive_fairness] frcc flows=5 run=32 done (134/200)
+[responsive_fairness] slot=16 frcc flows=7 run=15
+[responsive_fairness] frcc flows=5 run=35 done (135/200)
+[responsive_fairness] slot=4 frcc flows=7 run=16
+[responsive_fairness] frcc flows=5 run=39 done (136/200)
+[responsive_fairness] slot=17 frcc flows=7 run=17
+[responsive_fairness] frcc flows=5 run=38 done (137/200)
+[responsive_fairness] slot=14 frcc flows=7 run=18
+[responsive_fairness] frcc flows=5 run=33 done (138/200)
+[responsive_fairness] slot=29 frcc flows=7 run=19
+[responsive_fairness] frcc flows=5 run=45 done (139/200)
+[responsive_fairness] slot=21 frcc flows=7 run=20
+[responsive_fairness] frcc flows=5 run=48 done (140/200)
+[responsive_fairness] slot=25 frcc flows=7 run=21
+[responsive_fairness] frcc flows=5 run=41 done (141/200)
+[responsive_fairness] slot=19 frcc flows=7 run=22
+[responsive_fairness] frcc flows=5 run=34 done (142/200)
+[responsive_fairness] slot=18 frcc flows=7 run=23
+[responsive_fairness] frcc flows=5 run=43 done (143/200)
+[responsive_fairness] slot=7 frcc flows=7 run=24
+[responsive_fairness] frcc flows=5 run=47 done (144/200)
+[responsive_fairness] slot=23 frcc flows=7 run=25
+[responsive_fairness] frcc flows=5 run=42 done (145/200)
+[responsive_fairness] slot=11 frcc flows=7 run=26
+[responsive_fairness] frcc flows=5 run=46 done (146/200)
+[responsive_fairness] slot=26 frcc flows=7 run=27
+[responsive_fairness] frcc flows=5 run=44 done (147/200)
+[responsive_fairness] slot=22 frcc flows=7 run=28
+[responsive_fairness] frcc flows=5 run=50 done (148/200)
+[responsive_fairness] slot=5 frcc flows=7 run=29
+[responsive_fairness] frcc flows=5 run=40 done (149/200)
+[responsive_fairness] slot=28 frcc flows=7 run=30
+[responsive_fairness] frcc flows=5 run=49 done (150/200)
+[responsive_fairness] slot=6 frcc flows=7 run=31
+[responsive_fairness] frcc flows=7 run=2 done (151/200)
+[responsive_fairness] slot=8 frcc flows=7 run=32
+[responsive_fairness] frcc flows=7 run=4 done (152/200)
+[responsive_fairness] slot=0 frcc flows=7 run=33
+[responsive_fairness] frcc flows=7 run=5 done (153/200)
+[responsive_fairness] slot=1 frcc flows=7 run=34
+[responsive_fairness] frcc flows=7 run=1 done (154/200)
+[responsive_fairness] slot=15 frcc flows=7 run=35
+[responsive_fairness] frcc flows=7 run=3 done (155/200)
+[responsive_fairness] slot=10 frcc flows=7 run=36
+[responsive_fairness] frcc flows=7 run=7 done (156/200)
+[responsive_fairness] slot=12 frcc flows=7 run=37
+[responsive_fairness] frcc flows=7 run=10 done (157/200)
+[responsive_fairness] slot=24 frcc flows=7 run=38
+[responsive_fairness] frcc flows=7 run=6 done (158/200)
+[responsive_fairness] slot=3 frcc flows=7 run=39
+[responsive_fairness] frcc flows=7 run=8 done (159/200)
+[responsive_fairness] slot=2 frcc flows=7 run=40
+[responsive_fairness] frcc flows=7 run=9 done (160/200)
+[responsive_fairness] slot=13 frcc flows=7 run=41
+[responsive_fairness] frcc flows=7 run=12 done (161/200)
+[responsive_fairness] slot=4 frcc flows=7 run=42
+[responsive_fairness] frcc flows=7 run=16 done (162/200)
+[responsive_fairness] slot=20 frcc flows=7 run=43
+[responsive_fairness] frcc flows=7 run=11 done (163/200)
+[responsive_fairness] slot=27 frcc flows=7 run=44
+[responsive_fairness] frcc flows=7 run=14 done (164/200)
+[responsive_fairness] slot=19 frcc flows=7 run=45
+[responsive_fairness] frcc flows=7 run=22 done (165/200)
+[responsive_fairness] slot=16 frcc flows=7 run=46
+[responsive_fairness] frcc flows=7 run=15 done (166/200)
+[responsive_fairness] slot=9 frcc flows=7 run=47
+[responsive_fairness] frcc flows=7 run=13 done (167/200)
+[responsive_fairness] slot=17 frcc flows=7 run=48
+[responsive_fairness] frcc flows=7 run=17 done (168/200)
+[responsive_fairness] slot=22 frcc flows=7 run=49
+[responsive_fairness] frcc flows=7 run=28 done (169/200)
+[responsive_fairness] slot=18 frcc flows=7 run=50
+[responsive_fairness] frcc flows=7 run=23 done (170/200)
+[responsive_fairness] frcc flows=7 run=24 done (171/200)
+[responsive_fairness] frcc flows=7 run=30 done (172/200)
+[responsive_fairness] frcc flows=7 run=21 done (173/200)
+[responsive_fairness] frcc flows=7 run=29 done (174/200)
+[responsive_fairness] frcc flows=7 run=20 done (175/200)
+[responsive_fairness] frcc flows=7 run=18 done (176/200)
+[responsive_fairness] frcc flows=7 run=19 done (177/200)
+[responsive_fairness] frcc flows=7 run=26 done (178/200)
+[responsive_fairness] frcc flows=7 run=25 done (179/200)
+[responsive_fairness] frcc flows=7 run=27 done (180/200)
+[responsive_fairness] frcc flows=7 run=31 done (181/200)
+[responsive_fairness] frcc flows=7 run=32 done (182/200)
+[responsive_fairness] frcc flows=7 run=35 done (183/200)
+[responsive_fairness] frcc flows=7 run=34 done (184/200)
+[responsive_fairness] frcc flows=7 run=33 done (185/200)
+[responsive_fairness] frcc flows=7 run=36 done (186/200)
+[responsive_fairness] frcc flows=7 run=37 done (187/200)
+[responsive_fairness] frcc flows=7 run=42 done (188/200)
+[responsive_fairness] frcc flows=7 run=39 done (189/200)
+[responsive_fairness] frcc flows=7 run=40 done (190/200)
+[responsive_fairness] frcc flows=7 run=47 done (191/200)
+[responsive_fairness] frcc flows=7 run=48 done (192/200)
+[responsive_fairness] frcc flows=7 run=49 done (193/200)
+[responsive_fairness] frcc flows=7 run=43 done (194/200)
+[responsive_fairness] frcc flows=7 run=44 done (195/200)
+[responsive_fairness] frcc flows=7 run=41 done (196/200)
+[responsive_fairness] frcc flows=7 run=38 done (197/200)
+[responsive_fairness] frcc flows=7 run=50 done (198/200)
+[responsive_fairness] frcc flows=7 run=45 done (199/200)
+[responsive_fairness] frcc flows=7 run=46 done (200/200)
+[orch] runtime cleanup sweep
+[responsive_fairness] done; data checked and missing trials attempted; metrics=/its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsive_fairness/data/cubic/metrics.csv,/its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsive_fairness/data/bbr/metrics.csv,/its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsive_fairness/data/bbr1/metrics.csv,/its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsive_fairness/data/frcc/metrics.csv

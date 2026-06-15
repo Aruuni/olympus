@@ -1,0 +1,1116 @@
+[inter_rtt_bench] output_root=/its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data
+[inter_rtt_bench] benchmark=inter_rtt_fairness_two_flow_join20_final20 duration=60s flow1_start=0s flow2_start=20s fixed_flow_rtt=20ms score_window=20s
+[inter_rtt_bench] bw_grid=20,40,60,80,100
+[inter_rtt_bench] flow2_rtt_grid=20,40,60,80,100
+[inter_rtt_bench] runs_per_cell=4 n_parallel=7
+[inter_rtt_bench] approaches_to_run=ma_dreamer_second_try
+[inter_rtt_bench] ma_dreamer_second_try config=/its/home/mm2350/extra/Olympusv2/olympus/models/ma_dreamer_20260611-001404/telemetry/config.resolved.yaml
+[inter_rtt_bench] slot=2 ma_dreamer_second_try bw=20 f1_rtt=20 f2_rtt=20 run=3
+[slot=2] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=20Mbps  delay=20ms  duration=60s
+[inter_rtt_bench] slot=4 ma_dreamer_second_try bw=40 f1_rtt=20 f2_rtt=20 run=1
+[slot=4] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=40Mbps  delay=20ms  duration=60s
+[inter_rtt_bench] slot=6 ma_dreamer_second_try bw=40 f1_rtt=20 f2_rtt=20 run=3
+[slot=6] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=40Mbps  delay=20ms  duration=60s
+[inter_rtt_bench] slot=1 ma_dreamer_second_try bw=20 f1_rtt=20 f2_rtt=20 run=2
+[slot=1] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=20Mbps  delay=20ms  duration=60s
+[inter_rtt_bench] slot=5 ma_dreamer_second_try bw=40 f1_rtt=20 f2_rtt=20 run=2
+[slot=5] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=40Mbps  delay=20ms  duration=60s
+[inter_rtt_bench] slot=3 ma_dreamer_second_try bw=20 f1_rtt=20 f2_rtt=20 run=4
+[slot=3] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=20Mbps  delay=20ms  duration=60s
+[inter_rtt_bench] slot=0 ma_dreamer_second_try bw=20 f1_rtt=20 f2_rtt=20 run=1
+[slot=0] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=20Mbps  delay=20ms  duration=60s
+[sao-listener] cport=23200 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23400 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23100 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23500 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23000 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23300 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23600 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] new flow 1 10.0.0.1:23200->10.0.0.3:5203 cc=astraea pid=850947 child=851939
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23200 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23400->10.0.0.3:5205 cc=astraea pid=850950 child=851994
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23400 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23300->10.0.0.3:5204 cc=astraea pid=850956 child=852048
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23300 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23100->10.0.0.3:5202 cc=astraea pid=850953 child=852104
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23100 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23500->10.0.0.3:5206 cc=astraea pid=850958 child=852161
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23500 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23600->10.0.0.3:5207 cc=astraea pid=850965 child=852212
+[sao-listener flow 1] cport=23600 cc=astraea worker active
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener] new flow 1 10.0.0.1:23000->10.0.0.3:5201 cc=astraea pid=850957 child=852261
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23000 cc=astraea worker active
+[worker cport=23200 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23200 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23400 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23400 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23300 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23300 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23100 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23100 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23500 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23500 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23600 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23600 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23000 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23000 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw20_rtt20/run3/ep000001_bw20_d20_n1.pdf  return=61341.2
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw20_rtt20/run3/ep000001_bw20_d20_n1.pdf  return=61341.234375
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw20_rtt20/run4/ep000001_bw20_d20_n1.pdf  return=61560.3
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw20_rtt20/run4/ep000001_bw20_d20_n1.pdf  return=61560.3203125
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw40_rtt20/run3/ep000001_bw40_d20_n1.pdf  return=62509.2
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw40_rtt20/run3/ep000001_bw40_d20_n1.pdf  return=62509.203125
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw40_rtt20/run1/ep000001_bw40_d20_n1.pdf  return=64310.7
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw40_rtt20/run1/ep000001_bw40_d20_n1.pdf  return=64310.7421875
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw20_rtt20/run2/ep000001_bw20_d20_n1.pdf  return=60320.5
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw20_rtt20/run2/ep000001_bw20_d20_n1.pdf  return=60320.4765625
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw20_rtt20/run1/ep000001_bw20_d20_n1.pdf  return=60310.3
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw20_rtt20/run1/ep000001_bw20_d20_n1.pdf  return=60310.30859375
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw40_rtt20/run2/ep000001_bw40_d20_n1.pdf  return=62851.5
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw40_rtt20/run2/ep000001_bw40_d20_n1.pdf  return=62851.4765625
+[inter_rtt_bench] ma_dreamer_second_try cell=1 bw=20 f2_rtt=20 run=3/4 done (1/100)
+[inter_rtt_bench] ma_dreamer_second_try cell=1 bw=20 f2_rtt=20 run=4/4 done (2/100)
+[inter_rtt_bench] slot=2 ma_dreamer_second_try bw=40 f1_rtt=20 f2_rtt=20 run=4
+[slot=2] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=40Mbps  delay=20ms  duration=60s
+[inter_rtt_bench] slot=3 ma_dreamer_second_try bw=60 f1_rtt=20 f2_rtt=20 run=1
+[slot=3] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=60Mbps  delay=20ms  duration=60s
+[inter_rtt_bench] ma_dreamer_second_try cell=2 bw=40 f2_rtt=20 run=3/4 done (3/100)
+[inter_rtt_bench] slot=6 ma_dreamer_second_try bw=60 f1_rtt=20 f2_rtt=20 run=2
+[slot=6] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=60Mbps  delay=20ms  duration=60s
+[inter_rtt_bench] ma_dreamer_second_try cell=2 bw=40 f2_rtt=20 run=1/4 done (4/100)
+[inter_rtt_bench] slot=4 ma_dreamer_second_try bw=60 f1_rtt=20 f2_rtt=20 run=3
+[slot=4] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=60Mbps  delay=20ms  duration=60s
+[inter_rtt_bench] ma_dreamer_second_try cell=1 bw=20 f2_rtt=20 run=1/4 done (5/100)
+[inter_rtt_bench] ma_dreamer_second_try cell=1 bw=20 f2_rtt=20 run=2/4 done (6/100)
+[inter_rtt_bench] slot=0 ma_dreamer_second_try bw=60 f1_rtt=20 f2_rtt=20 run=4
+[slot=0] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=60Mbps  delay=20ms  duration=60s
+[inter_rtt_bench] slot=1 ma_dreamer_second_try bw=80 f1_rtt=20 f2_rtt=20 run=1
+[slot=1] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=80Mbps  delay=20ms  duration=60s
+[inter_rtt_bench] ma_dreamer_second_try cell=2 bw=40 f2_rtt=20 run=2/4 done (7/100)
+[inter_rtt_bench] slot=5 ma_dreamer_second_try bw=80 f1_rtt=20 f2_rtt=20 run=2
+[slot=5] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=80Mbps  delay=20ms  duration=60s
+[sao-listener] cport=23200 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23300 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23600 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23400 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23000 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23100 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23500 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] new flow 1 10.0.0.1:23000->10.0.0.3:5201 cc=astraea pid=855911 child=856138
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23000 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23100->10.0.0.3:5202 cc=astraea pid=855920 child=856193
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23100 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23500->10.0.0.3:5206 cc=astraea pid=855956 child=856268
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23500 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23200->10.0.0.3:5203 cc=astraea pid=855574 child=856349
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23200 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23300->10.0.0.3:5204 cc=astraea pid=855653 child=856402
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23300 cc=astraea worker active
+[worker cport=23100 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23100 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23000 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23000 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[sao-listener] new flow 1 10.0.0.1:23600->10.0.0.3:5207 cc=astraea pid=855767 child=856568
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23600 cc=astraea worker active
+[worker cport=23500 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23500 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[sao-listener] new flow 1 10.0.0.1:23400->10.0.0.3:5205 cc=astraea pid=855825 child=856669
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23400 cc=astraea worker active
+[worker cport=23200 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23200 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23300 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23300 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23600 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23600 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23400 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23400 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw40_rtt20/run4/ep000001_bw40_d20_n1.pdf  return=64306.5
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw40_rtt20/run4/ep000001_bw40_d20_n1.pdf  return=64306.53125
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw60_rtt20/run1/ep000001_bw60_d20_n1.pdf  return=63687.7
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw60_rtt20/run1/ep000001_bw60_d20_n1.pdf  return=63687.6796875
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw60_rtt20/run2/ep000001_bw60_d20_n1.pdf  return=63326.9
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw60_rtt20/run2/ep000001_bw60_d20_n1.pdf  return=63326.8671875
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw60_rtt20/run3/ep000001_bw60_d20_n1.pdf  return=62688.4
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw60_rtt20/run3/ep000001_bw60_d20_n1.pdf  return=62688.375
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw80_rtt20/run1/ep000001_bw80_d20_n1.pdf  return=65867.5
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw80_rtt20/run1/ep000001_bw80_d20_n1.pdf  return=65867.4609375
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw60_rtt20/run4/ep000001_bw60_d20_n1.pdf  return=64621.4
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw60_rtt20/run4/ep000001_bw60_d20_n1.pdf  return=64621.35546875
+[inter_rtt_bench] ma_dreamer_second_try cell=2 bw=40 f2_rtt=20 run=4/4 done (8/100)
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw80_rtt20/run2/ep000001_bw80_d20_n1.pdf  return=65952.3
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw80_rtt20/run2/ep000001_bw80_d20_n1.pdf  return=65952.2734375
+[inter_rtt_bench] slot=2 ma_dreamer_second_try bw=80 f1_rtt=20 f2_rtt=20 run=3
+[slot=2] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=80Mbps  delay=20ms  duration=60s
+[inter_rtt_bench] ma_dreamer_second_try cell=3 bw=60 f2_rtt=20 run=1/4 done (9/100)
+[inter_rtt_bench] slot=3 ma_dreamer_second_try bw=80 f1_rtt=20 f2_rtt=20 run=4
+[slot=3] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=80Mbps  delay=20ms  duration=60s
+[inter_rtt_bench] ma_dreamer_second_try cell=3 bw=60 f2_rtt=20 run=2/4 done (10/100)
+[inter_rtt_bench] slot=6 ma_dreamer_second_try bw=100 f1_rtt=20 f2_rtt=20 run=1
+[slot=6] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=100Mbps  delay=20ms  duration=60s
+[inter_rtt_bench] ma_dreamer_second_try cell=3 bw=60 f2_rtt=20 run=3/4 done (11/100)
+[inter_rtt_bench] slot=4 ma_dreamer_second_try bw=100 f1_rtt=20 f2_rtt=20 run=2
+[slot=4] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=100Mbps  delay=20ms  duration=60s
+[inter_rtt_bench] ma_dreamer_second_try cell=4 bw=80 f2_rtt=20 run=1/4 done (12/100)
+[inter_rtt_bench] slot=1 ma_dreamer_second_try bw=100 f1_rtt=20 f2_rtt=20 run=3
+[slot=1] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=100Mbps  delay=20ms  duration=60s
+[inter_rtt_bench] ma_dreamer_second_try cell=3 bw=60 f2_rtt=20 run=4/4 done (13/100)
+[inter_rtt_bench] slot=0 ma_dreamer_second_try bw=100 f1_rtt=20 f2_rtt=20 run=4
+[slot=0] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=100Mbps  delay=20ms  duration=60s
+[sao-listener] cport=23200 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23300 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23600 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[inter_rtt_bench] ma_dreamer_second_try cell=4 bw=80 f2_rtt=20 run=2/4 done (14/100)
+[sao-listener] cport=23400 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[inter_rtt_bench] slot=5 ma_dreamer_second_try bw=20 f1_rtt=20 f2_rtt=40 run=1
+[slot=5] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=20Mbps  delay=20ms  duration=60s
+[sao-listener] cport=23100 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23000 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23500 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] new flow 1 10.0.0.1:23200->10.0.0.3:5203 cc=astraea pid=860011 child=860386
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23200 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23300->10.0.0.3:5204 cc=astraea pid=860078 child=860441
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23300 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23100->10.0.0.3:5202 cc=astraea pid=860365 child=860511
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23100 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23000->10.0.0.3:5201 cc=astraea pid=860369 child=860563
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23000 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23600->10.0.0.3:5207 cc=astraea pid=860248 child=860642
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23600 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23500->10.0.0.3:5206 cc=astraea pid=860495 child=860692
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23500 cc=astraea worker active
+[worker cport=23300 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23300 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23200 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23200 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[sao-listener] new flow 1 10.0.0.1:23400->10.0.0.3:5205 cc=astraea pid=860314 child=860850
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23400 cc=astraea worker active
+[worker cport=23000 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23000 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23100 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23100 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23600 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23600 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23500 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23500 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23400 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23400 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw80_rtt20/run3/ep000001_bw80_d20_n1.pdf  return=66286.5
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw80_rtt20/run3/ep000001_bw80_d20_n1.pdf  return=66286.46875
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw80_rtt20/run4/ep000001_bw80_d20_n1.pdf  return=66026.5
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw80_rtt20/run4/ep000001_bw80_d20_n1.pdf  return=66026.53125
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw100_rtt20/run1/ep000001_bw100_d20_n1.pdf  return=67165.5
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw100_rtt20/run1/ep000001_bw100_d20_n1.pdf  return=67165.5234375
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw100_rtt20/run2/ep000001_bw100_d20_n1.pdf  return=65740.1
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw100_rtt20/run2/ep000001_bw100_d20_n1.pdf  return=65740.140625
+[inter_rtt_bench] ma_dreamer_second_try cell=4 bw=80 f2_rtt=20 run=3/4 done (15/100)
+[inter_rtt_bench] ma_dreamer_second_try cell=4 bw=80 f2_rtt=20 run=4/4 done (16/100)
+[inter_rtt_bench] slot=2 ma_dreamer_second_try bw=20 f1_rtt=20 f2_rtt=40 run=2
+[slot=2] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=20Mbps  delay=20ms  duration=60s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw100_rtt20/run3/ep000001_bw100_d20_n1.pdf  return=67076.3
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw100_rtt20/run3/ep000001_bw100_d20_n1.pdf  return=67076.28125
+[inter_rtt_bench] ma_dreamer_second_try cell=5 bw=100 f2_rtt=20 run=1/4 done (17/100)
+[inter_rtt_bench] slot=6 ma_dreamer_second_try bw=20 f1_rtt=20 f2_rtt=40 run=4
+[slot=6] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=20Mbps  delay=20ms  duration=60s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw100_rtt20/run4/ep000001_bw100_d20_n1.pdf  return=67016.4
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw100_rtt20/run4/ep000001_bw100_d20_n1.pdf  return=67016.4375
+[inter_rtt_bench] slot=3 ma_dreamer_second_try bw=20 f1_rtt=20 f2_rtt=40 run=3
+[slot=3] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=20Mbps  delay=20ms  duration=60s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw20_rtt40/run1/ep000001_bw20_d20_n1.pdf  return=62194.0
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw20_rtt40/run1/ep000001_bw20_d20_n1.pdf  return=62194.0234375
+[inter_rtt_bench] ma_dreamer_second_try cell=5 bw=100 f2_rtt=20 run=2/4 done (18/100)
+[inter_rtt_bench] slot=4 ma_dreamer_second_try bw=40 f1_rtt=20 f2_rtt=40 run=1
+[slot=4] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=40Mbps  delay=20ms  duration=60s
+[sao-listener] cport=23200 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23600 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23300 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[inter_rtt_bench] ma_dreamer_second_try cell=5 bw=100 f2_rtt=20 run=4/4 done (19/100)
+[inter_rtt_bench] ma_dreamer_second_try cell=5 bw=100 f2_rtt=20 run=3/4 done (20/100)
+[inter_rtt_bench] slot=1 ma_dreamer_second_try bw=40 f1_rtt=20 f2_rtt=40 run=2
+[slot=1] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=40Mbps  delay=20ms  duration=60s
+[inter_rtt_bench] ma_dreamer_second_try cell=6 bw=20 f2_rtt=40 run=1/4 done (21/100)
+[sao-listener] cport=23400 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[inter_rtt_bench] slot=5 ma_dreamer_second_try bw=40 f1_rtt=20 f2_rtt=40 run=4
+[slot=5] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=40Mbps  delay=20ms  duration=60s
+[inter_rtt_bench] slot=0 ma_dreamer_second_try bw=40 f1_rtt=20 f2_rtt=40 run=3
+[slot=0] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=40Mbps  delay=20ms  duration=60s
+[sao-listener] cport=23100 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23500 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23000 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] new flow 1 10.0.0.1:23200->10.0.0.3:5203 cc=astraea pid=863817 child=864567
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23200 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23600->10.0.0.3:5207 cc=astraea pid=863971 child=864660
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23600 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23300->10.0.0.3:5204 cc=astraea pid=863977 child=864714
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23300 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23100->10.0.0.3:5202 cc=astraea pid=864639 child=864777
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23100 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23500->10.0.0.3:5206 cc=astraea pid=864649 child=864839
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23500 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23400->10.0.0.3:5205 cc=astraea pid=864233 child=864900
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23400 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23000->10.0.0.3:5201 cc=astraea pid=864655 child=864902
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23000 cc=astraea worker active
+[worker cport=23200 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23200 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23300 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23300 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23600 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23600 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23100 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23100 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23500 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23500 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23400 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23400 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23000 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23000 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw20_rtt40/run2/ep000001_bw20_d20_n1.pdf  return=62921.2
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw20_rtt40/run2/ep000001_bw20_d20_n1.pdf  return=62921.203125
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw20_rtt40/run4/ep000001_bw20_d20_n1.pdf  return=62757.8
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw20_rtt40/run4/ep000001_bw20_d20_n1.pdf  return=62757.7734375
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw20_rtt40/run3/ep000001_bw20_d20_n1.pdf  return=62825.3
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw20_rtt40/run3/ep000001_bw20_d20_n1.pdf  return=62825.33203125
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw40_rtt40/run1/ep000001_bw40_d20_n1.pdf  return=64519.4
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw40_rtt40/run1/ep000001_bw40_d20_n1.pdf  return=64519.37109375
+[inter_rtt_bench] ma_dreamer_second_try cell=6 bw=20 f2_rtt=40 run=2/4 done (22/100)
+[inter_rtt_bench] slot=2 ma_dreamer_second_try bw=60 f1_rtt=20 f2_rtt=40 run=1
+[slot=2] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=60Mbps  delay=20ms  duration=60s
+[inter_rtt_bench] ma_dreamer_second_try cell=6 bw=20 f2_rtt=40 run=4/4 done (23/100)
+[inter_rtt_bench] slot=6 ma_dreamer_second_try bw=60 f1_rtt=20 f2_rtt=40 run=2
+[slot=6] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=60Mbps  delay=20ms  duration=60s
+[inter_rtt_bench] ma_dreamer_second_try cell=6 bw=20 f2_rtt=40 run=3/4 done (24/100)
+[inter_rtt_bench] slot=3 ma_dreamer_second_try bw=60 f1_rtt=20 f2_rtt=40 run=3
+[slot=3] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=60Mbps  delay=20ms  duration=60s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw40_rtt40/run2/ep000001_bw40_d20_n1.pdf  return=64245.6
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw40_rtt40/run2/ep000001_bw40_d20_n1.pdf  return=64245.6171875
+[sao-listener] cport=23200 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw40_rtt40/run3/ep000001_bw40_d20_n1.pdf  return=64458.3
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw40_rtt40/run3/ep000001_bw40_d20_n1.pdf  return=64458.296875
+[inter_rtt_bench] ma_dreamer_second_try cell=7 bw=40 f2_rtt=40 run=1/4 done (25/100)
+[inter_rtt_bench] slot=4 ma_dreamer_second_try bw=60 f1_rtt=20 f2_rtt=40 run=4
+[slot=4] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=60Mbps  delay=20ms  duration=60s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw40_rtt40/run4/ep000001_bw40_d20_n1.pdf  return=64426.4
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw40_rtt40/run4/ep000001_bw40_d20_n1.pdf  return=64426.4375
+[sao-listener] cport=23600 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23300 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[inter_rtt_bench] ma_dreamer_second_try cell=7 bw=40 f2_rtt=40 run=2/4 done (26/100)
+[inter_rtt_bench] slot=1 ma_dreamer_second_try bw=80 f1_rtt=20 f2_rtt=40 run=1
+[slot=1] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=80Mbps  delay=20ms  duration=60s
+[sao-listener] cport=23400 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[inter_rtt_bench] ma_dreamer_second_try cell=7 bw=40 f2_rtt=40 run=3/4 done (27/100)
+[inter_rtt_bench] slot=0 ma_dreamer_second_try bw=80 f1_rtt=20 f2_rtt=40 run=2
+[slot=0] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=80Mbps  delay=20ms  duration=60s
+[inter_rtt_bench] ma_dreamer_second_try cell=7 bw=40 f2_rtt=40 run=4/4 done (28/100)
+[inter_rtt_bench] slot=5 ma_dreamer_second_try bw=80 f1_rtt=20 f2_rtt=40 run=3
+[slot=5] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=80Mbps  delay=20ms  duration=60s
+[sao-listener] cport=23100 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23000 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23500 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] new flow 1 10.0.0.1:23200->10.0.0.3:5203 cc=astraea pid=867593 child=868648
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23200 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23600->10.0.0.3:5207 cc=astraea pid=868077 child=868734
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23600 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23300->10.0.0.3:5204 cc=astraea pid=868130 child=868797
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23300 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23100->10.0.0.3:5202 cc=astraea pid=868715 child=868858
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23100 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23400->10.0.0.3:5205 cc=astraea pid=868463 child=868926
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23400 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23000->10.0.0.3:5201 cc=astraea pid=868784 child=868928
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23000 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23500->10.0.0.3:5206 cc=astraea pid=868799 child=869124
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23500 cc=astraea worker active
+[worker cport=23200 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23200 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23600 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23600 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23300 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23300 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23100 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23100 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23400 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23400 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23000 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23000 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23500 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23500 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw60_rtt40/run1/ep000001_bw60_d20_n1.pdf  return=64063.9
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw60_rtt40/run1/ep000001_bw60_d20_n1.pdf  return=64063.90625
+[inter_rtt_bench] ma_dreamer_second_try cell=8 bw=60 f2_rtt=40 run=1/4 done (29/100)
+[inter_rtt_bench] slot=2 ma_dreamer_second_try bw=80 f1_rtt=20 f2_rtt=40 run=4
+[slot=2] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=80Mbps  delay=20ms  duration=60s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw60_rtt40/run2/ep000001_bw60_d20_n1.pdf  return=64096.9
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw60_rtt40/run2/ep000001_bw60_d20_n1.pdf  return=64096.90234375
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw60_rtt40/run3/ep000001_bw60_d20_n1.pdf  return=64760.1
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw60_rtt40/run3/ep000001_bw60_d20_n1.pdf  return=64760.07421875
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw60_rtt40/run4/ep000001_bw60_d20_n1.pdf  return=64808.0
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw60_rtt40/run4/ep000001_bw60_d20_n1.pdf  return=64808.03125
+[sao-listener] cport=23200 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[inter_rtt_bench] ma_dreamer_second_try cell=8 bw=60 f2_rtt=40 run=2/4 done (30/100)
+[inter_rtt_bench] slot=6 ma_dreamer_second_try bw=100 f1_rtt=20 f2_rtt=40 run=1
+[slot=6] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=100Mbps  delay=20ms  duration=60s
+[inter_rtt_bench] ma_dreamer_second_try cell=8 bw=60 f2_rtt=40 run=3/4 done (31/100)
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw80_rtt40/run1/ep000001_bw80_d20_n1.pdf  return=66051.7
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw80_rtt40/run1/ep000001_bw80_d20_n1.pdf  return=66051.7109375
+[inter_rtt_bench] slot=3 ma_dreamer_second_try bw=100 f1_rtt=20 f2_rtt=40 run=2
+[slot=3] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=100Mbps  delay=20ms  duration=60s
+[inter_rtt_bench] ma_dreamer_second_try cell=8 bw=60 f2_rtt=40 run=4/4 done (32/100)
+[inter_rtt_bench] slot=4 ma_dreamer_second_try bw=100 f1_rtt=20 f2_rtt=40 run=3
+[slot=4] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=100Mbps  delay=20ms  duration=60s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw80_rtt40/run2/ep000001_bw80_d20_n1.pdf  return=66824.2
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw80_rtt40/run2/ep000001_bw80_d20_n1.pdf  return=66824.25
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw80_rtt40/run3/ep000001_bw80_d20_n1.pdf  return=64086.8
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw80_rtt40/run3/ep000001_bw80_d20_n1.pdf  return=64086.79296875
+[sao-listener] cport=23600 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23300 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[inter_rtt_bench] ma_dreamer_second_try cell=9 bw=80 f2_rtt=40 run=1/4 done (33/100)
+[inter_rtt_bench] slot=1 ma_dreamer_second_try bw=100 f1_rtt=20 f2_rtt=40 run=4
+[slot=1] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=100Mbps  delay=20ms  duration=60s
+[sao-listener] new flow 1 10.0.0.1:23200->10.0.0.3:5203 cc=astraea pid=871139 child=871821
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23200 cc=astraea worker active
+[sao-listener] cport=23400 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[inter_rtt_bench] ma_dreamer_second_try cell=9 bw=80 f2_rtt=40 run=2/4 done (34/100)
+[inter_rtt_bench] slot=0 ma_dreamer_second_try bw=20 f1_rtt=20 f2_rtt=60 run=1
+[slot=0] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=20Mbps  delay=20ms  duration=60s
+[inter_rtt_bench] ma_dreamer_second_try cell=9 bw=80 f2_rtt=40 run=3/4 done (35/100)
+[sao-listener] cport=23100 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[inter_rtt_bench] slot=5 ma_dreamer_second_try bw=20 f1_rtt=20 f2_rtt=60 run=2
+[slot=5] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=20Mbps  delay=20ms  duration=60s
+[sao-listener] cport=23000 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23500 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[worker cport=23200 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23200 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[sao-listener] new flow 1 10.0.0.1:23600->10.0.0.3:5207 cc=astraea pid=872329 child=872984
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23600 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23300->10.0.0.3:5204 cc=astraea pid=872348 child=873054
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23300 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23100->10.0.0.3:5202 cc=astraea pid=872957 child=873057
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23100 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23400->10.0.0.3:5205 cc=astraea pid=872449 child=873225
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23400 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23000->10.0.0.3:5201 cc=astraea pid=873046 child=873320
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23000 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23500->10.0.0.3:5206 cc=astraea pid=873161 child=873424
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23500 cc=astraea worker active
+[worker cport=23600 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23600 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23300 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23300 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23100 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23100 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23400 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23400 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23000 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23000 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23500 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23500 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw80_rtt40/run4/ep000001_bw80_d20_n1.pdf  return=66288.6
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw80_rtt40/run4/ep000001_bw80_d20_n1.pdf  return=66288.59375
+[inter_rtt_bench] ma_dreamer_second_try cell=9 bw=80 f2_rtt=40 run=4/4 done (36/100)
+[inter_rtt_bench] slot=2 ma_dreamer_second_try bw=20 f1_rtt=20 f2_rtt=60 run=3
+[slot=2] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=20Mbps  delay=20ms  duration=60s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw100_rtt40/run2/ep000001_bw100_d20_n1.pdf  return=67330.2
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw100_rtt40/run2/ep000001_bw100_d20_n1.pdf  return=67330.2265625
+[sao-listener] cport=23200 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw100_rtt40/run1/ep000001_bw100_d20_n1.pdf  return=67249.7
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw100_rtt40/run1/ep000001_bw100_d20_n1.pdf  return=67249.6875
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw100_rtt40/run3/ep000001_bw100_d20_n1.pdf  return=67334.0
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw100_rtt40/run3/ep000001_bw100_d20_n1.pdf  return=67334.015625
+[inter_rtt_bench] ma_dreamer_second_try cell=10 bw=100 f2_rtt=40 run=2/4 done (37/100)
+[inter_rtt_bench] slot=3 ma_dreamer_second_try bw=20 f1_rtt=20 f2_rtt=60 run=4
+[slot=3] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=20Mbps  delay=20ms  duration=60s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw100_rtt40/run4/ep000001_bw100_d20_n1.pdf  return=67164.6
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw100_rtt40/run4/ep000001_bw100_d20_n1.pdf  return=67164.640625
+[inter_rtt_bench] ma_dreamer_second_try cell=10 bw=100 f2_rtt=40 run=1/4 done (38/100)
+[inter_rtt_bench] slot=6 ma_dreamer_second_try bw=40 f1_rtt=20 f2_rtt=60 run=1
+[slot=6] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=40Mbps  delay=20ms  duration=60s
+[inter_rtt_bench] ma_dreamer_second_try cell=10 bw=100 f2_rtt=40 run=3/4 done (39/100)
+[inter_rtt_bench] slot=4 ma_dreamer_second_try bw=40 f1_rtt=20 f2_rtt=60 run=2
+[slot=4] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=40Mbps  delay=20ms  duration=60s
+[sao-listener] new flow 1 10.0.0.1:23200->10.0.0.3:5203 cc=astraea pid=875212 child=875505
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23200 cc=astraea worker active
+[sao-listener] cport=23300 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw20_rtt60/run1/ep000001_bw20_d20_n1.pdf  return=62680.8
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw20_rtt60/run1/ep000001_bw20_d20_n1.pdf  return=62680.7578125
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw20_rtt60/run2/ep000001_bw20_d20_n1.pdf  return=62824.2
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw20_rtt60/run2/ep000001_bw20_d20_n1.pdf  return=62824.2265625
+[inter_rtt_bench] ma_dreamer_second_try cell=10 bw=100 f2_rtt=40 run=4/4 done (40/100)
+[sao-listener] cport=23600 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[inter_rtt_bench] slot=1 ma_dreamer_second_try bw=40 f1_rtt=20 f2_rtt=60 run=3
+[slot=1] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=40Mbps  delay=20ms  duration=60s
+[sao-listener] cport=23400 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[inter_rtt_bench] ma_dreamer_second_try cell=11 bw=20 f2_rtt=60 run=1/4 done (41/100)
+[inter_rtt_bench] slot=0 ma_dreamer_second_try bw=40 f1_rtt=20 f2_rtt=60 run=4
+[slot=0] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=40Mbps  delay=20ms  duration=60s
+[sao-listener] cport=23100 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[inter_rtt_bench] ma_dreamer_second_try cell=11 bw=20 f2_rtt=60 run=2/4 done (42/100)
+[inter_rtt_bench] slot=5 ma_dreamer_second_try bw=60 f1_rtt=20 f2_rtt=60 run=1
+[slot=5] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=60Mbps  delay=20ms  duration=60s
+[worker cport=23200 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23200 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[sao-listener] cport=23000 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] new flow 1 10.0.0.1:23300->10.0.0.3:5204 cc=astraea pid=876258 child=876886
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23300 cc=astraea worker active
+[sao-listener] cport=23500 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] new flow 1 10.0.0.1:23100->10.0.0.3:5202 cc=astraea pid=877064 child=877222
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23100 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23600->10.0.0.3:5207 cc=astraea pid=876444 child=877287
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23600 cc=astraea worker active
+[worker cport=23300 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23300 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[sao-listener] new flow 1 10.0.0.1:23000->10.0.0.3:5201 cc=astraea pid=877276 child=877496
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23000 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23400->10.0.0.3:5205 cc=astraea pid=876660 child=877554
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23400 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23500->10.0.0.3:5206 cc=astraea pid=877342 child=877697
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23500 cc=astraea worker active
+[worker cport=23100 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23100 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23600 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23600 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23000 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23000 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23400 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23400 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23500 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23500 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw20_rtt60/run3/ep000001_bw20_d20_n1.pdf  return=62731.9
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw20_rtt60/run3/ep000001_bw20_d20_n1.pdf  return=62731.87890625
+[inter_rtt_bench] ma_dreamer_second_try cell=11 bw=20 f2_rtt=60 run=3/4 done (43/100)
+[inter_rtt_bench] slot=2 ma_dreamer_second_try bw=60 f1_rtt=20 f2_rtt=60 run=2
+[slot=2] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=60Mbps  delay=20ms  duration=60s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw20_rtt60/run4/ep000001_bw20_d20_n1.pdf  return=62770.1
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw20_rtt60/run4/ep000001_bw20_d20_n1.pdf  return=62770.0625
+[sao-listener] cport=23200 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw40_rtt60/run1/ep000001_bw40_d20_n1.pdf  return=64583.2
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw40_rtt60/run1/ep000001_bw40_d20_n1.pdf  return=64583.1953125
+[inter_rtt_bench] ma_dreamer_second_try cell=11 bw=20 f2_rtt=60 run=4/4 done (44/100)
+[inter_rtt_bench] slot=3 ma_dreamer_second_try bw=60 f1_rtt=20 f2_rtt=60 run=3
+[slot=3] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=60Mbps  delay=20ms  duration=60s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw40_rtt60/run2/ep000001_bw40_d20_n1.pdf  return=64356.1
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw40_rtt60/run2/ep000001_bw40_d20_n1.pdf  return=64356.09375
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw40_rtt60/run3/ep000001_bw40_d20_n1.pdf  return=64616.0
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw40_rtt60/run3/ep000001_bw40_d20_n1.pdf  return=64615.96875
+[sao-listener] cport=23300 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] new flow 1 10.0.0.1:23200->10.0.0.3:5203 cc=astraea pid=879400 child=879630
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23200 cc=astraea worker active
+[inter_rtt_bench] ma_dreamer_second_try cell=12 bw=40 f2_rtt=60 run=1/4 done (45/100)
+[inter_rtt_bench] slot=6 ma_dreamer_second_try bw=60 f1_rtt=20 f2_rtt=60 run=4
+[slot=6] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=60Mbps  delay=20ms  duration=60s
+[inter_rtt_bench] ma_dreamer_second_try cell=12 bw=40 f2_rtt=60 run=2/4 done (46/100)
+[inter_rtt_bench] slot=4 ma_dreamer_second_try bw=80 f1_rtt=20 f2_rtt=60 run=1
+[slot=4] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=80Mbps  delay=20ms  duration=60s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw40_rtt60/run4/ep000001_bw40_d20_n1.pdf  return=64527.2
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw40_rtt60/run4/ep000001_bw40_d20_n1.pdf  return=64527.25
+[inter_rtt_bench] ma_dreamer_second_try cell=12 bw=40 f2_rtt=60 run=3/4 done (47/100)
+[inter_rtt_bench] slot=1 ma_dreamer_second_try bw=80 f1_rtt=20 f2_rtt=60 run=2
+[slot=1] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=80Mbps  delay=20ms  duration=60s
+[sao-listener] cport=23600 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw60_rtt60/run1/ep000001_bw60_d20_n1.pdf  return=63859.0
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw60_rtt60/run1/ep000001_bw60_d20_n1.pdf  return=63858.9921875
+[sao-listener] cport=23400 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23100 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] new flow 1 10.0.0.1:23300->10.0.0.3:5204 cc=astraea pid=879993 child=880578
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23300 cc=astraea worker active
+[inter_rtt_bench] ma_dreamer_second_try cell=12 bw=40 f2_rtt=60 run=4/4 done (48/100)
+[inter_rtt_bench] slot=0 ma_dreamer_second_try bw=80 f1_rtt=20 f2_rtt=60 run=3
+[slot=0] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=80Mbps  delay=20ms  duration=60s
+[worker cport=23200 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23200 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[inter_rtt_bench] ma_dreamer_second_try cell=13 bw=60 f2_rtt=60 run=1/4 done (49/100)
+[inter_rtt_bench] slot=5 ma_dreamer_second_try bw=80 f1_rtt=20 f2_rtt=60 run=4
+[slot=5] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=80Mbps  delay=20ms  duration=60s
+[sao-listener] cport=23000 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] new flow 1 10.0.0.1:23400->10.0.0.3:5205 cc=astraea pid=880921 child=881250
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23400 cc=astraea worker active
+[sao-listener] cport=23500 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] new flow 1 10.0.0.1:23100->10.0.0.3:5202 cc=astraea pid=881180 child=881434
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23100 cc=astraea worker active
+[worker cport=23300 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23300 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[sao-listener] new flow 1 10.0.0.1:23600->10.0.0.3:5207 cc=astraea pid=880717 child=881544
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23600 cc=astraea worker active
+[worker cport=23400 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23400 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[sao-listener] new flow 1 10.0.0.1:23000->10.0.0.3:5201 cc=astraea pid=881541 child=881715
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23000 cc=astraea worker active
+[worker cport=23100 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23100 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[sao-listener] new flow 1 10.0.0.1:23500->10.0.0.3:5206 cc=astraea pid=881600 child=881895
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23500 cc=astraea worker active
+[worker cport=23600 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23600 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23000 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23000 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23500 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23500 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw60_rtt60/run2/ep000001_bw60_d20_n1.pdf  return=64202.3
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw60_rtt60/run2/ep000001_bw60_d20_n1.pdf  return=64202.32421875
+[inter_rtt_bench] ma_dreamer_second_try cell=13 bw=60 f2_rtt=60 run=2/4 done (50/100)
+[inter_rtt_bench] slot=2 ma_dreamer_second_try bw=100 f1_rtt=20 f2_rtt=60 run=1
+[slot=2] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=100Mbps  delay=20ms  duration=60s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw60_rtt60/run3/ep000001_bw60_d20_n1.pdf  return=64734.6
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw60_rtt60/run3/ep000001_bw60_d20_n1.pdf  return=64734.6328125
+[sao-listener] cport=23200 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[inter_rtt_bench] ma_dreamer_second_try cell=13 bw=60 f2_rtt=60 run=3/4 done (51/100)
+[inter_rtt_bench] slot=3 ma_dreamer_second_try bw=100 f1_rtt=20 f2_rtt=60 run=2
+[slot=3] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=100Mbps  delay=20ms  duration=60s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw60_rtt60/run4/ep000001_bw60_d20_n1.pdf  return=64099.2
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw60_rtt60/run4/ep000001_bw60_d20_n1.pdf  return=64099.203125
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw80_rtt60/run1/ep000001_bw80_d20_n1.pdf  return=66505.0
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw80_rtt60/run1/ep000001_bw80_d20_n1.pdf  return=66505.03125
+[sao-listener] cport=23300 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] new flow 1 10.0.0.1:23200->10.0.0.3:5203 cc=astraea pid=883499 child=883860
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23200 cc=astraea worker active
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw80_rtt60/run2/ep000001_bw80_d20_n1.pdf  return=66616.6
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw80_rtt60/run2/ep000001_bw80_d20_n1.pdf  return=66616.5625
+[inter_rtt_bench] ma_dreamer_second_try cell=13 bw=60 f2_rtt=60 run=4/4 done (52/100)
+[inter_rtt_bench] slot=6 ma_dreamer_second_try bw=100 f1_rtt=20 f2_rtt=60 run=3
+[slot=6] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=100Mbps  delay=20ms  duration=60s
+[inter_rtt_bench] ma_dreamer_second_try cell=14 bw=80 f2_rtt=60 run=1/4 done (53/100)
+[inter_rtt_bench] slot=4 ma_dreamer_second_try bw=100 f1_rtt=20 f2_rtt=60 run=4
+[slot=4] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=100Mbps  delay=20ms  duration=60s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw80_rtt60/run3/ep000001_bw80_d20_n1.pdf  return=66463.8
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw80_rtt60/run3/ep000001_bw80_d20_n1.pdf  return=66463.75
+[sao-listener] cport=23600 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw80_rtt60/run4/ep000001_bw80_d20_n1.pdf  return=66239.3
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw80_rtt60/run4/ep000001_bw80_d20_n1.pdf  return=66239.296875
+[inter_rtt_bench] ma_dreamer_second_try cell=14 bw=80 f2_rtt=60 run=2/4 done (54/100)
+[inter_rtt_bench] slot=1 ma_dreamer_second_try bw=20 f1_rtt=20 f2_rtt=80 run=1
+[slot=1] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=20Mbps  delay=20ms  duration=60s
+[sao-listener] new flow 1 10.0.0.1:23300->10.0.0.3:5204 cc=astraea pid=884043 child=884337
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23300 cc=astraea worker active
+[worker cport=23200 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23200 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[sao-listener] cport=23400 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23100 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[inter_rtt_bench] ma_dreamer_second_try cell=14 bw=80 f2_rtt=60 run=3/4 done (55/100)
+[inter_rtt_bench] slot=0 ma_dreamer_second_try bw=20 f1_rtt=20 f2_rtt=80 run=2
+[slot=0] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=20Mbps  delay=20ms  duration=60s
+[inter_rtt_bench] ma_dreamer_second_try cell=14 bw=80 f2_rtt=60 run=4/4 done (56/100)
+[inter_rtt_bench] slot=5 ma_dreamer_second_try bw=20 f1_rtt=20 f2_rtt=80 run=3
+[slot=5] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=20Mbps  delay=20ms  duration=60s
+[sao-listener] cport=23000 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23500 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[worker cport=23300 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23300 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[sao-listener] new flow 1 10.0.0.1:23600->10.0.0.3:5207 cc=astraea pid=884880 child=885539
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23600 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23100->10.0.0.3:5202 cc=astraea pid=885358 child=885642
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23100 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23000->10.0.0.3:5201 cc=astraea pid=885790 child=885830
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23000 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23400->10.0.0.3:5205 cc=astraea pid=885021 child=885968
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23400 cc=astraea worker active
+[worker cport=23600 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23600 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23100 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23100 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[sao-listener] new flow 1 10.0.0.1:23500->10.0.0.3:5206 cc=astraea pid=885801 child=886073
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23500 cc=astraea worker active
+[worker cport=23000 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23000 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23400 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23400 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23500 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23500 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw100_rtt60/run1/ep000001_bw100_d20_n1.pdf  return=67138.7
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw100_rtt60/run1/ep000001_bw100_d20_n1.pdf  return=67138.671875
+[inter_rtt_bench] ma_dreamer_second_try cell=15 bw=100 f2_rtt=60 run=1/4 done (57/100)
+[inter_rtt_bench] slot=2 ma_dreamer_second_try bw=20 f1_rtt=20 f2_rtt=80 run=4
+[slot=2] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=20Mbps  delay=20ms  duration=60s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw100_rtt60/run2/ep000001_bw100_d20_n1.pdf  return=67410.0
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw100_rtt60/run2/ep000001_bw100_d20_n1.pdf  return=67410.0078125
+[sao-listener] cport=23200 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[inter_rtt_bench] ma_dreamer_second_try cell=15 bw=100 f2_rtt=60 run=2/4 done (58/100)
+[inter_rtt_bench] slot=3 ma_dreamer_second_try bw=40 f1_rtt=20 f2_rtt=80 run=1
+[slot=3] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=40Mbps  delay=20ms  duration=60s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw100_rtt60/run3/ep000001_bw100_d20_n1.pdf  return=67174.0
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw100_rtt60/run3/ep000001_bw100_d20_n1.pdf  return=67173.953125
+[sao-listener] cport=23300 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw100_rtt60/run4/ep000001_bw100_d20_n1.pdf  return=65996.1
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw100_rtt60/run4/ep000001_bw100_d20_n1.pdf  return=65996.125
+[sao-listener] new flow 1 10.0.0.1:23200->10.0.0.3:5203 cc=astraea pid=887786 child=888009
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23200 cc=astraea worker active
+[inter_rtt_bench] ma_dreamer_second_try cell=15 bw=100 f2_rtt=60 run=3/4 done (59/100)
+[inter_rtt_bench] slot=6 ma_dreamer_second_try bw=40 f1_rtt=20 f2_rtt=80 run=2
+[slot=6] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=40Mbps  delay=20ms  duration=60s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw20_rtt80/run1/ep000001_bw20_d20_n1.pdf  return=62653.4
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw20_rtt80/run1/ep000001_bw20_d20_n1.pdf  return=62653.359375
+[sao-listener] cport=23600 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] new flow 1 10.0.0.1:23300->10.0.0.3:5204 cc=astraea pid=888141 child=888401
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23300 cc=astraea worker active
+[inter_rtt_bench] ma_dreamer_second_try cell=15 bw=100 f2_rtt=60 run=4/4 done (60/100)
+[inter_rtt_bench] slot=4 ma_dreamer_second_try bw=40 f1_rtt=20 f2_rtt=80 run=3
+[slot=4] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=40Mbps  delay=20ms  duration=60s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw20_rtt80/run2/ep000001_bw20_d20_n1.pdf  return=62906.2
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw20_rtt80/run2/ep000001_bw20_d20_n1.pdf  return=62906.2109375
+[inter_rtt_bench] ma_dreamer_second_try cell=16 bw=20 f2_rtt=80 run=1/4 done (61/100)
+[inter_rtt_bench] slot=1 ma_dreamer_second_try bw=40 f1_rtt=20 f2_rtt=80 run=4
+[slot=1] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=40Mbps  delay=20ms  duration=60s
+[worker cport=23200 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23200 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw20_rtt80/run3/ep000001_bw20_d20_n1.pdf  return=62866.2
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw20_rtt80/run3/ep000001_bw20_d20_n1.pdf  return=62866.234375
+[sao-listener] cport=23400 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23100 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[inter_rtt_bench] ma_dreamer_second_try cell=16 bw=20 f2_rtt=80 run=2/4 done (62/100)
+[inter_rtt_bench] slot=0 ma_dreamer_second_try bw=60 f1_rtt=20 f2_rtt=80 run=1
+[slot=0] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=60Mbps  delay=20ms  duration=60s
+[worker cport=23300 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23300 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[inter_rtt_bench] ma_dreamer_second_try cell=16 bw=20 f2_rtt=80 run=3/4 done (63/100)
+[inter_rtt_bench] slot=5 ma_dreamer_second_try bw=60 f1_rtt=20 f2_rtt=80 run=2
+[slot=5] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=60Mbps  delay=20ms  duration=60s
+[sao-listener] cport=23000 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] new flow 1 10.0.0.1:23600->10.0.0.3:5207 cc=astraea pid=888870 child=889605
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23600 cc=astraea worker active
+[sao-listener] cport=23500 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] new flow 1 10.0.0.1:23100->10.0.0.3:5202 cc=astraea pid=889688 child=889953
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23100 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23400->10.0.0.3:5205 cc=astraea pid=889331 child=890176
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23400 cc=astraea worker active
+[worker cport=23600 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23600 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[sao-listener] new flow 1 10.0.0.1:23000->10.0.0.3:5201 cc=astraea pid=890053 child=890230
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23000 cc=astraea worker active
+[worker cport=23100 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23100 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[sao-listener] new flow 1 10.0.0.1:23500->10.0.0.3:5206 cc=astraea pid=890075 child=890421
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23500 cc=astraea worker active
+[worker cport=23400 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23400 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23000 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23000 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23500 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23500 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw20_rtt80/run4/ep000001_bw20_d20_n1.pdf  return=62895.0
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw20_rtt80/run4/ep000001_bw20_d20_n1.pdf  return=62895.0390625
+[inter_rtt_bench] ma_dreamer_second_try cell=16 bw=20 f2_rtt=80 run=4/4 done (64/100)
+[inter_rtt_bench] slot=2 ma_dreamer_second_try bw=60 f1_rtt=20 f2_rtt=80 run=3
+[slot=2] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=60Mbps  delay=20ms  duration=60s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw40_rtt80/run1/ep000001_bw40_d20_n1.pdf  return=64296.8
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw40_rtt80/run1/ep000001_bw40_d20_n1.pdf  return=64296.8359375
+[sao-listener] cport=23200 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[inter_rtt_bench] ma_dreamer_second_try cell=17 bw=40 f2_rtt=80 run=1/4 done (65/100)
+[inter_rtt_bench] slot=3 ma_dreamer_second_try bw=60 f1_rtt=20 f2_rtt=80 run=4
+[slot=3] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=60Mbps  delay=20ms  duration=60s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw40_rtt80/run2/ep000001_bw40_d20_n1.pdf  return=64397.4
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw40_rtt80/run2/ep000001_bw40_d20_n1.pdf  return=64397.39453125
+[sao-listener] cport=23300 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw40_rtt80/run3/ep000001_bw40_d20_n1.pdf  return=64417.6
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw40_rtt80/run3/ep000001_bw40_d20_n1.pdf  return=64417.5625
+[inter_rtt_bench] ma_dreamer_second_try cell=17 bw=40 f2_rtt=80 run=2/4 done (66/100)
+[inter_rtt_bench] slot=6 ma_dreamer_second_try bw=80 f1_rtt=20 f2_rtt=80 run=1
+[slot=6] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=80Mbps  delay=20ms  duration=60s
+[sao-listener] new flow 1 10.0.0.1:23200->10.0.0.3:5203 cc=astraea pid=892060 child=892267
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23200 cc=astraea worker active
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw40_rtt80/run4/ep000001_bw40_d20_n1.pdf  return=64546.2
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw40_rtt80/run4/ep000001_bw40_d20_n1.pdf  return=64546.1953125
+[sao-listener] cport=23600 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[inter_rtt_bench] ma_dreamer_second_try cell=17 bw=40 f2_rtt=80 run=3/4 done (67/100)
+[inter_rtt_bench] slot=4 ma_dreamer_second_try bw=80 f1_rtt=20 f2_rtt=80 run=2
+[slot=4] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=80Mbps  delay=20ms  duration=60s
+[sao-listener] new flow 1 10.0.0.1:23300->10.0.0.3:5204 cc=astraea pid=892376 child=892703
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23300 cc=astraea worker active
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw60_rtt80/run1/ep000001_bw60_d20_n1.pdf  return=64801.6
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw60_rtt80/run1/ep000001_bw60_d20_n1.pdf  return=64801.5546875
+[inter_rtt_bench] ma_dreamer_second_try cell=17 bw=40 f2_rtt=80 run=4/4 done (68/100)
+[worker cport=23200 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23200 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[inter_rtt_bench] slot=1 ma_dreamer_second_try bw=80 f1_rtt=20 f2_rtt=80 run=3
+[slot=1] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=80Mbps  delay=20ms  duration=60s
+[sao-listener] cport=23400 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw60_rtt80/run2/ep000001_bw60_d20_n1.pdf  return=64058.7
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw60_rtt80/run2/ep000001_bw60_d20_n1.pdf  return=64058.66796875
+[inter_rtt_bench] ma_dreamer_second_try cell=18 bw=60 f2_rtt=80 run=1/4 done (69/100)
+[inter_rtt_bench] slot=0 ma_dreamer_second_try bw=80 f1_rtt=20 f2_rtt=80 run=4
+[slot=0] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=80Mbps  delay=20ms  duration=60s
+[sao-listener] cport=23100 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[worker cport=23300 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23300 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[sao-listener] new flow 1 10.0.0.1:23600->10.0.0.3:5207 cc=astraea pid=893132 child=893652
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23600 cc=astraea worker active
+[inter_rtt_bench] ma_dreamer_second_try cell=18 bw=60 f2_rtt=80 run=2/4 done (70/100)
+[sao-listener] cport=23000 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[inter_rtt_bench] slot=5 ma_dreamer_second_try bw=100 f1_rtt=20 f2_rtt=80 run=1
+[slot=5] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=100Mbps  delay=20ms  duration=60s
+[sao-listener] cport=23500 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] new flow 1 10.0.0.1:23100->10.0.0.3:5202 cc=astraea pid=893940 child=894208
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23100 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23400->10.0.0.3:5205 cc=astraea pid=893513 child=894330
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23400 cc=astraea worker active
+[worker cport=23600 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23600 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[sao-listener] new flow 1 10.0.0.1:23000->10.0.0.3:5201 cc=astraea pid=894261 child=894394
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23000 cc=astraea worker active
+[worker cport=23100 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23100 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[sao-listener] new flow 1 10.0.0.1:23500->10.0.0.3:5206 cc=astraea pid=894387 child=894590
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23500 cc=astraea worker active
+[worker cport=23400 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23400 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23000 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23000 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23500 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23500 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw60_rtt80/run3/ep000001_bw60_d20_n1.pdf  return=64673.8
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw60_rtt80/run3/ep000001_bw60_d20_n1.pdf  return=64673.79296875
+[inter_rtt_bench] ma_dreamer_second_try cell=18 bw=60 f2_rtt=80 run=3/4 done (71/100)
+[inter_rtt_bench] slot=2 ma_dreamer_second_try bw=100 f1_rtt=20 f2_rtt=80 run=2
+[slot=2] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=100Mbps  delay=20ms  duration=60s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw60_rtt80/run4/ep000001_bw60_d20_n1.pdf  return=64635.6
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw60_rtt80/run4/ep000001_bw60_d20_n1.pdf  return=64635.55078125
+[sao-listener] cport=23200 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[inter_rtt_bench] ma_dreamer_second_try cell=18 bw=60 f2_rtt=80 run=4/4 done (72/100)
+[inter_rtt_bench] slot=3 ma_dreamer_second_try bw=100 f1_rtt=20 f2_rtt=80 run=3
+[slot=3] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=100Mbps  delay=20ms  duration=60s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw80_rtt80/run1/ep000001_bw80_d20_n1.pdf  return=66420.2
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw80_rtt80/run1/ep000001_bw80_d20_n1.pdf  return=66420.234375
+[sao-listener] cport=23300 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw80_rtt80/run2/ep000001_bw80_d20_n1.pdf  return=64486.9
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw80_rtt80/run2/ep000001_bw80_d20_n1.pdf  return=64486.8515625
+[inter_rtt_bench] ma_dreamer_second_try cell=19 bw=80 f2_rtt=80 run=1/4 done (73/100)
+[sao-listener] new flow 1 10.0.0.1:23200->10.0.0.3:5203 cc=astraea pid=896363 child=896488
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23200 cc=astraea worker active
+[inter_rtt_bench] slot=6 ma_dreamer_second_try bw=100 f1_rtt=20 f2_rtt=80 run=4
+[slot=6] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=100Mbps  delay=20ms  duration=60s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw80_rtt80/run3/ep000001_bw80_d20_n1.pdf  return=66444.8
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw80_rtt80/run3/ep000001_bw80_d20_n1.pdf  return=66444.75
+[inter_rtt_bench] ma_dreamer_second_try cell=19 bw=80 f2_rtt=80 run=2/4 done (74/100)
+[sao-listener] new flow 1 10.0.0.1:23300->10.0.0.3:5204 cc=astraea pid=896563 child=896781
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23300 cc=astraea worker active
+[inter_rtt_bench] slot=4 ma_dreamer_second_try bw=20 f1_rtt=20 f2_rtt=100 run=1
+[slot=4] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=20Mbps  delay=20ms  duration=60s
+[sao-listener] cport=23600 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw80_rtt80/run4/ep000001_bw80_d20_n1.pdf  return=66460.4
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw80_rtt80/run4/ep000001_bw80_d20_n1.pdf  return=66460.375
+[inter_rtt_bench] ma_dreamer_second_try cell=19 bw=80 f2_rtt=80 run=3/4 done (75/100)
+[sao-listener] cport=23400 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[inter_rtt_bench] slot=1 ma_dreamer_second_try bw=20 f1_rtt=20 f2_rtt=100 run=2
+[slot=1] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=20Mbps  delay=20ms  duration=60s
+[worker cport=23200 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23200 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw100_rtt80/run1/ep000001_bw100_d20_n1.pdf  return=67138.4
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw100_rtt80/run1/ep000001_bw100_d20_n1.pdf  return=67138.4140625
+[inter_rtt_bench] ma_dreamer_second_try cell=19 bw=80 f2_rtt=80 run=4/4 done (76/100)
+[inter_rtt_bench] slot=0 ma_dreamer_second_try bw=20 f1_rtt=20 f2_rtt=100 run=3
+[slot=0] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=20Mbps  delay=20ms  duration=60s
+[sao-listener] cport=23100 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[worker cport=23300 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23300 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[inter_rtt_bench] ma_dreamer_second_try cell=20 bw=100 f2_rtt=80 run=1/4 done (77/100)
+[sao-listener] cport=23000 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] new flow 1 10.0.0.1:23600->10.0.0.3:5207 cc=astraea pid=897210 child=897919
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23600 cc=astraea worker active
+[inter_rtt_bench] slot=5 ma_dreamer_second_try bw=20 f1_rtt=20 f2_rtt=100 run=4
+[slot=5] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=20Mbps  delay=20ms  duration=60s
+[sao-listener] cport=23500 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] new flow 1 10.0.0.1:23100->10.0.0.3:5202 cc=astraea pid=898077 child=898420
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23100 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23400->10.0.0.3:5205 cc=astraea pid=897602 child=898547
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23400 cc=astraea worker active
+[worker cport=23600 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23600 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[sao-listener] new flow 1 10.0.0.1:23000->10.0.0.3:5201 cc=astraea pid=898529 child=898660
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23000 cc=astraea worker active
+[worker cport=23100 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23100 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23400 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23400 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[sao-listener] new flow 1 10.0.0.1:23500->10.0.0.3:5206 cc=astraea pid=898657 child=898903
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23500 cc=astraea worker active
+[worker cport=23000 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23000 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23500 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23500 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw100_rtt80/run2/ep000001_bw100_d20_n1.pdf  return=67271.4
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw100_rtt80/run2/ep000001_bw100_d20_n1.pdf  return=67271.3515625
+[inter_rtt_bench] ma_dreamer_second_try cell=20 bw=100 f2_rtt=80 run=2/4 done (78/100)
+[inter_rtt_bench] slot=2 ma_dreamer_second_try bw=40 f1_rtt=20 f2_rtt=100 run=1
+[slot=2] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=40Mbps  delay=20ms  duration=60s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw100_rtt80/run3/ep000001_bw100_d20_n1.pdf  return=67142.0
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw100_rtt80/run3/ep000001_bw100_d20_n1.pdf  return=67141.96875
+[sao-listener] cport=23200 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[inter_rtt_bench] ma_dreamer_second_try cell=20 bw=100 f2_rtt=80 run=3/4 done (79/100)
+[inter_rtt_bench] slot=3 ma_dreamer_second_try bw=40 f1_rtt=20 f2_rtt=100 run=2
+[slot=3] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=40Mbps  delay=20ms  duration=60s
+[sao-listener] cport=23300 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw100_rtt80/run4/ep000001_bw100_d20_n1.pdf  return=67104.9
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw100_rtt80/run4/ep000001_bw100_d20_n1.pdf  return=67104.8515625
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw20_rtt100/run1/ep000001_bw20_d20_n1.pdf  return=62732.0
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw20_rtt100/run1/ep000001_bw20_d20_n1.pdf  return=62732.0078125
+[inter_rtt_bench] ma_dreamer_second_try cell=20 bw=100 f2_rtt=80 run=4/4 done (80/100)
+[inter_rtt_bench] slot=6 ma_dreamer_second_try bw=40 f1_rtt=20 f2_rtt=100 run=3
+[slot=6] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=40Mbps  delay=20ms  duration=60s
+[sao-listener] new flow 1 10.0.0.1:23200->10.0.0.3:5203 cc=astraea pid=900534 child=900716
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23200 cc=astraea worker active
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw20_rtt100/run2/ep000001_bw20_d20_n1.pdf  return=62646.4
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw20_rtt100/run2/ep000001_bw20_d20_n1.pdf  return=62646.4375
+[sao-listener] new flow 1 10.0.0.1:23300->10.0.0.3:5204 cc=astraea pid=900711 child=900849
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23300 cc=astraea worker active
+[sao-listener] cport=23600 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[inter_rtt_bench] ma_dreamer_second_try cell=21 bw=20 f2_rtt=100 run=1/4 done (81/100)
+[inter_rtt_bench] slot=4 ma_dreamer_second_try bw=40 f1_rtt=20 f2_rtt=100 run=4
+[slot=4] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=40Mbps  delay=20ms  duration=60s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw20_rtt100/run3/ep000001_bw20_d20_n1.pdf  return=62453.6
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw20_rtt100/run3/ep000001_bw20_d20_n1.pdf  return=62453.609375
+[inter_rtt_bench] ma_dreamer_second_try cell=21 bw=20 f2_rtt=100 run=2/4 done (82/100)
+[inter_rtt_bench] slot=1 ma_dreamer_second_try bw=60 f1_rtt=20 f2_rtt=100 run=1
+[slot=1] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=60Mbps  delay=20ms  duration=60s
+[sao-listener] cport=23400 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[worker cport=23200 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23200 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw20_rtt100/run4/ep000001_bw20_d20_n1.pdf  return=62846.0
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw20_rtt100/run4/ep000001_bw20_d20_n1.pdf  return=62846.0390625
+[inter_rtt_bench] ma_dreamer_second_try cell=21 bw=20 f2_rtt=100 run=3/4 done (83/100)
+[sao-listener] cport=23100 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[inter_rtt_bench] slot=0 ma_dreamer_second_try bw=60 f1_rtt=20 f2_rtt=100 run=2
+[slot=0] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=60Mbps  delay=20ms  duration=60s
+[worker cport=23300 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23300 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[sao-listener] cport=23000 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[inter_rtt_bench] ma_dreamer_second_try cell=21 bw=20 f2_rtt=100 run=4/4 done (84/100)
+[sao-listener] new flow 1 10.0.0.1:23600->10.0.0.3:5207 cc=astraea pid=901594 child=902247
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23600 cc=astraea worker active
+[inter_rtt_bench] slot=5 ma_dreamer_second_try bw=60 f1_rtt=20 f2_rtt=100 run=3
+[slot=5] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=60Mbps  delay=20ms  duration=60s
+[sao-listener] cport=23500 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] new flow 1 10.0.0.1:23100->10.0.0.3:5202 cc=astraea pid=902325 child=902621
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23100 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23400->10.0.0.3:5205 cc=astraea pid=901959 child=902758
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23400 cc=astraea worker active
+[worker cport=23600 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23600 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[sao-listener] new flow 1 10.0.0.1:23000->10.0.0.3:5201 cc=astraea pid=902695 child=902911
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23000 cc=astraea worker active
+[worker cport=23100 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23100 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[sao-listener] new flow 1 10.0.0.1:23500->10.0.0.3:5206 cc=astraea pid=902907 child=903028
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23500 cc=astraea worker active
+[worker cport=23400 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23400 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23000 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23000 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23500 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23500 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw40_rtt100/run1/ep000001_bw40_d20_n1.pdf  return=64484.8
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw40_rtt100/run1/ep000001_bw40_d20_n1.pdf  return=64484.8125
+[inter_rtt_bench] ma_dreamer_second_try cell=22 bw=40 f2_rtt=100 run=1/4 done (85/100)
+[inter_rtt_bench] slot=2 ma_dreamer_second_try bw=60 f1_rtt=20 f2_rtt=100 run=4
+[slot=2] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=60Mbps  delay=20ms  duration=60s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw40_rtt100/run2/ep000001_bw40_d20_n1.pdf  return=64212.6
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw40_rtt100/run2/ep000001_bw40_d20_n1.pdf  return=64212.6171875
+[sao-listener] cport=23200 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[inter_rtt_bench] ma_dreamer_second_try cell=22 bw=40 f2_rtt=100 run=2/4 done (86/100)
+[inter_rtt_bench] slot=3 ma_dreamer_second_try bw=80 f1_rtt=20 f2_rtt=100 run=1
+[slot=3] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=80Mbps  delay=20ms  duration=60s
+[sao-listener] cport=23300 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw40_rtt100/run3/ep000001_bw40_d20_n1.pdf  return=64411.1
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw40_rtt100/run3/ep000001_bw40_d20_n1.pdf  return=64411.0625
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw40_rtt100/run4/ep000001_bw40_d20_n1.pdf  return=64538.5
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw40_rtt100/run4/ep000001_bw40_d20_n1.pdf  return=64538.47265625
+[sao-listener] new flow 1 10.0.0.1:23200->10.0.0.3:5203 cc=astraea pid=904716 child=904959
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23200 cc=astraea worker active
+[inter_rtt_bench] ma_dreamer_second_try cell=22 bw=40 f2_rtt=100 run=3/4 done (87/100)
+[inter_rtt_bench] slot=6 ma_dreamer_second_try bw=80 f1_rtt=20 f2_rtt=100 run=2
+[slot=6] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=80Mbps  delay=20ms  duration=60s
+[sao-listener] new flow 1 10.0.0.1:23300->10.0.0.3:5204 cc=astraea pid=904961 child=905049
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23300 cc=astraea worker active
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw60_rtt100/run1/ep000001_bw60_d20_n1.pdf  return=64450.9
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw60_rtt100/run1/ep000001_bw60_d20_n1.pdf  return=64450.890625
+[sao-listener] cport=23600 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[inter_rtt_bench] ma_dreamer_second_try cell=22 bw=40 f2_rtt=100 run=4/4 done (88/100)
+[inter_rtt_bench] slot=4 ma_dreamer_second_try bw=80 f1_rtt=20 f2_rtt=100 run=3
+[slot=4] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=80Mbps  delay=20ms  duration=60s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw60_rtt100/run2/ep000001_bw60_d20_n1.pdf  return=64073.1
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw60_rtt100/run2/ep000001_bw60_d20_n1.pdf  return=64073.10546875
+[inter_rtt_bench] ma_dreamer_second_try cell=23 bw=60 f2_rtt=100 run=1/4 done (89/100)
+[inter_rtt_bench] slot=1 ma_dreamer_second_try bw=80 f1_rtt=20 f2_rtt=100 run=4
+[slot=1] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=80Mbps  delay=20ms  duration=60s
+[sao-listener] cport=23400 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[worker cport=23200 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23200 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23300 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23300 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw60_rtt100/run3/ep000001_bw60_d20_n1.pdf  return=64186.9
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw60_rtt100/run3/ep000001_bw60_d20_n1.pdf  return=64186.94921875
+[sao-listener] cport=23100 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[inter_rtt_bench] ma_dreamer_second_try cell=23 bw=60 f2_rtt=100 run=2/4 done (90/100)
+[inter_rtt_bench] slot=0 ma_dreamer_second_try bw=100 f1_rtt=20 f2_rtt=100 run=1
+[slot=0] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=100Mbps  delay=20ms  duration=60s
+[sao-listener] cport=23000 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[inter_rtt_bench] ma_dreamer_second_try cell=23 bw=60 f2_rtt=100 run=3/4 done (91/100)
+[sao-listener] new flow 1 10.0.0.1:23600->10.0.0.3:5207 cc=astraea pid=905770 child=906409
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23600 cc=astraea worker active
+[inter_rtt_bench] slot=5 ma_dreamer_second_try bw=100 f1_rtt=20 f2_rtt=100 run=2
+[slot=5] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=100Mbps  delay=20ms  duration=60s
+[sao-listener] new flow 1 10.0.0.1:23100->10.0.0.3:5202 cc=astraea pid=906533 child=906788
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23100 cc=astraea worker active
+[sao-listener] cport=23500 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] new flow 1 10.0.0.1:23400->10.0.0.3:5205 cc=astraea pid=906116 child=906928
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23400 cc=astraea worker active
+[worker cport=23600 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23600 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[sao-listener] new flow 1 10.0.0.1:23000->10.0.0.3:5201 cc=astraea pid=906908 child=907081
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23000 cc=astraea worker active
+[worker cport=23100 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23100 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[sao-listener] new flow 1 10.0.0.1:23500->10.0.0.3:5206 cc=astraea pid=907074 child=907282
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23500 cc=astraea worker active
+[worker cport=23400 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23400 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23000 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23000 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23500 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23500 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw60_rtt100/run4/ep000001_bw60_d20_n1.pdf  return=64958.1
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw60_rtt100/run4/ep000001_bw60_d20_n1.pdf  return=64958.05859375
+[inter_rtt_bench] ma_dreamer_second_try cell=23 bw=60 f2_rtt=100 run=4/4 done (92/100)
+[inter_rtt_bench] slot=2 ma_dreamer_second_try bw=100 f1_rtt=20 f2_rtt=100 run=3
+[slot=2] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=100Mbps  delay=20ms  duration=60s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw80_rtt100/run1/ep000001_bw80_d20_n1.pdf  return=65818.6
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw80_rtt100/run1/ep000001_bw80_d20_n1.pdf  return=65818.5703125
+[sao-listener] cport=23200 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[inter_rtt_bench] ma_dreamer_second_try cell=24 bw=80 f2_rtt=100 run=1/4 done (93/100)
+[inter_rtt_bench] slot=3 ma_dreamer_second_try bw=100 f1_rtt=20 f2_rtt=100 run=4
+[slot=3] ep=1  env=inter_rtt_fairness_two_flow_join20_final20  bw=100Mbps  delay=20ms  duration=60s
+[sao-listener] cport=23300 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw80_rtt100/run2/ep000001_bw80_d20_n1.pdf  return=65881.0
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw80_rtt100/run2/ep000001_bw80_d20_n1.pdf  return=65880.9765625
+[sao-listener] new flow 1 10.0.0.1:23200->10.0.0.3:5203 cc=astraea pid=908832 child=909166
+[sao-listener flow 1] cport=23200 cc=astraea worker active
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw80_rtt100/run3/ep000001_bw80_d20_n1.pdf  return=66665.0
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw80_rtt100/run3/ep000001_bw80_d20_n1.pdf  return=66664.9765625
+[inter_rtt_bench] ma_dreamer_second_try cell=24 bw=80 f2_rtt=100 run=2/4 done (94/100)
+[sao-listener] new flow 1 10.0.0.1:23300->10.0.0.3:5204 cc=astraea pid=909216 child=909227
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23300 cc=astraea worker active
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw80_rtt100/run4/ep000001_bw80_d20_n1.pdf  return=64805.2
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw80_rtt100/run4/ep000001_bw80_d20_n1.pdf  return=64805.20703125
+[inter_rtt_bench] ma_dreamer_second_try cell=24 bw=80 f2_rtt=100 run=3/4 done (95/100)
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw100_rtt100/run1/ep000001_bw100_d20_n1.pdf  return=67243.0
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw100_rtt100/run1/ep000001_bw100_d20_n1.pdf  return=67242.984375
+[worker cport=23200 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23200 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[inter_rtt_bench] ma_dreamer_second_try cell=24 bw=80 f2_rtt=100 run=4/4 done (96/100)
+[worker cport=23300 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23300 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw100_rtt100/run2/ep000001_bw100_d20_n1.pdf  return=67310.0
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw100_rtt100/run2/ep000001_bw100_d20_n1.pdf  return=67309.953125
+[inter_rtt_bench] ma_dreamer_second_try cell=25 bw=100 f2_rtt=100 run=1/4 done (97/100)
+[inter_rtt_bench] ma_dreamer_second_try cell=25 bw=100 f2_rtt=100 run=2/4 done (98/100)
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw100_rtt100/run3/ep000001_bw100_d20_n1.pdf  return=66963.5
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw100_rtt100/run3/ep000001_bw100_d20_n1.pdf  return=66963.53125
+[inter_rtt_bench] ma_dreamer_second_try cell=25 bw=100 f2_rtt=100 run=3/4 done (99/100)
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw100_rtt100/run4/ep000001_bw100_d20_n1.pdf  return=67136.8
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/bw100_rtt100/run4/ep000001_bw100_d20_n1.pdf  return=67136.75
+[inter_rtt_bench] ma_dreamer_second_try cell=25 bw=100 f2_rtt=100 run=4/4 done (100/100)
+[inter_rtt_bench] heatmap -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/fairness_heatmap.pdf
+[orch] runtime cleanup sweep
+[inter_rtt_bench] heatmap -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_20260609-022904/fairness_heatmap.pdf
+[inter_rtt_bench] heatmap -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/ma_dreamer_second_try/fairness_heatmap.pdf
+[inter_rtt_bench] heatmap -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/sa_dreamer_20260521-145020/fairness_heatmap.pdf
+[inter_rtt_bench] heatmap -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/self_play_dreamer_20260525-152636/fairness_heatmap.pdf
+[inter_rtt_bench] heatmap -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/fairness_heatmap.pdf
+[inter_rtt_bench] replotted rows=400 total_rows=400 individual_plots=400 approach_heatmaps=4
+[inter_rtt_bench] done metrics=/its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/metrics.csv

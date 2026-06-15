@@ -1,0 +1,1845 @@
+[resp_bench] output_root=/its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data
+[resp_bench] benchmark=random_bw_rtt_15s_300s runs=50
+[resp_bench] n_parallel=30
+[resp_bench] approaches_to_run=cubic, bbr, bbr1, frcc
+[resp_bench] slot=0 cubic run=1 seed=1 -C cubic
+[resp_bench] slot=1 cubic run=2 seed=2 -C cubic
+[resp_bench] slot=2 cubic run=3 seed=3 -C cubic
+[resp_bench] slot=3 cubic run=4 seed=4 -C cubic
+[resp_bench] slot=4 cubic run=5 seed=5 -C cubic
+[resp_bench] slot=5 cubic run=6 seed=6 -C cubic
+[resp_bench] slot=6 cubic run=7 seed=7 -C cubic
+[resp_bench] slot=7 cubic run=8 seed=8 -C cubic
+[resp_bench] slot=8 cubic run=9 seed=9 -C cubic
+[resp_bench] slot=9 cubic run=10 seed=10 -C cubic
+[resp_bench] slot=10 cubic run=11 seed=11 -C cubic
+[resp_bench] slot=11 cubic run=12 seed=12 -C cubic
+[resp_bench] slot=12 cubic run=13 seed=13 -C cubic
+[resp_bench] slot=13 cubic run=14 seed=14 -C cubic
+[resp_bench] slot=14 cubic run=15 seed=15 -C cubic
+[resp_bench] slot=15 cubic run=16 seed=16 -C cubic
+[resp_bench] slot=16 cubic run=17 seed=17 -C cubic
+[resp_bench] slot=17 cubic run=18 seed=18 -C cubic
+[resp_bench] slot=18 cubic run=19 seed=19 -C cubic
+[resp_bench] slot=19 cubic run=20 seed=20 -C cubic
+[resp_bench] slot=20 cubic run=21 seed=21 -C cubic
+[resp_bench] slot=21 cubic run=22 seed=22 -C cubic
+[resp_bench] slot=22 cubic run=23 seed=23 -C cubic
+[resp_bench] slot=23 cubic run=24 seed=24 -C cubic
+[resp_bench] slot=24 cubic run=25 seed=25 -C cubic
+[resp_bench] slot=25 cubic run=26 seed=26 -C cubic
+[resp_bench] slot=26 cubic run=27 seed=27 -C cubic
+[resp_bench] slot=27 cubic run=28 seed=28 -C cubic
+[resp_bench] slot=28 cubic run=29 seed=29 -C cubic
+[resp_bench] slot=29 cubic run=30 seed=30 -C cubic
+[resp_bench] link change t=15.0s bw=18 delay=42
+[resp_bench] link change t=15.0s bw=69 delay=67
+[resp_bench] link change t=15.0s bw=97 delay=97
+[resp_bench] link change t=15.0s bw=72 delay=43
+[resp_bench] link change t=15.0s bw=64 delay=71
+[resp_bench] link change t=15.0s bw=88 delay=13
+[resp_bench] link change t=15.0s bw=76 delay=25
+[resp_bench] link change t=15.0s bw=99 delay=93
+[resp_bench] link change t=15.0s bw=79 delay=26
+[resp_bench] link change t=15.1s bw=23 delay=60
+[resp_bench] link change t=15.1s bw=55 delay=98
+[resp_bench] link change t=15.1s bw=98 delay=63
+[resp_bench] link change t=15.1s bw=58 delay=26
+[resp_bench] link change t=15.1s bw=76 delay=14
+[resp_bench] link change t=15.1s bw=12 delay=85
+[resp_bench] link change t=15.1s bw=33 delay=37
+[resp_bench] link change t=15.1s bw=99 delay=45
+[resp_bench] link change t=15.1s bw=37 delay=49
+[resp_bench] link change t=15.1s bw=36 delay=65
+[resp_bench] link change t=15.1s bw=48 delay=56
+[resp_bench] link change t=15.1s bw=79 delay=86
+[resp_bench] link change t=15.1s bw=54 delay=86
+[resp_bench] link change t=15.1s bw=60 delay=93
+[resp_bench] link change t=15.1s bw=71 delay=46
+[resp_bench] link change t=15.1s bw=43 delay=96
+[resp_bench] link change t=15.1s bw=20 delay=56
+[resp_bench] link change t=15.1s bw=94 delay=67
+[resp_bench] link change t=15.1s bw=57 delay=44
+[resp_bench] link change t=15.1s bw=94 delay=77
+[resp_bench] link change t=15.1s bw=13 delay=88
+[resp_bench] link change t=30.0s bw=25 delay=73
+[resp_bench] link change t=30.0s bw=75 delay=85
+[resp_bench] link change t=30.0s bw=33 delay=93
+[resp_bench] link change t=30.0s bw=14 delay=10
+[resp_bench] link change t=30.0s bw=83 delay=11
+[resp_bench] link change t=30.0s bw=89 delay=93
+[resp_bench] link change t=30.0s bw=75 delay=35
+[resp_bench] link change t=30.0s bw=77 delay=41
+[resp_bench] link change t=30.0s bw=57 delay=87
+[resp_bench] link change t=30.1s bw=71 delay=29
+[resp_bench] link change t=30.1s bw=93 delay=77
+[resp_bench] link change t=30.1s bw=34 delay=100
+[resp_bench] link change t=30.1s bw=30 delay=40
+[resp_bench] link change t=30.1s bw=91 delay=70
+[resp_bench] link change t=30.1s bw=49 delay=64
+[resp_bench] link change t=30.1s bw=47 delay=32
+[resp_bench] link change t=30.1s bw=31 delay=34
+[resp_bench] link change t=30.1s bw=91 delay=46
+[resp_bench] link change t=30.1s bw=16 delay=19
+[resp_bench] link change t=30.1s bw=67 delay=33
+[resp_bench] link change t=30.1s bw=87 delay=46
+[resp_bench] link change t=30.1s bw=86 delay=79
+[resp_bench] link change t=30.1s bw=31 delay=95
+[resp_bench] link change t=30.1s bw=52 delay=40
+[resp_bench] link change t=30.1s bw=27 delay=33
+[resp_bench] link change t=30.1s bw=91 delay=22
+[resp_bench] link change t=30.1s bw=63 delay=39
+[resp_bench] link change t=30.1s bw=46 delay=35
+[resp_bench] link change t=30.1s bw=32 delay=38
+[resp_bench] link change t=30.1s bw=95 delay=54
+[resp_bench] link change t=45.0s bw=67 delay=70
+[resp_bench] link change t=45.0s bw=34 delay=33
+[resp_bench] link change t=45.0s bw=39 delay=95
+[resp_bench] link change t=45.0s bw=28 delay=94
+[resp_bench] link change t=45.0s bw=36 delay=69
+[resp_bench] link change t=45.0s bw=36 delay=42
+[resp_bench] link change t=45.0s bw=60 delay=54
+[resp_bench] link change t=45.0s bw=44 delay=42
+[resp_bench] link change t=45.1s bw=70 delay=90
+[resp_bench] link change t=45.1s bw=21 delay=18
+[resp_bench] link change t=45.1s bw=13 delay=69
+[resp_bench] link change t=45.1s bw=15 delay=20
+[resp_bench] link change t=45.1s bw=58 delay=77
+[resp_bench] link change t=45.1s bw=100 delay=100
+[resp_bench] link change t=45.1s bw=31 delay=95
+[resp_bench] link change t=45.1s bw=12 delay=17
+[resp_bench] link change t=45.1s bw=26 delay=91
+[resp_bench] link change t=45.1s bw=17 delay=26
+[resp_bench] link change t=45.1s bw=71 delay=37
+[resp_bench] link change t=45.1s bw=35 delay=72
+[resp_bench] link change t=45.1s bw=15 delay=42
+[resp_bench] link change t=45.1s bw=78 delay=22
+[resp_bench] link change t=45.1s bw=49 delay=42
+[resp_bench] link change t=45.1s bw=28 delay=58
+[resp_bench] link change t=45.1s bw=21 delay=75
+[resp_bench] link change t=45.1s bw=96 delay=10
+[resp_bench] link change t=45.1s bw=19 delay=18
+[resp_bench] link change t=45.1s bw=99 delay=25
+[resp_bench] link change t=45.1s bw=51 delay=83
+[resp_bench] link change t=45.1s bw=67 delay=10
+[resp_bench] link change t=60.0s bw=93 delay=58
+[resp_bench] link change t=60.0s bw=75 delay=70
+[resp_bench] link change t=60.0s bw=28 delay=38
+[resp_bench] link change t=60.0s bw=85 delay=70
+[resp_bench] link change t=60.0s bw=72 delay=45
+[resp_bench] link change t=60.0s bw=16 delay=60
+[resp_bench] link change t=60.0s bw=77 delay=47
+[resp_bench] link change t=60.0s bw=47 delay=19
+[resp_bench] link change t=60.0s bw=84 delay=18
+[resp_bench] link change t=60.1s bw=12 delay=61
+[resp_bench] link change t=60.1s bw=41 delay=93
+[resp_bench] link change t=60.1s bw=27 delay=41
+[resp_bench] link change t=60.1s bw=55 delay=26
+[resp_bench] link change t=60.1s bw=14 delay=49
+[resp_bench] link change t=60.1s bw=69 delay=63
+[resp_bench] link change t=60.1s bw=71 delay=15
+[resp_bench] link change t=60.1s bw=70 delay=75
+[resp_bench] link change t=60.1s bw=87 delay=37
+[resp_bench] link change t=60.1s bw=93 delay=54
+[resp_bench] link change t=60.1s bw=54 delay=60
+[resp_bench] link change t=60.1s bw=97 delay=28
+[resp_bench] link change t=60.1s bw=11 delay=57
+[resp_bench] link change t=60.1s bw=31 delay=13
+[resp_bench] link change t=60.1s bw=79 delay=94
+[resp_bench] link change t=60.1s bw=97 delay=21
+[resp_bench] link change t=60.1s bw=53 delay=74
+[resp_bench] link change t=60.1s bw=90 delay=73
+[resp_bench] link change t=60.1s bw=42 delay=79
+[resp_bench] link change t=60.1s bw=62 delay=94
+[resp_bench] link change t=60.1s bw=56 delay=84
+[resp_bench] link change t=75.0s bw=36 delay=22
+[resp_bench] link change t=75.0s bw=90 delay=88
+[resp_bench] link change t=75.0s bw=92 delay=33
+[resp_bench] link change t=75.0s bw=57 delay=50
+[resp_bench] link change t=75.0s bw=93 delay=30
+[resp_bench] link change t=75.0s bw=58 delay=92
+[resp_bench] link change t=75.0s bw=84 delay=28
+[resp_bench] link change t=75.0s bw=94 delay=67
+[resp_bench] link change t=75.1s bw=87 delay=11
+[resp_bench] link change t=75.1s bw=80 delay=47
+[resp_bench] link change t=75.1s bw=16 delay=30
+[resp_bench] link change t=75.1s bw=98 delay=57
+[resp_bench] link change t=75.1s bw=34 delay=44
+[resp_bench] link change t=75.1s bw=74 delay=36
+[resp_bench] link change t=75.1s bw=45 delay=24
+[resp_bench] link change t=75.1s bw=100 delay=29
+[resp_bench] link change t=75.1s bw=97 delay=89
+[resp_bench] link change t=75.1s bw=62 delay=62
+[resp_bench] link change t=75.1s bw=33 delay=74
+[resp_bench] link change t=75.1s bw=69 delay=87
+[resp_bench] link change t=75.1s bw=20 delay=39
+[resp_bench] link change t=75.1s bw=36 delay=37
+[resp_bench] link change t=75.1s bw=82 delay=64
+[resp_bench] link change t=75.1s bw=63 delay=12
+[resp_bench] link change t=75.1s bw=71 delay=45
+[resp_bench] link change t=75.1s bw=33 delay=71
+[resp_bench] link change t=75.1s bw=17 delay=74
+[resp_bench] link change t=75.1s bw=43 delay=40
+[resp_bench] link change t=75.1s bw=87 delay=14
+[resp_bench] link change t=75.1s bw=52 delay=42
+[resp_bench] link change t=90.0s bw=72 delay=13
+[resp_bench] link change t=90.0s bw=33 delay=22
+[resp_bench] link change t=90.0s bw=26 delay=19
+[resp_bench] link change t=90.0s bw=12 delay=44
+[resp_bench] link change t=90.0s bw=14 delay=76
+[resp_bench] link change t=90.0s bw=27 delay=20
+[resp_bench] link change t=90.0s bw=86 delay=43
+[resp_bench] link change t=90.0s bw=48 delay=69
+[resp_bench] link change t=90.0s bw=70 delay=43
+[resp_bench] link change t=90.1s bw=17 delay=38
+[resp_bench] link change t=90.1s bw=61 delay=92
+[resp_bench] link change t=90.1s bw=24 delay=57
+[resp_bench] link change t=90.1s bw=66 delay=11
+[resp_bench] link change t=90.1s bw=77 delay=40
+[resp_bench] link change t=90.1s bw=84 delay=97
+[resp_bench] link change t=90.1s bw=100 delay=46
+[resp_bench] link change t=90.1s bw=40 delay=24
+[resp_bench] link change t=90.1s bw=13 delay=41
+[resp_bench] link change t=90.1s bw=22 delay=85
+[resp_bench] link change t=90.1s bw=14 delay=23
+[resp_bench] link change t=90.1s bw=47 delay=68
+[resp_bench] link change t=90.1s bw=57 delay=61
+[resp_bench] link change t=90.1s bw=44 delay=16
+[resp_bench] link change t=90.1s bw=19 delay=23
+[resp_bench] link change t=90.1s bw=20 delay=52
+[resp_bench] link change t=90.1s bw=74 delay=31
+[resp_bench] link change t=90.1s bw=92 delay=68
+[resp_bench] link change t=90.1s bw=37 delay=14
+[resp_bench] link change t=90.1s bw=91 delay=38
+[resp_bench] link change t=90.1s bw=28 delay=60
+[resp_bench] link change t=105.0s bw=59 delay=65
+[resp_bench] link change t=105.0s bw=67 delay=48
+[resp_bench] link change t=105.0s bw=78 delay=37
+[resp_bench] link change t=105.0s bw=72 delay=35
+[resp_bench] link change t=105.0s bw=72 delay=51
+[resp_bench] link change t=105.0s bw=23 delay=43
+[resp_bench] link change t=105.0s bw=69 delay=10
+[resp_bench] link change t=105.0s bw=97 delay=60
+[resp_bench] link change t=105.0s bw=80 delay=39
+[resp_bench] link change t=105.1s bw=76 delay=78
+[resp_bench] link change t=105.1s bw=13 delay=68
+[resp_bench] link change t=105.1s bw=70 delay=41
+[resp_bench] link change t=105.1s bw=38 delay=89
+[resp_bench] link change t=105.1s bw=11 delay=66
+[resp_bench] link change t=105.1s bw=10 delay=11
+[resp_bench] link change t=105.1s bw=53 delay=69
+[resp_bench] link change t=105.1s bw=59 delay=63
+[resp_bench] link change t=105.1s bw=50 delay=86
+[resp_bench] link change t=105.1s bw=98 delay=86
+[resp_bench] link change t=105.1s bw=25 delay=83
+[resp_bench] link change t=105.1s bw=43 delay=35
+[resp_bench] link change t=105.1s bw=66 delay=93
+[resp_bench] link change t=105.1s bw=30 delay=26
+[resp_bench] link change t=105.1s bw=91 delay=64
+[resp_bench] link change t=105.1s bw=11 delay=47
+[resp_bench] link change t=105.1s bw=80 delay=88
+[resp_bench] link change t=105.1s bw=30 delay=65
+[resp_bench] link change t=105.1s bw=21 delay=65
+[resp_bench] link change t=105.1s bw=33 delay=41
+[resp_bench] link change t=105.1s bw=26 delay=50
+[resp_bench] link change t=120.0s bw=87 delay=10
+[resp_bench] link change t=120.0s bw=28 delay=21
+[resp_bench] link change t=120.0s bw=47 delay=13
+[resp_bench] link change t=120.0s bw=62 delay=78
+[resp_bench] link change t=120.0s bw=19 delay=41
+[resp_bench] link change t=120.0s bw=76 delay=41
+[resp_bench] link change t=120.0s bw=62 delay=51
+[resp_bench] link change t=120.0s bw=60 delay=25
+[resp_bench] link change t=120.0s bw=34 delay=70
+[resp_bench] link change t=120.1s bw=56 delay=45
+[resp_bench] link change t=120.1s bw=58 delay=79
+[resp_bench] link change t=120.1s bw=72 delay=68
+[resp_bench] link change t=120.1s bw=100 delay=55
+[resp_bench] link change t=120.1s bw=42 delay=74
+[resp_bench] link change t=120.1s bw=69 delay=91
+[resp_bench] link change t=120.1s bw=42 delay=98
+[resp_bench] link change t=120.1s bw=41 delay=62
+[resp_bench] link change t=120.1s bw=57 delay=84
+[resp_bench] link change t=120.1s bw=97 delay=35
+[resp_bench] link change t=120.1s bw=32 delay=80
+[resp_bench] link change t=120.1s bw=40 delay=72
+[resp_bench] link change t=120.1s bw=99 delay=15
+[resp_bench] link change t=120.1s bw=48 delay=52
+[resp_bench] link change t=120.1s bw=68 delay=13
+[resp_bench] link change t=120.1s bw=87 delay=34
+[resp_bench] link change t=120.1s bw=38 delay=54
+[resp_bench] link change t=120.1s bw=63 delay=18
+[resp_bench] link change t=120.1s bw=91 delay=60
+[resp_bench] link change t=120.1s bw=70 delay=84
+[resp_bench] link change t=120.1s bw=39 delay=81
+[resp_bench] link change t=135.0s bw=99 delay=67
+[resp_bench] link change t=135.0s bw=78 delay=98
+[resp_bench] link change t=135.0s bw=65 delay=26
+[resp_bench] link change t=135.0s bw=79 delay=97
+[resp_bench] link change t=135.0s bw=56 delay=15
+[resp_bench] link change t=135.0s bw=13 delay=19
+[resp_bench] link change t=135.0s bw=44 delay=23
+[resp_bench] link change t=135.0s bw=43 delay=38
+[resp_bench] link change t=135.0s bw=79 delay=80
+[resp_bench] link change t=135.1s bw=32 delay=23
+[resp_bench] link change t=135.1s bw=23 delay=83
+[resp_bench] link change t=135.1s bw=59 delay=73
+[resp_bench] link change t=135.1s bw=45 delay=60
+[resp_bench] link change t=135.1s bw=23 delay=20
+[resp_bench] link change t=135.1s bw=35 delay=13
+[resp_bench] link change t=135.1s bw=97 delay=65
+[resp_bench] link change t=135.1s bw=25 delay=51
+[resp_bench] link change t=135.1s bw=20 delay=73
+[resp_bench] link change t=135.1s bw=50 delay=91
+[resp_bench] link change t=135.1s bw=75 delay=89
+[resp_bench] link change t=135.1s bw=10 delay=94
+[resp_bench] link change t=135.1s bw=64 delay=18
+[resp_bench] link change t=135.1s bw=95 delay=28
+[resp_bench] link change t=135.1s bw=40 delay=21
+[resp_bench] link change t=135.1s bw=19 delay=91
+[resp_bench] link change t=135.1s bw=24 delay=13
+[resp_bench] link change t=135.1s bw=58 delay=31
+[resp_bench] link change t=135.1s bw=35 delay=98
+[resp_bench] link change t=135.1s bw=75 delay=57
+[resp_bench] link change t=135.1s bw=67 delay=62
+[resp_bench] link change t=150.0s bw=44 delay=39
+[resp_bench] link change t=150.0s bw=91 delay=15
+[resp_bench] link change t=150.0s bw=97 delay=87
+[resp_bench] link change t=150.0s bw=22 delay=34
+[resp_bench] link change t=150.0s bw=63 delay=27
+[resp_bench] link change t=150.0s bw=30 delay=86
+[resp_bench] link change t=150.0s bw=51 delay=49
+[resp_bench] link change t=150.0s bw=50 delay=55
+[resp_bench] link change t=150.1s bw=70 delay=60
+[resp_bench] link change t=150.1s bw=43 delay=37
+[resp_bench] link change t=150.1s bw=83 delay=34
+[resp_bench] link change t=150.1s bw=100 delay=73
+[resp_bench] link change t=150.1s bw=41 delay=11
+[resp_bench] link change t=150.1s bw=43 delay=54
+[resp_bench] link change t=150.1s bw=97 delay=61
+[resp_bench] link change t=150.1s bw=52 delay=87
+[resp_bench] link change t=150.1s bw=76 delay=31
+[resp_bench] link change t=150.1s bw=50 delay=33
+[resp_bench] link change t=150.1s bw=28 delay=39
+[resp_bench] link change t=150.1s bw=36 delay=35
+[resp_bench] link change t=150.1s bw=89 delay=28
+[resp_bench] link change t=150.1s bw=62 delay=40
+[resp_bench] link change t=150.1s bw=79 delay=66
+[resp_bench] link change t=150.1s bw=100 delay=16
+[resp_bench] link change t=150.1s bw=13 delay=95
+[resp_bench] link change t=150.1s bw=100 delay=67
+[resp_bench] link change t=150.1s bw=83 delay=93
+[resp_bench] link change t=150.1s bw=76 delay=96
+[resp_bench] link change t=150.1s bw=87 delay=49
+[resp_bench] link change t=150.1s bw=80 delay=64
+[resp_bench] link change t=165.0s bw=85 delay=23
+[resp_bench] link change t=165.0s bw=86 delay=60
+[resp_bench] link change t=165.0s bw=11 delay=45
+[resp_bench] link change t=165.0s bw=82 delay=80
+[resp_bench] link change t=165.0s bw=87 delay=55
+[resp_bench] link change t=165.0s bw=77 delay=61
+[resp_bench] link change t=165.0s bw=12 delay=82
+[resp_bench] link change t=165.0s bw=43 delay=56
+[resp_bench] link change t=165.0s bw=91 delay=29
+[resp_bench] link change t=165.1s bw=13 delay=92
+[resp_bench] link change t=165.1s bw=37 delay=62
+[resp_bench] link change t=165.1s bw=61 delay=21
+[resp_bench] link change t=165.1s bw=63 delay=12
+[resp_bench] link change t=165.1s bw=39 delay=36
+[resp_bench] link change t=165.1s bw=27 delay=80
+[resp_bench] link change t=165.1s bw=32 delay=40
+[resp_bench] link change t=165.1s bw=80 delay=55
+[resp_bench] link change t=165.1s bw=72 delay=66
+[resp_bench] link change t=165.1s bw=39 delay=98
+[resp_bench] link change t=165.1s bw=79 delay=63
+[resp_bench] link change t=165.1s bw=74 delay=44
+[resp_bench] link change t=165.1s bw=83 delay=12
+[resp_bench] link change t=165.1s bw=18 delay=22
+[resp_bench] link change t=165.1s bw=38 delay=28
+[resp_bench] link change t=165.1s bw=66 delay=57
+[resp_bench] link change t=165.1s bw=17 delay=82
+[resp_bench] link change t=165.1s bw=64 delay=30
+[resp_bench] link change t=165.1s bw=12 delay=38
+[resp_bench] link change t=165.1s bw=20 delay=88
+[resp_bench] link change t=165.1s bw=50 delay=90
+[resp_bench] link change t=180.0s bw=50 delay=13
+[resp_bench] link change t=180.0s bw=67 delay=93
+[resp_bench] link change t=180.0s bw=28 delay=20
+[resp_bench] link change t=180.0s bw=99 delay=43
+[resp_bench] link change t=180.0s bw=58 delay=63
+[resp_bench] link change t=180.0s bw=89 delay=35
+[resp_bench] link change t=180.0s bw=93 delay=54
+[resp_bench] link change t=180.0s bw=90 delay=90
+[resp_bench] link change t=180.1s bw=39 delay=91
+[resp_bench] link change t=180.1s bw=43 delay=44
+[resp_bench] link change t=180.1s bw=72 delay=39
+[resp_bench] link change t=180.1s bw=45 delay=33
+[resp_bench] link change t=180.1s bw=55 delay=50
+[resp_bench] link change t=180.1s bw=97 delay=48
+[resp_bench] link change t=180.1s bw=15 delay=65
+[resp_bench] link change t=180.1s bw=14 delay=13
+[resp_bench] link change t=180.1s bw=75 delay=90
+[resp_bench] link change t=180.1s bw=35 delay=67
+[resp_bench] link change t=180.1s bw=63 delay=50
+[resp_bench] link change t=180.1s bw=31 delay=40
+[resp_bench] link change t=180.1s bw=17 delay=27
+[resp_bench] link change t=180.1s bw=26 delay=37
+[resp_bench] link change t=180.1s bw=97 delay=52
+[resp_bench] link change t=180.1s bw=25 delay=38
+[resp_bench] link change t=180.1s bw=31 delay=40
+[resp_bench] link change t=180.1s bw=85 delay=43
+[resp_bench] link change t=180.1s bw=75 delay=70
+[resp_bench] link change t=180.1s bw=64 delay=63
+[resp_bench] link change t=180.1s bw=30 delay=53
+[resp_bench] link change t=180.1s bw=87 delay=42
+[resp_bench] link change t=195.0s bw=12 delay=13
+[resp_bench] link change t=195.0s bw=88 delay=93
+[resp_bench] link change t=195.0s bw=43 delay=67
+[resp_bench] link change t=195.0s bw=94 delay=88
+[resp_bench] link change t=195.0s bw=46 delay=96
+[resp_bench] link change t=195.0s bw=78 delay=18
+[resp_bench] link change t=195.0s bw=19 delay=35
+[resp_bench] link change t=195.0s bw=76 delay=29
+[resp_bench] link change t=195.1s bw=29 delay=76
+[resp_bench] link change t=195.1s bw=34 delay=31
+[resp_bench] link change t=195.1s bw=59 delay=30
+[resp_bench] link change t=195.1s bw=65 delay=55
+[resp_bench] link change t=195.1s bw=12 delay=99
+[resp_bench] link change t=195.1s bw=77 delay=23
+[resp_bench] link change t=195.1s bw=62 delay=88
+[resp_bench] link change t=195.1s bw=73 delay=20
+[resp_bench] link change t=195.1s bw=38 delay=49
+[resp_bench] link change t=195.1s bw=86 delay=71
+[resp_bench] link change t=195.1s bw=35 delay=29
+[resp_bench] link change t=195.1s bw=99 delay=26
+[resp_bench] link change t=195.1s bw=49 delay=63
+[resp_bench] link change t=195.1s bw=12 delay=29
+[resp_bench] link change t=195.1s bw=36 delay=17
+[resp_bench] link change t=195.1s bw=35 delay=56
+[resp_bench] link change t=195.1s bw=31 delay=38
+[resp_bench] link change t=195.1s bw=16 delay=94
+[resp_bench] link change t=195.1s bw=56 delay=69
+[resp_bench] link change t=195.1s bw=52 delay=64
+[resp_bench] link change t=195.1s bw=16 delay=24
+[resp_bench] link change t=195.1s bw=90 delay=90
+[resp_bench] link change t=210.0s bw=93 delay=79
+[resp_bench] link change t=210.0s bw=30 delay=89
+[resp_bench] link change t=210.0s bw=65 delay=27
+[resp_bench] link change t=210.0s bw=97 delay=21
+[resp_bench] link change t=210.0s bw=43 delay=68
+[resp_bench] link change t=210.0s bw=61 delay=13
+[resp_bench] link change t=210.0s bw=24 delay=79
+[resp_bench] link change t=210.0s bw=30 delay=80
+[resp_bench] link change t=210.1s bw=59 delay=11
+[resp_bench] link change t=210.1s bw=49 delay=47
+[resp_bench] link change t=210.1s bw=19 delay=27
+[resp_bench] link change t=210.1s bw=44 delay=76
+[resp_bench] link change t=210.1s bw=66 delay=14
+[resp_bench] link change t=210.1s bw=97 delay=42
+[resp_bench] link change t=210.1s bw=75 delay=63
+[resp_bench] link change t=210.1s bw=17 delay=36
+[resp_bench] link change t=210.1s bw=59 delay=56
+[resp_bench] link change t=210.1s bw=100 delay=78
+[resp_bench] link change t=210.1s bw=26 delay=74
+[resp_bench] link change t=210.1s bw=32 delay=74
+[resp_bench] link change t=210.1s bw=34 delay=33
+[resp_bench] link change t=210.1s bw=65 delay=62
+[resp_bench] link change t=210.1s bw=83 delay=35
+[resp_bench] link change t=210.1s bw=91 delay=96
+[resp_bench] link change t=210.1s bw=83 delay=74
+[resp_bench] link change t=210.1s bw=50 delay=58
+[resp_bench] link change t=210.1s bw=84 delay=17
+[resp_bench] link change t=210.1s bw=21 delay=90
+[resp_bench] link change t=210.1s bw=66 delay=54
+[resp_bench] link change t=210.1s bw=87 delay=95
+[resp_bench] link change t=225.0s bw=11 delay=58
+[resp_bench] link change t=225.0s bw=11 delay=77
+[resp_bench] link change t=225.0s bw=42 delay=55
+[resp_bench] link change t=225.0s bw=64 delay=52
+[resp_bench] link change t=225.0s bw=32 delay=97
+[resp_bench] link change t=225.0s bw=41 delay=82
+[resp_bench] link change t=225.0s bw=68 delay=59
+[resp_bench] link change t=225.0s bw=95 delay=94
+[resp_bench] link change t=225.1s bw=95 delay=18
+[resp_bench] link change t=225.1s bw=90 delay=57
+[resp_bench] link change t=225.1s bw=89 delay=89
+[resp_bench] link change t=225.1s bw=62 delay=70
+[resp_bench] link change t=225.1s bw=14 delay=85
+[resp_bench] link change t=225.1s bw=76 delay=98
+[resp_bench] link change t=225.1s bw=88 delay=30
+[resp_bench] link change t=225.1s bw=39 delay=83
+[resp_bench] link change t=225.1s bw=81 delay=97
+[resp_bench] link change t=225.1s bw=22 delay=86
+[resp_bench] link change t=225.1s bw=96 delay=97
+[resp_bench] link change t=225.1s bw=24 delay=84
+[resp_bench] link change t=225.1s bw=35 delay=96
+[resp_bench] link change t=225.1s bw=41 delay=84
+[resp_bench] link change t=225.1s bw=19 delay=75
+[resp_bench] link change t=225.1s bw=90 delay=13
+[resp_bench] link change t=225.1s bw=83 delay=84
+[resp_bench] link change t=225.1s bw=52 delay=79
+[resp_bench] link change t=225.1s bw=85 delay=18
+[resp_bench] link change t=225.1s bw=64 delay=77
+[resp_bench] link change t=225.1s bw=11 delay=92
+[resp_bench] link change t=225.1s bw=76 delay=72
+[resp_bench] link change t=240.0s bw=97 delay=37
+[resp_bench] link change t=240.0s bw=18 delay=17
+[resp_bench] link change t=240.0s bw=39 delay=72
+[resp_bench] link change t=240.0s bw=21 delay=56
+[resp_bench] link change t=240.0s bw=48 delay=94
+[resp_bench] link change t=240.0s bw=96 delay=45
+[resp_bench] link change t=240.0s bw=19 delay=22
+[resp_bench] link change t=240.0s bw=45 delay=31
+[resp_bench] link change t=240.0s bw=30 delay=85
+[resp_bench] link change t=240.1s bw=66 delay=26
+[resp_bench] link change t=240.1s bw=21 delay=87
+[resp_bench] link change t=240.1s bw=58 delay=24
+[resp_bench] link change t=240.1s bw=73 delay=98
+[resp_bench] link change t=240.1s bw=13 delay=13
+[resp_bench] link change t=240.1s bw=57 delay=94
+[resp_bench] link change t=240.1s bw=68 delay=63
+[resp_bench] link change t=240.1s bw=36 delay=52
+[resp_bench] link change t=240.1s bw=97 delay=53
+[resp_bench] link change t=240.1s bw=69 delay=68
+[resp_bench] link change t=240.1s bw=94 delay=44
+[resp_bench] link change t=240.1s bw=84 delay=55
+[resp_bench] link change t=240.1s bw=77 delay=82
+[resp_bench] link change t=240.1s bw=98 delay=59
+[resp_bench] link change t=240.1s bw=73 delay=37
+[resp_bench] link change t=240.1s bw=97 delay=51
+[resp_bench] link change t=240.1s bw=61 delay=20
+[resp_bench] link change t=240.1s bw=31 delay=81
+[resp_bench] link change t=240.1s bw=60 delay=16
+[resp_bench] link change t=240.1s bw=71 delay=42
+[resp_bench] link change t=240.1s bw=82 delay=77
+[resp_bench] link change t=255.0s bw=64 delay=13
+[resp_bench] link change t=255.0s bw=14 delay=34
+[resp_bench] link change t=255.0s bw=80 delay=82
+[resp_bench] link change t=255.0s bw=62 delay=42
+[resp_bench] link change t=255.0s bw=56 delay=27
+[resp_bench] link change t=255.0s bw=64 delay=82
+[resp_bench] link change t=255.0s bw=63 delay=12
+[resp_bench] link change t=255.0s bw=11 delay=93
+[resp_bench] link change t=255.0s bw=15 delay=48
+[resp_bench] link change t=255.1s bw=53 delay=95
+[resp_bench] link change t=255.1s bw=26 delay=10
+[resp_bench] link change t=255.1s bw=94 delay=43
+[resp_bench] link change t=255.1s bw=79 delay=25
+[resp_bench] link change t=255.1s bw=24 delay=93
+[resp_bench] link change t=255.1s bw=36 delay=83
+[resp_bench] link change t=255.1s bw=49 delay=19
+[resp_bench] link change t=255.1s bw=32 delay=89
+[resp_bench] link change t=255.1s bw=88 delay=39
+[resp_bench] link change t=255.1s bw=32 delay=40
+[resp_bench] link change t=255.1s bw=47 delay=79
+[resp_bench] link change t=255.1s bw=27 delay=88
+[resp_bench] link change t=255.1s bw=17 delay=99
+[resp_bench] link change t=255.1s bw=86 delay=90
+[resp_bench] link change t=255.1s bw=72 delay=20
+[resp_bench] link change t=255.1s bw=97 delay=61
+[resp_bench] link change t=255.1s bw=23 delay=47
+[resp_bench] link change t=255.1s bw=63 delay=55
+[resp_bench] link change t=255.1s bw=38 delay=15
+[resp_bench] link change t=255.1s bw=35 delay=79
+[resp_bench] link change t=255.1s bw=48 delay=43
+[resp_bench] link change t=270.0s bw=77 delay=38
+[resp_bench] link change t=270.0s bw=40 delay=86
+[resp_bench] link change t=270.0s bw=64 delay=95
+[resp_bench] link change t=270.0s bw=66 delay=99
+[resp_bench] link change t=270.0s bw=68 delay=40
+[resp_bench] link change t=270.0s bw=22 delay=96
+[resp_bench] link change t=270.0s bw=22 delay=84
+[resp_bench] link change t=270.0s bw=18 delay=25
+[resp_bench] link change t=270.0s bw=13 delay=44
+[resp_bench] link change t=270.1s bw=59 delay=74
+[resp_bench] link change t=270.1s bw=10 delay=36
+[resp_bench] link change t=270.1s bw=22 delay=18
+[resp_bench] link change t=270.1s bw=57 delay=12
+[resp_bench] link change t=270.1s bw=96 delay=64
+[resp_bench] link change t=270.1s bw=41 delay=14
+[resp_bench] link change t=270.1s bw=79 delay=93
+[resp_bench] link change t=270.1s bw=37 delay=56
+[resp_bench] link change t=270.1s bw=69 delay=82
+[resp_bench] link change t=270.1s bw=34 delay=96
+[resp_bench] link change t=270.1s bw=39 delay=13
+[resp_bench] link change t=270.1s bw=96 delay=67
+[resp_bench] link change t=270.1s bw=78 delay=25
+[resp_bench] link change t=270.1s bw=91 delay=18
+[resp_bench] link change t=270.1s bw=10 delay=53
+[resp_bench] link change t=270.1s bw=21 delay=12
+[resp_bench] link change t=270.1s bw=51 delay=88
+[resp_bench] link change t=270.1s bw=36 delay=96
+[resp_bench] link change t=270.1s bw=53 delay=88
+[resp_bench] link change t=270.1s bw=100 delay=47
+[resp_bench] link change t=270.1s bw=81 delay=27
+[resp_bench] link change t=285.0s bw=66 delay=73
+[resp_bench] link change t=285.0s bw=13 delay=69
+[resp_bench] link change t=285.0s bw=56 delay=65
+[resp_bench] link change t=285.0s bw=22 delay=35
+[resp_bench] link change t=285.0s bw=66 delay=88
+[resp_bench] link change t=285.0s bw=45 delay=91
+[resp_bench] link change t=285.0s bw=64 delay=60
+[resp_bench] link change t=285.0s bw=86 delay=53
+[resp_bench] link change t=285.1s bw=70 delay=86
+[resp_bench] link change t=285.1s bw=41 delay=32
+[resp_bench] link change t=285.1s bw=29 delay=21
+[resp_bench] link change t=285.1s bw=37 delay=31
+[resp_bench] link change t=285.1s bw=82 delay=57
+[resp_bench] link change t=285.1s bw=59 delay=89
+[resp_bench] link change t=285.1s bw=56 delay=94
+[resp_bench] link change t=285.1s bw=49 delay=62
+[resp_bench] link change t=285.1s bw=56 delay=66
+[resp_bench] link change t=285.1s bw=75 delay=15
+[resp_bench] link change t=285.1s bw=26 delay=35
+[resp_bench] link change t=285.1s bw=17 delay=94
+[resp_bench] link change t=285.1s bw=52 delay=43
+[resp_bench] link change t=285.1s bw=30 delay=89
+[resp_bench] link change t=285.1s bw=32 delay=51
+[resp_bench] link change t=285.1s bw=48 delay=45
+[resp_bench] link change t=285.1s bw=38 delay=63
+[resp_bench] link change t=285.1s bw=93 delay=39
+[resp_bench] link change t=285.1s bw=47 delay=63
+[resp_bench] link change t=285.1s bw=61 delay=38
+[resp_bench] link change t=285.1s bw=35 delay=22
+[resp_bench] link change t=285.1s bw=38 delay=49
+[resp_bench] slot=24 cubic run=31 seed=31 -C cubic
+[resp_bench] cubic run=25/50 done (1/50)
+[resp_bench] slot=12 cubic run=32 seed=32 -C cubic
+[resp_bench] cubic run=13/50 done (2/50)
+[resp_bench] slot=0 cubic run=33 seed=33 -C cubic
+[resp_bench] cubic run=1/50 done (3/50)
+[resp_bench] slot=10 cubic run=34 seed=34 -C cubic
+[resp_bench] cubic run=11/50 done (4/50)
+[resp_bench] slot=9 cubic run=35 seed=35 -C cubic
+[resp_bench] cubic run=10/50 done (5/50)
+[resp_bench] slot=14 cubic run=36 seed=36 -C cubic
+[resp_bench] cubic run=15/50 done (6/50)
+[resp_bench] slot=17 cubic run=37 seed=37 -C cubic
+[resp_bench] cubic run=18/50 done (7/50)
+[resp_bench] slot=13 cubic run=38 seed=38 -C cubic
+[resp_bench] cubic run=14/50 done (8/50)
+[resp_bench] slot=5 cubic run=39 seed=39 -C cubic
+[resp_bench] cubic run=6/50 done (9/50)
+[resp_bench] cubic run=19/50 done (10/50)
+[resp_bench] slot=18 cubic run=40 seed=40 -C cubic
+[resp_bench] slot=6 cubic run=41 seed=41 -C cubic
+[resp_bench] cubic run=7/50 done (11/50)
+[resp_bench] slot=4 cubic run=42 seed=42 -C cubic
+[resp_bench] cubic run=5/50 done (12/50)
+[resp_bench] slot=3 cubic run=43 seed=43 -C cubic
+[resp_bench] cubic run=4/50 done (13/50)
+[resp_bench] slot=7 cubic run=44 seed=44 -C cubic
+[resp_bench] cubic run=8/50 done (14/50)
+[resp_bench] slot=29 cubic run=45 seed=45 -C cubic
+[resp_bench] cubic run=30/50 done (15/50)
+[resp_bench] slot=28 cubic run=46 seed=46 -C cubic
+[resp_bench] cubic run=29/50 done (16/50)
+[resp_bench] slot=11 cubic run=47 seed=47 -C cubic
+[resp_bench] cubic run=12/50 done (17/50)
+[resp_bench] slot=16 cubic run=48 seed=48 -C cubic
+[resp_bench] cubic run=17/50 done (18/50)
+[resp_bench] slot=2 cubic run=49 seed=49 -C cubic
+[resp_bench] cubic run=3/50 done (19/50)
+[resp_bench] slot=21 cubic run=50 seed=50 -C cubic
+[resp_bench] cubic run=22/50 done (20/50)
+[resp_bench] cubic run=24/50 done (21/50)
+[resp_bench] cubic run=9/50 done (22/50)
+[resp_bench] cubic run=23/50 done (23/50)
+[resp_bench] cubic run=27/50 done (24/50)
+[resp_bench] cubic run=26/50 done (25/50)
+[resp_bench] cubic run=21/50 done (26/50)
+[resp_bench] cubic run=16/50 done (27/50)
+[resp_bench] cubic run=28/50 done (28/50)
+[resp_bench] cubic run=20/50 done (29/50)
+[resp_bench] cubic run=2/50 done (30/50)
+[resp_bench] link change t=15.0s bw=24 delay=60
+[resp_bench] link change t=15.0s bw=28 delay=48
+[resp_bench] link change t=15.0s bw=84 delay=13
+[resp_bench] link change t=15.0s bw=90 delay=39
+[resp_bench] link change t=15.0s bw=59 delay=13
+[resp_bench] link change t=15.0s bw=26 delay=53
+[resp_bench] link change t=15.0s bw=64 delay=23
+[resp_bench] link change t=15.0s bw=79 delay=99
+[resp_bench] link change t=15.0s bw=77 delay=14
+[resp_bench] link change t=15.0s bw=12 delay=46
+[resp_bench] link change t=15.0s bw=21 delay=89
+[resp_bench] link change t=15.0s bw=15 delay=85
+[resp_bench] link change t=15.0s bw=99 delay=28
+[resp_bench] link change t=15.0s bw=39 delay=31
+[resp_bench] link change t=15.0s bw=13 delay=45
+[resp_bench] link change t=15.0s bw=65 delay=80
+[resp_bench] link change t=15.0s bw=72 delay=42
+[resp_bench] link change t=15.0s bw=26 delay=81
+[resp_bench] link change t=15.0s bw=62 delay=24
+[resp_bench] link change t=15.0s bw=56 delay=91
+[resp_bench] link change t=30.0s bw=28 delay=97
+[resp_bench] link change t=30.0s bw=99 delay=40
+[resp_bench] link change t=30.0s bw=39 delay=13
+[resp_bench] link change t=30.0s bw=45 delay=71
+[resp_bench] link change t=30.0s bw=34 delay=38
+[resp_bench] link change t=30.0s bw=29 delay=46
+[resp_bench] link change t=30.0s bw=18 delay=56
+[resp_bench] link change t=30.0s bw=24 delay=32
+[resp_bench] link change t=30.0s bw=41 delay=46
+[resp_bench] link change t=30.0s bw=95 delay=91
+[resp_bench] link change t=30.0s bw=20 delay=10
+[resp_bench] link change t=30.0s bw=85 delay=39
+[resp_bench] link change t=30.0s bw=69 delay=57
+[resp_bench] link change t=30.0s bw=59 delay=83
+[resp_bench] link change t=30.0s bw=41 delay=38
+[resp_bench] link change t=30.0s bw=68 delay=83
+[resp_bench] link change t=30.0s bw=78 delay=48
+[resp_bench] link change t=30.0s bw=20 delay=48
+[resp_bench] link change t=30.0s bw=51 delay=80
+[resp_bench] link change t=30.0s bw=41 delay=98
+[resp_bench] link change t=45.0s bw=15 delay=27
+[resp_bench] link change t=45.0s bw=73 delay=13
+[resp_bench] link change t=45.0s bw=59 delay=56
+[resp_bench] link change t=45.0s bw=93 delay=78
+[resp_bench] link change t=45.0s bw=60 delay=82
+[resp_bench] link change t=45.0s bw=65 delay=42
+[resp_bench] link change t=45.0s bw=99 delay=69
+[resp_bench] link change t=45.0s bw=58 delay=38
+[resp_bench] link change t=45.0s bw=95 delay=91
+[resp_bench] link change t=45.0s bw=74 delay=90
+[resp_bench] link change t=45.0s bw=75 delay=14
+[resp_bench] link change t=45.0s bw=91 delay=76
+[resp_bench] link change t=45.0s bw=95 delay=99
+[resp_bench] link change t=45.0s bw=98 delay=46
+[resp_bench] link change t=45.0s bw=27 delay=23
+[resp_bench] link change t=45.0s bw=53 delay=42
+[resp_bench] link change t=45.0s bw=74 delay=34
+[resp_bench] link change t=45.0s bw=53 delay=12
+[resp_bench] link change t=45.0s bw=75 delay=16
+[resp_bench] link change t=45.0s bw=70 delay=52
+[resp_bench] link change t=60.0s bw=24 delay=78
+[resp_bench] link change t=60.0s bw=14 delay=22
+[resp_bench] link change t=60.0s bw=18 delay=64
+[resp_bench] link change t=60.0s bw=77 delay=33
+[resp_bench] link change t=60.0s bw=10 delay=92
+[resp_bench] link change t=60.0s bw=82 delay=17
+[resp_bench] link change t=60.0s bw=57 delay=15
+[resp_bench] link change t=60.0s bw=47 delay=13
+[resp_bench] link change t=60.0s bw=95 delay=36
+[resp_bench] link change t=60.0s bw=90 delay=57
+[resp_bench] link change t=60.0s bw=32 delay=41
+[resp_bench] link change t=60.0s bw=29 delay=84
+[resp_bench] link change t=60.0s bw=22 delay=68
+[resp_bench] link change t=60.0s bw=80 delay=45
+[resp_bench] link change t=60.0s bw=96 delay=79
+[resp_bench] link change t=60.0s bw=75 delay=59
+[resp_bench] link change t=60.0s bw=65 delay=31
+[resp_bench] link change t=60.0s bw=19 delay=71
+[resp_bench] link change t=60.0s bw=97 delay=15
+[resp_bench] link change t=60.0s bw=20 delay=78
+[resp_bench] link change t=75.0s bw=39 delay=27
+[resp_bench] link change t=75.0s bw=51 delay=75
+[resp_bench] link change t=75.0s bw=49 delay=53
+[resp_bench] link change t=75.0s bw=93 delay=88
+[resp_bench] link change t=75.0s bw=42 delay=96
+[resp_bench] link change t=75.0s bw=77 delay=45
+[resp_bench] link change t=75.0s bw=87 delay=95
+[resp_bench] link change t=75.0s bw=38 delay=24
+[resp_bench] link change t=75.0s bw=26 delay=54
+[resp_bench] link change t=75.0s bw=44 delay=93
+[resp_bench] link change t=75.0s bw=66 delay=77
+[resp_bench] link change t=75.0s bw=78 delay=14
+[resp_bench] link change t=75.0s bw=86 delay=73
+[resp_bench] link change t=75.0s bw=21 delay=85
+[resp_bench] link change t=75.0s bw=59 delay=83
+[resp_bench] link change t=75.0s bw=60 delay=88
+[resp_bench] link change t=75.0s bw=29 delay=94
+[resp_bench] link change t=75.0s bw=11 delay=24
+[resp_bench] link change t=75.0s bw=45 delay=29
+[resp_bench] link change t=75.0s bw=50 delay=38
+[resp_bench] link change t=90.0s bw=28 delay=14
+[resp_bench] link change t=90.0s bw=52 delay=17
+[resp_bench] link change t=90.0s bw=22 delay=84
+[resp_bench] link change t=90.0s bw=74 delay=51
+[resp_bench] link change t=90.0s bw=55 delay=100
+[resp_bench] link change t=90.0s bw=93 delay=56
+[resp_bench] link change t=90.0s bw=31 delay=85
+[resp_bench] link change t=90.0s bw=82 delay=11
+[resp_bench] link change t=90.0s bw=45 delay=66
+[resp_bench] link change t=90.0s bw=23 delay=97
+[resp_bench] link change t=90.0s bw=65 delay=56
+[resp_bench] link change t=90.0s bw=13 delay=18
+[resp_bench] link change t=90.0s bw=87 delay=12
+[resp_bench] link change t=90.0s bw=11 delay=41
+[resp_bench] link change t=90.0s bw=64 delay=14
+[resp_bench] link change t=90.0s bw=15 delay=63
+[resp_bench] link change t=90.0s bw=23 delay=73
+[resp_bench] link change t=90.0s bw=46 delay=25
+[resp_bench] link change t=90.0s bw=68 delay=15
+[resp_bench] link change t=90.0s bw=96 delay=81
+[resp_bench] link change t=105.0s bw=94 delay=17
+[resp_bench] link change t=105.0s bw=76 delay=98
+[resp_bench] link change t=105.0s bw=75 delay=29
+[resp_bench] link change t=105.0s bw=97 delay=77
+[resp_bench] link change t=105.0s bw=32 delay=13
+[resp_bench] link change t=105.0s bw=84 delay=22
+[resp_bench] link change t=105.0s bw=54 delay=51
+[resp_bench] link change t=105.0s bw=22 delay=30
+[resp_bench] link change t=105.0s bw=13 delay=77
+[resp_bench] link change t=105.0s bw=81 delay=44
+[resp_bench] link change t=105.0s bw=68 delay=86
+[resp_bench] link change t=105.0s bw=50 delay=90
+[resp_bench] link change t=105.0s bw=75 delay=65
+[resp_bench] link change t=105.0s bw=94 delay=12
+[resp_bench] link change t=105.0s bw=13 delay=21
+[resp_bench] link change t=105.0s bw=94 delay=13
+[resp_bench] link change t=105.0s bw=93 delay=38
+[resp_bench] link change t=105.0s bw=49 delay=93
+[resp_bench] link change t=105.0s bw=90 delay=79
+[resp_bench] link change t=105.0s bw=20 delay=29
+[resp_bench] link change t=120.0s bw=27 delay=39
+[resp_bench] link change t=120.0s bw=70 delay=57
+[resp_bench] link change t=120.0s bw=22 delay=45
+[resp_bench] link change t=120.0s bw=71 delay=66
+[resp_bench] link change t=120.0s bw=47 delay=96
+[resp_bench] link change t=120.0s bw=56 delay=11
+[resp_bench] link change t=120.0s bw=44 delay=100
+[resp_bench] link change t=120.0s bw=75 delay=98
+[resp_bench] link change t=120.0s bw=26 delay=17
+[resp_bench] link change t=120.0s bw=46 delay=58
+[resp_bench] link change t=120.0s bw=79 delay=19
+[resp_bench] link change t=120.0s bw=16 delay=13
+[resp_bench] link change t=120.0s bw=83 delay=57
+[resp_bench] link change t=120.0s bw=66 delay=29
+[resp_bench] link change t=120.0s bw=37 delay=39
+[resp_bench] link change t=120.0s bw=23 delay=10
+[resp_bench] link change t=120.0s bw=37 delay=75
+[resp_bench] link change t=120.0s bw=14 delay=89
+[resp_bench] link change t=120.0s bw=74 delay=38
+[resp_bench] link change t=120.0s bw=54 delay=22
+[resp_bench] link change t=135.0s bw=78 delay=67
+[resp_bench] link change t=135.0s bw=86 delay=10
+[resp_bench] link change t=135.0s bw=54 delay=88
+[resp_bench] link change t=135.0s bw=46 delay=96
+[resp_bench] link change t=135.0s bw=19 delay=56
+[resp_bench] link change t=135.0s bw=75 delay=11
+[resp_bench] link change t=135.0s bw=52 delay=89
+[resp_bench] link change t=135.0s bw=48 delay=98
+[resp_bench] link change t=135.0s bw=92 delay=35
+[resp_bench] link change t=135.0s bw=83 delay=62
+[resp_bench] link change t=135.0s bw=64 delay=66
+[resp_bench] link change t=135.0s bw=27 delay=80
+[resp_bench] link change t=135.0s bw=89 delay=80
+[resp_bench] link change t=135.0s bw=29 delay=50
+[resp_bench] link change t=135.0s bw=74 delay=87
+[resp_bench] link change t=135.0s bw=43 delay=71
+[resp_bench] link change t=135.0s bw=18 delay=27
+[resp_bench] link change t=135.0s bw=81 delay=75
+[resp_bench] link change t=135.0s bw=87 delay=46
+[resp_bench] link change t=135.0s bw=54 delay=50
+[resp_bench] link change t=150.0s bw=77 delay=62
+[resp_bench] link change t=150.0s bw=79 delay=26
+[resp_bench] link change t=150.0s bw=10 delay=29
+[resp_bench] link change t=150.0s bw=91 delay=19
+[resp_bench] link change t=150.0s bw=11 delay=23
+[resp_bench] link change t=150.0s bw=22 delay=73
+[resp_bench] link change t=150.0s bw=49 delay=70
+[resp_bench] link change t=150.0s bw=91 delay=58
+[resp_bench] link change t=150.0s bw=89 delay=100
+[resp_bench] link change t=150.0s bw=28 delay=16
+[resp_bench] link change t=150.0s bw=72 delay=59
+[resp_bench] link change t=150.0s bw=47 delay=77
+[resp_bench] link change t=150.0s bw=65 delay=60
+[resp_bench] link change t=150.0s bw=31 delay=42
+[resp_bench] link change t=150.0s bw=13 delay=81
+[resp_bench] link change t=150.0s bw=79 delay=11
+[resp_bench] link change t=150.0s bw=29 delay=70
+[resp_bench] link change t=150.0s bw=44 delay=29
+[resp_bench] link change t=150.0s bw=83 delay=57
+[resp_bench] link change t=150.0s bw=38 delay=34
+[resp_bench] link change t=165.0s bw=36 delay=85
+[resp_bench] link change t=165.0s bw=77 delay=11
+[resp_bench] link change t=165.0s bw=77 delay=21
+[resp_bench] link change t=165.0s bw=48 delay=62
+[resp_bench] link change t=165.0s bw=64 delay=54
+[resp_bench] link change t=165.0s bw=57 delay=13
+[resp_bench] link change t=165.0s bw=84 delay=61
+[resp_bench] link change t=165.0s bw=85 delay=61
+[resp_bench] link change t=165.0s bw=68 delay=16
+[resp_bench] link change t=165.0s bw=21 delay=62
+[resp_bench] link change t=165.0s bw=54 delay=60
+[resp_bench] link change t=165.0s bw=52 delay=21
+[resp_bench] link change t=165.0s bw=32 delay=17
+[resp_bench] link change t=165.0s bw=93 delay=98
+[resp_bench] link change t=165.0s bw=35 delay=93
+[resp_bench] link change t=165.0s bw=50 delay=82
+[resp_bench] link change t=165.0s bw=37 delay=13
+[resp_bench] link change t=165.0s bw=37 delay=64
+[resp_bench] link change t=165.0s bw=61 delay=13
+[resp_bench] link change t=165.0s bw=18 delay=52
+[resp_bench] link change t=180.0s bw=21 delay=25
+[resp_bench] link change t=180.0s bw=72 delay=35
+[resp_bench] link change t=180.0s bw=17 delay=57
+[resp_bench] link change t=180.0s bw=49 delay=76
+[resp_bench] link change t=180.0s bw=64 delay=22
+[resp_bench] link change t=180.0s bw=53 delay=96
+[resp_bench] link change t=180.0s bw=38 delay=88
+[resp_bench] link change t=180.0s bw=98 delay=95
+[resp_bench] link change t=180.0s bw=32 delay=87
+[resp_bench] link change t=180.0s bw=41 delay=60
+[resp_bench] link change t=180.0s bw=19 delay=79
+[resp_bench] link change t=180.0s bw=60 delay=100
+[resp_bench] link change t=180.0s bw=23 delay=25
+[resp_bench] link change t=180.0s bw=89 delay=84
+[resp_bench] link change t=180.0s bw=99 delay=79
+[resp_bench] link change t=180.0s bw=64 delay=39
+[resp_bench] link change t=180.0s bw=19 delay=64
+[resp_bench] link change t=180.0s bw=19 delay=88
+[resp_bench] link change t=180.0s bw=41 delay=27
+[resp_bench] link change t=180.0s bw=87 delay=87
+[resp_bench] link change t=195.0s bw=12 delay=61
+[resp_bench] link change t=195.0s bw=46 delay=35
+[resp_bench] link change t=195.0s bw=42 delay=80
+[resp_bench] link change t=195.0s bw=73 delay=16
+[resp_bench] link change t=195.0s bw=60 delay=75
+[resp_bench] link change t=195.0s bw=73 delay=16
+[resp_bench] link change t=195.0s bw=20 delay=77
+[resp_bench] link change t=195.0s bw=51 delay=55
+[resp_bench] link change t=195.0s bw=50 delay=24
+[resp_bench] link change t=195.0s bw=31 delay=25
+[resp_bench] link change t=195.0s bw=46 delay=56
+[resp_bench] link change t=195.0s bw=71 delay=56
+[resp_bench] link change t=195.0s bw=58 delay=29
+[resp_bench] link change t=195.0s bw=17 delay=25
+[resp_bench] link change t=195.0s bw=63 delay=38
+[resp_bench] link change t=195.0s bw=40 delay=76
+[resp_bench] link change t=195.0s bw=18 delay=26
+[resp_bench] link change t=195.0s bw=62 delay=28
+[resp_bench] link change t=195.0s bw=22 delay=64
+[resp_bench] link change t=195.0s bw=64 delay=91
+[resp_bench] link change t=210.0s bw=53 delay=35
+[resp_bench] link change t=210.0s bw=67 delay=20
+[resp_bench] link change t=210.0s bw=100 delay=17
+[resp_bench] link change t=210.0s bw=87 delay=96
+[resp_bench] link change t=210.0s bw=84 delay=48
+[resp_bench] link change t=210.0s bw=12 delay=40
+[resp_bench] link change t=210.0s bw=72 delay=28
+[resp_bench] link change t=210.0s bw=19 delay=53
+[resp_bench] link change t=210.0s bw=42 delay=51
+[resp_bench] link change t=210.0s bw=75 delay=73
+[resp_bench] link change t=210.0s bw=92 delay=100
+[resp_bench] link change t=210.0s bw=29 delay=70
+[resp_bench] link change t=210.0s bw=22 delay=30
+[resp_bench] link change t=210.0s bw=85 delay=14
+[resp_bench] link change t=210.0s bw=67 delay=85
+[resp_bench] link change t=210.0s bw=75 delay=55
+[resp_bench] link change t=210.0s bw=73 delay=96
+[resp_bench] link change t=210.0s bw=99 delay=17
+[resp_bench] link change t=210.0s bw=58 delay=51
+[resp_bench] link change t=210.0s bw=21 delay=18
+[resp_bench] link change t=225.0s bw=36 delay=52
+[resp_bench] link change t=225.0s bw=52 delay=25
+[resp_bench] link change t=225.0s bw=59 delay=31
+[resp_bench] link change t=225.0s bw=64 delay=45
+[resp_bench] link change t=225.0s bw=44 delay=18
+[resp_bench] link change t=225.0s bw=51 delay=20
+[resp_bench] link change t=225.0s bw=65 delay=77
+[resp_bench] link change t=225.0s bw=46 delay=89
+[resp_bench] link change t=225.0s bw=28 delay=75
+[resp_bench] link change t=225.0s bw=65 delay=85
+[resp_bench] link change t=225.0s bw=99 delay=36
+[resp_bench] link change t=225.0s bw=69 delay=19
+[resp_bench] link change t=225.0s bw=75 delay=73
+[resp_bench] link change t=225.0s bw=65 delay=46
+[resp_bench] link change t=225.0s bw=45 delay=10
+[resp_bench] link change t=225.0s bw=66 delay=40
+[resp_bench] link change t=225.0s bw=30 delay=26
+[resp_bench] link change t=225.0s bw=14 delay=32
+[resp_bench] link change t=225.0s bw=55 delay=44
+[resp_bench] link change t=225.0s bw=98 delay=87
+[resp_bench] link change t=240.0s bw=60 delay=56
+[resp_bench] link change t=240.0s bw=14 delay=77
+[resp_bench] link change t=240.0s bw=85 delay=91
+[resp_bench] link change t=240.0s bw=50 delay=81
+[resp_bench] link change t=240.0s bw=68 delay=65
+[resp_bench] link change t=240.0s bw=30 delay=53
+[resp_bench] link change t=240.0s bw=41 delay=11
+[resp_bench] link change t=240.0s bw=30 delay=24
+[resp_bench] link change t=240.0s bw=97 delay=76
+[resp_bench] link change t=240.0s bw=77 delay=47
+[resp_bench] link change t=240.0s bw=82 delay=56
+[resp_bench] link change t=240.0s bw=68 delay=99
+[resp_bench] link change t=240.0s bw=26 delay=59
+[resp_bench] link change t=240.0s bw=37 delay=19
+[resp_bench] link change t=240.0s bw=14 delay=81
+[resp_bench] link change t=240.0s bw=17 delay=99
+[resp_bench] link change t=240.0s bw=30 delay=99
+[resp_bench] link change t=240.0s bw=51 delay=42
+[resp_bench] link change t=240.0s bw=93 delay=61
+[resp_bench] link change t=240.0s bw=52 delay=98
+[resp_bench] link change t=255.0s bw=86 delay=41
+[resp_bench] link change t=255.0s bw=24 delay=30
+[resp_bench] link change t=255.0s bw=49 delay=47
+[resp_bench] link change t=255.0s bw=97 delay=41
+[resp_bench] link change t=255.0s bw=42 delay=83
+[resp_bench] link change t=255.0s bw=31 delay=82
+[resp_bench] link change t=255.0s bw=58 delay=57
+[resp_bench] link change t=255.0s bw=75 delay=18
+[resp_bench] link change t=255.0s bw=22 delay=62
+[resp_bench] link change t=255.0s bw=33 delay=72
+[resp_bench] link change t=255.0s bw=91 delay=100
+[resp_bench] link change t=255.0s bw=79 delay=89
+[resp_bench] link change t=255.0s bw=86 delay=74
+[resp_bench] link change t=255.0s bw=56 delay=70
+[resp_bench] link change t=255.0s bw=64 delay=53
+[resp_bench] link change t=255.0s bw=57 delay=98
+[resp_bench] link change t=255.0s bw=80 delay=47
+[resp_bench] link change t=255.0s bw=55 delay=50
+[resp_bench] link change t=255.0s bw=88 delay=89
+[resp_bench] link change t=255.0s bw=92 delay=65
+[resp_bench] link change t=270.0s bw=36 delay=37
+[resp_bench] link change t=270.0s bw=66 delay=12
+[resp_bench] link change t=270.0s bw=58 delay=50
+[resp_bench] link change t=270.0s bw=25 delay=17
+[resp_bench] link change t=270.0s bw=51 delay=82
+[resp_bench] link change t=270.0s bw=19 delay=71
+[resp_bench] link change t=270.0s bw=78 delay=97
+[resp_bench] link change t=270.0s bw=85 delay=22
+[resp_bench] link change t=270.0s bw=16 delay=50
+[resp_bench] link change t=270.0s bw=83 delay=14
+[resp_bench] link change t=270.0s bw=100 delay=85
+[resp_bench] link change t=270.0s bw=24 delay=65
+[resp_bench] link change t=270.0s bw=44 delay=83
+[resp_bench] link change t=270.0s bw=26 delay=81
+[resp_bench] link change t=270.0s bw=45 delay=29
+[resp_bench] link change t=270.0s bw=55 delay=86
+[resp_bench] link change t=270.0s bw=53 delay=99
+[resp_bench] link change t=270.0s bw=22 delay=62
+[resp_bench] link change t=270.0s bw=16 delay=94
+[resp_bench] link change t=270.0s bw=10 delay=39
+[resp_bench] link change t=285.0s bw=63 delay=84
+[resp_bench] link change t=285.0s bw=65 delay=16
+[resp_bench] link change t=285.0s bw=37 delay=36
+[resp_bench] link change t=285.0s bw=50 delay=46
+[resp_bench] link change t=285.0s bw=10 delay=100
+[resp_bench] link change t=285.0s bw=56 delay=20
+[resp_bench] link change t=285.0s bw=88 delay=74
+[resp_bench] link change t=285.0s bw=44 delay=50
+[resp_bench] link change t=285.0s bw=52 delay=39
+[resp_bench] link change t=285.0s bw=77 delay=89
+[resp_bench] link change t=285.0s bw=51 delay=80
+[resp_bench] link change t=285.0s bw=38 delay=53
+[resp_bench] link change t=285.0s bw=33 delay=58
+[resp_bench] link change t=285.0s bw=37 delay=53
+[resp_bench] link change t=285.0s bw=95 delay=12
+[resp_bench] link change t=285.0s bw=53 delay=81
+[resp_bench] link change t=285.0s bw=53 delay=22
+[resp_bench] link change t=285.0s bw=21 delay=12
+[resp_bench] link change t=285.0s bw=62 delay=98
+[resp_bench] link change t=285.0s bw=53 delay=44
+[resp_bench] cubic run=32/50 done (31/50)
+[resp_bench] cubic run=31/50 done (32/50)
+[resp_bench] cubic run=39/50 done (33/50)
+[resp_bench] cubic run=34/50 done (34/50)
+[resp_bench] cubic run=43/50 done (35/50)
+[resp_bench] cubic run=35/50 done (36/50)
+[resp_bench] cubic run=33/50 done (37/50)
+[resp_bench] cubic run=46/50 done (38/50)
+[resp_bench] cubic run=41/50 done (39/50)
+[resp_bench] cubic run=47/50 done (40/50)
+[resp_bench] cubic run=42/50 done (41/50)
+[resp_bench] cubic run=36/50 done (42/50)
+[resp_bench] cubic run=49/50 done (43/50)
+[resp_bench] cubic run=48/50 done (44/50)
+[resp_bench] cubic run=44/50 done (45/50)
+[resp_bench] cubic run=45/50 done (46/50)
+[resp_bench] cubic run=38/50 done (47/50)
+[resp_bench] cubic run=37/50 done (48/50)
+[resp_bench] cubic run=40/50 done (49/50)
+[resp_bench] cubic run=50/50 done (50/50)
+[orch] runtime cleanup sweep
+[resp_bench] slot=0 bbr run=1 seed=1 -C bbr
+[resp_bench] slot=1 bbr run=2 seed=2 -C bbr
+[resp_bench] slot=2 bbr run=3 seed=3 -C bbr
+[resp_bench] slot=3 bbr run=4 seed=4 -C bbr
+[resp_bench] slot=4 bbr run=5 seed=5 -C bbr
+[resp_bench] slot=5 bbr run=6 seed=6 -C bbr
+[resp_bench] slot=6 bbr run=7 seed=7 -C bbr
+[resp_bench] slot=7 bbr run=8 seed=8 -C bbr
+[resp_bench] slot=8 bbr run=9 seed=9 -C bbr
+[resp_bench] slot=9 bbr run=10 seed=10 -C bbr
+[resp_bench] slot=10 bbr run=11 seed=11 -C bbr
+[resp_bench] slot=11 bbr run=12 seed=12 -C bbr
+[resp_bench] slot=12 bbr run=13 seed=13 -C bbr
+[resp_bench] slot=13 bbr run=14 seed=14 -C bbr
+[resp_bench] slot=14 bbr run=15 seed=15 -C bbr
+[resp_bench] slot=15 bbr run=16 seed=16 -C bbr
+[resp_bench] slot=16 bbr run=17 seed=17 -C bbr
+[resp_bench] slot=17 bbr run=18 seed=18 -C bbr
+[resp_bench] slot=18 bbr run=19 seed=19 -C bbr
+[resp_bench] slot=19 bbr run=20 seed=20 -C bbr
+[resp_bench] slot=20 bbr run=21 seed=21 -C bbr
+[resp_bench] slot=21 bbr run=22 seed=22 -C bbr
+[resp_bench] slot=22 bbr run=23 seed=23 -C bbr
+[resp_bench] slot=23 bbr run=24 seed=24 -C bbr
+[resp_bench] slot=24 bbr run=25 seed=25 -C bbr
+[resp_bench] slot=25 bbr run=26 seed=26 -C bbr
+[resp_bench] slot=26 bbr run=27 seed=27 -C bbr
+[resp_bench] slot=27 bbr run=28 seed=28 -C bbr
+[resp_bench] slot=28 bbr run=29 seed=29 -C bbr
+[resp_bench] slot=29 bbr run=30 seed=30 -C bbr
+[resp_bench] link change t=15.0s bw=64 delay=71
+[resp_bench] link change t=15.0s bw=58 delay=26
+[resp_bench] link change t=15.0s bw=18 delay=42
+[resp_bench] link change t=15.0s bw=79 delay=26
+[resp_bench] link change t=15.0s bw=76 delay=14
+[resp_bench] link change t=15.0s bw=69 delay=67
+[resp_bench] link change t=15.1s bw=20 delay=56
+[resp_bench] link change t=15.1s bw=55 delay=98
+[resp_bench] link change t=15.1s bw=60 delay=93
+[resp_bench] link change t=15.1s bw=48 delay=56
+[resp_bench] link change t=15.1s bw=23 delay=60
+[resp_bench] link change t=15.1s bw=33 delay=37
+[resp_bench] link change t=15.1s bw=94 delay=67
+[resp_bench] link change t=15.1s bw=98 delay=63
+[resp_bench] link change t=15.1s bw=71 delay=46
+[resp_bench] link change t=15.1s bw=99 delay=93
+[resp_bench] link change t=15.1s bw=97 delay=97
+[resp_bench] link change t=15.1s bw=12 delay=85
+[resp_bench] link change t=15.1s bw=43 delay=96
+[resp_bench] link change t=15.1s bw=79 delay=86
+[resp_bench] link change t=15.1s bw=76 delay=25
+[resp_bench] link change t=15.1s bw=13 delay=88
+[resp_bench] link change t=15.1s bw=99 delay=45
+[resp_bench] link change t=15.1s bw=57 delay=44
+[resp_bench] link change t=15.1s bw=36 delay=65
+[resp_bench] link change t=15.1s bw=54 delay=86
+[resp_bench] link change t=15.1s bw=37 delay=49
+[resp_bench] link change t=15.1s bw=88 delay=13
+[resp_bench] link change t=15.1s bw=94 delay=77
+[resp_bench] link change t=15.1s bw=72 delay=43
+[resp_bench] link change t=30.0s bw=83 delay=11
+[resp_bench] link change t=30.0s bw=34 delay=100
+[resp_bench] link change t=30.0s bw=25 delay=73
+[resp_bench] link change t=30.0s bw=57 delay=87
+[resp_bench] link change t=30.0s bw=30 delay=40
+[resp_bench] link change t=30.0s bw=75 delay=85
+[resp_bench] link change t=30.1s bw=31 delay=95
+[resp_bench] link change t=30.1s bw=93 delay=77
+[resp_bench] link change t=30.1s bw=16 delay=19
+[resp_bench] link change t=30.1s bw=47 delay=32
+[resp_bench] link change t=30.1s bw=71 delay=29
+[resp_bench] link change t=30.1s bw=31 delay=34
+[resp_bench] link change t=30.1s bw=33 delay=93
+[resp_bench] link change t=30.1s bw=91 delay=46
+[resp_bench] link change t=30.1s bw=32 delay=38
+[resp_bench] link change t=30.1s bw=91 delay=70
+[resp_bench] link change t=30.1s bw=77 delay=41
+[resp_bench] link change t=30.1s bw=91 delay=22
+[resp_bench] link change t=30.1s bw=75 delay=35
+[resp_bench] link change t=30.1s bw=52 delay=40
+[resp_bench] link change t=30.1s bw=63 delay=39
+[resp_bench] link change t=30.1s bw=46 delay=35
+[resp_bench] link change t=30.1s bw=95 delay=54
+[resp_bench] link change t=30.1s bw=27 delay=33
+[resp_bench] link change t=30.1s bw=14 delay=10
+[resp_bench] link change t=30.1s bw=89 delay=93
+[resp_bench] link change t=30.1s bw=87 delay=46
+[resp_bench] link change t=30.1s bw=49 delay=64
+[resp_bench] link change t=30.1s bw=67 delay=33
+[resp_bench] link change t=30.1s bw=86 delay=79
+[resp_bench] link change t=45.0s bw=36 delay=69
+[resp_bench] link change t=45.0s bw=15 delay=20
+[resp_bench] link change t=45.0s bw=67 delay=70
+[resp_bench] link change t=45.0s bw=70 delay=90
+[resp_bench] link change t=45.0s bw=12 delay=17
+[resp_bench] link change t=45.0s bw=34 delay=33
+[resp_bench] link change t=45.1s bw=49 delay=42
+[resp_bench] link change t=45.1s bw=13 delay=69
+[resp_bench] link change t=45.1s bw=71 delay=37
+[resp_bench] link change t=45.1s bw=78 delay=22
+[resp_bench] link change t=45.1s bw=100 delay=100
+[resp_bench] link change t=45.1s bw=31 delay=95
+[resp_bench] link change t=45.1s bw=21 delay=18
+[resp_bench] link change t=45.1s bw=39 delay=95
+[resp_bench] link change t=45.1s bw=96 delay=10
+[resp_bench] link change t=45.1s bw=51 delay=83
+[resp_bench] link change t=45.1s bw=35 delay=72
+[resp_bench] link change t=45.1s bw=26 delay=91
+[resp_bench] link change t=45.1s bw=44 delay=42
+[resp_bench] link change t=45.1s bw=60 delay=54
+[resp_bench] link change t=45.1s bw=15 delay=42
+[resp_bench] link change t=45.1s bw=67 delay=10
+[resp_bench] link change t=45.1s bw=28 delay=94
+[resp_bench] link change t=45.1s bw=19 delay=18
+[resp_bench] link change t=45.1s bw=58 delay=77
+[resp_bench] link change t=45.1s bw=21 delay=75
+[resp_bench] link change t=45.1s bw=99 delay=25
+[resp_bench] link change t=45.1s bw=28 delay=58
+[resp_bench] link change t=45.1s bw=17 delay=26
+[resp_bench] link change t=45.1s bw=36 delay=42
+[resp_bench] link change t=60.0s bw=72 delay=45
+[resp_bench] link change t=60.0s bw=27 delay=41
+[resp_bench] link change t=60.0s bw=93 delay=58
+[resp_bench] link change t=60.0s bw=84 delay=18
+[resp_bench] link change t=60.0s bw=97 delay=28
+[resp_bench] link change t=60.1s bw=75 delay=70
+[resp_bench] link change t=60.1s bw=87 delay=37
+[resp_bench] link change t=60.1s bw=41 delay=93
+[resp_bench] link change t=60.1s bw=56 delay=84
+[resp_bench] link change t=60.1s bw=79 delay=94
+[resp_bench] link change t=60.1s bw=97 delay=21
+[resp_bench] link change t=60.1s bw=12 delay=61
+[resp_bench] link change t=60.1s bw=70 delay=75
+[resp_bench] link change t=60.1s bw=47 delay=19
+[resp_bench] link change t=60.1s bw=53 delay=74
+[resp_bench] link change t=60.1s bw=28 delay=38
+[resp_bench] link change t=60.1s bw=90 delay=73
+[resp_bench] link change t=60.1s bw=93 delay=54
+[resp_bench] link change t=60.1s bw=31 delay=13
+[resp_bench] link change t=60.1s bw=77 delay=47
+[resp_bench] link change t=60.1s bw=71 delay=15
+[resp_bench] link change t=60.1s bw=14 delay=49
+[resp_bench] link change t=60.1s bw=69 delay=63
+[resp_bench] link change t=60.1s bw=11 delay=57
+[resp_bench] link change t=60.1s bw=62 delay=94
+[resp_bench] link change t=60.1s bw=55 delay=26
+[resp_bench] link change t=60.1s bw=42 delay=79
+[resp_bench] link change t=60.1s bw=16 delay=60
+[resp_bench] link change t=60.1s bw=54 delay=60
+[resp_bench] link change t=60.1s bw=85 delay=70
+[resp_bench] link change t=75.0s bw=93 delay=30
+[resp_bench] link change t=75.0s bw=74 delay=36
+[resp_bench] link change t=75.0s bw=36 delay=22
+[resp_bench] link change t=75.0s bw=87 delay=11
+[resp_bench] link change t=75.0s bw=98 delay=57
+[resp_bench] link change t=75.1s bw=90 delay=88
+[resp_bench] link change t=75.1s bw=87 delay=14
+[resp_bench] link change t=75.1s bw=16 delay=30
+[resp_bench] link change t=75.1s bw=17 delay=74
+[resp_bench] link change t=75.1s bw=45 delay=24
+[resp_bench] link change t=75.1s bw=100 delay=29
+[resp_bench] link change t=75.1s bw=80 delay=47
+[resp_bench] link change t=75.1s bw=33 delay=74
+[resp_bench] link change t=75.1s bw=92 delay=33
+[resp_bench] link change t=75.1s bw=94 delay=67
+[resp_bench] link change t=75.1s bw=36 delay=37
+[resp_bench] link change t=75.1s bw=33 delay=71
+[resp_bench] link change t=75.1s bw=62 delay=62
+[resp_bench] link change t=75.1s bw=82 delay=64
+[resp_bench] link change t=75.1s bw=84 delay=28
+[resp_bench] link change t=75.1s bw=57 delay=50
+[resp_bench] link change t=75.1s bw=63 delay=12
+[resp_bench] link change t=75.1s bw=43 delay=40
+[resp_bench] link change t=75.1s bw=97 delay=89
+[resp_bench] link change t=75.1s bw=71 delay=45
+[resp_bench] link change t=75.1s bw=69 delay=87
+[resp_bench] link change t=75.1s bw=58 delay=92
+[resp_bench] link change t=75.1s bw=52 delay=42
+[resp_bench] link change t=75.1s bw=20 delay=39
+[resp_bench] link change t=75.1s bw=34 delay=44
+[resp_bench] link change t=90.0s bw=14 delay=76
+[resp_bench] link change t=90.0s bw=61 delay=92
+[resp_bench] link change t=90.0s bw=72 delay=13
+[resp_bench] link change t=90.0s bw=70 delay=43
+[resp_bench] link change t=90.0s bw=40 delay=24
+[resp_bench] link change t=90.1s bw=84 delay=97
+[resp_bench] link change t=90.1s bw=33 delay=22
+[resp_bench] link change t=90.1s bw=24 delay=57
+[resp_bench] link change t=90.1s bw=37 delay=14
+[resp_bench] link change t=90.1s bw=17 delay=38
+[resp_bench] link change t=90.1s bw=13 delay=41
+[resp_bench] link change t=90.1s bw=100 delay=46
+[resp_bench] link change t=90.1s bw=77 delay=40
+[resp_bench] link change t=90.1s bw=26 delay=19
+[resp_bench] link change t=90.1s bw=47 delay=68
+[resp_bench] link change t=90.1s bw=48 delay=69
+[resp_bench] link change t=90.1s bw=22 delay=85
+[resp_bench] link change t=90.1s bw=28 delay=60
+[resp_bench] link change t=90.1s bw=20 delay=52
+[resp_bench] link change t=90.1s bw=86 delay=43
+[resp_bench] link change t=90.1s bw=91 delay=38
+[resp_bench] link change t=90.1s bw=92 delay=68
+[resp_bench] link change t=90.1s bw=44 delay=16
+[resp_bench] link change t=90.1s bw=74 delay=31
+[resp_bench] link change t=90.1s bw=19 delay=23
+[resp_bench] link change t=90.1s bw=14 delay=23
+[resp_bench] link change t=90.1s bw=57 delay=61
+[resp_bench] link change t=90.1s bw=66 delay=11
+[resp_bench] link change t=90.1s bw=12 delay=44
+[resp_bench] link change t=90.1s bw=27 delay=20
+[resp_bench] link change t=105.0s bw=72 delay=51
+[resp_bench] link change t=105.0s bw=13 delay=68
+[resp_bench] link change t=105.0s bw=59 delay=65
+[resp_bench] link change t=105.0s bw=80 delay=39
+[resp_bench] link change t=105.0s bw=53 delay=69
+[resp_bench] link change t=105.0s bw=67 delay=48
+[resp_bench] link change t=105.1s bw=30 delay=65
+[resp_bench] link change t=105.1s bw=70 delay=41
+[resp_bench] link change t=105.1s bw=59 delay=63
+[resp_bench] link change t=105.1s bw=21 delay=65
+[resp_bench] link change t=105.1s bw=43 delay=35
+[resp_bench] link change t=105.1s bw=11 delay=66
+[resp_bench] link change t=105.1s bw=10 delay=11
+[resp_bench] link change t=105.1s bw=78 delay=37
+[resp_bench] link change t=105.1s bw=97 delay=60
+[resp_bench] link change t=105.1s bw=76 delay=78
+[resp_bench] link change t=105.1s bw=80 delay=88
+[resp_bench] link change t=105.1s bw=11 delay=47
+[resp_bench] link change t=105.1s bw=26 delay=50
+[resp_bench] link change t=105.1s bw=30 delay=26
+[resp_bench] link change t=105.1s bw=25 delay=83
+[resp_bench] link change t=105.1s bw=66 delay=93
+[resp_bench] link change t=105.1s bw=33 delay=41
+[resp_bench] link change t=105.1s bw=98 delay=86
+[resp_bench] link change t=105.1s bw=23 delay=43
+[resp_bench] link change t=105.1s bw=50 delay=86
+[resp_bench] link change t=105.1s bw=69 delay=10
+[resp_bench] link change t=105.1s bw=72 delay=35
+[resp_bench] link change t=105.1s bw=91 delay=64
+[resp_bench] link change t=105.1s bw=38 delay=89
+[resp_bench] link change t=120.0s bw=19 delay=41
+[resp_bench] link change t=120.0s bw=72 delay=68
+[resp_bench] link change t=120.0s bw=87 delay=10
+[resp_bench] link change t=120.0s bw=34 delay=70
+[resp_bench] link change t=120.0s bw=100 delay=55
+[resp_bench] link change t=120.0s bw=28 delay=21
+[resp_bench] link change t=120.1s bw=91 delay=60
+[resp_bench] link change t=120.1s bw=58 delay=79
+[resp_bench] link change t=120.1s bw=42 delay=74
+[resp_bench] link change t=120.1s bw=63 delay=18
+[resp_bench] link change t=120.1s bw=57 delay=84
+[resp_bench] link change t=120.1s bw=56 delay=45
+[resp_bench] link change t=120.1s bw=69 delay=91
+[resp_bench] link change t=120.1s bw=47 delay=13
+[resp_bench] link change t=120.1s bw=42 delay=98
+[resp_bench] link change t=120.1s bw=87 delay=34
+[resp_bench] link change t=120.1s bw=60 delay=25
+[resp_bench] link change t=120.1s bw=48 delay=52
+[resp_bench] link change t=120.1s bw=62 delay=51
+[resp_bench] link change t=120.1s bw=62 delay=78
+[resp_bench] link change t=120.1s bw=39 delay=81
+[resp_bench] link change t=120.1s bw=76 delay=41
+[resp_bench] link change t=120.1s bw=97 delay=35
+[resp_bench] link change t=120.1s bw=70 delay=84
+[resp_bench] link change t=120.1s bw=32 delay=80
+[resp_bench] link change t=120.1s bw=38 delay=54
+[resp_bench] link change t=120.1s bw=68 delay=13
+[resp_bench] link change t=120.1s bw=99 delay=15
+[resp_bench] link change t=120.1s bw=41 delay=62
+[resp_bench] link change t=120.1s bw=40 delay=72
+[resp_bench] link change t=135.0s bw=56 delay=15
+[resp_bench] link change t=135.0s bw=59 delay=73
+[resp_bench] link change t=135.0s bw=99 delay=67
+[resp_bench] link change t=135.0s bw=79 delay=80
+[resp_bench] link change t=135.0s bw=45 delay=60
+[resp_bench] link change t=135.0s bw=78 delay=98
+[resp_bench] link change t=135.1s bw=75 delay=57
+[resp_bench] link change t=135.1s bw=23 delay=83
+[resp_bench] link change t=135.1s bw=50 delay=91
+[resp_bench] link change t=135.1s bw=40 delay=21
+[resp_bench] link change t=135.1s bw=24 delay=13
+[resp_bench] link change t=135.1s bw=64 delay=18
+[resp_bench] link change t=135.1s bw=32 delay=23
+[resp_bench] link change t=135.1s bw=25 delay=51
+[resp_bench] link change t=135.1s bw=65 delay=26
+[resp_bench] link change t=135.1s bw=97 delay=65
+[resp_bench] link change t=135.1s bw=95 delay=28
+[resp_bench] link change t=135.1s bw=43 delay=38
+[resp_bench] link change t=135.1s bw=35 delay=13
+[resp_bench] link change t=135.1s bw=13 delay=19
+[resp_bench] link change t=135.1s bw=35 delay=98
+[resp_bench] link change t=135.1s bw=19 delay=91
+[resp_bench] link change t=135.1s bw=58 delay=31
+[resp_bench] link change t=135.1s bw=67 delay=62
+[resp_bench] link change t=135.1s bw=20 delay=73
+[resp_bench] link change t=135.1s bw=75 delay=89
+[resp_bench] link change t=135.1s bw=10 delay=94
+[resp_bench] link change t=135.1s bw=79 delay=97
+[resp_bench] link change t=135.1s bw=44 delay=23
+[resp_bench] link change t=135.1s bw=23 delay=20
+[resp_bench] link change t=150.0s bw=63 delay=27
+[resp_bench] link change t=150.0s bw=83 delay=34
+[resp_bench] link change t=150.0s bw=44 delay=39
+[resp_bench] link change t=150.0s bw=70 delay=60
+[resp_bench] link change t=150.0s bw=43 delay=54
+[resp_bench] link change t=150.0s bw=91 delay=15
+[resp_bench] link change t=150.1s bw=79 delay=66
+[resp_bench] link change t=150.1s bw=41 delay=11
+[resp_bench] link change t=150.1s bw=80 delay=64
+[resp_bench] link change t=150.1s bw=36 delay=35
+[resp_bench] link change t=150.1s bw=43 delay=37
+[resp_bench] link change t=150.1s bw=76 delay=31
+[resp_bench] link change t=150.1s bw=97 delay=61
+[resp_bench] link change t=150.1s bw=28 delay=39
+[resp_bench] link change t=150.1s bw=76 delay=96
+[resp_bench] link change t=150.1s bw=87 delay=49
+[resp_bench] link change t=150.1s bw=62 delay=40
+[resp_bench] link change t=150.1s bw=50 delay=55
+[resp_bench] link change t=150.1s bw=100 delay=67
+[resp_bench] link change t=150.1s bw=97 delay=87
+[resp_bench] link change t=150.1s bw=50 delay=33
+[resp_bench] link change t=150.1s bw=51 delay=49
+[resp_bench] link change t=150.1s bw=100 delay=16
+[resp_bench] link change t=150.1s bw=89 delay=28
+[resp_bench] link change t=150.1s bw=100 delay=73
+[resp_bench] link change t=150.1s bw=52 delay=87
+[resp_bench] link change t=150.1s bw=22 delay=34
+[resp_bench] link change t=150.1s bw=30 delay=86
+[resp_bench] link change t=150.1s bw=13 delay=95
+[resp_bench] link change t=150.1s bw=83 delay=93
+[resp_bench] link change t=165.0s bw=87 delay=55
+[resp_bench] link change t=165.0s bw=61 delay=21
+[resp_bench] link change t=165.0s bw=85 delay=23
+[resp_bench] link change t=165.0s bw=91 delay=29
+[resp_bench] link change t=165.0s bw=39 delay=36
+[resp_bench] link change t=165.0s bw=86 delay=60
+[resp_bench] link change t=165.1s bw=74 delay=44
+[resp_bench] link change t=165.1s bw=37 delay=62
+[resp_bench] link change t=165.1s bw=13 delay=92
+[resp_bench] link change t=165.1s bw=27 delay=80
+[resp_bench] link change t=165.1s bw=39 delay=98
+[resp_bench] link change t=165.1s bw=17 delay=82
+[resp_bench] link change t=165.1s bw=72 delay=66
+[resp_bench] link change t=165.1s bw=50 delay=90
+[resp_bench] link change t=165.1s bw=43 delay=56
+[resp_bench] link change t=165.1s bw=32 delay=40
+[resp_bench] link change t=165.1s bw=18 delay=22
+[resp_bench] link change t=165.1s bw=64 delay=30
+[resp_bench] link change t=165.1s bw=11 delay=45
+[resp_bench] link change t=165.1s bw=12 delay=38
+[resp_bench] link change t=165.1s bw=80 delay=55
+[resp_bench] link change t=165.1s bw=82 delay=80
+[resp_bench] link change t=165.1s bw=83 delay=12
+[resp_bench] link change t=165.1s bw=12 delay=82
+[resp_bench] link change t=165.1s bw=79 delay=63
+[resp_bench] link change t=165.1s bw=20 delay=88
+[resp_bench] link change t=165.1s bw=66 delay=57
+[resp_bench] link change t=165.1s bw=63 delay=12
+[resp_bench] link change t=165.1s bw=77 delay=61
+[resp_bench] link change t=165.1s bw=38 delay=28
+[resp_bench] link change t=180.0s bw=58 delay=63
+[resp_bench] link change t=180.0s bw=72 delay=39
+[resp_bench] link change t=180.0s bw=50 delay=13
+[resp_bench] link change t=180.0s bw=39 delay=91
+[resp_bench] link change t=180.0s bw=55 delay=50
+[resp_bench] link change t=180.1s bw=67 delay=93
+[resp_bench] link change t=180.1s bw=14 delay=13
+[resp_bench] link change t=180.1s bw=45 delay=33
+[resp_bench] link change t=180.1s bw=17 delay=27
+[resp_bench] link change t=180.1s bw=25 delay=38
+[resp_bench] link change t=180.1s bw=28 delay=20
+[resp_bench] link change t=180.1s bw=31 delay=40
+[resp_bench] link change t=180.1s bw=43 delay=44
+[resp_bench] link change t=180.1s bw=97 delay=48
+[resp_bench] link change t=180.1s bw=15 delay=65
+[resp_bench] link change t=180.1s bw=97 delay=52
+[resp_bench] link change t=180.1s bw=31 delay=40
+[resp_bench] link change t=180.1s bw=63 delay=50
+[resp_bench] link change t=180.1s bw=90 delay=90
+[resp_bench] link change t=180.1s bw=85 delay=43
+[resp_bench] link change t=180.1s bw=89 delay=35
+[resp_bench] link change t=180.1s bw=87 delay=42
+[resp_bench] link change t=180.1s bw=99 delay=43
+[resp_bench] link change t=180.1s bw=26 delay=37
+[resp_bench] link change t=180.1s bw=75 delay=70
+[resp_bench] link change t=180.1s bw=93 delay=54
+[resp_bench] link change t=180.1s bw=30 delay=53
+[resp_bench] link change t=180.1s bw=64 delay=63
+[resp_bench] link change t=180.1s bw=35 delay=67
+[resp_bench] link change t=180.1s bw=75 delay=90
+[resp_bench] link change t=195.0s bw=46 delay=96
+[resp_bench] link change t=195.0s bw=12 delay=99
+[resp_bench] link change t=195.0s bw=12 delay=13
+[resp_bench] link change t=195.0s bw=29 delay=76
+[resp_bench] link change t=195.0s bw=38 delay=49
+[resp_bench] link change t=195.1s bw=88 delay=93
+[resp_bench] link change t=195.1s bw=56 delay=69
+[resp_bench] link change t=195.1s bw=90 delay=90
+[resp_bench] link change t=195.1s bw=59 delay=30
+[resp_bench] link change t=195.1s bw=35 delay=29
+[resp_bench] link change t=195.1s bw=73 delay=20
+[resp_bench] link change t=195.1s bw=34 delay=31
+[resp_bench] link change t=195.1s bw=62 delay=88
+[resp_bench] link change t=195.1s bw=86 delay=71
+[resp_bench] link change t=195.1s bw=35 delay=56
+[resp_bench] link change t=195.1s bw=16 delay=24
+[resp_bench] link change t=195.1s bw=77 delay=23
+[resp_bench] link change t=195.1s bw=43 delay=67
+[resp_bench] link change t=195.1s bw=12 delay=29
+[resp_bench] link change t=195.1s bw=52 delay=64
+[resp_bench] link change t=195.1s bw=49 delay=63
+[resp_bench] link change t=195.1s bw=99 delay=26
+[resp_bench] link change t=195.1s bw=76 delay=29
+[resp_bench] link change t=195.1s bw=78 delay=18
+[resp_bench] link change t=195.1s bw=16 delay=94
+[resp_bench] link change t=195.1s bw=36 delay=17
+[resp_bench] link change t=195.1s bw=94 delay=88
+[resp_bench] link change t=195.1s bw=31 delay=38
+[resp_bench] link change t=195.1s bw=65 delay=55
+[resp_bench] link change t=195.1s bw=19 delay=35
+[resp_bench] link change t=210.0s bw=43 delay=68
+[resp_bench] link change t=210.0s bw=44 delay=76
+[resp_bench] link change t=210.0s bw=93 delay=79
+[resp_bench] link change t=210.0s bw=59 delay=11
+[resp_bench] link change t=210.0s bw=75 delay=63
+[resp_bench] link change t=210.1s bw=30 delay=89
+[resp_bench] link change t=210.1s bw=50 delay=58
+[resp_bench] link change t=210.1s bw=84 delay=17
+[resp_bench] link change t=210.1s bw=100 delay=78
+[resp_bench] link change t=210.1s bw=19 delay=27
+[resp_bench] link change t=210.1s bw=49 delay=47
+[resp_bench] link change t=210.1s bw=97 delay=42
+[resp_bench] link change t=210.1s bw=66 delay=14
+[resp_bench] link change t=210.1s bw=65 delay=27
+[resp_bench] link change t=210.1s bw=21 delay=90
+[resp_bench] link change t=210.1s bw=30 delay=80
+[resp_bench] link change t=210.1s bw=83 delay=35
+[resp_bench] link change t=210.1s bw=24 delay=79
+[resp_bench] link change t=210.1s bw=83 delay=74
+[resp_bench] link change t=210.1s bw=34 delay=33
+[resp_bench] link change t=210.1s bw=26 delay=74
+[resp_bench] link change t=210.1s bw=17 delay=36
+[resp_bench] link change t=210.1s bw=91 delay=96
+[resp_bench] link change t=210.1s bw=32 delay=74
+[resp_bench] link change t=210.1s bw=66 delay=54
+[resp_bench] link change t=210.1s bw=97 delay=21
+[resp_bench] link change t=210.1s bw=87 delay=95
+[resp_bench] link change t=210.1s bw=59 delay=56
+[resp_bench] link change t=210.1s bw=65 delay=62
+[resp_bench] link change t=210.1s bw=61 delay=13
+[resp_bench] link change t=225.0s bw=32 delay=97
+[resp_bench] link change t=225.0s bw=62 delay=70
+[resp_bench] link change t=225.0s bw=11 delay=58
+[resp_bench] link change t=225.0s bw=95 delay=18
+[resp_bench] link change t=225.0s bw=39 delay=83
+[resp_bench] link change t=225.0s bw=11 delay=77
+[resp_bench] link change t=225.1s bw=64 delay=77
+[resp_bench] link change t=225.1s bw=89 delay=89
+[resp_bench] link change t=225.1s bw=83 delay=84
+[resp_bench] link change t=225.1s bw=88 delay=30
+[resp_bench] link change t=225.1s bw=90 delay=57
+[resp_bench] link change t=225.1s bw=81 delay=97
+[resp_bench] link change t=225.1s bw=95 delay=94
+[resp_bench] link change t=225.1s bw=52 delay=79
+[resp_bench] link change t=225.1s bw=42 delay=55
+[resp_bench] link change t=225.1s bw=35 delay=96
+[resp_bench] link change t=225.1s bw=76 delay=72
+[resp_bench] link change t=225.1s bw=11 delay=92
+[resp_bench] link change t=225.1s bw=24 delay=84
+[resp_bench] link change t=225.1s bw=90 delay=13
+[resp_bench] link change t=225.1s bw=76 delay=98
+[resp_bench] link change t=225.1s bw=85 delay=18
+[resp_bench] link change t=225.1s bw=64 delay=52
+[resp_bench] link change t=225.1s bw=41 delay=82
+[resp_bench] link change t=225.1s bw=14 delay=85
+[resp_bench] link change t=225.1s bw=68 delay=59
+[resp_bench] link change t=225.1s bw=19 delay=75
+[resp_bench] link change t=225.1s bw=41 delay=84
+[resp_bench] link change t=225.1s bw=22 delay=86
+[resp_bench] link change t=225.1s bw=96 delay=97
+[resp_bench] link change t=240.0s bw=48 delay=94
+[resp_bench] link change t=240.0s bw=58 delay=24
+[resp_bench] link change t=240.0s bw=97 delay=37
+[resp_bench] link change t=240.0s bw=30 delay=85
+[resp_bench] link change t=240.0s bw=68 delay=63
+[resp_bench] link change t=240.0s bw=18 delay=17
+[resp_bench] link change t=240.1s bw=31 delay=81
+[resp_bench] link change t=240.1s bw=66 delay=26
+[resp_bench] link change t=240.1s bw=21 delay=87
+[resp_bench] link change t=240.1s bw=60 delay=16
+[resp_bench] link change t=240.1s bw=36 delay=52
+[resp_bench] link change t=240.1s bw=73 delay=98
+[resp_bench] link change t=240.1s bw=97 delay=51
+[resp_bench] link change t=240.1s bw=61 delay=20
+[resp_bench] link change t=240.1s bw=39 delay=72
+[resp_bench] link change t=240.1s bw=98 delay=59
+[resp_bench] link change t=240.1s bw=45 delay=31
+[resp_bench] link change t=240.1s bw=69 delay=68
+[resp_bench] link change t=240.1s bw=73 delay=37
+[resp_bench] link change t=240.1s bw=19 delay=22
+[resp_bench] link change t=240.1s bw=94 delay=44
+[resp_bench] link change t=240.1s bw=77 delay=82
+[resp_bench] link change t=240.1s bw=13 delay=13
+[resp_bench] link change t=240.1s bw=82 delay=77
+[resp_bench] link change t=240.1s bw=96 delay=45
+[resp_bench] link change t=240.1s bw=21 delay=56
+[resp_bench] link change t=240.1s bw=84 delay=55
+[resp_bench] link change t=240.1s bw=57 delay=94
+[resp_bench] link change t=240.1s bw=71 delay=42
+[resp_bench] link change t=240.1s bw=97 delay=53
+[resp_bench] link change t=255.0s bw=56 delay=27
+[resp_bench] link change t=255.0s bw=94 delay=43
+[resp_bench] link change t=255.0s bw=64 delay=13
+[resp_bench] link change t=255.0s bw=15 delay=48
+[resp_bench] link change t=255.0s bw=72 delay=20
+[resp_bench] link change t=255.1s bw=14 delay=34
+[resp_bench] link change t=255.1s bw=32 delay=40
+[resp_bench] link change t=255.1s bw=26 delay=10
+[resp_bench] link change t=255.1s bw=38 delay=15
+[resp_bench] link change t=255.1s bw=79 delay=25
+[resp_bench] link change t=255.1s bw=24 delay=93
+[resp_bench] link change t=255.1s bw=80 delay=82
+[resp_bench] link change t=255.1s bw=53 delay=95
+[resp_bench] link change t=255.1s bw=49 delay=19
+[resp_bench] link change t=255.1s bw=11 delay=93
+[resp_bench] link change t=255.1s bw=48 delay=43
+[resp_bench] link change t=255.1s bw=86 delay=90
+[resp_bench] link change t=255.1s bw=47 delay=79
+[resp_bench] link change t=255.1s bw=23 delay=47
+[resp_bench] link change t=255.1s bw=36 delay=83
+[resp_bench] link change t=255.1s bw=35 delay=79
+[resp_bench] link change t=255.1s bw=17 delay=99
+[resp_bench] link change t=255.1s bw=63 delay=55
+[resp_bench] link change t=255.1s bw=27 delay=88
+[resp_bench] link change t=255.1s bw=63 delay=12
+[resp_bench] link change t=255.1s bw=64 delay=82
+[resp_bench] link change t=255.1s bw=32 delay=89
+[resp_bench] link change t=255.1s bw=88 delay=39
+[resp_bench] link change t=255.1s bw=97 delay=61
+[resp_bench] link change t=255.1s bw=62 delay=42
+[resp_bench] link change t=270.0s bw=68 delay=40
+[resp_bench] link change t=270.0s bw=22 delay=18
+[resp_bench] link change t=270.0s bw=77 delay=38
+[resp_bench] link change t=270.0s bw=13 delay=44
+[resp_bench] link change t=270.0s bw=69 delay=82
+[resp_bench] link change t=270.0s bw=40 delay=86
+[resp_bench] link change t=270.1s bw=39 delay=13
+[resp_bench] link change t=270.1s bw=81 delay=27
+[resp_bench] link change t=270.1s bw=10 delay=36
+[resp_bench] link change t=270.1s bw=91 delay=18
+[resp_bench] link change t=270.1s bw=79 delay=93
+[resp_bench] link change t=270.1s bw=64 delay=95
+[resp_bench] link change t=270.1s bw=10 delay=53
+[resp_bench] link change t=270.1s bw=57 delay=12
+[resp_bench] link change t=270.1s bw=18 delay=25
+[resp_bench] link change t=270.1s bw=59 delay=74
+[resp_bench] link change t=270.1s bw=37 delay=56
+[resp_bench] link change t=270.1s bw=78 delay=25
+[resp_bench] link change t=270.1s bw=51 delay=88
+[resp_bench] link change t=270.1s bw=96 delay=67
+[resp_bench] link change t=270.1s bw=22 delay=84
+[resp_bench] link change t=270.1s bw=100 delay=47
+[resp_bench] link change t=270.1s bw=53 delay=88
+[resp_bench] link change t=270.1s bw=34 delay=96
+[resp_bench] link change t=270.1s bw=41 delay=14
+[resp_bench] link change t=270.1s bw=66 delay=99
+[resp_bench] link change t=270.1s bw=22 delay=96
+[resp_bench] link change t=270.1s bw=96 delay=64
+[resp_bench] link change t=270.1s bw=21 delay=12
+[resp_bench] link change t=270.1s bw=36 delay=96
+[resp_bench] link change t=285.0s bw=66 delay=88
+[resp_bench] link change t=285.0s bw=59 delay=89
+[resp_bench] link change t=285.0s bw=66 delay=73
+[resp_bench] link change t=285.0s bw=70 delay=86
+[resp_bench] link change t=285.0s bw=56 delay=66
+[resp_bench] link change t=285.0s bw=13 delay=69
+[resp_bench] link change t=285.1s bw=32 delay=51
+[resp_bench] link change t=285.1s bw=37 delay=31
+[resp_bench] link change t=285.1s bw=56 delay=94
+[resp_bench] link change t=285.1s bw=47 delay=63
+[resp_bench] link change t=285.1s bw=49 delay=62
+[resp_bench] link change t=285.1s bw=41 delay=32
+[resp_bench] link change t=285.1s bw=56 delay=65
+[resp_bench] link change t=285.1s bw=29 delay=21
+[resp_bench] link change t=285.1s bw=26 delay=35
+[resp_bench] link change t=285.1s bw=38 delay=63
+[resp_bench] link change t=285.1s bw=86 delay=53
+[resp_bench] link change t=285.1s bw=64 delay=60
+[resp_bench] link change t=285.1s bw=30 delay=89
+[resp_bench] link change t=285.1s bw=75 delay=15
+[resp_bench] link change t=285.1s bw=22 delay=35
+[resp_bench] link change t=285.1s bw=61 delay=38
+[resp_bench] link change t=285.1s bw=45 delay=91
+[resp_bench] link change t=285.1s bw=35 delay=22
+[resp_bench] link change t=285.1s bw=93 delay=39
+[resp_bench] link change t=285.1s bw=38 delay=49
+[resp_bench] link change t=285.1s bw=82 delay=57
+[resp_bench] link change t=285.1s bw=52 delay=43
+[resp_bench] link change t=285.1s bw=17 delay=94
+[resp_bench] link change t=285.1s bw=48 delay=45
+[resp_bench] slot=24 bbr run=31 seed=31 -C bbr
+[resp_bench] bbr run=25/50 done (1/50)
+[resp_bench] slot=1 bbr run=32 seed=32 -C bbr
+[resp_bench] bbr run=2/50 done (2/50)
+[resp_bench] slot=28 bbr run=33 seed=33 -C bbr
+[resp_bench] bbr run=29/50 done (3/50)
+[resp_bench] slot=2 bbr run=34 seed=34 -C bbr
+[resp_bench] bbr run=3/50 done (4/50)
+[resp_bench] slot=10 bbr run=35 seed=35 -C bbr
+[resp_bench] bbr run=11/50 done (5/50)
+[resp_bench] slot=21 bbr run=36 seed=36 -C bbr
+[resp_bench] bbr run=22/50 done (6/50)
+[resp_bench] slot=9 bbr run=37 seed=37 -C bbr
+[resp_bench] bbr run=10/50 done (7/50)
+[resp_bench] slot=4 bbr run=38 seed=38 -C bbr
+[resp_bench] bbr run=5/50 done (8/50)
+[resp_bench] slot=0 bbr run=39 seed=39 -C bbr
+[resp_bench] bbr run=1/50 done (9/50)
+[resp_bench] slot=3 bbr run=40 seed=40 -C bbr
+[resp_bench] bbr run=4/50 done (10/50)
+[resp_bench] slot=12 bbr run=41 seed=41 -C bbr
+[resp_bench] bbr run=13/50 done (11/50)
+[resp_bench] slot=15 bbr run=42 seed=42 -C bbr
+[resp_bench] bbr run=16/50 done (12/50)
+[resp_bench] slot=13 bbr run=43 seed=43 -C bbr
+[resp_bench] bbr run=14/50 done (13/50)
+[resp_bench] slot=19 bbr run=44 seed=44 -C bbr
+[resp_bench] bbr run=20/50 done (14/50)
+[resp_bench] slot=6 bbr run=45 seed=45 -C bbr
+[resp_bench] bbr run=7/50 done (15/50)
+[resp_bench] slot=23 bbr run=46 seed=46 -C bbr
+[resp_bench] bbr run=24/50 done (16/50)
+[resp_bench] slot=7 bbr run=47 seed=47 -C bbr
+[resp_bench] bbr run=8/50 done (17/50)
+[resp_bench] slot=14 bbr run=48 seed=48 -C bbr
+[resp_bench] bbr run=15/50 done (18/50)
+[resp_bench] slot=8 bbr run=49 seed=49 -C bbr
+[resp_bench] bbr run=9/50 done (19/50)
+[resp_bench] slot=20 bbr run=50 seed=50 -C bbr
+[resp_bench] bbr run=21/50 done (20/50)
+[resp_bench] bbr run=28/50 done (21/50)
+[resp_bench] bbr run=17/50 done (22/50)
+[resp_bench] bbr run=26/50 done (23/50)
+[resp_bench] bbr run=30/50 done (24/50)
+[resp_bench] bbr run=19/50 done (25/50)
+[resp_bench] bbr run=27/50 done (26/50)
+[resp_bench] bbr run=18/50 done (27/50)
+[resp_bench] bbr run=23/50 done (28/50)
+[resp_bench] bbr run=6/50 done (29/50)
+[resp_bench] bbr run=12/50 done (30/50)
+[resp_bench] link change t=15.0s bw=24 delay=60
+[resp_bench] link change t=15.0s bw=28 delay=48
+[resp_bench] link change t=15.0s bw=39 delay=31
+[resp_bench] link change t=15.0s bw=59 delay=13
+[resp_bench] link change t=15.0s bw=79 delay=99
+[resp_bench] link change t=15.0s bw=13 delay=45
+[resp_bench] link change t=15.0s bw=64 delay=23
+[resp_bench] link change t=15.0s bw=90 delay=39
+[resp_bench] link change t=15.0s bw=72 delay=42
+[resp_bench] link change t=15.0s bw=77 delay=14
+[resp_bench] link change t=15.0s bw=84 delay=13
+[resp_bench] link change t=15.0s bw=12 delay=46
+[resp_bench] link change t=15.0s bw=99 delay=28
+[resp_bench] link change t=15.0s bw=21 delay=89
+[resp_bench] link change t=15.0s bw=15 delay=85
+[resp_bench] link change t=15.0s bw=65 delay=80
+[resp_bench] link change t=15.0s bw=26 delay=53
+[resp_bench] link change t=15.0s bw=26 delay=81
+[resp_bench] link change t=15.0s bw=62 delay=24
+[resp_bench] link change t=15.0s bw=56 delay=91
+[resp_bench] link change t=30.0s bw=28 delay=97
+[resp_bench] link change t=30.0s bw=99 delay=40
+[resp_bench] link change t=30.0s bw=59 delay=83
+[resp_bench] link change t=30.0s bw=34 delay=38
+[resp_bench] link change t=30.0s bw=24 delay=32
+[resp_bench] link change t=30.0s bw=41 delay=38
+[resp_bench] link change t=30.0s bw=18 delay=56
+[resp_bench] link change t=30.0s bw=45 delay=71
+[resp_bench] link change t=30.0s bw=41 delay=46
+[resp_bench] link change t=30.0s bw=20 delay=48
+[resp_bench] link change t=30.0s bw=69 delay=57
+[resp_bench] link change t=30.0s bw=39 delay=13
+[resp_bench] link change t=30.0s bw=20 delay=10
+[resp_bench] link change t=30.0s bw=85 delay=39
+[resp_bench] link change t=30.0s bw=95 delay=91
+[resp_bench] link change t=30.0s bw=29 delay=46
+[resp_bench] link change t=30.0s bw=68 delay=83
+[resp_bench] link change t=30.0s bw=78 delay=48
+[resp_bench] link change t=30.0s bw=51 delay=80
+[resp_bench] link change t=30.0s bw=41 delay=98
+[resp_bench] link change t=45.0s bw=15 delay=27
+[resp_bench] link change t=45.0s bw=73 delay=13
+[resp_bench] link change t=45.0s bw=98 delay=46
+[resp_bench] link change t=45.0s bw=60 delay=82
+[resp_bench] link change t=45.0s bw=58 delay=38
+[resp_bench] link change t=45.0s bw=27 delay=23
+[resp_bench] link change t=45.0s bw=99 delay=69
+[resp_bench] link change t=45.0s bw=93 delay=78
+[resp_bench] link change t=45.0s bw=53 delay=12
+[resp_bench] link change t=45.0s bw=59 delay=56
+[resp_bench] link change t=45.0s bw=95 delay=91
+[resp_bench] link change t=45.0s bw=95 delay=99
+[resp_bench] link change t=45.0s bw=74 delay=90
+[resp_bench] link change t=45.0s bw=91 delay=76
+[resp_bench] link change t=45.0s bw=75 delay=14
+[resp_bench] link change t=45.0s bw=65 delay=42
+[resp_bench] link change t=45.0s bw=53 delay=42
+[resp_bench] link change t=45.0s bw=74 delay=34
+[resp_bench] link change t=45.0s bw=75 delay=16
+[resp_bench] link change t=45.0s bw=70 delay=52
+[resp_bench] link change t=60.0s bw=24 delay=78
+[resp_bench] link change t=60.0s bw=14 delay=22
+[resp_bench] link change t=60.0s bw=80 delay=45
+[resp_bench] link change t=60.0s bw=10 delay=92
+[resp_bench] link change t=60.0s bw=47 delay=13
+[resp_bench] link change t=60.0s bw=96 delay=79
+[resp_bench] link change t=60.0s bw=57 delay=15
+[resp_bench] link change t=60.0s bw=77 delay=33
+[resp_bench] link change t=60.0s bw=95 delay=36
+[resp_bench] link change t=60.0s bw=22 delay=68
+[resp_bench] link change t=60.0s bw=19 delay=71
+[resp_bench] link change t=60.0s bw=18 delay=64
+[resp_bench] link change t=60.0s bw=32 delay=41
+[resp_bench] link change t=60.0s bw=90 delay=57
+[resp_bench] link change t=60.0s bw=29 delay=84
+[resp_bench] link change t=60.0s bw=82 delay=17
+[resp_bench] link change t=60.0s bw=75 delay=59
+[resp_bench] link change t=60.0s bw=65 delay=31
+[resp_bench] link change t=60.0s bw=97 delay=15
+[resp_bench] link change t=60.0s bw=20 delay=78
+[resp_bench] link change t=75.0s bw=39 delay=27
+[resp_bench] link change t=75.0s bw=51 delay=75
+[resp_bench] link change t=75.0s bw=59 delay=83
+[resp_bench] link change t=75.0s bw=42 delay=96
+[resp_bench] link change t=75.0s bw=38 delay=24
+[resp_bench] link change t=75.0s bw=21 delay=85
+[resp_bench] link change t=75.0s bw=87 delay=95
+[resp_bench] link change t=75.0s bw=93 delay=88
+[resp_bench] link change t=75.0s bw=11 delay=24
+[resp_bench] link change t=75.0s bw=26 delay=54
+[resp_bench] link change t=75.0s bw=86 delay=73
+[resp_bench] link change t=75.0s bw=49 delay=53
+[resp_bench] link change t=75.0s bw=44 delay=93
+[resp_bench] link change t=75.0s bw=78 delay=14
+[resp_bench] link change t=75.0s bw=77 delay=45
+[resp_bench] link change t=75.0s bw=66 delay=77
+[resp_bench] link change t=75.0s bw=60 delay=88
+[resp_bench] link change t=75.0s bw=29 delay=94
+[resp_bench] link change t=75.0s bw=45 delay=29
+[resp_bench] link change t=75.0s bw=50 delay=38
+[resp_bench] link change t=90.0s bw=28 delay=14
+[resp_bench] link change t=90.0s bw=52 delay=17
+[resp_bench] link change t=90.0s bw=11 delay=41
+[resp_bench] link change t=90.0s bw=55 delay=100
+[resp_bench] link change t=90.0s bw=82 delay=11
+[resp_bench] link change t=90.0s bw=64 delay=14
+[resp_bench] link change t=90.0s bw=31 delay=85
+[resp_bench] link change t=90.0s bw=74 delay=51
+[resp_bench] link change t=90.0s bw=45 delay=66
+[resp_bench] link change t=90.0s bw=87 delay=12
+[resp_bench] link change t=90.0s bw=22 delay=84
+[resp_bench] link change t=90.0s bw=46 delay=25
+[resp_bench] link change t=90.0s bw=65 delay=56
+[resp_bench] link change t=90.0s bw=13 delay=18
+[resp_bench] link change t=90.0s bw=23 delay=97
+[resp_bench] link change t=90.0s bw=93 delay=56
+[resp_bench] link change t=90.0s bw=15 delay=63
+[resp_bench] link change t=90.0s bw=23 delay=73
+[resp_bench] link change t=90.0s bw=68 delay=15
+[resp_bench] link change t=90.0s bw=96 delay=81
+[resp_bench] link change t=105.0s bw=94 delay=17
+[resp_bench] link change t=105.0s bw=76 delay=98
+[resp_bench] link change t=105.0s bw=94 delay=12
+[resp_bench] link change t=105.0s bw=32 delay=13
+[resp_bench] link change t=105.0s bw=22 delay=30
+[resp_bench] link change t=105.0s bw=13 delay=21
+[resp_bench] link change t=105.0s bw=54 delay=51
+[resp_bench] link change t=105.0s bw=97 delay=77
+[resp_bench] link change t=105.0s bw=13 delay=77
+[resp_bench] link change t=105.0s bw=49 delay=93
+[resp_bench] link change t=105.0s bw=75 delay=65
+[resp_bench] link change t=105.0s bw=75 delay=29
+[resp_bench] link change t=105.0s bw=81 delay=44
+[resp_bench] link change t=105.0s bw=50 delay=90
+[resp_bench] link change t=105.0s bw=68 delay=86
+[resp_bench] link change t=105.0s bw=84 delay=22
+[resp_bench] link change t=105.0s bw=94 delay=13
+[resp_bench] link change t=105.0s bw=93 delay=38
+[resp_bench] link change t=105.0s bw=90 delay=79
+[resp_bench] link change t=105.0s bw=20 delay=29

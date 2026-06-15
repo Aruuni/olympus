@@ -1,0 +1,87 @@
+
+
+approaches:
+  # - data_folder: ma_dreamer_20260611-001404
+  #   kind: model
+  #   algorithm: ma_dreamer
+  #   state: tempest
+  #   reward: tempest_fairness_ma
+  #   environment: multiflow_interleave
+  #   plot_label: MA-Dreamer / Tempest / Team fairness
+  #   config: olympus/models/ma_dreamer_20260611-001404/telemetry/config.resolved.yaml
+  #   checkpoint: olympus/models/ma_dreamer_20260611-001404/checkpoints/ma_dreamer_cwnd_model.pt
+
+  # - data_folder: sa_dreamer_20260521-145020
+  #   name: single_agent_dreamer
+  #   kind: model
+  #   algorithm: dreamer_v3
+  #   state: kalman
+  #   reward: tempest
+  #   environment: dynamic
+  #   plot_label: Single-Agent Dreamer / Tempest / Kalman
+  #   config: olympus/models/dreamer_v3_tempest_kalman_dynamic/telemetry/config.resolved.yaml
+  #   checkpoint: olympus/models/dreamer_v3_tempest_kalman_dynamic/checkpoints/dreamer_v3_cwnd_model.pt
+
+  # - data_folder: self_play_dreamer_20260525-152636
+  #   name: self_play_dreamer
+  #   kind: model
+  #   algorithm: dreamer_v3
+  #   state: kalman
+  #   reward: tempest_fairness
+  #   environment: lagged_fairness
+  #   plot_label: Self-Play Dreamer / Tempest Fairness / Staggered Flows
+  #   config: olympus/models/dreamer_v3_tempest_fairness_kalman_lagged/telemetry/config.resolved.yaml
+  #   checkpoint: olympus/models/dreamer_v3_tempest_fairness_kalman_lagged/checkpoints/dreamer_v3_cwnd_model.pt
+
+  # - data_folder: ma_dreamer_20260611-175726
+  #   kind: model
+  #   algorithm: ma_dreamer
+  #   state: tempest
+  #   reward: tempest_fairness_ma
+  #   environment: multiflow_interleave
+  #   plot_label: MA-Dreamer / Tempest / Team fairness
+  #   config: olympus/models/ma_dreamer_20260611-175726/telemetry/config.resolved.yaml
+  #   checkpoint: olympus/models/ma_dreamer_20260611-175726/checkpoints/ma_dreamer_cwnd_model.pt
+
+  # - data_folder: ma_dreamer_symmetrical
+  #   kind: model
+  #   algorithm: ma_dreamer
+  #   state: tempest
+  #   reward: tempest_fairness_ma_symetric
+  #   environment: multiflow_interleave
+  #   plot_label: MA-Dreamer / Tempest / Team fairness + symetrical 
+  #   config: olympus/models/ma_dreamer_20260612-005800/telemetry/config.resolved.yaml
+  #   checkpoint: olympus/models/ma_dreamer_20260612-005800/checkpoints/ma_dreamer_cwnd_model.pt
+
+  # - data_folder: ma_dreamer_credit
+  #   kind: model
+  #   algorithm: ma_dreamer
+  #   state: tempest
+  #   reward: tempest_fairness_ma
+  #   environment: multiflow_interleave
+  #   plot_label: MA-Dreamer / Tempest / Team fairness + credit
+  #   config: olympus/models/ma_dreamer_20260612-204251_credit/telemetry/config.resolved.yaml
+  #   checkpoint: olympus/models/ma_dreamer_20260612-204251_credit/checkpoints/ma_dreamer_cwnd_model.pt
+
+  # Kernel congestion-control baselines. These run iperf3 directly with
+  # `-C <kernel_cc>` and do not start an Olympus listener or load a checkpoint.
+  - data_folder: cubic
+    kind: kernel
+    kernel_cc: cubic
+    plot_label: CUBIC
+
+  - data_folder: bbr
+    kind: kernel
+    kernel_cc: bbr
+    plot_label: BBRv3
+
+  - data_folder: bbr1
+    kind: kernel
+    kernel_cc: bbr1
+    plot_label: BBRv1
+
+  - data_folder: frcc
+    kind: kernel
+    kernel_cc: frcc
+    plot_label: FRCC
+

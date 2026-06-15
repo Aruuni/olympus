@@ -1,0 +1,5 @@
+figures:
+  - name: ma_dreamer
+    description: Single-flow MA-Dreamer responsiveness.
+    data_folders:
+      - ma_dreamer_20260609-022904

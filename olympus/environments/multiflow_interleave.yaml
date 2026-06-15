@@ -1,0 +1,47 @@
+name: multiflow_interleave
+description: >
+  Up to N flows interleave on one bottleneck — each joins at a random time and
+  leaves after a random lifetime (one flow always survives to episode end).
+  Multi-agent algorithms (mat, ma_dreamer) train every flow jointly; single-agent
+  algorithms run the extra flows as lagged self-play of the training policy.
+  The flow count is configurable via `flows` (not hard-set to 4).
+shuffle: true
+
+sweep:
+  bw_range:    [20, 100]
+  bw_step:     10
+  delay_range: [10, 80]
+  delay_step:  10
+  bdp_mult: 4
+  # Concurrent flows (agents) per slot. A list sweeps all listed counts, padding
+  # smaller-N episodes with masks. The count is NOT hard-coded — adjust freely:
+  #   [1, 2, 3, 4]  up to 4 (default)   |   [1, 2]  up to 2   |   [4]  exactly 4.
+  flows:    [1, 2, 3, 4]
+  # Flow start stagger: 'simul' | 'half_late' | 'random'.
+  agent_join_pattern: random
+  agent_join_max_frac: 0.2
+  # Random per-flow lifetimes (one flow always survives to episode end).
+  flow_lifetime_pattern: random
+  flow_lifetime_min_frac: 0.25
+  flow_lifetime_max_frac: 0.9
+  flow_lifetime_keep_one: true
+  duration: 120
+  link_schedules:
+    # ── 7-change / 15s cadence: BW only ──────────────────────────────────────
+    - [{t: 15, bw_frac: 0.5},  {t: 30, bw_frac: 1.0}, {t: 45, bw_frac: 0.5},  {t: 60, bw_frac: 1.0}, {t: 75, bw_frac: 0.5},  {t: 90, bw_frac: 1.0}, {t: 105, bw_frac: 0.5}]
+    - [{t: 15, bw_frac: 2.0},  {t: 30, bw_frac: 1.0}, {t: 45, bw_frac: 2.0},  {t: 60, bw_frac: 1.0}, {t: 75, bw_frac: 2.0},  {t: 90, bw_frac: 1.0}, {t: 105, bw_frac: 2.0}]
+    - [{t: 15, bw_frac: 0.75}, {t: 30, bw_frac: 1.5}, {t: 45, bw_frac: 0.5},  {t: 60, bw_frac: 2.0}, {t: 75, bw_frac: 0.75}, {t: 90, bw_frac: 1.5}, {t: 105, bw_frac: 0.5}]
+    # ── 7-change / 15s cadence: RTT only ─────────────────────────────────────
+    - [{t: 15, delay_frac: 2.0}, {t: 30, delay_frac: 1.0}, {t: 45, delay_frac: 2.0}, {t: 60, delay_frac: 1.0}, {t: 75, delay_frac: 2.0}, {t: 90, delay_frac: 1.0}, {t: 105, delay_frac: 2.0}]
+    - [{t: 15, delay_frac: 0.5}, {t: 30, delay_frac: 2.0}, {t: 45, delay_frac: 0.5}, {t: 60, delay_frac: 2.0}, {t: 75, delay_frac: 0.5}, {t: 90, delay_frac: 2.0}, {t: 105, delay_frac: 0.5}]
+    # ── 7-change / 15s cadence: BW + RTT both change ─────────────────────────
+    - [{t: 15, bw_frac: 0.5, delay_frac: 2.0}, {t: 30, bw_frac: 1.0, delay_frac: 1.0}, {t: 45, bw_frac: 0.5, delay_frac: 2.0}, {t: 60, bw_frac: 1.0, delay_frac: 1.0}, {t: 75, bw_frac: 0.5, delay_frac: 2.0}, {t: 90, bw_frac: 1.0, delay_frac: 1.0}, {t: 105, bw_frac: 0.5, delay_frac: 2.0}]
+    - [{t: 15, bw_frac: 2.0, delay_frac: 0.5}, {t: 30, bw_frac: 1.0, delay_frac: 1.0}, {t: 45, bw_frac: 2.0, delay_frac: 0.5}, {t: 60, bw_frac: 1.0, delay_frac: 1.0}, {t: 75, bw_frac: 2.0, delay_frac: 0.5}, {t: 90, bw_frac: 1.0, delay_frac: 1.0}, {t: 105, bw_frac: 2.0, delay_frac: 0.5}]
+    # ── Single change / static ───────────────────────────────────────────────
+    - [{t: 15, bw_frac: 0.5}]
+    - [{t: 15, bw_frac: 2.0}]
+    - [{t: 15, delay_frac: 2.0}]
+    - [{t: 15, delay_frac: 0.5}]
+    - [{t: 15, bw_frac: 0.5, delay_frac: 2.0}]
+    - [{t: 15, bw_frac: 2.0, delay_frac: 0.5}]
+    - []

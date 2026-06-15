@@ -1,0 +1,9 @@
+[conv4] output_root=/its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_convergence_4flow/data
+[conv4] benchmark=convergence_4flow_join25_stay100_175s duration=175s flows=4 runs=3 n_parallel=6
+[conv4] flow_starts=0,25,50,75
+[conv4] bw_grid=50,100  rtt_grid=20,50  (4 conditions, 12 trials/approach)
+[conv4] approaches_to_run=cubic, bbr, bbr1, frcc
+[conv4] dry-run would run: /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_convergence_4flow/data/cubic trials=12 (4 conditions × 3 runs)
+[conv4] dry-run would run: /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_convergence_4flow/data/bbr trials=12 (4 conditions × 3 runs)
+[conv4] dry-run would run: /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_convergence_4flow/data/bbr1 trials=12 (4 conditions × 3 runs)
+[conv4] dry-run would run: /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_convergence_4flow/data/frcc trials=12 (4 conditions × 3 runs)

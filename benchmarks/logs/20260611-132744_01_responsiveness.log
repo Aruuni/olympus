@@ -1,0 +1,1510 @@
+[resp_bench] output_root=/its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data
+[resp_bench] benchmark=random_bw_rtt_15s_300s runs=50
+[resp_bench] n_parallel=10
+[resp_bench] approaches_to_run=ma_dreamer_second_try
+[resp_bench] ma_dreamer_second_try config=/its/home/mm2350/extra/Olympusv2/olympus/models/ma_dreamer_20260611-001404/telemetry/config.resolved.yaml
+[resp_bench] slot=2 ma_dreamer_second_try run=3 seed=3
+[slot=2] ep=3  env=random_bw_rtt_15s_300s  bw=40Mbps  delay=85ms  duration=300s
+[resp_bench] slot=6 ma_dreamer_second_try run=7 seed=7
+[slot=6] ep=7  env=random_bw_rtt_15s_300s  bw=51Mbps  delay=29ms  duration=300s
+[resp_bench] slot=0 ma_dreamer_second_try run=1 seed=1
+[slot=0] ep=1  env=random_bw_rtt_15s_300s  bw=27Mbps  delay=82ms  duration=300s
+[resp_bench] slot=9 ma_dreamer_second_try run=10 seed=10
+[slot=9] ep=10  env=random_bw_rtt_15s_300s  bw=83Mbps  delay=14ms  duration=300s
+[resp_bench] slot=4 ma_dreamer_second_try run=5 seed=5
+[slot=4] ep=5  env=random_bw_rtt_15s_300s  bw=89Mbps  delay=42ms  duration=300s
+[resp_bench] slot=1 ma_dreamer_second_try run=2 seed=2
+[slot=1] ep=2  env=random_bw_rtt_15s_300s  bw=17Mbps  delay=21ms  duration=300s
+[resp_bench] slot=8 ma_dreamer_second_try run=9 seed=9
+[slot=8] ep=9  env=random_bw_rtt_15s_300s  bw=69Mbps  delay=88ms  duration=300s
+[resp_bench] slot=3 ma_dreamer_second_try run=4 seed=4
+[resp_bench] slot=7 ma_dreamer_second_try run=8 seed=8
+[slot=7] ep=8  env=random_bw_rtt_15s_300s  bw=39Mbps  delay=57ms  duration=300s
+[slot=3] ep=4  env=random_bw_rtt_15s_300s  bw=40Mbps  delay=48ms  duration=300s
+[resp_bench] slot=5 ma_dreamer_second_try run=6 seed=6
+[slot=5] ep=6  env=random_bw_rtt_15s_300s  bw=83Mbps  delay=20ms  duration=300s
+[sao-listener] cport=23000 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23200 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23600 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23700 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23500 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23400 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23300 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23800 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23900 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23100 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] new flow 1 10.0.0.1:23100->10.0.0.2:5202 cc=astraea pid=561079 child=561708
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23100 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23900->10.0.0.2:5210 cc=astraea pid=561078 child=561922
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23900 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23000->10.0.0.2:5201 cc=astraea pid=560970 child=562560
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23000 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23700->10.0.0.2:5208 cc=astraea pid=560997 child=562624
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23700 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23600->10.0.0.2:5207 cc=astraea pid=560996 child=562679
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23600 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23200->10.0.0.2:5203 cc=astraea pid=560989 child=562740
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23200 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23300->10.0.0.2:5204 cc=astraea pid=561025 child=562806
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23300 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23500->10.0.0.2:5206 cc=astraea pid=561017 child=562860
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23500 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23400->10.0.0.2:5205 cc=astraea pid=561022 child=562909
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23400 cc=astraea worker active
+[worker cport=23100 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23100 agent=0 group=slot0_ep2 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23900 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23900 agent=0 group=slot0_ep10 flow=1] started interval=20ms det=1 latent=8x8
+[sao-listener] new flow 1 10.0.0.1:23800->10.0.0.2:5209 cc=astraea pid=561077 child=563060
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23800 cc=astraea worker active
+[worker cport=23000 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23000 agent=0 group=slot0_ep1 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23700 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23700 agent=0 group=slot0_ep8 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23600 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23600 agent=0 group=slot0_ep7 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23200 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23200 agent=0 group=slot0_ep3 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23300 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23300 agent=0 group=slot0_ep4 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23500 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23500 agent=0 group=slot0_ep6 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23400 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23400 agent=0 group=slot0_ep5 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23800 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23800 agent=0 group=slot0_ep9 flow=1] started interval=20ms det=1 latent=8x8
+[orch] link change t=15.0s bw=18 delay=42
+[orch] link change t=15.0s bw=79 delay=26
+[orch] link change t=15.0s bw=58 delay=26
+[orch] link change t=15.0s bw=60 delay=93
+[orch] link change t=15.0s bw=72 delay=43
+[orch] link change t=15.0s bw=55 delay=98
+[orch] link change t=15.0s bw=23 delay=60
+[orch] link change t=15.0s bw=57 delay=44
+[orch] link change t=15.0s bw=64 delay=71
+[orch] link change t=15.0s bw=20 delay=56
+[orch] link change t=30.0s bw=25 delay=73
+[orch] link change t=30.0s bw=57 delay=87
+[orch] link change t=30.0s bw=34 delay=100
+[orch] link change t=30.0s bw=16 delay=19
+[orch] link change t=30.0s bw=14 delay=10
+[orch] link change t=30.0s bw=93 delay=77
+[orch] link change t=30.0s bw=71 delay=29
+[orch] link change t=30.0s bw=27 delay=33
+[orch] link change t=30.0s bw=31 delay=95
+[orch] link change t=30.0s bw=83 delay=11
+[orch] link change t=45.0s bw=67 delay=70
+[orch] link change t=45.0s bw=70 delay=90
+[orch] link change t=45.0s bw=15 delay=20
+[orch] link change t=45.0s bw=78 delay=22
+[orch] link change t=45.0s bw=28 delay=94
+[orch] link change t=45.0s bw=13 delay=69
+[orch] link change t=45.0s bw=21 delay=18
+[orch] link change t=45.0s bw=96 delay=10
+[orch] link change t=45.0s bw=49 delay=42
+[orch] link change t=45.0s bw=36 delay=69
+[orch] link change t=60.0s bw=93 delay=58
+[orch] link change t=60.0s bw=84 delay=18
+[orch] link change t=60.0s bw=27 delay=41
+[orch] link change t=60.0s bw=56 delay=84
+[orch] link change t=60.0s bw=85 delay=70
+[orch] link change t=60.0s bw=41 delay=93
+[orch] link change t=60.0s bw=12 delay=61
+[orch] link change t=60.0s bw=53 delay=74
+[orch] link change t=60.0s bw=72 delay=45
+[orch] link change t=60.0s bw=87 delay=37
+[orch] link change t=75.0s bw=36 delay=22
+[orch] link change t=75.0s bw=87 delay=11
+[orch] link change t=75.0s bw=74 delay=36
+[orch] link change t=75.0s bw=17 delay=74
+[orch] link change t=75.0s bw=57 delay=50
+[orch] link change t=75.0s bw=16 delay=30
+[orch] link change t=75.0s bw=80 delay=47
+[orch] link change t=75.0s bw=69 delay=87
+[orch] link change t=75.0s bw=93 delay=30
+[orch] link change t=75.0s bw=87 delay=14
+[orch] link change t=90.0s bw=72 delay=13
+[orch] link change t=90.0s bw=70 delay=43
+[orch] link change t=90.0s bw=61 delay=92
+[orch] link change t=90.0s bw=37 delay=14
+[orch] link change t=90.0s bw=12 delay=44
+[orch] link change t=90.0s bw=24 delay=57
+[orch] link change t=90.0s bw=17 delay=38
+[orch] link change t=90.0s bw=20 delay=52
+[orch] link change t=90.0s bw=14 delay=76
+[orch] link change t=90.0s bw=84 delay=97
+[orch] link change t=105.0s bw=59 delay=65
+[orch] link change t=105.0s bw=80 delay=39
+[orch] link change t=105.0s bw=13 delay=68
+[orch] link change t=105.0s bw=21 delay=65
+[orch] link change t=105.0s bw=72 delay=35
+[orch] link change t=105.0s bw=70 delay=41
+[orch] link change t=105.0s bw=76 delay=78
+[orch] link change t=105.0s bw=80 delay=88
+[orch] link change t=105.0s bw=72 delay=51
+[orch] link change t=105.0s bw=30 delay=65
+[orch] link change t=120.0s bw=87 delay=10
+[orch] link change t=120.0s bw=34 delay=70
+[orch] link change t=120.0s bw=72 delay=68
+[orch] link change t=120.0s bw=63 delay=18
+[orch] link change t=120.0s bw=62 delay=78
+[orch] link change t=120.0s bw=58 delay=79
+[orch] link change t=120.0s bw=56 delay=45
+[orch] link change t=120.0s bw=99 delay=15
+[orch] link change t=120.0s bw=19 delay=41
+[orch] link change t=120.0s bw=91 delay=60
+[orch] link change t=135.0s bw=99 delay=67
+[orch] link change t=135.0s bw=79 delay=80
+[orch] link change t=135.0s bw=59 delay=73
+[orch] link change t=135.0s bw=40 delay=21
+[orch] link change t=135.0s bw=79 delay=97
+[orch] link change t=135.0s bw=23 delay=83
+[orch] link change t=135.0s bw=32 delay=23
+[orch] link change t=135.0s bw=58 delay=31
+[orch] link change t=135.0s bw=75 delay=57
+[orch] link change t=135.0s bw=56 delay=15
+[orch] link change t=150.0s bw=44 delay=39
+[orch] link change t=150.0s bw=70 delay=60
+[orch] link change t=150.0s bw=83 delay=34
+[orch] link change t=150.0s bw=80 delay=64
+[orch] link change t=150.0s bw=22 delay=34
+[orch] link change t=150.0s bw=41 delay=11
+[orch] link change t=150.0s bw=43 delay=37
+[orch] link change t=150.0s bw=100 delay=67
+[orch] link change t=150.0s bw=79 delay=66
+[orch] link change t=150.0s bw=63 delay=27
+[orch] link change t=165.0s bw=85 delay=23
+[orch] link change t=165.0s bw=91 delay=29
+[orch] link change t=165.0s bw=61 delay=21
+[orch] link change t=165.0s bw=17 delay=82
+[orch] link change t=165.0s bw=82 delay=80
+[orch] link change t=165.0s bw=37 delay=62
+[orch] link change t=165.0s bw=13 delay=92
+[orch] link change t=165.0s bw=64 delay=30
+[orch] link change t=165.0s bw=87 delay=55
+[orch] link change t=165.0s bw=74 delay=44
+[orch] link change t=180.0s bw=50 delay=13
+[orch] link change t=180.0s bw=39 delay=91
+[orch] link change t=180.0s bw=72 delay=39
+[orch] link change t=180.0s bw=25 delay=38
+[orch] link change t=180.0s bw=99 delay=43
+[orch] link change t=180.0s bw=45 delay=33
+[orch] link change t=180.0s bw=43 delay=44
+[orch] link change t=180.0s bw=31 delay=40
+[orch] link change t=180.0s bw=14 delay=13
+[orch] link change t=180.0s bw=58 delay=63
+[orch] link change t=195.0s bw=12 delay=13
+[orch] link change t=195.0s bw=29 delay=76
+[orch] link change t=195.0s bw=12 delay=99
+[orch] link change t=195.0s bw=90 delay=90
+[orch] link change t=195.0s bw=94 delay=88
+[orch] link change t=195.0s bw=59 delay=30
+[orch] link change t=195.0s bw=34 delay=31
+[orch] link change t=195.0s bw=16 delay=24
+[orch] link change t=195.0s bw=56 delay=69
+[orch] link change t=195.0s bw=46 delay=96
+[orch] link change t=210.0s bw=93 delay=79
+[orch] link change t=210.0s bw=59 delay=11
+[orch] link change t=210.0s bw=44 delay=76
+[orch] link change t=210.0s bw=84 delay=17
+[orch] link change t=210.0s bw=97 delay=21
+[orch] link change t=210.0s bw=19 delay=27
+[orch] link change t=210.0s bw=49 delay=47
+[orch] link change t=210.0s bw=26 delay=74
+[orch] link change t=210.0s bw=50 delay=58
+[orch] link change t=210.0s bw=43 delay=68
+[orch] link change t=225.0s bw=11 delay=58
+[orch] link change t=225.0s bw=95 delay=18
+[orch] link change t=225.0s bw=62 delay=70
+[orch] link change t=225.0s bw=83 delay=84
+[orch] link change t=225.0s bw=64 delay=52
+[orch] link change t=225.0s bw=89 delay=89
+[orch] link change t=225.0s bw=90 delay=57
+[orch] link change t=225.0s bw=85 delay=18
+[orch] link change t=225.0s bw=32 delay=97
+[orch] link change t=225.0s bw=64 delay=77
+[orch] link change t=240.0s bw=97 delay=37
+[orch] link change t=240.0s bw=30 delay=85
+[orch] link change t=240.0s bw=58 delay=24
+[orch] link change t=240.0s bw=60 delay=16
+[orch] link change t=240.0s bw=21 delay=56
+[orch] link change t=240.0s bw=66 delay=26
+[orch] link change t=240.0s bw=21 delay=87
+[orch] link change t=240.0s bw=98 delay=59
+[orch] link change t=240.0s bw=48 delay=94
+[orch] link change t=240.0s bw=31 delay=81
+[orch] link change t=255.0s bw=64 delay=13
+[orch] link change t=255.0s bw=15 delay=48
+[orch] link change t=255.0s bw=94 delay=43
+[orch] link change t=255.0s bw=38 delay=15
+[orch] link change t=255.0s bw=62 delay=42
+[orch] link change t=255.0s bw=26 delay=10
+[orch] link change t=255.0s bw=53 delay=95
+[orch] link change t=255.0s bw=23 delay=47
+[orch] link change t=255.0s bw=32 delay=40
+[orch] link change t=255.0s bw=56 delay=27
+[orch] link change t=270.0s bw=77 delay=38
+[orch] link change t=270.0s bw=13 delay=44
+[orch] link change t=270.0s bw=22 delay=18
+[orch] link change t=270.0s bw=81 delay=27
+[orch] link change t=270.0s bw=66 delay=99
+[orch] link change t=270.0s bw=10 delay=36
+[orch] link change t=270.0s bw=59 delay=74
+[orch] link change t=270.0s bw=36 delay=96
+[orch] link change t=270.0s bw=68 delay=40
+[orch] link change t=270.0s bw=39 delay=13
+[orch] link change t=285.0s bw=66 delay=73
+[orch] link change t=285.0s bw=70 delay=86
+[orch] link change t=285.0s bw=59 delay=89
+[orch] link change t=285.0s bw=47 delay=63
+[orch] link change t=285.0s bw=22 delay=35
+[orch] link change t=285.0s bw=37 delay=31
+[orch] link change t=285.0s bw=41 delay=32
+[orch] link change t=285.0s bw=38 delay=63
+[orch] link change t=285.0s bw=66 delay=88
+[orch] link change t=285.0s bw=32 delay=51
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run1/ep000001_bw27_d82_n1.pdf  return=303367.3
+[ep_plot] ep=1 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run1/ep000001_bw27_d82_n1.pdf  return=303367.3125
+[resp_bench] ma_dreamer_second_try run=1/50 done (1/50)
+[resp_bench] slot=0 ma_dreamer_second_try run=11 seed=11
+[slot=0] ep=11  env=random_bw_rtt_15s_300s  bw=67Mbps  delay=81ms  duration=300s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run9/ep000009_bw69_d88_n1.pdf  return=298739.0
+[ep_plot] ep=9 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run9/ep000009_bw69_d88_n1.pdf  return=298739.0
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run8/ep000008_bw39_d57_n1.pdf  return=309593.2
+[ep_plot] ep=8 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run8/ep000008_bw39_d57_n1.pdf  return=309593.1875
+[sao-listener] cport=23000 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run2/ep000002_bw17_d21_n1.pdf  return=299077.2
+[ep_plot] ep=2 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run2/ep000002_bw17_d21_n1.pdf  return=299077.1875
+[resp_bench] ma_dreamer_second_try run=9/50 done (2/50)
+[resp_bench] ma_dreamer_second_try run=8/50 done (3/50)
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run6/ep000006_bw83_d20_n1.pdf  return=282791.6
+[ep_plot] ep=6 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run6/ep000006_bw83_d20_n1.pdf  return=282791.5625
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run7/ep000007_bw51_d29_n1.pdf  return=304222.1
+[ep_plot] ep=7 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run7/ep000007_bw51_d29_n1.pdf  return=304222.0625
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run4/ep000004_bw40_d48_n1.pdf  return=282242.8
+[ep_plot] ep=4 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run4/ep000004_bw40_d48_n1.pdf  return=282242.84375
+[resp_bench] slot=7 ma_dreamer_second_try run=13 seed=13
+[slot=7] ep=13  env=random_bw_rtt_15s_300s  bw=43Mbps  delay=47ms  duration=300s
+[resp_bench] slot=8 ma_dreamer_second_try run=12 seed=12
+[slot=8] ep=12  env=random_bw_rtt_15s_300s  bw=70Mbps  delay=44ms  duration=300s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run3/ep000003_bw40_d85_n1.pdf  return=309856.7
+[ep_plot] ep=3 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run3/ep000003_bw40_d85_n1.pdf  return=309856.6875
+[resp_bench] ma_dreamer_second_try run=2/50 done (4/50)
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run5/ep000005_bw89_d42_n1.pdf  return=293094.7
+[ep_plot] ep=5 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run5/ep000005_bw89_d42_n1.pdf  return=293094.71875
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run10/ep000010_bw83_d14_n1.pdf  return=304682.9
+[ep_plot] ep=10 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run10/ep000010_bw83_d14_n1.pdf  return=304682.9375
+[resp_bench] ma_dreamer_second_try run=6/50 done (5/50)
+[resp_bench] ma_dreamer_second_try run=7/50 done (6/50)
+[resp_bench] ma_dreamer_second_try run=4/50 done (7/50)
+[resp_bench] slot=1 ma_dreamer_second_try run=14 seed=14
+[slot=1] ep=14  env=random_bw_rtt_15s_300s  bw=23Mbps  delay=88ms  duration=300s
+[resp_bench] slot=5 ma_dreamer_second_try run=15 seed=15
+[slot=5] ep=15  env=random_bw_rtt_15s_300s  bw=36Mbps  delay=11ms  duration=300s
+[resp_bench] ma_dreamer_second_try run=3/50 done (8/50)
+[resp_bench] slot=3 ma_dreamer_second_try run=17 seed=17
+[slot=3] ep=17  env=random_bw_rtt_15s_300s  bw=76Mbps  delay=63ms  duration=300s
+[resp_bench] slot=6 ma_dreamer_second_try run=16 seed=16
+[slot=6] ep=16  env=random_bw_rtt_15s_300s  bw=56Mbps  delay=70ms  duration=300s
+[sao-listener] cport=23800 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23700 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[resp_bench] ma_dreamer_second_try run=5/50 done (9/50)
+[resp_bench] ma_dreamer_second_try run=10/50 done (10/50)
+[resp_bench] slot=2 ma_dreamer_second_try run=18 seed=18
+[slot=2] ep=18  env=random_bw_rtt_15s_300s  bw=33Mbps  delay=25ms  duration=300s
+[resp_bench] slot=4 ma_dreamer_second_try run=19 seed=19
+[slot=4] ep=19  env=random_bw_rtt_15s_300s  bw=96Mbps  delay=15ms  duration=300s
+[resp_bench] slot=9 ma_dreamer_second_try run=20 seed=20
+[slot=9] ep=20  env=random_bw_rtt_15s_300s  bw=97Mbps  delay=29ms  duration=300s
+[sao-listener] cport=23100 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23300 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23500 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23600 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23200 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23400 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23900 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] new flow 1 10.0.0.1:23000->10.0.0.2:5201 cc=astraea pid=566445 child=567930
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23000 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23200->10.0.0.2:5203 cc=astraea pid=568637 child=568694
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23200 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23400->10.0.0.2:5205 cc=astraea pid=568644 child=568761
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23400 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23900->10.0.0.2:5210 cc=astraea pid=568649 child=568817
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23900 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23100->10.0.0.2:5202 cc=astraea pid=568192 child=568887
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23100 cc=astraea worker active
+[worker cport=23000 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23000 agent=0 group=slot0_ep11 flow=1] started interval=20ms det=1 latent=8x8
+[sao-listener] new flow 1 10.0.0.1:23700->10.0.0.2:5208 cc=astraea pid=567705 child=569066
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23700 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23800->10.0.0.2:5209 cc=astraea pid=567700 child=569118
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23800 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23500->10.0.0.2:5206 cc=astraea pid=568448 child=569172
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23500 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23300->10.0.0.2:5204 cc=astraea pid=568442 child=569224
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23300 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23600->10.0.0.2:5207 cc=astraea pid=568464 child=569274
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23600 cc=astraea worker active
+[worker cport=23200 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23200 agent=0 group=slot0_ep18 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23400 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23400 agent=0 group=slot0_ep19 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23900 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23900 agent=0 group=slot0_ep20 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23100 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23100 agent=0 group=slot0_ep14 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23700 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23700 agent=0 group=slot0_ep13 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23800 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23800 agent=0 group=slot0_ep12 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23500 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23500 agent=0 group=slot0_ep15 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23300 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23300 agent=0 group=slot0_ep17 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23600 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23600 agent=0 group=slot0_ep16 flow=1] started interval=20ms det=1 latent=8x8
+[orch] link change t=15.0s bw=69 delay=67
+[orch] link change t=15.0s bw=94 delay=77
+[orch] link change t=15.0s bw=97 delay=97
+[orch] link change t=15.0s bw=99 delay=93
+[orch] link change t=15.0s bw=48 delay=56
+[orch] link change t=15.0s bw=76 delay=14
+[orch] link change t=15.0s bw=71 delay=46
+[orch] link change t=15.0s bw=94 delay=67
+[orch] link change t=15.0s bw=76 delay=25
+[orch] link change t=15.0s bw=43 delay=96
+[orch] link change t=30.0s bw=75 delay=85
+[orch] link change t=30.0s bw=95 delay=54
+[orch] link change t=30.0s bw=33 delay=93
+[orch] link change t=30.0s bw=77 delay=41
+[orch] link change t=30.0s bw=47 delay=32
+[orch] link change t=30.0s bw=30 delay=40
+[orch] link change t=30.0s bw=63 delay=39
+[orch] link change t=30.0s bw=52 delay=40
+[orch] link change t=30.0s bw=75 delay=35
+[orch] link change t=30.0s bw=91 delay=22
+[orch] link change t=45.0s bw=34 delay=33
+[orch] link change t=45.0s bw=28 delay=58
+[orch] link change t=45.0s bw=39 delay=95
+[orch] link change t=45.0s bw=44 delay=42
+[orch] link change t=45.0s bw=100 delay=100
+[orch] link change t=45.0s bw=12 delay=17
+[orch] link change t=45.0s bw=67 delay=10
+[orch] link change t=45.0s bw=35 delay=72
+[orch] link change t=45.0s bw=60 delay=54
+[orch] link change t=45.0s bw=51 delay=83
+[orch] link change t=60.0s bw=75 delay=70
+[orch] link change t=60.0s bw=11 delay=57
+[orch] link change t=60.0s bw=28 delay=38
+[orch] link change t=60.0s bw=47 delay=19
+[orch] link change t=60.0s bw=79 delay=94
+[orch] link change t=60.0s bw=97 delay=28
+[orch] link change t=60.0s bw=62 delay=94
+[orch] link change t=60.0s bw=90 delay=73
+[orch] link change t=60.0s bw=77 delay=47
+[orch] link change t=60.0s bw=31 delay=13
+[orch] link change t=75.0s bw=90 delay=88
+[orch] link change t=75.0s bw=71 delay=45
+[orch] link change t=75.0s bw=92 delay=33
+[orch] link change t=75.0s bw=94 delay=67
+[orch] link change t=75.0s bw=45 delay=24
+[orch] link change t=75.0s bw=98 delay=57
+[orch] link change t=75.0s bw=43 delay=40
+[orch] link change t=75.0s bw=33 delay=71
+[orch] link change t=75.0s bw=84 delay=28
+[orch] link change t=75.0s bw=62 delay=62
+[orch] link change t=90.0s bw=33 delay=22
+[orch] link change t=90.0s bw=92 delay=68
+[orch] link change t=90.0s bw=26 delay=19
+[orch] link change t=90.0s bw=48 delay=69
+[orch] link change t=90.0s bw=13 delay=41
+[orch] link change t=90.0s bw=40 delay=24
+[orch] link change t=90.0s bw=91 delay=38
+[orch] link change t=90.0s bw=47 delay=68
+[orch] link change t=90.0s bw=86 delay=43
+[orch] link change t=90.0s bw=19 delay=23
+[orch] link change t=105.0s bw=67 delay=48
+[orch] link change t=105.0s bw=98 delay=86
+[orch] link change t=105.0s bw=78 delay=37
+[orch] link change t=105.0s bw=97 delay=60
+[orch] link change t=105.0s bw=59 delay=63
+[orch] link change t=105.0s bw=53 delay=69
+[orch] link change t=105.0s bw=11 delay=47
+[orch] link change t=105.0s bw=43 delay=35
+[orch] link change t=105.0s bw=23 delay=43
+[orch] link change t=105.0s bw=26 delay=50
+[orch] link change t=120.0s bw=28 delay=21
+[orch] link change t=120.0s bw=39 delay=81
+[orch] link change t=120.0s bw=47 delay=13
+[orch] link change t=120.0s bw=60 delay=25
+[orch] link change t=120.0s bw=42 delay=74
+[orch] link change t=120.0s bw=100 delay=55
+[orch] link change t=120.0s bw=48 delay=52
+[orch] link change t=120.0s bw=42 delay=98
+[orch] link change t=120.0s bw=62 delay=51
+[orch] link change t=120.0s bw=70 delay=84
+[orch] link change t=135.0s bw=78 delay=98
+[orch] link change t=135.0s bw=10 delay=94
+[orch] link change t=135.0s bw=65 delay=26
+[orch] link change t=135.0s bw=43 delay=38
+[orch] link change t=135.0s bw=50 delay=91
+[orch] link change t=135.0s bw=45 delay=60
+[orch] link change t=135.0s bw=95 delay=28
+[orch] link change t=135.0s bw=25 delay=51
+[orch] link change t=135.0s bw=44 delay=23
+[orch] link change t=135.0s bw=67 delay=62
+[orch] link change t=150.0s bw=91 delay=15
+[orch] link change t=150.0s bw=89 delay=28
+[orch] link change t=150.0s bw=97 delay=87
+[orch] link change t=150.0s bw=50 delay=55
+[orch] link change t=150.0s bw=97 delay=61
+[orch] link change t=150.0s bw=43 delay=54
+[orch] link change t=150.0s bw=87 delay=49
+[orch] link change t=150.0s bw=76 delay=96
+[orch] link change t=150.0s bw=51 delay=49
+[orch] link change t=150.0s bw=36 delay=35
+[orch] link change t=165.0s bw=86 delay=60
+[orch] link change t=165.0s bw=66 delay=57
+[orch] link change t=165.0s bw=11 delay=45
+[orch] link change t=165.0s bw=43 delay=56
+[orch] link change t=165.0s bw=27 delay=80
+[orch] link change t=165.0s bw=39 delay=36
+[orch] link change t=165.0s bw=12 delay=38
+[orch] link change t=165.0s bw=32 delay=40
+[orch] link change t=165.0s bw=12 delay=82
+[orch] link change t=165.0s bw=50 delay=90
+[orch] link change t=180.0s bw=67 delay=93
+[orch] link change t=180.0s bw=30 delay=53
+[orch] link change t=180.0s bw=28 delay=20
+[orch] link change t=180.0s bw=90 delay=90
+[orch] link change t=180.0s bw=17 delay=27
+[orch] link change t=180.0s bw=55 delay=50
+[orch] link change t=180.0s bw=87 delay=42
+[orch] link change t=180.0s bw=31 delay=40
+[orch] link change t=180.0s bw=89 delay=35
+[orch] link change t=180.0s bw=97 delay=52
+[orch] link change t=195.0s bw=88 delay=93
+[orch] link change t=195.0s bw=36 delay=17
+[orch] link change t=195.0s bw=43 delay=67
+[orch] link change t=195.0s bw=76 delay=29
+[orch] link change t=195.0s bw=35 delay=29
+[orch] link change t=195.0s bw=38 delay=49
+[orch] link change t=195.0s bw=12 delay=29
+[orch] link change t=195.0s bw=35 delay=56
+[orch] link change t=195.0s bw=19 delay=35
+[orch] link change t=195.0s bw=52 delay=64
+[orch] link change t=210.0s bw=30 delay=89
+[orch] link change t=210.0s bw=83 delay=35
+[orch] link change t=210.0s bw=65 delay=27
+[orch] link change t=210.0s bw=30 delay=80
+[orch] link change t=210.0s bw=100 delay=78
+[orch] link change t=210.0s bw=75 delay=63
+[orch] link change t=210.0s bw=87 delay=95
+[orch] link change t=210.0s bw=83 delay=74
+[orch] link change t=210.0s bw=24 delay=79
+[orch] link change t=210.0s bw=21 delay=90
+[orch] link change t=225.0s bw=11 delay=77
+[orch] link change t=225.0s bw=19 delay=75
+[orch] link change t=225.0s bw=42 delay=55
+[orch] link change t=225.0s bw=95 delay=94
+[orch] link change t=225.0s bw=81 delay=97
+[orch] link change t=225.0s bw=39 delay=83
+[orch] link change t=225.0s bw=90 delay=13
+[orch] link change t=225.0s bw=35 delay=96
+[orch] link change t=225.0s bw=68 delay=59
+[orch] link change t=225.0s bw=76 delay=72
+[orch] link change t=240.0s bw=18 delay=17
+[orch] link change t=240.0s bw=97 delay=53
+[orch] link change t=240.0s bw=39 delay=72
+[orch] link change t=240.0s bw=45 delay=31
+[orch] link change t=240.0s bw=36 delay=52
+[orch] link change t=240.0s bw=68 delay=63
+[orch] link change t=240.0s bw=69 delay=68
+[orch] link change t=240.0s bw=73 delay=37
+[orch] link change t=240.0s bw=19 delay=22
+[orch] link change t=240.0s bw=61 delay=20
+[orch] link change t=255.0s bw=14 delay=34
+[orch] link change t=255.0s bw=97 delay=61
+[orch] link change t=255.0s bw=80 delay=82
+[orch] link change t=255.0s bw=11 delay=93
+[orch] link change t=255.0s bw=72 delay=20
+[orch] link change t=255.0s bw=79 delay=25
+[orch] link change t=255.0s bw=86 delay=90
+[orch] link change t=255.0s bw=48 delay=43
+[orch] link change t=255.0s bw=63 delay=12
+[orch] link change t=255.0s bw=36 delay=83
+[orch] link change t=270.0s bw=40 delay=86
+[orch] link change t=270.0s bw=21 delay=12
+[orch] link change t=270.0s bw=64 delay=95
+[orch] link change t=270.0s bw=18 delay=25
+[orch] link change t=270.0s bw=91 delay=18
+[orch] link change t=270.0s bw=69 delay=82
+[orch] link change t=270.0s bw=100 delay=47
+[orch] link change t=270.0s bw=10 delay=53
+[orch] link change t=270.0s bw=22 delay=84
+[orch] link change t=270.0s bw=41 delay=14
+[orch] link change t=285.0s bw=13 delay=69
+[orch] link change t=285.0s bw=17 delay=94
+[orch] link change t=285.0s bw=56 delay=65
+[orch] link change t=285.0s bw=86 delay=53
+[orch] link change t=285.0s bw=49 delay=62
+[orch] link change t=285.0s bw=56 delay=66
+[orch] link change t=285.0s bw=38 delay=49
+[orch] link change t=285.0s bw=61 delay=38
+[orch] link change t=285.0s bw=64 delay=60
+[orch] link change t=285.0s bw=35 delay=22
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run11/ep000011_bw67_d81_n1.pdf  return=294494.0
+[ep_plot] ep=11 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run11/ep000011_bw67_d81_n1.pdf  return=294493.96875
+[resp_bench] ma_dreamer_second_try run=11/50 done (11/50)
+[resp_bench] slot=0 ma_dreamer_second_try run=21 seed=21
+[slot=0] ep=21  env=random_bw_rtt_15s_300s  bw=31Mbps  delay=63ms  duration=300s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run12/ep000012_bw70_d44_n1.pdf  return=291733.7
+[ep_plot] ep=12 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run12/ep000012_bw70_d44_n1.pdf  return=291733.65625
+[sao-listener] cport=23000 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run13/ep000013_bw43_d47_n1.pdf  return=285313.0
+[ep_plot] ep=13 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run13/ep000013_bw43_d47_n1.pdf  return=285312.96875
+[resp_bench] ma_dreamer_second_try run=12/50 done (12/50)
+[resp_bench] slot=8 ma_dreamer_second_try run=22 seed=22
+[slot=8] ep=22  env=random_bw_rtt_15s_300s  bw=27Mbps  delay=41ms  duration=300s
+[resp_bench] ma_dreamer_second_try run=13/50 done (13/50)
+[resp_bench] slot=7 ma_dreamer_second_try run=23 seed=23
+[slot=7] ep=23  env=random_bw_rtt_15s_300s  bw=47Mbps  delay=20ms  duration=300s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run14/ep000014_bw23_d88_n1.pdf  return=278380.1
+[ep_plot] ep=14 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run14/ep000014_bw23_d88_n1.pdf  return=278380.0625
+[sao-listener] cport=23800 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run17/ep000017_bw76_d63_n1.pdf  return=303424.3
+[ep_plot] ep=17 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run17/ep000017_bw76_d63_n1.pdf  return=303424.3125
+[sao-listener] cport=23700 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[resp_bench] ma_dreamer_second_try run=14/50 done (14/50)
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run15/ep000015_bw36_d11_n1.pdf  return=300610.2
+[ep_plot] ep=15 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run15/ep000015_bw36_d11_n1.pdf  return=300610.21875
+[resp_bench] slot=1 ma_dreamer_second_try run=24 seed=24
+[slot=1] ep=24  env=random_bw_rtt_15s_300s  bw=59Mbps  delay=84ms  duration=300s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run16/ep000016_bw56_d70_n1.pdf  return=296250.5
+[ep_plot] ep=16 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run16/ep000016_bw56_d70_n1.pdf  return=296250.46875
+[resp_bench] ma_dreamer_second_try run=17/50 done (15/50)
+[resp_bench] slot=3 ma_dreamer_second_try run=25 seed=25
+[slot=3] ep=25  env=random_bw_rtt_15s_300s  bw=58Mbps  delay=11ms  duration=300s
+[resp_bench] ma_dreamer_second_try run=15/50 done (16/50)
+[resp_bench] slot=5 ma_dreamer_second_try run=26 seed=26
+[slot=5] ep=26  env=random_bw_rtt_15s_300s  bw=35Mbps  delay=94ms  duration=300s
+[resp_bench] ma_dreamer_second_try run=16/50 done (17/50)
+[sao-listener] cport=23100 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[resp_bench] slot=6 ma_dreamer_second_try run=27 seed=27
+[slot=6] ep=27  env=random_bw_rtt_15s_300s  bw=93Mbps  delay=71ms  duration=300s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run18/ep000018_bw33_d25_n1.pdf  return=277463.7
+[ep_plot] ep=18 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run18/ep000018_bw33_d25_n1.pdf  return=277463.71875
+[sao-listener] cport=23300 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] new flow 1 10.0.0.1:23000->10.0.0.2:5201 cc=astraea pid=572451 child=573335
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23000 cc=astraea worker active
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run19/ep000019_bw96_d15_n1.pdf  return=297083.0
+[ep_plot] ep=19 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run19/ep000019_bw96_d15_n1.pdf  return=297083.0
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run20/ep000020_bw97_d29_n1.pdf  return=308096.9
+[ep_plot] ep=20 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run20/ep000020_bw97_d29_n1.pdf  return=308096.875
+[sao-listener] cport=23500 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[resp_bench] ma_dreamer_second_try run=18/50 done (18/50)
+[resp_bench] slot=2 ma_dreamer_second_try run=28 seed=28
+[slot=2] ep=28  env=random_bw_rtt_15s_300s  bw=24Mbps  delay=26ms  duration=300s
+[sao-listener] cport=23600 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[resp_bench] ma_dreamer_second_try run=19/50 done (19/50)
+[sao-listener] new flow 1 10.0.0.1:23700->10.0.0.2:5208 cc=astraea pid=573367 child=573863
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23700 cc=astraea worker active
+[resp_bench] slot=4 ma_dreamer_second_try run=29 seed=29
+[slot=4] ep=29  env=random_bw_rtt_15s_300s  bw=80Mbps  delay=19ms  duration=300s
+[resp_bench] ma_dreamer_second_try run=20/50 done (20/50)
+[resp_bench] slot=9 ma_dreamer_second_try run=30 seed=30
+[slot=9] ep=30  env=random_bw_rtt_15s_300s  bw=79Mbps  delay=47ms  duration=300s
+[sao-listener] cport=23200 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23400 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] cport=23900 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] new flow 1 10.0.0.1:23800->10.0.0.2:5209 cc=astraea pid=573329 child=574761
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23800 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23100->10.0.0.2:5202 cc=astraea pid=573973 child=574819
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23100 cc=astraea worker active
+[worker cport=23000 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23000 agent=0 group=slot0_ep21 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23700 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23700 agent=0 group=slot0_ep23 flow=1] started interval=20ms det=1 latent=8x8
+[sao-listener] new flow 1 10.0.0.1:23200->10.0.0.2:5203 cc=astraea pid=574942 child=575027
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23200 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23300->10.0.0.2:5204 cc=astraea pid=574228 child=575079
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23300 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23400->10.0.0.2:5205 cc=astraea pid=575009 child=575187
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23400 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23500->10.0.0.2:5206 cc=astraea pid=574503 child=575239
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23500 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23900->10.0.0.2:5210 cc=astraea pid=575022 child=575335
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23900 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23600->10.0.0.2:5207 cc=astraea pid=574679 child=575388
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23600 cc=astraea worker active
+[worker cport=23800 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23800 agent=0 group=slot0_ep22 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23100 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23100 agent=0 group=slot0_ep24 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23200 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23200 agent=0 group=slot0_ep28 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23300 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23300 agent=0 group=slot0_ep25 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23400 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23400 agent=0 group=slot0_ep29 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23500 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23500 agent=0 group=slot0_ep26 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23600 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23600 agent=0 group=slot0_ep27 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23900 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23900 agent=0 group=slot0_ep30 flow=1] started interval=20ms det=1 latent=8x8
+[orch] link change t=15.0s bw=98 delay=63
+[orch] link change t=15.0s bw=13 delay=88
+[orch] link change t=15.0s bw=12 delay=85
+[orch] link change t=15.0s bw=33 delay=37
+[orch] link change t=15.0s bw=37 delay=49
+[orch] link change t=15.0s bw=36 delay=65
+[orch] link change t=15.0s bw=99 delay=45
+[orch] link change t=15.0s bw=79 delay=86
+[orch] link change t=15.0s bw=54 delay=86
+[orch] link change t=15.0s bw=88 delay=13
+[orch] link change t=30.0s bw=91 delay=46
+[orch] link change t=30.0s bw=67 delay=33
+[orch] link change t=30.0s bw=49 delay=64
+[orch] link change t=30.0s bw=31 delay=34
+[orch] link change t=30.0s bw=91 delay=70
+[orch] link change t=30.0s bw=86 delay=79
+[orch] link change t=30.0s bw=46 delay=35
+[orch] link change t=30.0s bw=32 delay=38
+[orch] link change t=30.0s bw=87 delay=46
+[orch] link change t=30.0s bw=89 delay=93
+[orch] link change t=45.0s bw=71 delay=37
+[orch] link change t=45.0s bw=99 delay=25
+[orch] link change t=45.0s bw=58 delay=77
+[orch] link change t=45.0s bw=31 delay=95
+[orch] link change t=45.0s bw=15 delay=42
+[orch] link change t=45.0s bw=17 delay=26
+[orch] link change t=45.0s bw=19 delay=18
+[orch] link change t=45.0s bw=26 delay=91
+[orch] link change t=45.0s bw=21 delay=75
+[orch] link change t=45.0s bw=36 delay=42
+[orch] link change t=60.0s bw=70 delay=75
+[orch] link change t=60.0s bw=93 delay=54
+[orch] link change t=60.0s bw=55 delay=26
+[orch] link change t=60.0s bw=97 delay=21
+[orch] link change t=60.0s bw=14 delay=49
+[orch] link change t=60.0s bw=71 delay=15
+[orch] link change t=60.0s bw=42 delay=79
+[orch] link change t=60.0s bw=69 delay=63
+[orch] link change t=60.0s bw=54 delay=60
+[orch] link change t=60.0s bw=16 delay=60
+[orch] link change t=75.0s bw=33 delay=74
+[orch] link change t=75.0s bw=20 delay=39
+[orch] link change t=75.0s bw=34 delay=44
+[orch] link change t=75.0s bw=100 delay=29
+[orch] link change t=75.0s bw=82 delay=64
+[orch] link change t=75.0s bw=97 delay=89
+[orch] link change t=75.0s bw=52 delay=42
+[orch] link change t=75.0s bw=36 delay=37
+[orch] link change t=75.0s bw=63 delay=12
+[orch] link change t=75.0s bw=58 delay=92
+[orch] link change t=90.0s bw=77 delay=40
+[orch] link change t=90.0s bw=44 delay=16
+[orch] link change t=90.0s bw=66 delay=11
+[orch] link change t=90.0s bw=100 delay=46
+[orch] link change t=90.0s bw=22 delay=85
+[orch] link change t=90.0s bw=74 delay=31
+[orch] link change t=90.0s bw=57 delay=61
+[orch] link change t=90.0s bw=28 delay=60
+[orch] link change t=90.0s bw=14 delay=23
+[orch] link change t=90.0s bw=27 delay=20
+[orch] link change t=105.0s bw=10 delay=11
+[orch] link change t=105.0s bw=50 delay=86
+[orch] link change t=105.0s bw=38 delay=89
+[orch] link change t=105.0s bw=11 delay=66
+[orch] link change t=105.0s bw=25 delay=83
+[orch] link change t=105.0s bw=91 delay=64
+[orch] link change t=105.0s bw=33 delay=41
+[orch] link change t=105.0s bw=30 delay=26
+[orch] link change t=105.0s bw=66 delay=93
+[orch] link change t=105.0s bw=69 delay=10
+[orch] link change t=120.0s bw=57 delay=84
+[orch] link change t=120.0s bw=32 delay=80
+[orch] link change t=120.0s bw=68 delay=13
+[orch] link change t=120.0s bw=69 delay=91
+[orch] link change t=120.0s bw=97 delay=35
+[orch] link change t=120.0s bw=41 delay=62
+[orch] link change t=120.0s bw=40 delay=72
+[orch] link change t=120.0s bw=87 delay=34
+[orch] link change t=120.0s bw=38 delay=54
+[orch] link change t=120.0s bw=76 delay=41
+[orch] link change t=135.0s bw=64 delay=18
+[orch] link change t=135.0s bw=97 delay=65
+[orch] link change t=135.0s bw=23 delay=20
+[orch] link change t=135.0s bw=24 delay=13
+[orch] link change t=135.0s bw=75 delay=89
+[orch] link change t=135.0s bw=35 delay=98
+[orch] link change t=135.0s bw=19 delay=91
+[orch] link change t=135.0s bw=35 delay=13
+[orch] link change t=135.0s bw=20 delay=73
+[orch] link change t=135.0s bw=13 delay=19
+[orch] link change t=150.0s bw=28 delay=39
+[orch] link change t=150.0s bw=100 delay=16
+[orch] link change t=150.0s bw=100 delay=73
+[orch] link change t=150.0s bw=76 delay=31
+[orch] link change t=150.0s bw=50 delay=33
+[orch] link change t=150.0s bw=13 delay=95
+[orch] link change t=150.0s bw=83 delay=93
+[orch] link change t=150.0s bw=62 delay=40
+[orch] link change t=150.0s bw=52 delay=87
+[orch] link change t=150.0s bw=30 delay=86
+[orch] link change t=165.0s bw=39 delay=98
+[orch] link change t=165.0s bw=83 delay=12
+[orch] link change t=165.0s bw=63 delay=12
+[orch] link change t=165.0s bw=72 delay=66
+[orch] link change t=165.0s bw=80 delay=55
+[orch] link change t=165.0s bw=38 delay=28
+[orch] link change t=165.0s bw=20 delay=88
+[orch] link change t=165.0s bw=18 delay=22
+[orch] link change t=165.0s bw=79 delay=63
+[orch] link change t=165.0s bw=77 delay=61
+[orch] link change t=180.0s bw=15 delay=65
+[orch] link change t=180.0s bw=85 delay=43
+[orch] link change t=180.0s bw=75 delay=90
+[orch] link change t=180.0s bw=97 delay=48
+[orch] link change t=180.0s bw=75 delay=70
+[orch] link change t=180.0s bw=26 delay=37
+[orch] link change t=180.0s bw=64 delay=63
+[orch] link change t=180.0s bw=63 delay=50
+[orch] link change t=180.0s bw=35 delay=67
+[orch] link change t=180.0s bw=93 delay=54
+[orch] link change t=195.0s bw=62 delay=88
+[orch] link change t=195.0s bw=49 delay=63
+[orch] link change t=195.0s bw=65 delay=55
+[orch] link change t=195.0s bw=73 delay=20
+[orch] link change t=195.0s bw=77 delay=23
+[orch] link change t=195.0s bw=86 delay=71
+[orch] link change t=195.0s bw=16 delay=94
+[orch] link change t=195.0s bw=99 delay=26
+[orch] link change t=195.0s bw=31 delay=38
+[orch] link change t=195.0s bw=78 delay=18
+[orch] link change t=210.0s bw=66 delay=14
+[orch] link change t=210.0s bw=34 delay=33
+[orch] link change t=210.0s bw=17 delay=36
+[orch] link change t=210.0s bw=97 delay=42
+[orch] link change t=210.0s bw=91 delay=96
+[orch] link change t=210.0s bw=59 delay=56
+[orch] link change t=210.0s bw=66 delay=54
+[orch] link change t=210.0s bw=32 delay=74
+[orch] link change t=210.0s bw=65 delay=62
+[orch] link change t=210.0s bw=61 delay=13
+[orch] link change t=225.0s bw=52 delay=79
+[orch] link change t=225.0s bw=24 delay=84
+[orch] link change t=225.0s bw=14 delay=85
+[orch] link change t=225.0s bw=88 delay=30
+[orch] link change t=225.0s bw=22 delay=86
+[orch] link change t=225.0s bw=41 delay=84
+[orch] link change t=225.0s bw=11 delay=92
+[orch] link change t=225.0s bw=76 delay=98
+[orch] link change t=225.0s bw=96 delay=97
+[orch] link change t=225.0s bw=41 delay=82
+[orch] link change t=240.0s bw=73 delay=98
+[orch] link change t=240.0s bw=77 delay=82
+[orch] link change t=240.0s bw=57 delay=94
+[orch] link change t=240.0s bw=97 delay=51
+[orch] link change t=240.0s bw=84 delay=55
+[orch] link change t=240.0s bw=13 delay=13
+[orch] link change t=240.0s bw=71 delay=42
+[orch] link change t=240.0s bw=94 delay=44
+[orch] link change t=240.0s bw=82 delay=77
+[orch] link change t=240.0s bw=96 delay=45
+[orch] link change t=255.0s bw=24 delay=93
+[orch] link change t=255.0s bw=17 delay=99
+[orch] link change t=255.0s bw=32 delay=89
+[orch] link change t=255.0s bw=49 delay=19
+[orch] link change t=255.0s bw=63 delay=55
+[orch] link change t=255.0s bw=47 delay=79
+[orch] link change t=255.0s bw=27 delay=88
+[orch] link change t=255.0s bw=88 delay=39
+[orch] link change t=255.0s bw=35 delay=79
+[orch] link change t=255.0s bw=64 delay=82
+[orch] link change t=270.0s bw=57 delay=12
+[orch] link change t=270.0s bw=51 delay=88
+[orch] link change t=270.0s bw=37 delay=56
+[orch] link change t=270.0s bw=79 delay=93
+[orch] link change t=270.0s bw=34 delay=96
+[orch] link change t=270.0s bw=78 delay=25
+[orch] link change t=270.0s bw=53 delay=88
+[orch] link change t=270.0s bw=96 delay=67
+[orch] link change t=270.0s bw=96 delay=64
+[orch] link change t=270.0s bw=22 delay=96
+[orch] link change t=285.0s bw=29 delay=21
+[orch] link change t=285.0s bw=52 delay=43
+[orch] link change t=285.0s bw=82 delay=57
+[orch] link change t=285.0s bw=56 delay=94
+[orch] link change t=285.0s bw=30 delay=89
+[orch] link change t=285.0s bw=75 delay=15
+[orch] link change t=285.0s bw=93 delay=39
+[orch] link change t=285.0s bw=26 delay=35
+[orch] link change t=285.0s bw=48 delay=45
+[orch] link change t=285.0s bw=45 delay=91
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run21/ep000021_bw31_d63_n1.pdf  return=301744.2
+[ep_plot] ep=21 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run21/ep000021_bw31_d63_n1.pdf  return=301744.25
+[resp_bench] ma_dreamer_second_try run=21/50 done (21/50)
+[resp_bench] slot=0 ma_dreamer_second_try run=31 seed=31
+[slot=0] ep=31  env=random_bw_rtt_15s_300s  bw=11Mbps  delay=70ms  duration=300s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run22/ep000022_bw27_d41_n1.pdf  return=304117.3
+[ep_plot] ep=22 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run22/ep000022_bw27_d41_n1.pdf  return=304117.34375
+[sao-listener] cport=23000 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[resp_bench] ma_dreamer_second_try run=22/50 done (22/50)
+[resp_bench] slot=8 ma_dreamer_second_try run=32 seed=32
+[slot=8] ep=32  env=random_bw_rtt_15s_300s  bw=19Mbps  delay=37ms  duration=300s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run23/ep000023_bw47_d20_n1.pdf  return=303674.7
+[ep_plot] ep=23 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run23/ep000023_bw47_d20_n1.pdf  return=303674.6875
+[resp_bench] ma_dreamer_second_try run=23/50 done (23/50)
+[resp_bench] slot=7 ma_dreamer_second_try run=33 seed=33
+[slot=7] ep=33  env=random_bw_rtt_15s_300s  bw=83Mbps  delay=31ms  duration=300s
+[sao-listener] cport=23800 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run24/ep000024_bw59_d84_n1.pdf  return=295128.5
+[ep_plot] ep=24 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run24/ep000024_bw59_d84_n1.pdf  return=295128.46875
+[sao-listener] cport=23700 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[resp_bench] ma_dreamer_second_try run=24/50 done (24/50)
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run25/ep000025_bw58_d11_n1.pdf  return=307019.4
+[ep_plot] ep=25 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run25/ep000025_bw58_d11_n1.pdf  return=307019.4375
+[resp_bench] slot=1 ma_dreamer_second_try run=34 seed=34
+[slot=1] ep=34  env=random_bw_rtt_15s_300s  bw=77Mbps  delay=55ms  duration=300s
+[resp_bench] ma_dreamer_second_try run=25/50 done (25/50)
+[resp_bench] slot=3 ma_dreamer_second_try run=35 seed=35
+[slot=3] ep=35  env=random_bw_rtt_15s_300s  bw=80Mbps  delay=52ms  duration=300s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run26/ep000026_bw35_d94_n1.pdf  return=294701.0
+[ep_plot] ep=26 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run26/ep000026_bw35_d94_n1.pdf  return=294701.0
+[sao-listener] cport=23100 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run27/ep000027_bw93_d71_n1.pdf  return=284674.9
+[ep_plot] ep=27 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run27/ep000027_bw93_d71_n1.pdf  return=284674.90625
+[resp_bench] ma_dreamer_second_try run=26/50 done (26/50)
+[sao-listener] new flow 1 10.0.0.1:23000->10.0.0.2:5201 cc=astraea pid=578582 child=579099
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23000 cc=astraea worker active
+[resp_bench] slot=5 ma_dreamer_second_try run=36 seed=36
+[slot=5] ep=36  env=random_bw_rtt_15s_300s  bw=52Mbps  delay=17ms  duration=300s
+[resp_bench] ma_dreamer_second_try run=27/50 done (27/50)
+[sao-listener] cport=23300 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[resp_bench] slot=6 ma_dreamer_second_try run=37 seed=37
+[slot=6] ep=37  env=random_bw_rtt_15s_300s  bw=97Mbps  delay=87ms  duration=300s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run28/ep000028_bw24_d26_n1.pdf  return=290109.1
+[ep_plot] ep=28 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run28/ep000028_bw24_d26_n1.pdf  return=290109.0625
+[sao-listener] new flow 1 10.0.0.1:23700->10.0.0.2:5208 cc=astraea pid=579215 child=579382
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23700 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23800->10.0.0.2:5209 cc=astraea pid=578852 child=579384
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23800 cc=astraea worker active
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run29/ep000029_bw80_d19_n1.pdf  return=303148.8
+[ep_plot] ep=29 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run29/ep000029_bw80_d19_n1.pdf  return=303148.84375
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run30/ep000030_bw79_d47_n1.pdf  return=308049.4
+[ep_plot] ep=30 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run30/ep000030_bw79_d47_n1.pdf  return=308049.4375
+[sao-listener] cport=23500 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[resp_bench] ma_dreamer_second_try run=28/50 done (28/50)
+[resp_bench] slot=2 ma_dreamer_second_try run=38 seed=38
+[slot=2] ep=38  env=random_bw_rtt_15s_300s  bw=91Mbps  delay=63ms  duration=300s
+[sao-listener] cport=23600 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[resp_bench] ma_dreamer_second_try run=29/50 done (29/50)
+[resp_bench] ma_dreamer_second_try run=30/50 done (30/50)
+[resp_bench] slot=4 ma_dreamer_second_try run=39 seed=39
+[slot=4] ep=39  env=random_bw_rtt_15s_300s  bw=36Mbps  delay=43ms  duration=300s
+[resp_bench] slot=9 ma_dreamer_second_try run=40 seed=40
+[slot=9] ep=40  env=random_bw_rtt_15s_300s  bw=68Mbps  delay=84ms  duration=300s
+[sao-listener] cport=23200 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] new flow 1 10.0.0.1:23100->10.0.0.2:5202 cc=astraea pid=579587 child=580302
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23100 cc=astraea worker active
+[sao-listener] cport=23400 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[worker cport=23000 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23000 agent=0 group=slot0_ep31 flow=1] started interval=20ms det=1 latent=8x8
+[sao-listener] cport=23900 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] new flow 1 10.0.0.1:23300->10.0.0.2:5204 cc=astraea pid=579956 child=581057
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23300 cc=astraea worker active
+[worker cport=23800 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23800 agent=0 group=slot0_ep32 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23700 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23700 agent=0 group=slot0_ep33 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23100 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23100 agent=0 group=slot0_ep34 flow=1] started interval=20ms det=1 latent=8x8
+[sao-listener] new flow 1 10.0.0.1:23500->10.0.0.2:5206 cc=astraea pid=580627 child=581359
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23500 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23600->10.0.0.2:5207 cc=astraea pid=580698 child=581459
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23600 cc=astraea worker active
+[worker cport=23300 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23300 agent=0 group=slot0_ep35 flow=1] started interval=20ms det=1 latent=8x8
+[sao-listener] new flow 1 10.0.0.1:23200->10.0.0.2:5203 cc=astraea pid=581114 child=581602
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23200 cc=astraea worker active
+[worker cport=23500 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23500 agent=0 group=slot0_ep36 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23600 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23600 agent=0 group=slot0_ep37 flow=1] started interval=20ms det=1 latent=8x8
+[sao-listener] new flow 1 10.0.0.1:23400->10.0.0.2:5205 cc=astraea pid=581187 child=581763
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23400 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23900->10.0.0.2:5210 cc=astraea pid=581190 child=581817
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23900 cc=astraea worker active
+[worker cport=23200 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23200 agent=0 group=slot0_ep38 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23400 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23400 agent=0 group=slot0_ep39 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23900 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23900 agent=0 group=slot0_ep40 flow=1] started interval=20ms det=1 latent=8x8
+[orch] link change t=15.0s bw=24 delay=60
+[orch] link change t=15.0s bw=28 delay=48
+[orch] link change t=15.0s bw=90 delay=39
+[orch] link change t=15.0s bw=84 delay=13
+[orch] link change t=15.0s bw=26 delay=53
+[orch] link change t=15.0s bw=12 delay=46
+[orch] link change t=15.0s bw=21 delay=89
+[orch] link change t=15.0s bw=64 delay=23
+[orch] link change t=15.0s bw=59 delay=13
+[orch] link change t=15.0s bw=77 delay=14
+[orch] link change t=30.0s bw=28 delay=97
+[orch] link change t=30.0s bw=99 delay=40
+[orch] link change t=30.0s bw=45 delay=71
+[orch] link change t=30.0s bw=39 delay=13
+[orch] link change t=30.0s bw=29 delay=46
+[orch] link change t=30.0s bw=20 delay=10
+[orch] link change t=30.0s bw=95 delay=91
+[orch] link change t=30.0s bw=18 delay=56
+[orch] link change t=30.0s bw=34 delay=38
+[orch] link change t=30.0s bw=41 delay=46
+[orch] link change t=45.0s bw=15 delay=27
+[orch] link change t=45.0s bw=73 delay=13
+[orch] link change t=45.0s bw=93 delay=78
+[orch] link change t=45.0s bw=59 delay=56
+[orch] link change t=45.0s bw=65 delay=42
+[orch] link change t=45.0s bw=74 delay=90
+[orch] link change t=45.0s bw=75 delay=14
+[orch] link change t=45.0s bw=99 delay=69
+[orch] link change t=45.0s bw=60 delay=82
+[orch] link change t=45.0s bw=95 delay=91
+[orch] link change t=60.0s bw=24 delay=78
+[orch] link change t=60.0s bw=14 delay=22
+[orch] link change t=60.0s bw=77 delay=33
+[orch] link change t=60.0s bw=18 delay=64
+[orch] link change t=60.0s bw=82 delay=17
+[orch] link change t=60.0s bw=32 delay=41
+[orch] link change t=60.0s bw=90 delay=57
+[orch] link change t=60.0s bw=57 delay=15
+[orch] link change t=60.0s bw=10 delay=92
+[orch] link change t=60.0s bw=95 delay=36
+[orch] link change t=75.0s bw=39 delay=27
+[orch] link change t=75.0s bw=51 delay=75
+[orch] link change t=75.0s bw=93 delay=88
+[orch] link change t=75.0s bw=49 delay=53
+[orch] link change t=75.0s bw=77 delay=45
+[orch] link change t=75.0s bw=44 delay=93
+[orch] link change t=75.0s bw=66 delay=77
+[orch] link change t=75.0s bw=87 delay=95
+[orch] link change t=75.0s bw=42 delay=96
+[orch] link change t=75.0s bw=26 delay=54
+[orch] link change t=90.0s bw=28 delay=14
+[orch] link change t=90.0s bw=52 delay=17
+[orch] link change t=90.0s bw=74 delay=51
+[orch] link change t=90.0s bw=22 delay=84
+[orch] link change t=90.0s bw=93 delay=56
+[orch] link change t=90.0s bw=65 delay=56
+[orch] link change t=90.0s bw=23 delay=97
+[orch] link change t=90.0s bw=31 delay=85
+[orch] link change t=90.0s bw=55 delay=100
+[orch] link change t=90.0s bw=45 delay=66
+[orch] link change t=105.0s bw=94 delay=17
+[orch] link change t=105.0s bw=76 delay=98
+[orch] link change t=105.0s bw=97 delay=77
+[orch] link change t=105.0s bw=75 delay=29
+[orch] link change t=105.0s bw=84 delay=22
+[orch] link change t=105.0s bw=81 delay=44
+[orch] link change t=105.0s bw=68 delay=86
+[orch] link change t=105.0s bw=54 delay=51
+[orch] link change t=105.0s bw=32 delay=13
+[orch] link change t=105.0s bw=13 delay=77
+[orch] link change t=120.0s bw=27 delay=39
+[orch] link change t=120.0s bw=70 delay=57
+[orch] link change t=120.0s bw=71 delay=66
+[orch] link change t=120.0s bw=22 delay=45
+[orch] link change t=120.0s bw=56 delay=11
+[orch] link change t=120.0s bw=79 delay=19
+[orch] link change t=120.0s bw=46 delay=58
+[orch] link change t=120.0s bw=44 delay=100
+[orch] link change t=120.0s bw=47 delay=96
+[orch] link change t=120.0s bw=26 delay=17
+[orch] link change t=135.0s bw=78 delay=67
+[orch] link change t=135.0s bw=86 delay=10
+[orch] link change t=135.0s bw=46 delay=96
+[orch] link change t=135.0s bw=54 delay=88
+[orch] link change t=135.0s bw=75 delay=11
+[orch] link change t=135.0s bw=83 delay=62
+[orch] link change t=135.0s bw=64 delay=66
+[orch] link change t=135.0s bw=52 delay=89
+[orch] link change t=135.0s bw=19 delay=56
+[orch] link change t=135.0s bw=92 delay=35
+[orch] link change t=150.0s bw=77 delay=62
+[orch] link change t=150.0s bw=79 delay=26
+[orch] link change t=150.0s bw=91 delay=19
+[orch] link change t=150.0s bw=10 delay=29
+[orch] link change t=150.0s bw=22 delay=73
+[orch] link change t=150.0s bw=72 delay=59
+[orch] link change t=150.0s bw=28 delay=16
+[orch] link change t=150.0s bw=49 delay=70
+[orch] link change t=150.0s bw=11 delay=23
+[orch] link change t=150.0s bw=89 delay=100
+[orch] link change t=165.0s bw=36 delay=85
+[orch] link change t=165.0s bw=77 delay=11
+[orch] link change t=165.0s bw=48 delay=62
+[orch] link change t=165.0s bw=77 delay=21
+[orch] link change t=165.0s bw=57 delay=13
+[orch] link change t=165.0s bw=54 delay=60
+[orch] link change t=165.0s bw=21 delay=62
+[orch] link change t=165.0s bw=84 delay=61
+[orch] link change t=165.0s bw=64 delay=54
+[orch] link change t=165.0s bw=68 delay=16
+[orch] link change t=180.0s bw=21 delay=25
+[orch] link change t=180.0s bw=72 delay=35
+[orch] link change t=180.0s bw=49 delay=76
+[orch] link change t=180.0s bw=17 delay=57
+[orch] link change t=180.0s bw=53 delay=96
+[orch] link change t=180.0s bw=41 delay=60
+[orch] link change t=180.0s bw=19 delay=79
+[orch] link change t=180.0s bw=38 delay=88
+[orch] link change t=180.0s bw=64 delay=22
+[orch] link change t=180.0s bw=32 delay=87
+[orch] link change t=195.0s bw=12 delay=61
+[orch] link change t=195.0s bw=46 delay=35
+[orch] link change t=195.0s bw=73 delay=16
+[orch] link change t=195.0s bw=42 delay=80
+[orch] link change t=195.0s bw=73 delay=16
+[orch] link change t=195.0s bw=31 delay=25
+[orch] link change t=195.0s bw=46 delay=56
+[orch] link change t=195.0s bw=20 delay=77
+[orch] link change t=195.0s bw=60 delay=75
+[orch] link change t=195.0s bw=50 delay=24
+[orch] link change t=210.0s bw=53 delay=35
+[orch] link change t=210.0s bw=67 delay=20
+[orch] link change t=210.0s bw=87 delay=96
+[orch] link change t=210.0s bw=100 delay=17
+[orch] link change t=210.0s bw=12 delay=40
+[orch] link change t=210.0s bw=75 delay=73
+[orch] link change t=210.0s bw=92 delay=100
+[orch] link change t=210.0s bw=72 delay=28
+[orch] link change t=210.0s bw=84 delay=48
+[orch] link change t=210.0s bw=42 delay=51
+[orch] link change t=225.0s bw=36 delay=52
+[orch] link change t=225.0s bw=52 delay=25
+[orch] link change t=225.0s bw=64 delay=45
+[orch] link change t=225.0s bw=59 delay=31
+[orch] link change t=225.0s bw=51 delay=20
+[orch] link change t=225.0s bw=99 delay=36
+[orch] link change t=225.0s bw=65 delay=85
+[orch] link change t=225.0s bw=65 delay=77
+[orch] link change t=225.0s bw=44 delay=18
+[orch] link change t=225.0s bw=28 delay=75
+[orch] link change t=240.0s bw=60 delay=56
+[orch] link change t=240.0s bw=14 delay=77
+[orch] link change t=240.0s bw=50 delay=81
+[orch] link change t=240.0s bw=85 delay=91
+[orch] link change t=240.0s bw=30 delay=53
+[orch] link change t=240.0s bw=77 delay=47
+[orch] link change t=240.0s bw=82 delay=56
+[orch] link change t=240.0s bw=41 delay=11
+[orch] link change t=240.0s bw=68 delay=65
+[orch] link change t=240.0s bw=97 delay=76
+[orch] link change t=255.0s bw=86 delay=41
+[orch] link change t=255.0s bw=24 delay=30
+[orch] link change t=255.0s bw=97 delay=41
+[orch] link change t=255.0s bw=49 delay=47
+[orch] link change t=255.0s bw=31 delay=82
+[orch] link change t=255.0s bw=33 delay=72
+[orch] link change t=255.0s bw=91 delay=100
+[orch] link change t=255.0s bw=58 delay=57
+[orch] link change t=255.0s bw=42 delay=83
+[orch] link change t=255.0s bw=22 delay=62
+[orch] link change t=270.0s bw=36 delay=37
+[orch] link change t=270.0s bw=66 delay=12
+[orch] link change t=270.0s bw=25 delay=17
+[orch] link change t=270.0s bw=58 delay=50
+[orch] link change t=270.0s bw=19 delay=71
+[orch] link change t=270.0s bw=100 delay=85
+[orch] link change t=270.0s bw=83 delay=14
+[orch] link change t=270.0s bw=78 delay=97
+[orch] link change t=270.0s bw=51 delay=82
+[orch] link change t=270.0s bw=16 delay=50
+[orch] link change t=285.0s bw=63 delay=84
+[orch] link change t=285.0s bw=65 delay=16
+[orch] link change t=285.0s bw=50 delay=46
+[orch] link change t=285.0s bw=37 delay=36
+[orch] link change t=285.0s bw=56 delay=20
+[orch] link change t=285.0s bw=51 delay=80
+[orch] link change t=285.0s bw=77 delay=89
+[orch] link change t=285.0s bw=88 delay=74
+[orch] link change t=285.0s bw=10 delay=100
+[orch] link change t=285.0s bw=52 delay=39
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run31/ep000031_bw11_d70_n1.pdf  return=291609.4
+[ep_plot] ep=31 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run31/ep000031_bw11_d70_n1.pdf  return=291609.4375
+[resp_bench] ma_dreamer_second_try run=31/50 done (31/50)
+[resp_bench] slot=0 ma_dreamer_second_try run=41 seed=41
+[slot=0] ep=41  env=random_bw_rtt_15s_300s  bw=58Mbps  delay=52ms  duration=300s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run32/ep000032_bw19_d37_n1.pdf  return=309587.1
+[ep_plot] ep=32 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run32/ep000032_bw19_d37_n1.pdf  return=309587.125
+[sao-listener] cport=23000 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[resp_bench] ma_dreamer_second_try run=32/50 done (32/50)
+[resp_bench] slot=8 ma_dreamer_second_try run=42 seed=42
+[slot=8] ep=42  env=random_bw_rtt_15s_300s  bw=91Mbps  delay=24ms  duration=300s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run33/ep000033_bw83_d31_n1.pdf  return=301648.9
+[ep_plot] ep=33 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run33/ep000033_bw83_d31_n1.pdf  return=301648.90625
+[sao-listener] cport=23800 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[resp_bench] ma_dreamer_second_try run=33/50 done (33/50)
+[resp_bench] slot=7 ma_dreamer_second_try run=43 seed=43
+[slot=7] ep=43  env=random_bw_rtt_15s_300s  bw=14Mbps  delay=46ms  duration=300s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run34/ep000034_bw77_d55_n1.pdf  return=290989.6
+[ep_plot] ep=34 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run34/ep000034_bw77_d55_n1.pdf  return=290989.5625
+[resp_bench] ma_dreamer_second_try run=34/50 done (34/50)
+[resp_bench] slot=1 ma_dreamer_second_try run=44 seed=44
+[slot=1] ep=44  env=random_bw_rtt_15s_300s  bw=62Mbps  delay=76ms  duration=300s
+[sao-listener] cport=23700 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run35/ep000035_bw80_d52_n1.pdf  return=303650.6
+[ep_plot] ep=35 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run35/ep000035_bw80_d52_n1.pdf  return=303650.59375
+[resp_bench] ma_dreamer_second_try run=35/50 done (35/50)
+[resp_bench] slot=3 ma_dreamer_second_try run=45 seed=45
+[slot=3] ep=45  env=random_bw_rtt_15s_300s  bw=44Mbps  delay=63ms  duration=300s
+[sao-listener] cport=23100 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] new flow 1 10.0.0.1:23000->10.0.0.2:5201 cc=astraea pid=584538 child=585180
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23000 cc=astraea worker active
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run36/ep000036_bw52_d17_n1.pdf  return=294775.9
+[ep_plot] ep=36 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run36/ep000036_bw52_d17_n1.pdf  return=294775.9375
+[sao-listener] cport=23300 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run37/ep000037_bw97_d87_n1.pdf  return=299823.0
+[ep_plot] ep=37 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run37/ep000037_bw97_d87_n1.pdf  return=299823.0
+[resp_bench] ma_dreamer_second_try run=36/50 done (36/50)
+[resp_bench] slot=5 ma_dreamer_second_try run=46 seed=46
+[slot=5] ep=46  env=random_bw_rtt_15s_300s  bw=19Mbps  delay=61ms  duration=300s
+[sao-listener] new flow 1 10.0.0.1:23800->10.0.0.2:5209 cc=astraea pid=584943 child=585452
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23800 cc=astraea worker active
+[resp_bench] ma_dreamer_second_try run=37/50 done (37/50)
+[resp_bench] slot=6 ma_dreamer_second_try run=47 seed=47
+[slot=6] ep=47  env=random_bw_rtt_15s_300s  bw=55Mbps  delay=18ms  duration=300s
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run38/ep000038_bw91_d63_n1.pdf  return=309559.2
+[ep_plot] ep=38 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run38/ep000038_bw91_d63_n1.pdf  return=309559.25
+[sao-listener] cport=23500 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run40/ep000040_bw68_d84_n1.pdf  return=297885.2
+[ep_plot] ep=40 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run40/ep000040_bw68_d84_n1.pdf  return=297885.1875
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run39/ep000039_bw36_d43_n1.pdf  return=298682.9
+[ep_plot] ep=39 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run39/ep000039_bw36_d43_n1.pdf  return=298682.90625
+[resp_bench] ma_dreamer_second_try run=38/50 done (38/50)
+[resp_bench] slot=2 ma_dreamer_second_try run=48 seed=48
+[slot=2] ep=48  env=random_bw_rtt_15s_300s  bw=80Mbps  delay=50ms  duration=300s
+[sao-listener] cport=23600 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[resp_bench] ma_dreamer_second_try run=40/50 done (39/50)
+[worker cport=23000 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23000 agent=0 group=slot0_ep41 flow=1] started interval=20ms det=1 latent=8x8
+[resp_bench] slot=9 ma_dreamer_second_try run=49 seed=49
+[slot=9] ep=49  env=random_bw_rtt_15s_300s  bw=18Mbps  delay=54ms  duration=300s
+[resp_bench] ma_dreamer_second_try run=39/50 done (40/50)
+[sao-listener] new flow 1 10.0.0.1:23700->10.0.0.2:5208 cc=astraea pid=585381 child=586203
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23700 cc=astraea worker active
+[resp_bench] slot=4 ma_dreamer_second_try run=50 seed=50
+[slot=4] ep=50  env=random_bw_rtt_15s_300s  bw=73Mbps  delay=44ms  duration=300s
+[sao-listener] cport=23200 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[worker cport=23800 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23800 agent=0 group=slot0_ep42 flow=1] started interval=20ms det=1 latent=8x8
+[sao-listener] cport=23900 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] new flow 1 10.0.0.1:23300->10.0.0.2:5204 cc=astraea pid=585898 child=586812
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23300 cc=astraea worker active
+[sao-listener] cport=23400 worker=/its/home/mm2350/extra/Olympusv2/olympus/algorithms/ma_dreamer/worker.py scan=20ms target_cc=astraea single_flow=1 no_state_pipe=1
+[sao-listener] new flow 1 10.0.0.1:23600->10.0.0.2:5207 cc=astraea pid=586787 child=587083
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23600 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23100->10.0.0.2:5202 cc=astraea pid=585549 child=587201
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23100 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23500->10.0.0.2:5206 cc=astraea pid=586322 child=587288
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23500 cc=astraea worker active
+[worker cport=23700 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23700 agent=0 group=slot0_ep43 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23300 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23300 agent=0 group=slot0_ep45 flow=1] started interval=20ms det=1 latent=8x8
+[sao-listener] new flow 1 10.0.0.1:23400->10.0.0.2:5205 cc=astraea pid=587392 child=587646
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23400 cc=astraea worker active
+[worker cport=23600 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23600 agent=0 group=slot0_ep47 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23100 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23100 agent=0 group=slot0_ep44 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23500 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23500 agent=0 group=slot0_ep46 flow=1] started interval=20ms det=1 latent=8x8
+[sao-listener] new flow 1 10.0.0.1:23200->10.0.0.2:5203 cc=astraea pid=587261 child=587856
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23200 cc=astraea worker active
+[sao-listener] new flow 1 10.0.0.1:23900->10.0.0.2:5210 cc=astraea pid=587282 child=587916
+[sao-listener] single-flow mode: attached worker; stopping ss scans
+[sao-listener flow 1] cport=23900 cc=astraea worker active
+[worker cport=23400 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23400 agent=0 group=slot0_ep50 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23200 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23200 agent=0 group=slot0_ep48 flow=1] started interval=20ms det=1 latent=8x8
+[worker cport=23900 agent=0] loaded checkpoint step=58994
+[worker alg=ma_dreamer reward=tempest_fairness_ma cport=23900 agent=0 group=slot0_ep49 flow=1] started interval=20ms det=1 latent=8x8
+[orch] link change t=15.0s bw=39 delay=31
+[orch] link change t=15.0s bw=13 delay=45
+[orch] link change t=15.0s bw=99 delay=28
+[orch] link change t=15.0s bw=79 delay=99
+[orch] link change t=15.0s bw=72 delay=42
+[orch] link change t=15.0s bw=15 delay=85
+[orch] link change t=15.0s bw=65 delay=80
+[orch] link change t=15.0s bw=26 delay=81
+[orch] link change t=15.0s bw=62 delay=24
+[orch] link change t=15.0s bw=56 delay=91
+[orch] link change t=30.0s bw=59 delay=83
+[orch] link change t=30.0s bw=41 delay=38
+[orch] link change t=30.0s bw=69 delay=57
+[orch] link change t=30.0s bw=24 delay=32
+[orch] link change t=30.0s bw=20 delay=48
+[orch] link change t=30.0s bw=85 delay=39
+[orch] link change t=30.0s bw=68 delay=83
+[orch] link change t=30.0s bw=78 delay=48
+[orch] link change t=30.0s bw=51 delay=80
+[orch] link change t=30.0s bw=41 delay=98
+[orch] link change t=45.0s bw=98 delay=46
+[orch] link change t=45.0s bw=27 delay=23
+[orch] link change t=45.0s bw=95 delay=99
+[orch] link change t=45.0s bw=58 delay=38
+[orch] link change t=45.0s bw=53 delay=12
+[orch] link change t=45.0s bw=91 delay=76
+[orch] link change t=45.0s bw=53 delay=42
+[orch] link change t=45.0s bw=74 delay=34
+[orch] link change t=45.0s bw=75 delay=16
+[orch] link change t=45.0s bw=70 delay=52
+[orch] link change t=60.0s bw=80 delay=45
+[orch] link change t=60.0s bw=96 delay=79
+[orch] link change t=60.0s bw=22 delay=68
+[orch] link change t=60.0s bw=47 delay=13
+[orch] link change t=60.0s bw=19 delay=71
+[orch] link change t=60.0s bw=29 delay=84
+[orch] link change t=60.0s bw=75 delay=59
+[orch] link change t=60.0s bw=65 delay=31
+[orch] link change t=60.0s bw=97 delay=15
+[orch] link change t=60.0s bw=20 delay=78
+[orch] link change t=75.0s bw=59 delay=83
+[orch] link change t=75.0s bw=21 delay=85
+[orch] link change t=75.0s bw=86 delay=73
+[orch] link change t=75.0s bw=38 delay=24
+[orch] link change t=75.0s bw=11 delay=24
+[orch] link change t=75.0s bw=78 delay=14
+[orch] link change t=75.0s bw=60 delay=88
+[orch] link change t=75.0s bw=29 delay=94
+[orch] link change t=75.0s bw=45 delay=29
+[orch] link change t=75.0s bw=50 delay=38
+[orch] link change t=90.0s bw=11 delay=41
+[orch] link change t=90.0s bw=64 delay=14
+[orch] link change t=90.0s bw=87 delay=12
+[orch] link change t=90.0s bw=82 delay=11
+[orch] link change t=90.0s bw=46 delay=25
+[orch] link change t=90.0s bw=13 delay=18
+[orch] link change t=90.0s bw=15 delay=63
+[orch] link change t=90.0s bw=23 delay=73
+[orch] link change t=90.0s bw=68 delay=15
+[orch] link change t=90.0s bw=96 delay=81
+[orch] link change t=105.0s bw=94 delay=12
+[orch] link change t=105.0s bw=13 delay=21
+[orch] link change t=105.0s bw=75 delay=65
+[orch] link change t=105.0s bw=22 delay=30
+[orch] link change t=105.0s bw=49 delay=93
+[orch] link change t=105.0s bw=50 delay=90
+[orch] link change t=105.0s bw=94 delay=13
+[orch] link change t=105.0s bw=93 delay=38
+[orch] link change t=105.0s bw=90 delay=79
+[orch] link change t=105.0s bw=20 delay=29
+[orch] link change t=120.0s bw=66 delay=29
+[orch] link change t=120.0s bw=37 delay=39
+[orch] link change t=120.0s bw=83 delay=57
+[orch] link change t=120.0s bw=75 delay=98
+[orch] link change t=120.0s bw=14 delay=89
+[orch] link change t=120.0s bw=16 delay=13
+[orch] link change t=120.0s bw=23 delay=10
+[orch] link change t=120.0s bw=37 delay=75
+[orch] link change t=120.0s bw=74 delay=38
+[orch] link change t=120.0s bw=54 delay=22
+[orch] link change t=135.0s bw=29 delay=50
+[orch] link change t=135.0s bw=74 delay=87
+[orch] link change t=135.0s bw=89 delay=80
+[orch] link change t=135.0s bw=48 delay=98
+[orch] link change t=135.0s bw=18 delay=27
+[orch] link change t=135.0s bw=27 delay=80
+[orch] link change t=135.0s bw=43 delay=71
+[orch] link change t=135.0s bw=81 delay=75
+[orch] link change t=135.0s bw=87 delay=46
+[orch] link change t=135.0s bw=54 delay=50
+[orch] link change t=150.0s bw=31 delay=42
+[orch] link change t=150.0s bw=13 delay=81
+[orch] link change t=150.0s bw=65 delay=60
+[orch] link change t=150.0s bw=91 delay=58
+[orch] link change t=150.0s bw=44 delay=29
+[orch] link change t=150.0s bw=47 delay=77
+[orch] link change t=150.0s bw=79 delay=11
+[orch] link change t=150.0s bw=29 delay=70
+[orch] link change t=150.0s bw=83 delay=57
+[orch] link change t=150.0s bw=38 delay=34
+[orch] link change t=165.0s bw=93 delay=98
+[orch] link change t=165.0s bw=35 delay=93
+[orch] link change t=165.0s bw=32 delay=17
+[orch] link change t=165.0s bw=85 delay=61
+[orch] link change t=165.0s bw=37 delay=64
+[orch] link change t=165.0s bw=52 delay=21
+[orch] link change t=165.0s bw=50 delay=82
+[orch] link change t=165.0s bw=37 delay=13
+[orch] link change t=165.0s bw=61 delay=13
+[orch] link change t=165.0s bw=18 delay=52
+[orch] link change t=180.0s bw=89 delay=84
+[orch] link change t=180.0s bw=99 delay=79
+[orch] link change t=180.0s bw=23 delay=25
+[orch] link change t=180.0s bw=98 delay=95
+[orch] link change t=180.0s bw=19 delay=88
+[orch] link change t=180.0s bw=60 delay=100
+[orch] link change t=180.0s bw=64 delay=39
+[orch] link change t=180.0s bw=19 delay=64
+[orch] link change t=180.0s bw=41 delay=27
+[orch] link change t=180.0s bw=87 delay=87
+[orch] link change t=195.0s bw=17 delay=25
+[orch] link change t=195.0s bw=63 delay=38
+[orch] link change t=195.0s bw=58 delay=29
+[orch] link change t=195.0s bw=51 delay=55
+[orch] link change t=195.0s bw=62 delay=28
+[orch] link change t=195.0s bw=71 delay=56
+[orch] link change t=195.0s bw=40 delay=76
+[orch] link change t=195.0s bw=18 delay=26
+[orch] link change t=195.0s bw=22 delay=64
+[orch] link change t=195.0s bw=64 delay=91
+[orch] link change t=210.0s bw=85 delay=14
+[orch] link change t=210.0s bw=67 delay=85
+[orch] link change t=210.0s bw=22 delay=30
+[orch] link change t=210.0s bw=19 delay=53
+[orch] link change t=210.0s bw=99 delay=17
+[orch] link change t=210.0s bw=29 delay=70
+[orch] link change t=210.0s bw=75 delay=55
+[orch] link change t=210.0s bw=73 delay=96
+[orch] link change t=210.0s bw=58 delay=51
+[orch] link change t=210.0s bw=21 delay=18
+[orch] link change t=225.0s bw=65 delay=46
+[orch] link change t=225.0s bw=45 delay=10
+[orch] link change t=225.0s bw=75 delay=73
+[orch] link change t=225.0s bw=46 delay=89
+[orch] link change t=225.0s bw=14 delay=32
+[orch] link change t=225.0s bw=69 delay=19
+[orch] link change t=225.0s bw=66 delay=40
+[orch] link change t=225.0s bw=30 delay=26
+[orch] link change t=225.0s bw=55 delay=44
+[orch] link change t=225.0s bw=98 delay=87
+[orch] link change t=240.0s bw=37 delay=19
+[orch] link change t=240.0s bw=30 delay=99
+[orch] link change t=240.0s bw=26 delay=59
+[orch] link change t=240.0s bw=30 delay=24
+[orch] link change t=240.0s bw=51 delay=42
+[orch] link change t=240.0s bw=68 delay=99
+[orch] link change t=240.0s bw=14 delay=81
+[orch] link change t=240.0s bw=17 delay=99
+[orch] link change t=240.0s bw=93 delay=61
+[orch] link change t=240.0s bw=52 delay=98
+[orch] link change t=255.0s bw=56 delay=70
+[orch] link change t=255.0s bw=64 delay=53
+[orch] link change t=255.0s bw=86 delay=74
+[orch] link change t=255.0s bw=75 delay=18
+[orch] link change t=255.0s bw=55 delay=50
+[orch] link change t=255.0s bw=79 delay=89
+[orch] link change t=255.0s bw=57 delay=98
+[orch] link change t=255.0s bw=80 delay=47
+[orch] link change t=255.0s bw=88 delay=89
+[orch] link change t=255.0s bw=92 delay=65
+[orch] link change t=270.0s bw=26 delay=81
+[orch] link change t=270.0s bw=45 delay=29
+[orch] link change t=270.0s bw=44 delay=83
+[orch] link change t=270.0s bw=85 delay=22
+[orch] link change t=270.0s bw=22 delay=62
+[orch] link change t=270.0s bw=24 delay=65
+[orch] link change t=270.0s bw=55 delay=86
+[orch] link change t=270.0s bw=53 delay=99
+[orch] link change t=270.0s bw=16 delay=94
+[orch] link change t=270.0s bw=10 delay=39
+[orch] link change t=285.0s bw=95 delay=12
+[orch] link change t=285.0s bw=37 delay=53
+[orch] link change t=285.0s bw=33 delay=58
+[orch] link change t=285.0s bw=44 delay=50
+[orch] link change t=285.0s bw=21 delay=12
+[orch] link change t=285.0s bw=38 delay=53
+[orch] link change t=285.0s bw=53 delay=81
+[orch] link change t=285.0s bw=53 delay=22
+[orch] link change t=285.0s bw=62 delay=98
+[orch] link change t=285.0s bw=53 delay=44
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run41/ep000041_bw58_d52_n1.pdf  return=307775.0
+[ep_plot] ep=41 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run41/ep000041_bw58_d52_n1.pdf  return=307775.03125
+[resp_bench] ma_dreamer_second_try run=41/50 done (41/50)
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run42/ep000042_bw91_d24_n1.pdf  return=298841.6
+[ep_plot] ep=42 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run42/ep000042_bw91_d24_n1.pdf  return=298841.5625
+[resp_bench] ma_dreamer_second_try run=42/50 done (42/50)
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run43/ep000043_bw14_d46_n1.pdf  return=283632.4
+[ep_plot] ep=43 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run43/ep000043_bw14_d46_n1.pdf  return=283632.40625
+[resp_bench] ma_dreamer_second_try run=43/50 done (43/50)
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run44/ep000044_bw62_d76_n1.pdf  return=288587.2
+[ep_plot] ep=44 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run44/ep000044_bw62_d76_n1.pdf  return=288587.15625
+[resp_bench] ma_dreamer_second_try run=44/50 done (44/50)
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run45/ep000045_bw44_d63_n1.pdf  return=302019.7
+[ep_plot] ep=45 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run45/ep000045_bw44_d63_n1.pdf  return=302019.65625
+[resp_bench] ma_dreamer_second_try run=45/50 done (45/50)
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run46/ep000046_bw19_d61_n1.pdf  return=301876.8
+[ep_plot] ep=46 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run46/ep000046_bw19_d61_n1.pdf  return=301876.75
+[resp_bench] ma_dreamer_second_try run=46/50 done (46/50)
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run47/ep000047_bw55_d18_n1.pdf  return=306133.7
+[ep_plot] ep=47 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run47/ep000047_bw55_d18_n1.pdf  return=306133.65625
+[resp_bench] ma_dreamer_second_try run=47/50 done (47/50)
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run48/ep000048_bw80_d50_n1.pdf  return=313509.8
+[ep_plot] ep=48 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run48/ep000048_bw80_d50_n1.pdf  return=313509.75
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run49/ep000049_bw18_d54_n1.pdf  return=291879.2
+[ep_plot] ep=49 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run49/ep000049_bw18_d54_n1.pdf  return=291879.1875
+[resp_bench] ma_dreamer_second_try run=48/50 done (48/50)
+[multi_ep_plot] saved -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run50/ep000050_bw73_d44_n1.pdf  return=268115.0
+[ep_plot] ep=50 -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/ma_dreamer_second_try/run50/ep000050_bw73_d44_n1.pdf  return=268115.03125
+[resp_bench] ma_dreamer_second_try run=49/50 done (49/50)
+[resp_bench] ma_dreamer_second_try run=50/50 done (50/50)
+[orch] runtime cleanup sweep
+[resp_bench] summary plot -> /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/responsiveness_summary.pdf
+[resp_bench] replotted approaches=4 rows=200
+[resp_bench] individual_plots=0 skipped=200 failed=0
+[resp_bench] done metrics=/its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsiveness/data/metrics.csv

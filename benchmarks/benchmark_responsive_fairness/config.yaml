@@ -1,0 +1,32 @@
+# Responsive fairness benchmark.
+#
+# Flow starts are equally spaced over the first 45 seconds:
+#   2 flows: [0, 45]
+#   4 flows: [0, 15, 30, 45]
+#   5 flows: [0, 11.25, 22.5, 33.75, 45]
+#   7 flows: [0, 7.5, 15, 22.5, 30, 37.5, 45]
+#
+# All flows then share the changing bottleneck for 300 seconds. Bandwidth and
+# RTT change every 15 seconds throughout the complete 345-second episode.
+
+approaches_config: ../config.yaml
+output_root: data
+
+benchmark:
+  name: responsive_fairness_join45_score300
+  runs: 50
+  n_parallel: 30
+  flow_counts: [2, 4, 5, 7]
+  arrival_window_s: 45
+  score_duration_s: 300
+  duration_s: 345
+  change_interval_s: 15
+  bw_min_mbps: 10
+  bw_max_mbps: 100
+  rtt_min_ms: 10
+  rtt_max_ms: 100
+  seed_offset: 0
+  bdp_mult: 4
+  measure_interval_s: 1.0
+  kernel_cport_base: 56000
+  deterministic_inference: true

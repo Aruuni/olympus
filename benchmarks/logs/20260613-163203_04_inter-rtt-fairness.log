@@ -1,0 +1,10 @@
+[inter_rtt_bench] output_root=/its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data
+[inter_rtt_bench] benchmark=inter_rtt_fairness_two_flow_join20_final20 duration=60s flow1_start=0s flow2_start=20s fixed_flow_rtt=20ms score_window=20s
+[inter_rtt_bench] bw_grid=20,40,60,80,100
+[inter_rtt_bench] flow2_rtt_grid=20,40,60,80,100
+[inter_rtt_bench] runs_per_cell=4 n_parallel=7
+[inter_rtt_bench] approaches_to_run=cubic, bbr, bbr1, frcc
+[inter_rtt_bench] dry-run would run: /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/cubic trials=100
+[inter_rtt_bench] dry-run would run: /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/bbr trials=100
+[inter_rtt_bench] dry-run would run: /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/bbr1 trials=100
+[inter_rtt_bench] dry-run would run: /its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_inter_rtt_fairness/data/frcc trials=100

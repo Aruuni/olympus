@@ -1,9 +1,0 @@
-__pycache__/
-*.py[cod]
-data/*
-!data/checkpoints/
-!data/checkpoints/.gitkeep
-!data/plots/
-!data/plots/.gitkeep
-!data/traces/
-!data/traces/.gitkeep

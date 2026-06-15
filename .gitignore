@@ -15,7 +15,30 @@ oc_listener
 venv*
 *.pdf
 *.png
-multi_agent_olympus/
+# Keep generated multi-agent runs ignored while allowing the MA-Dreamer
+# runtime and its direct dependencies to be versioned.
+multi_agent_olympus/*
+!multi_agent_olympus/__init__.py
+!multi_agent_olympus/config.yaml
+!multi_agent_olympus/orchestrator.py
+!multi_agent_olympus/algorithms/
+multi_agent_olympus/algorithms/*
+!multi_agent_olympus/algorithms/__init__.py
+!multi_agent_olympus/algorithms/ma_dreamer/
+!multi_agent_olympus/algorithms/ma_dreamer/**
+!multi_agent_olympus/common/
+multi_agent_olympus/common/*
+!multi_agent_olympus/common/__init__.py
+!multi_agent_olympus/common/registry.py
+!multi_agent_olympus/common/multi_flow_episode_plot.py
+!multi_agent_olympus/rewards/
+multi_agent_olympus/rewards/*
+!multi_agent_olympus/rewards/__init__.py
+!multi_agent_olympus/rewards/tempest_fairness.py
+!multi_agent_olympus/tests/
+!multi_agent_olympus/tests/**
+multi_agent_olympus/**/__pycache__/
+multi_agent_olympus/**/*.pyc
 arm_bandit_mutant.zip
 
 # Kernel module build artifacts

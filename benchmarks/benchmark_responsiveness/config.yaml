@@ -1,0 +1,24 @@
+# Single-flow dynamic BW/RTT responsiveness benchmark.
+
+approaches_config: ../config.yaml
+output_root: data
+
+benchmark:
+  name: random_bw_rtt_15s_300s
+  runs: 50
+  n_parallel: 30 
+  duration_s: 300
+  change_interval_s: 15
+  bw_min_mbps: 10
+  bw_max_mbps: 100
+  rtt_min_ms: 10
+  rtt_max_ms: 100
+  seed_offset: 0
+  flows: 1
+  bdp_mult: 4
+  measure_interval_s: 1.0
+  kernel_cport_base: 33000
+  # Learned-model episode PDFs are produced once by the orchestrator.
+  # Kernel/Astraea/Orca run plots are produced by the benchmark runner.
+  plot_episodes: true
+  deterministic_inference: true

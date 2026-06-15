@@ -1,0 +1,42 @@
+# Four-flow staggered-arrival convergence benchmark (run-averaged).
+#
+# 4 flows. Flow i starts at t = (i-1) * flow_join_interval_s and lasts
+# flow_duration_s seconds:
+#   flow1 0->100s, flow2 25->125s, flow3 50->150s, flow4 75->175s.
+# Episode duration = (flows-1)*flow_join_interval_s + flow_duration_s = 175s.
+#
+# It sweeps a (bw_mbps_values x rtt_ms_values) grid: every flow in a given
+# experiment sees the same bottleneck bw/RTT, and each combination is its own
+# experiment. `runs` independent runs per (approach, condition) are averaged.
+#
+# convergence_summary.pdf is one combined page: a vertical stack of
+# full-width panels, one per (approach, bw/RTT condition), each the 4
+# per-flow goodput traces (mean ± 1σ).
+# efficiency.pdf puts every condition on one axes (colour = approach,
+# marker = bw/RTT condition) with Pearson covariance ellipses.
+#
+approaches_config: ../config.yaml
+output_root: data
+
+benchmark:
+  name: convergence_4flow_join25_stay100_175s
+  runs: 3
+  n_parallel: 10
+  flows: 4
+  flow_join_interval_s: 25
+  flow_duration_s: 100
+  duration_s: 175            # (flows-1)*join_interval + flow_duration; auto if omitted
+  # (bw, rtt) sweep -- every flow in an experiment sees the same bottleneck.
+  # The full cross product is run; all conditions share the summary plots.
+  bw_mbps_values: [50, 100]
+  rtt_ms_values: [20, 50]
+  bw_mbps: 100               # fallback if *_values omitted
+  rtt_ms: 50                 # fallback if *_values omitted
+  bdp_mult: 4                # environment invariant for OC-CWND; do not tune
+  measure_interval_s: 1.0
+  kernel_cport_base: 44000
+  plot_episodes: true
+  deterministic_inference: true
+  seed_offset: 0
+  summary_log_yscale: false   # linear ("real") goodput axis
+  summary_ymin_mbps: 1.0
