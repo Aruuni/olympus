@@ -40,10 +40,13 @@ import yaml
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _ROOT = os.path.dirname(_HERE)
 _ENV_DIR = os.path.join(_HERE, 'environments')
+# Environment backend type → subfolder under environments/. The link/traffic
+# emulator currently provided is Mininet; selecting it picks environments/mininet/.
+_DEFAULT_ENV_TYPE = 'mininet'
 sys.path.insert(0, _ROOT)
 sys.path.insert(0, _HERE)
 
-from olympus.common.mininet_env import MininetEnv
+from olympus.environments import make_env
 from olympus.plots.episode_plot import (
     plot as _plot_episode,
     episode_return as _episode_return,
@@ -361,37 +364,55 @@ def _environment_selection_label(selection) -> str:
     if isinstance(selection, str):
         return selection
     if isinstance(selection, dict):
-        return str(selection.get('name') or selection.get('path') or 'config')
+        return str(selection.get('environment_setup') or selection.get('name')
+                   or selection.get('path') or 'config')
     return 'config'
 
 
-def _environment_path(name: str) -> str:
-    return os.path.join(_ENV_DIR, f'{name}.yaml')
+def _environment_path(env_type: str, name: str) -> str:
+    """Built-in environment definitions live in environments/<type>/<name>.yaml."""
+    return os.path.join(_ENV_DIR, env_type, f'{name}.yaml')
+
+
+def _env_backend_type(cfg: dict) -> str:
+    """Resolve which network backend to build for this run.
+
+    The type is recorded on cfg['_environment_meta'] by
+    _load_environment_definition. An inline/config environment leaves it empty,
+    which falls back to the Mininet backend (legacy behavior)."""
+    meta = cfg.get('_environment_meta') or {}
+    return str(meta.get('type') or _DEFAULT_ENV_TYPE).strip() or _DEFAULT_ENV_TYPE
 
 
 def _load_environment_definition(cfg: dict):
     selection = cfg.get('environment')
     if not selection:
-        return cfg, {'name': 'config', 'path': '', 'source': 'config'}
+        return cfg, {'name': 'config', 'type': '', 'path': '', 'source': 'config'}
 
     if isinstance(selection, str):
+        env_type = _DEFAULT_ENV_TYPE
         if selection.endswith(('.yaml', '.yml')) or os.path.sep in selection:
             name = os.path.splitext(os.path.basename(selection))[0]
             path = _resolve_repo_path(selection)
         else:
             name = selection
-            path = _environment_path(name)
+            path = _environment_path(env_type, name)
     elif isinstance(selection, dict):
-        name = str(selection.get('name') or '').strip()
+        env_type = str(selection.get('type') or _DEFAULT_ENV_TYPE).strip()
+        # `environment_setup` is the scenario file name; `name` is kept as a
+        # deprecated fallback so older configs keep loading.
+        name = str(selection.get('environment_setup')
+                   or selection.get('name') or '').strip()
         raw_path = selection.get('path')
         if raw_path:
             path = _resolve_repo_path(str(raw_path))
             if not name:
                 name = os.path.splitext(os.path.basename(path))[0]
         elif name:
-            path = _environment_path(name)
+            path = _environment_path(env_type, name)
         else:
-            raise SystemExit('[orch] environment must define either name or path')
+            raise SystemExit(
+                '[orch] environment must define either environment_setup or path')
     else:
         raise SystemExit('[orch] environment must be a name, path, or mapping')
 
@@ -404,7 +425,7 @@ def _load_environment_definition(cfg: dict):
         raise SystemExit(f'[orch] environment file must contain a mapping: {path}')
     env_cfg = dict(env_cfg)
     env_name = str(env_cfg.get('name') or name or os.path.splitext(os.path.basename(path))[0])
-    return env_cfg, {'name': env_name, 'path': path, 'source': 'file'}
+    return env_cfg, {'name': env_name, 'type': env_type, 'path': path, 'source': 'file'}
 
 
 def _activate_runtime_blocks(cfg: dict) -> None:
@@ -615,7 +636,7 @@ def _build_pool(cfg):
             'either sweep or experiments')
 
     # Backward-compatible fallback: older configs kept sweep/experiments at the
-    # top level instead of in olympus/environments/*.yaml.
+    # top level instead of in olympus/environments/<type>/*.yaml.
     if 'sweep' in cfg:
         return _build_sweep_pool(cfg['sweep'], env_meta), True
     envs = cfg.get('experiments', [{}])
@@ -804,7 +825,8 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
           f'env={env_name or "config"}  bw={bw_str}Mbps  '
           f'delay={delay_str}ms  duration={duration}s', flush=True)
 
-    env = MininetEnv(
+    env = make_env(
+        _env_backend_type(cfg),
         n           = n_flows,
         bw          = ecfg.get('bw',    100.0),
         delay       = ecfg.get('delay',  20.0),
@@ -839,6 +861,16 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
         listener_cmd += ['--single-flow', '1']
     if not _as_bool(cfg.get('listener_state_pipe'), default=False):
         listener_cmd += ['--no-state-pipe', '1']
+
+    # Opt-in: have the listener exec() into the worker instead of forking and
+    # supervising it. Only safe in single-flow mode (exec destroys the scan
+    # loop), so it is silently ignored otherwise.
+    if _as_bool(cfg.get('listener_exec_worker'), default=False):
+        if listener_single_flow:
+            worker_env['OC_LISTENER_EXEC_WORKER'] = '1'
+        else:
+            print('[orchestrator] listener_exec_worker ignored: '
+                  'requires listener_single_flow', flush=True)
 
     listener_proc = subprocess.Popen(
         listener_cmd,
@@ -1222,7 +1254,7 @@ def _build_pool_marl(cfg):
     Honors the selected ``environment:`` file (its ``sweep``/``experiments``),
     falling back to an inline ``cfg['sweep']`` / ``cfg['experiments']`` for older
     configs, so multi-agent and single-agent runs share the same environment
-    presets in ``olympus/environments/``.
+    presets in ``olympus/environments/<type>/``.
     """
     env_cfg, env_meta = _load_environment_definition(cfg)
     cfg['_environment_meta'] = env_meta
@@ -1371,7 +1403,8 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
           f'{delays_str}  '
           f'lifetimes={[round(x,1) for x in flow_durations]}', flush=True)
 
-    env = MininetEnv(
+    env = make_env(
+        _env_backend_type(cfg),
         n           = n_flows,
         bw          = ecfg.get('bw',    100.0),
         delay       = ecfg.get('delay',  20.0),
@@ -1399,10 +1432,18 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
             listener_bin, '--cport', str(listener_cport), '--worker', worker_script,
             '--mode', 'mininet', '--scan-ms', str(cfg.get('scan_ms', 20)),
         ]
-        if _as_bool(cfg.get('listener_single_flow'), default=True):
+        _ml_single_flow = _as_bool(cfg.get('listener_single_flow'), default=True)
+        if _ml_single_flow:
             listener_cmd += ['--single-flow', '1']
         if not _as_bool(cfg.get('listener_state_pipe'), default=False):
             listener_cmd += ['--no-state-pipe', '1']
+        # Opt-in exec-into-worker; safe only in single-flow mode (see above).
+        if _as_bool(cfg.get('listener_exec_worker'), default=False):
+            if _ml_single_flow:
+                listener_env['OC_LISTENER_EXEC_WORKER'] = '1'
+            else:
+                print('[orchestrator] listener_exec_worker ignored: '
+                      'requires listener_single_flow', flush=True)
         listener_procs.append(subprocess.Popen(
             listener_cmd, env=listener_env, start_new_session=True))
 
@@ -1557,16 +1598,29 @@ def main():
     ap.add_argument('--config',   required=True)
     ap.add_argument('--episodes', type=int, default=None)
     ap.add_argument('--environment', default=None,
-                    help='environment name or yaml path; e.g. dynamic or static')
+                    help='environment_setup name or yaml path; e.g. dynamic or static')
+    ap.add_argument('--env-type', default=None,
+                    help=f'environment backend type (subfolder of environments/); '
+                         f'default {_DEFAULT_ENV_TYPE}')
     args = ap.parse_args()
 
     with open(args.config) as f:
         cfg = yaml.safe_load(f)
-    if args.environment:
-        if args.environment.endswith(('.yaml', '.yml')) or os.path.sep in args.environment:
-            cfg['environment'] = {'path': args.environment}
+    if args.environment or args.env_type:
+        existing = cfg.get('environment')
+        env_type = args.env_type or (
+            existing.get('type') if isinstance(existing, dict) else None
+        ) or _DEFAULT_ENV_TYPE
+        if args.environment:
+            if args.environment.endswith(('.yaml', '.yml')) or os.path.sep in args.environment:
+                cfg['environment'] = {'type': env_type, 'path': args.environment}
+            else:
+                cfg['environment'] = {'type': env_type, 'environment_setup': args.environment}
         else:
-            cfg['environment'] = {'name': args.environment}
+            # Only the type changed; keep the existing setup selection.
+            sel = dict(existing) if isinstance(existing, dict) else {}
+            sel['type'] = env_type
+            cfg['environment'] = sel
     _activate_runtime_blocks(cfg)
     resume_from = (cfg.get('training', {}) or {}).get('resume_from')
     if resume_from:
