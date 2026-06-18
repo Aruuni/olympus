@@ -1,14 +1,5 @@
 # Architecture diagrams
-
-The figures here are TikZ sources compiled to PDF, plus a PNG preview for quick
-viewing / embedding.
-
-| Source | PDF | Preview | Shows |
-| --- | --- | --- | --- |
-| `architecture.tex`           | `architecture.pdf`           | `preview-1.png`           | Single-agent: `×N` parallel envs, one worker each |
-| `architecture_multiflow.tex` | `architecture_multiflow.pdf` | `preview_multiflow-1.png` | Single-agent multi-flow: one env, one **live** worker trains + lagged self-play background workers |
-| `architecture_marl.tex`      | `architecture_marl.pdf`      | `preview_marl-1.png`      | Multi-agent (MARL): one env, `×N` agents jointly trained (CTDE) |
-
+Olympus architecture diagram explaining how all parts fit together. 
 ## Requirements
 
 - `pdflatex` (TeX Live) — uses only `tikz`, `helvet`, and standard libraries.
