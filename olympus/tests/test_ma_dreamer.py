@@ -20,7 +20,7 @@ from olympus.algorithms.ma_dreamer.model import (
     shared_team_reward,
 )
 from olympus.common.marl_team_reward import over_share_fraction
-from olympus.common.multi_flow_episode_plot import (
+from olympus.plots.multi_flow_episode_plot import (
     _r_fair_matrix,
     plot as plot_multi_flow_episode,
 )
