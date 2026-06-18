@@ -178,13 +178,15 @@ class LocalWorldModel(nn.Module):
             + continue_weight * continue_loss
             + kl_weight * kl_loss
         )
+        # Keep these as detached on-device scalars; the learner only reads
+        # them on logging steps, so we avoid a GPU->CPU sync every update.
         info = WorldModelInfo(
             loss=loss,
-            recon=float(recon_loss.detach().item()),
-            reward=float(reward_loss.detach().item()),
-            cont=float(continue_loss.detach().item()),
-            kl_dyn=float(kl_dyn.item()),
-            kl_rep=float(kl_rep.item()),
+            recon=recon_loss.detach(),
+            reward=reward_loss.detach(),
+            cont=continue_loss.detach(),
+            kl_dyn=kl_dyn.detach(),
+            kl_rep=kl_rep.detach(),
         )
         return loss, info, h_t.detach(), z_t.detach()
 
@@ -341,15 +343,17 @@ class GlobalWorldModel(nn.Module):
             + latent_h_weight * agent_h_loss
             + latent_z_weight * agent_z_loss
         )
+        # Detached on-device scalars; converted to floats by the learner only
+        # on logging steps to avoid a GPU->CPU sync every update.
         info = GlobalWorldModelInfo(
             loss=loss,
-            recon=float(recon_loss.detach().item()),
-            reward=float(reward_loss.detach().item()),
-            cont=float(continue_loss.detach().item()),
-            kl_dyn=float(kl_dyn.item()),
-            kl_rep=float(kl_rep.item()),
-            agent_h=float(agent_h_loss.detach().item()),
-            agent_z=float(agent_z_loss.detach().item()),
+            recon=recon_loss.detach(),
+            reward=reward_loss.detach(),
+            cont=continue_loss.detach(),
+            kl_dyn=kl_dyn.detach(),
+            kl_rep=kl_rep.detach(),
+            agent_h=agent_h_loss.detach(),
+            agent_z=agent_z_loss.detach(),
         )
         return loss, info, h_t.detach(), z_t.detach()
 

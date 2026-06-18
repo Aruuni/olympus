@@ -45,7 +45,7 @@ _BENCHMARKS = os.path.dirname(_HERE)
 _ROOT = os.path.dirname(_BENCHMARKS)
 sys.path.insert(0, _ROOT)
 
-from olympus.common.mininet_env import MininetEnv
+from olympus.environments.mininet.env import MininetEnv
 from olympus.orchestrator import (
     _as_bool,
     _final_runtime_cleanup,

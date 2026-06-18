@@ -45,11 +45,13 @@ _ROOT = os.path.dirname(_BENCHMARKS)
 _DEFAULT_CONFIG = os.path.join(_HERE, 'config.yaml')
 sys.path.insert(0, _ROOT)
 
-from olympus.common.mininet_env import MininetEnv
+from olympus.environments.mininet.env import MininetEnv
 from olympus.common.checkpoint_config import (
     apply_model_config_from_checkpoint,
 )
-from olympus.inference_benchmark import _state_log_metrics
+from olympus.common.state_log_metrics import (
+    multiflow_state_log_metrics as _state_log_metrics,
+)
 from olympus.orchestrator import (
     _activate_runtime_blocks,
     _as_bool,

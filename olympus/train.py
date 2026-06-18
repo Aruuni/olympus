@@ -309,7 +309,9 @@ def _parse_args() -> argparse.Namespace:
     ap.add_argument('--episodes', type=int, default=None,
                     help='override episodes from the config')
     ap.add_argument('--environment', default=None,
-                    help='environment name or yaml path passed through')
+                    help='environment_setup name or yaml path passed through')
+    ap.add_argument('--env-type', default=None,
+                    help='environment backend type passed through (e.g. mininet)')
     ap.add_argument('--python', default=None,
                     help='interpreter for the orchestrator; '
                          'defaults to paths.py from the config')
@@ -347,6 +349,8 @@ def main() -> int:
         command += ['--episodes', str(args.episodes)]
     if args.environment:
         command += ['--environment', args.environment]
+    if args.env_type:
+        command += ['--env-type', args.env_type]
 
     _LOG_DIR.mkdir(parents=True, exist_ok=True)
     stamp = time.strftime('%Y%m%d-%H%M%S')

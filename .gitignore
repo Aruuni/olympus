@@ -40,6 +40,24 @@ multi_agent_olympus/rewards/*
 multi_agent_olympus/**/__pycache__/
 multi_agent_olympus/**/*.pyc
 arm_bandit_mutant.zip
+olympus/logs/
+
+# Run and log artifacts
+*.log
+benchmarks/logs/
+
+# LaTeX build artifacts (.tex sources stay tracked; .pdf already ignored above)
+*.aux
+*.toc
+*.out
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.bbl
+*.blg
+*.nav
+*.snm
+*.vrb
 
 # Kernel module build artifacts
 kernel/**/*.o

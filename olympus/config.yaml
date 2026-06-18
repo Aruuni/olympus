@@ -46,15 +46,21 @@ actions:
     step: 0.025
 
 environment:
-  # Built-in environment files live in olympus/environments/. Override at runtime
-  # with `--environment <name>`. Options:
+  # `type` selects the emulator backend; its definitions live in
+  # olympus/environments/<type>/. `environment_setup` is the scenario file
+  # (<environment_setup>.yaml) within that folder. Override the scenario at
+  # runtime with `--environment <name>` and the backend with `--env-type <type>`.
+  #
+  # type: mininet            link + traffic emulation via Mininet (the backend
+  #                          provided today). environment_setup options:
   #   multiflow_interleave  up to N flows join at random times and leave after
   #                         random lifetimes (multi-agent joint training, or
   #                         lagged self-play under a single-agent algorithm).
   #   dynamic               one flow under changing BW/RTT link schedules.
   #   static                one flow on a steady link (no schedule changes).
   #   lagged_fairness       one flow plus lagged-policy background flows (join only).
-  name: multiflow_interleave
+  type: mininet
+  environment_setup: multiflow_interleave
 
 reward:
   delay_margin_coef: 1.25
@@ -119,7 +125,7 @@ n_parallel: 20
 # Hard cap on total dispatched episodes. The orchestrator stops handing out new
 # work once this many have been launched and lets in-flight slots drain. Omit
 # (or set null) to run until interrupted.
-episodes: 2000
+episodes: 10000
 
 algorithms:
 
@@ -310,7 +316,7 @@ algorithms:
       lr_actor: 3.0e-5
       lr_critic: 3.0e-5
       horizon: 15
-      gamma: 0.99
+      gamma: 0.995
       lam: 0.95
       entropy_coef: 3.0e-3
       action_l2_coef: 2.0e-2
@@ -421,7 +427,8 @@ listener_cc: astraea
 cport_base: 23000
 
 # The episode pool — base bottleneck/RTT sweep, flow counts, join/leave churn, and
-# link schedules — now lives in olympus/environments/*.yaml and is chosen by the
-# `environment:` selection near the top of this file, for BOTH single- and
-# multi-agent algorithms. The multi-flow join/leave sweep that used to sit here is
-# now olympus/environments/multiflow_interleave.yaml.
+# link schedules — now lives in olympus/environments/<type>/*.yaml and is chosen by
+# the `environment:` selection (type + environment_setup) near the top of this
+# file, for BOTH single- and multi-agent algorithms. The multi-flow join/leave
+# sweep that used to sit here is now
+# olympus/environments/mininet/multiflow_interleave.yaml.

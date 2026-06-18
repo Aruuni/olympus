@@ -152,6 +152,11 @@ class JointReplayBuffer:
 
     def __init__(self, max_transitions=400_000):
         self._groups = defaultdict(lambda: defaultdict(dict))
+        # group_id -> {group_step: refcount}; refcount = #agents holding that
+        # step. Maintained incrementally so sampling never scans the buffer.
+        self._group_steps = defaultdict(dict)
+        # group_ids that currently have >= 2 distinct steps (sampleable).
+        self._candidates = set()
         self._traj_keys = defaultdict(list)
         self._traj_order = deque()
         self._known_trajs = set()
@@ -171,6 +176,13 @@ class JointReplayBuffer:
         if old is None:
             self._total += 1
             self._traj_keys[traj_id].append(key)
+            steps_seen = self._group_steps[key[0]]
+            if key[2] in steps_seen:
+                steps_seen[key[2]] += 1
+            else:
+                steps_seen[key[2]] = 1
+                if len(steps_seen) >= 2:
+                    self._candidates.add(key[0])
 
         while self._total > self._capacity and self._traj_order:
             self._evict(self._traj_order.popleft())
@@ -187,6 +199,16 @@ class JointReplayBuffer:
             if current is not None and current.traj_id == traj_id:
                 del steps[group_step]
                 self._total -= 1
+                steps_seen = self._group_steps.get(group_id)
+                if steps_seen is not None and group_step in steps_seen:
+                    if steps_seen[group_step] <= 1:
+                        del steps_seen[group_step]
+                        if len(steps_seen) < 2:
+                            self._candidates.discard(group_id)
+                        if not steps_seen:
+                            self._group_steps.pop(group_id, None)
+                    else:
+                        steps_seen[group_step] -= 1
             if not steps:
                 agents.pop(agent_id, None)
             if not agents:
@@ -200,24 +222,31 @@ class JointReplayBuffer:
         return len(self._groups)
 
     def sample_chunks(self, batch_size, seq_len, max_agents):
-        candidates = [
-            group_id for group_id, agents in self._groups.items()
-            if len({step for steps in agents.values() for step in steps}) >= 2
-        ]
-        if not candidates:
+        if not self._candidates:
             return None
+        candidates = list(self._candidates)
 
+        batch_size = int(batch_size)
+        seq_len = int(seq_len)
+        max_agents = int(max_agents)
+        # Sort each chosen group's step list at most once per call (the buffer
+        # is not mutated while sampling), instead of rebuilding it per attempt.
+        sorted_steps = {}
         out = defaultdict(list)
         attempts = 0
-        while len(out['state']) < int(batch_size) and attempts < int(batch_size) * 12:
+        max_attempts = batch_size * 12
+        while len(out['state']) < batch_size and attempts < max_attempts:
             attempts += 1
             group_id = random.choice(candidates)
-            agents = self._groups[group_id]
-            available_steps = sorted(
-                {step for steps in agents.values() for step in steps})
+            available_steps = sorted_steps.get(group_id)
+            if available_steps is None:
+                steps_seen = self._group_steps.get(group_id)
+                available_steps = sorted(steps_seen) if steps_seen else []
+                sorted_steps[group_id] = available_steps
             if len(available_steps) < 2:
                 continue
-            start = random.choice(available_steps[:-1])
+            agents = self._groups[group_id]
+            start = available_steps[random.randrange(len(available_steps) - 1)]
 
             states = np.zeros(
                 (seq_len, max_agents, STATE_DIM), dtype=np.float32)
@@ -230,12 +259,13 @@ class JointReplayBuffer:
             dones = np.zeros(seq_len, dtype=np.float32)
             mask = np.zeros((seq_len, max_agents), dtype=np.float32)
 
-            for t in range(seq_len):
-                group_step = start + t
-                for agent_id, steps in agents.items():
-                    if agent_id < 0 or agent_id >= max_agents:
-                        continue
-                    exp = steps.get(group_step)
+            # Fetch each agent's step dict once, rather than re-scanning
+            # agents.items() for every one of the seq_len timesteps.
+            for agent_id, steps in agents.items():
+                if agent_id < 0 or agent_id >= max_agents:
+                    continue
+                for t in range(seq_len):
+                    exp = steps.get(start + t)
                     if exp is None:
                         continue
                     states[t, agent_id] = exp.next_state
@@ -800,7 +830,6 @@ class Learner:
 
         actor_loss_value = float('nan')
         entropy_value = float('nan')
-        return_mean = float(valid_returns.detach().mean().item())
         if self.step >= self.actor_warmup_steps:
             self.actor.train()
             log_prob_stack = torch.stack(log_prob_steps, dim=0)
@@ -846,17 +875,29 @@ class Learner:
             self.actor.eval()
 
         if self.step % 10 == 0:
+            # Pull every logged scalar off the GPU here (the only place they are
+            # consumed), so the hot path stays sync-free between steps.
+            return_mean = float(valid_returns.detach().mean().item())
+            local_loss = float(local_info.loss.item())
+            local_recon = float(local_info.recon.item())
+            local_reward = float(local_info.reward.item())
+            global_loss = float(global_info.loss.item())
+            global_recon = float(global_info.recon.item())
+            global_reward = float(global_info.reward.item())
+            global_agent_h = float(global_info.agent_h.item())
+            global_agent_z = float(global_info.agent_z.item())
+            critic_loss_value = float(critic_loss.item())
             r_fair_mean = float(
                 r_fair[row_mask].mean().item()) if row_mask.any() else 0.0
             fairness_cost_mean = float(
                 fairness_cost[row_mask].mean().item()) if row_mask.any() else 0.0
             print(
                 f'[learner] step={self.step:6d} '
-                f'local_wm={local_info.loss.item():.3f} '
-                f'global_wm={global_info.loss.item():.3f} '
-                f'latent=({global_info.agent_h:.3f},'
-                f'{global_info.agent_z:.3f}) '
-                f'critic={critic_loss.item():.3f} '
+                f'local_wm={local_loss:.3f} '
+                f'global_wm={global_loss:.3f} '
+                f'latent=({global_agent_h:.3f},'
+                f'{global_agent_z:.3f}) '
+                f'critic={critic_loss_value:.3f} '
                 f'actor={actor_loss_value:.3f} '
                 f'R_fair={r_fair_mean:.4f} '
                 f'fair_cost={fairness_cost_mean:.3f} '
@@ -867,15 +908,15 @@ class Learner:
             if self._csv_writer:
                 self._csv_writer.writerow([
                     self.step,
-                    f'{local_info.loss.item():.6f}',
-                    f'{local_info.recon:.6f}',
-                    f'{local_info.reward:.6f}',
-                    f'{global_info.loss.item():.6f}',
-                    f'{global_info.recon:.6f}',
-                    f'{global_info.reward:.6f}',
-                    f'{global_info.agent_h:.6f}',
-                    f'{global_info.agent_z:.6f}',
-                    f'{critic_loss.item():.6f}',
+                    f'{local_loss:.6f}',
+                    f'{local_recon:.6f}',
+                    f'{local_reward:.6f}',
+                    f'{global_loss:.6f}',
+                    f'{global_recon:.6f}',
+                    f'{global_reward:.6f}',
+                    f'{global_agent_h:.6f}',
+                    f'{global_agent_z:.6f}',
+                    f'{critic_loss_value:.6f}',
                     f'{actor_loss_value:.6f}',
                     f'{entropy_value:.6f}',
                     f'{return_mean:.6f}',

@@ -23,6 +23,10 @@ _HERE = os.path.dirname(os.path.abspath(__file__))
 _BENCHMARKS = os.path.dirname(_HERE)
 _ROOT = os.path.dirname(_BENCHMARKS)
 _DEFAULT_CONFIG = os.path.join(_HERE, 'config.yaml')
+# Curated approaches drawn into the aggregate plots, kept separate from the
+# benchmark approaches config (which controls what gets run). Hardcoded so the
+# default `plot.py` invocation needs no extra flags.
+_DEFAULT_PLOT_APPROACHES = os.path.join(_HERE, 'plot_approaches.yaml')
 sys.path.insert(0, _ROOT)
 
 from benchmarks.benchmark_responsive_fairness.responsive_fairness import (
@@ -37,6 +41,7 @@ from benchmarks.benchmark_responsive_fairness.responsive_fairness import (
     _schedule_mean,
     _slug,
 )
+from olympus.common.bench_utils import _approach_label, _load_yaml
 from olympus.common.marl_team_reward import r_fair_from_avg_throughput
 
 
@@ -746,6 +751,10 @@ def main() -> None:
         description='Plot responsive-fairness data from completed runs.')
     parser.add_argument('--config', default=_DEFAULT_CONFIG)
     parser.add_argument(
+        '--plot-config', default=_DEFAULT_PLOT_APPROACHES,
+        help='YAML listing the approaches (data_folder + plot_label) to '
+             'include in the aggregate plots; defaults to plot_approaches.yaml')
+    parser.add_argument(
         '--data-dir', default=None,
         help='directory containing learner metrics; defaults to output_root')
     parser.add_argument(
@@ -762,7 +771,17 @@ def main() -> None:
     data_dir = _resolve_data_dir(config_path, cfg, args.data_dir)
     aggregate_dir = os.path.abspath(
         args.output_dir or os.path.join(_HERE, 'aggregate'))
-    selected = {_slug(value) for value in (args.approach or [])}
+
+    # The curated plot config drives both which data folders are drawn and the
+    # labels they get, independent of the benchmark approaches config. A data
+    # folder present under data/ but absent here is left out of the plots.
+    plot_approaches = _load_yaml(
+        os.path.abspath(args.plot_config)).get('approaches') or []
+    cfg['approaches'] = plot_approaches
+    if args.approach:
+        selected = {_slug(value) for value in args.approach}
+    else:
+        selected = {_approach_label(approach) for approach in plot_approaches}
 
     rows = _completed_rows(
         _collect_rows(data_dir, cfg), bench, selected or None)

@@ -10,6 +10,11 @@ from mininet.topo import Topo
 from mininet.link import TCLink
 from mininet.log import setLogLevel
 
+try:
+    from olympus.environments.base import NetworkEnv
+except Exception:  # allow running this file standalone, outside the package
+    NetworkEnv = object
+
 
 class LinuxBridgeSwitch(Switch):
     """
@@ -93,7 +98,7 @@ def _peer_intf(intf):
     return link.intf1 if link.intf2 is intf else link.intf2
 
 
-class MininetEnv:
+class MininetEnv(NetworkEnv):
     """
     Simple dumbbell Mininet environment.
 
@@ -336,6 +341,10 @@ class MininetEnv:
             return
         self.net.stop()
         self.net = None
+
+
+# Backend entry point resolved by olympus.environments.make_env.
+ENV_CLASS = MininetEnv
 
 
 if __name__ == '__main__':
