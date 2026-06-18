@@ -28,7 +28,7 @@ by both of them.
                       /              \
           starts one learner       starts episode slots
                   |                       |
-                  |                 oc_listener process
+                  |                 oc_bridge process
                   |                       |
                   |                 one worker per flow
                   |                       |
@@ -135,7 +135,7 @@ action mapping is rejected even when both mappings use `ACTION_DIM = 1`.
 
 ## `worker.py`: Live Rollout and Inference
 
-A worker is attached to a live TCP flow by `oc_listener`. It is latency
+A worker is attached to a live TCP flow by `oc_bridge`. It is latency
 sensitive and should remain lightweight. Its responsibilities are:
 
 1. Read the flow descriptors and runtime settings from environment variables.

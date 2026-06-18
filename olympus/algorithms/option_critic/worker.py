@@ -1,9 +1,9 @@
 """
 worker.py — per-flow Option-Critic worker for direct CWND control.
 
-Spawned by oc_listener (same binary as training/) for each TCP flow.
+Spawned by oc_bridge (same binary as training/) for each TCP flow.
 
-Protocol with oc_listener:
+Protocol with oc_bridge:
   OC_STATE_FD   — optional C state pipe. In the single-agent fast path this is
                   -1 because the worker reads TCP state directly via tcp_sockopt.
   OC_ACTION_FD  — legacy field; the single-agent listener sets this to -1.
@@ -13,8 +13,8 @@ Protocol with oc_listener:
 The worker connects to the central learner via multiprocessing Manager IPC
 (OC_MANAGER_ADDR / OC_MANAGER_KEY) to push experiences and pull weights.
 
-Environment variables (set by orchestrator → oc_listener → inherited here):
-  OC_FLOW_FD          TCP socket fd (deepcc already enabled by oc_listener)
+Environment variables (set by orchestrator → oc_bridge → inherited here):
+  OC_FLOW_FD          TCP socket fd (deepcc already enabled by oc_bridge)
   OC_FLOW_ID          monotonic flow id
   OC_CPORT            iperf3 client source port (for logging)
   OC_STATE_FD         optional pipe to drain, or -1 when disabled

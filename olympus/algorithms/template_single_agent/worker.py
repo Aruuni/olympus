@@ -1,6 +1,6 @@
 """Per-flow rollout worker template (single-agent).
 
-One process per flow. The orchestrator's oc_listener forks this script with a
+One process per flow. The orchestrator's oc_bridge forks this script with a
 fully populated environment (see run_episode in olympus/orchestrator.py). The
 worker drives one TCP flow at a fixed control interval: read kernel stats →
 normalize → pick an action → set cwnd → push the transition to the learner and

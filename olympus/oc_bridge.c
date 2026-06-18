@@ -1,5 +1,5 @@
 /*
- * single_agent_olympus/oc_listener.c
+ * single_agent_olympus/oc_bridge.c
  *
  * Single-agent flow listener for Olympus.
  *
@@ -18,12 +18,12 @@
  * flow: the scan loop runs until the first match, then hands off for good.
  *
  * Build:
- *   cc -O2 -Wall -Wextra -o single_agent_olympus/oc_listener \
- *      single_agent_olympus/oc_listener.c
+ *   cc -O2 -Wall -Wextra -o single_agent_olympus/oc_bridge \
+ *      single_agent_olympus/oc_bridge.c
  *
  * Run:
  *   sudo -E env OC_PYTHON="./venv_training/bin/python" \
- *     single_agent_olympus/oc_listener --cport 23000 \
+ *     single_agent_olympus/oc_bridge --cport 23000 \
  *       --worker single_agent_olympus/algorithms/orca_td3/worker.py \
  *       --mode mininet --scan-ms 20
  */

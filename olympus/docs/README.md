@@ -1,5 +1,6 @@
 # Architecture diagrams
 Olympus architecture diagram explaining how all parts fit together. 
+
 ## Requirements
 
 - `pdflatex` (TeX Live) — uses only `tikz`, `helvet`, and standard libraries.
@@ -35,6 +36,6 @@ commands above.
   To drop a figure into a paper instead, `\input{}` the body and remove the
   standalone preamble (see the comment at the top of each `.tex`).
 - Styles to know when editing: `proc` (component box), `agent` (the Worker —
-  the RL loop), `bridge` (the de-emphasised `oc_listener` hand-off), `card`
+  the RL loop), `bridge` (the de-emphasised `oc_bridge` hand-off), `card`
   (the faint ×N rollout stack), and the edge styles `ctrl` / `data` / `tap` /
   `ipc` / `cfg`.

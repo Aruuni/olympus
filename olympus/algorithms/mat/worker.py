@@ -125,7 +125,7 @@ def run():
     state_log_path = os.environ.get('SAO_TRACE_LOG', '')
 
     # agent_id is the flow's index within the slot. New orchestrators pass it
-    # directly because oc_listener matches one exact cport; keep the cport
+    # directly because oc_bridge matches one exact cport; keep the cport
     # fallback so older launchers still work.
     agent_id_env = os.environ.get('SAO_AGENT_ID', '')
     if agent_id_env != '':

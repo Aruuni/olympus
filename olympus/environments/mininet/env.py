@@ -112,7 +112,7 @@ class MininetEnv(NetworkEnv):
         bdp_mult    - queue size as a multiple of BDP (default 1.0)
         loss        - packet loss percentage on s1-s2 (float, optional)
         duration    - iperf3 flow duration in seconds
-        cport       - iperf3 client source port (oc_listener matches on this)
+        cport       - iperf3 client source port (oc_bridge matches on this)
         cc_algo     - TCP congestion control algorithm name
         unique_cports - when true, use cport+i-1 per flow. The default keeps
                       the same cport across network namespaces so one listener

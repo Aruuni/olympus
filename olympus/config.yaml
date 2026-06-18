@@ -103,7 +103,7 @@ state_options:
     jump_thresh: 1.5
 
 paths:
-  listener: olympus/oc_listener
+  listener: olympus/oc_bridge
   py: ./venv_training/bin/python
 
 outputs:
@@ -415,7 +415,7 @@ learner:
   port: 6301
 
 scan_ms: 20
-# When true, oc_listener attaches the first matching worker, stops scanning
+# When true, oc_bridge attaches the first matching worker, stops scanning
 # `ss`, and never connects another worker during that listener lifetime.
 listener_single_flow: true
 # Workers read TCP state from tcp_sockopt directly, so the listener does not

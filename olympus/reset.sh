@@ -52,7 +52,7 @@ kill_pattern "$REPO_ROOT/orca/astraea_listener"
 kill_pattern "$REPO_ROOT/recurrent_ppo_clean_slate/astraea_listener"
 kill_pattern "$REPO_ROOT/td3_clean_slate/astraea_listener"
 kill_pattern "astraea_listener"
-kill_pattern "oc_listener"
+kill_pattern "oc_bridge"
 
 echo "[reset] killing legacy learner/worker/orchestrator processes..."
 kill_pattern "orca/worker.py"

@@ -129,7 +129,7 @@ def _final_runtime_cleanup(learner_port: int):
     # Listener binaries and traffic helpers can survive if a slot process is
     # terminated before run_episode() reaches its own finally block.
     _pkill('astraea_listener')
-    _pkill('oc_listener')
+    _pkill('oc_bridge')
     _pkill_exact('iperf3')
     _pkill_exact('iperf')
     _pkill_exact('ss')
@@ -339,7 +339,7 @@ def _materialize_lagged_policy_episode(ecfg: dict, episode: int) -> dict:
     out['per_flow_state_logs'] = True
     out['unique_cports'] = False
     out['listener_single_flow'] = False
-    # oc_listener flow ids start at 1. Flow 1 is the initial/train flow; the
+    # oc_bridge flow ids start at 1. Flow 1 is the initial/train flow; the
     # delayed background flows are attached after it and receive ids 2..N.
     out['lagged_policy_flow_ids'] = list(range(2, 2 + n_extra))
     out['lagged_policy_lag_episodes'] = selected_lag
@@ -711,7 +711,7 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
 
     worker_env = dict(os.environ)
     worker_env.update({
-        # oc_listener reads OC_PYTHON to fork the worker - must be set.
+        # oc_bridge reads OC_PYTHON to fork the worker - must be set.
         'OC_PYTHON':        python_bin,
         'SAO_PYTHON':       python_bin,
         'SAO_LISTENER_CC':  str(cfg.get('listener_cc', 'astraea')),
@@ -985,7 +985,7 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
 # ── Multi-agent (MARL) path ───────────────────────────────────────────────────
 #
 # Used when the selected algorithm declares MULTI_AGENT = True (mat, ma_dreamer).
-# One worker (and one oc_listener) is launched per flow, each carrying its agent
+# One worker (and one oc_bridge) is launched per flow, each carrying its agent
 # index, and the learner trains every flow jointly. Single-agent algorithms in
 # multi-flow environments do NOT come through here — they run as lagged
 # self-play via run_episode() above.
