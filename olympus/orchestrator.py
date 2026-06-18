@@ -862,16 +862,6 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
     if not _as_bool(cfg.get('listener_state_pipe'), default=False):
         listener_cmd += ['--no-state-pipe', '1']
 
-    # Opt-in: have the listener exec() into the worker instead of forking and
-    # supervising it. Only safe in single-flow mode (exec destroys the scan
-    # loop), so it is silently ignored otherwise.
-    if _as_bool(cfg.get('listener_exec_worker'), default=False):
-        if listener_single_flow:
-            worker_env['OC_LISTENER_EXEC_WORKER'] = '1'
-        else:
-            print('[orchestrator] listener_exec_worker ignored: '
-                  'requires listener_single_flow', flush=True)
-
     listener_proc = subprocess.Popen(
         listener_cmd,
         env=worker_env, start_new_session=True)
@@ -1432,18 +1422,10 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
             listener_bin, '--cport', str(listener_cport), '--worker', worker_script,
             '--mode', 'mininet', '--scan-ms', str(cfg.get('scan_ms', 20)),
         ]
-        _ml_single_flow = _as_bool(cfg.get('listener_single_flow'), default=True)
-        if _ml_single_flow:
+        if _as_bool(cfg.get('listener_single_flow'), default=True):
             listener_cmd += ['--single-flow', '1']
         if not _as_bool(cfg.get('listener_state_pipe'), default=False):
             listener_cmd += ['--no-state-pipe', '1']
-        # Opt-in exec-into-worker; safe only in single-flow mode (see above).
-        if _as_bool(cfg.get('listener_exec_worker'), default=False):
-            if _ml_single_flow:
-                listener_env['OC_LISTENER_EXEC_WORKER'] = '1'
-            else:
-                print('[orchestrator] listener_exec_worker ignored: '
-                      'requires listener_single_flow', flush=True)
         listener_procs.append(subprocess.Popen(
             listener_cmd, env=listener_env, start_new_session=True))
 
