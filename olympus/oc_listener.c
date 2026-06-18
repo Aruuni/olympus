@@ -254,6 +254,47 @@ static pid_t spawn_worker(const config_t *cfg, flow_worker_t *w, int state_rd) {
     return child;
 }
 
+/* --- BEGIN exec-into-worker (revertible: delete this whole block) --- */
+/*
+ * Replace the listener process image with the Python worker instead of
+ * fork()ing a child and supervising it. Only safe in single-flow mode, since
+ * exec() destroys the scan loop and per-flow supervision. Opt in by setting
+ * OC_LISTENER_EXEC_WORKER=1. Does not return on success.
+ */
+static void exec_into_worker(const config_t *cfg, int flow_fd,
+                             const ss_record_t *rec) {
+    char fd_s[32], flow_s[32], cport_s[32];
+    long flow_id = __sync_fetch_and_add(&g_next_flow_id, 1);
+
+    snprintf(fd_s, sizeof(fd_s), "%d", flow_fd);
+    snprintf(flow_s, sizeof(flow_s), "%ld", flow_id);
+    snprintf(cport_s, sizeof(cport_s), "%d", cfg->cport);
+
+    /* No state pipe and no action pipe in the exec path. */
+    setenv("OC_STATE_FD", "-1", 1);
+    setenv("OC_ACTION_FD", "-1", 1);
+    setenv("OC_FLOW_FD", fd_s, 1);
+    setenv("OC_FLOW_ID", flow_s, 1);
+    setenv("OC_CPORT", cport_s, 1);
+
+    /* deepcc already enabled by the caller; just keep the fd across exec. */
+    int cfl = fcntl(flow_fd, F_GETFD);
+    if (cfl >= 0) fcntl(flow_fd, F_SETFD, cfl & ~FD_CLOEXEC);
+
+    fprintf(stderr,
+            "[sao-listener] exec-into-worker flow %ld %s->%s cc=%s fd=%d\n",
+            flow_id, rec->local, rec->peer, rec->cc, flow_fd);
+    fflush(stderr);
+
+    const char *py = getenv("OC_PYTHON");
+    if (!py || !*py) py = "/usr/bin/python3";
+
+    execl(py, py, cfg->py_worker, (char *)NULL);
+    perror("execl worker (exec-into-worker)");
+    _exit(127);
+}
+/* --- END exec-into-worker --- */
+
 static void *flow_thread(void *arg) {
     flow_worker_t *w = (flow_worker_t *)arg;
 
@@ -312,6 +353,14 @@ static int maybe_spawn_flow(const config_t *cfg, const ss_record_t *rec) {
         close(fd);
         return 0;
     }
+
+    /* --- BEGIN exec-into-worker hook (revertible: delete these lines) --- */
+    {
+        const char *exec_mode = getenv("OC_LISTENER_EXEC_WORKER");
+        if (exec_mode && *exec_mode && atoi(exec_mode) != 0)
+            exec_into_worker(cfg, fd, rec);  /* does not return on success */
+    }
+    /* --- END exec-into-worker hook --- */
 
     int flags = fcntl(fd, F_GETFD);
     if (flags >= 0) fcntl(fd, F_SETFD, flags | FD_CLOEXEC);
