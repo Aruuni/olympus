@@ -71,6 +71,7 @@ from olympus.common.bench_utils import (
     _safe_overwrite_dir,
     _safe_unlink,
     _slug,
+    _specific_plot_keys,
     _start_astraea_listener,
     _stop_astraea_listener,
     _validate_approach,
@@ -1404,6 +1405,11 @@ def _replot_all(output_root: str, cfg: dict, bench: dict,
         _write_rows(summary_csv, SUMMARY_FIELDS, summary_rows)
         _write_summary_json(summary_rows, summary_json)
         _plot_heatmaps(summary_rows, bench, os.path.join(output_root, 'fairness_heatmap.pdf'))
+        specific = _specific_plot_keys(cfg)
+        specific_rows = _filter_rows_by_approach(summary_rows, specific) if specific else []
+        if specific_rows:
+            _plot_heatmaps(specific_rows, bench,
+                           os.path.join(output_root, 'fairness_heatmap_specific.pdf'))
     except PermissionError as exc:
         print(f'[fair_bench] root summary skipped: {exc}', flush=True)
     _restore_sudo_user_ownership(output_root)

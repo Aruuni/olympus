@@ -101,9 +101,11 @@ from olympus.common.bench_utils import (
     _resolve_from,
     _restore_sudo_user_ownership,
     _resume_rows_by_key,
+    _row_in_specific,
     _run_orca_on_env,
     _safe_overwrite_dir,
     _safe_unlink,
+    _specific_plot_keys,
     _start_astraea_listener,
     _stop_astraea_listener,
     _validate_approach,
@@ -1059,7 +1061,8 @@ def _plot_summary_page(pdf: PdfPages, rows: list, title: str,
     plt.close(fig)
 
 
-def _plot_summary(metrics_csv: str, output_pdf: str) -> None:
+def _plot_summary(metrics_csv: str, output_pdf: str,
+                  specific_keys: set = None) -> None:
     rows = _enrich_kernel_rtt_rows(_read_metrics(metrics_csv))
     completed = [r for r in rows if not r.get('error')]
     if not completed:
@@ -1087,8 +1090,12 @@ def _plot_summary(metrics_csv: str, output_pdf: str) -> None:
         r for r in completed
         if _is_multi_addition_sage_variant(r) or _is_final_kalman_fit_product(r)
     ]
+    specific_rows = [
+        r for r in completed if _row_in_specific(r, specific_keys or set())
+    ]
     pages = [
         ('All Approaches', completed),
+        ('Specific Subset', specific_rows),
         ('MBPO-TD3 Dynamic Approaches', mbpo_rows),
         ('SAGE Reward Variants', sage_rows),
         ('SAGE Additions vs Kalman-Fit', sage_additions_vs_final_rows),
@@ -1142,7 +1149,8 @@ def _replot_all(output_root: str, bench_cfg: dict = None) -> None:
     plotted, skipped, failed = _plot_individual_runs(all_rows)
     _write_rows(all_metrics_csv, METRIC_FIELDS, all_rows)
     _write_summary(all_metrics_csv, os.path.join(output_root, 'summary.json'))
-    _plot_summary(all_metrics_csv, os.path.join(output_root, 'responsiveness_summary.pdf'))
+    _plot_summary(all_metrics_csv, os.path.join(output_root, 'responsiveness_summary.pdf'),
+                  specific_keys=_specific_plot_keys(bench_cfg or {}))
     _restore_sudo_user_ownership(output_root)
     print(f'[resp_bench] replotted approaches={len({r["approach"] for r in all_rows})} '
           f'rows={len(all_rows)}', flush=True)

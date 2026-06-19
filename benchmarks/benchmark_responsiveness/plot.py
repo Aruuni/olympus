@@ -24,6 +24,7 @@ from benchmarks.benchmark_responsiveness.responsiveness import (
     _plot_individual_runs,
     _plot_summary,
     _restore_sudo_user_ownership,
+    _specific_plot_keys,
     _write_rows,
     _write_summary,
 )
@@ -71,7 +72,8 @@ def main():
 
     _write_rows(metrics_csv, METRIC_FIELDS, rows)
     _write_summary(metrics_csv, summary_json)
-    _plot_summary(metrics_csv, output_pdf)
+    _plot_summary(metrics_csv, output_pdf,
+                  specific_keys=_specific_plot_keys(bench_cfg))
     _restore_sudo_user_ownership(data_dir)
     print(f'[bench_plot] approaches={len({r["approach"] for r in rows})}', flush=True)
     print(f'[bench_plot] rows={len(rows)}', flush=True)

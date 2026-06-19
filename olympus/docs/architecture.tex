@@ -40,9 +40,9 @@
                     fill=white},
   ctrl/.style={->,thick},
   data/.style={->,very thick,draw=red!70!black},
-  tap/.style={->,thin,draw=red!55!black,densely dashed},
-  ipc/.style={<->,thick,draw=blue!60!black,dashed},
-  cfg/.style={->,thick,draw=orange!80!black,densely dashed},
+  tap/.style={->,thin,draw=red!55!black},
+  ipc/.style={<->,thick,draw=blue!60!black},
+  cfg/.style={->,thick,draw=orange!80!black},
   lbl/.style={font=\scriptsize\itshape,fill=white,inner sep=1pt},
 ]
 
@@ -51,7 +51,7 @@
      {\textbf{Mininet Env} $\rightleftarrows$\\\footnotesize iperf3 \texttt{c$i$}$\to$\texttt{x$i$}, \texttt{cport=$P_i$}\\\footnotesize tc/netem: bw, delay};
 
 \node[bridge,right=of env] (listener)
-     {oc\_bridge \\\scriptsize \texttt{ss} match \texttt{port=$P_i$}\\\scriptsize duplicate fd $\to$ fork worker};
+     {oc\_bridge \\\scriptsize \texttt{ss} match \texttt{port=$P_i$}\\\scriptsize duplicate fd, hold env var};
 
 % worker shell, with internal state + action module decks
 \node[agent,right=26mm of listener,minimum width=64mm,minimum height=19mm] (worker) {};
@@ -106,10 +106,10 @@
   \draw[->,thin,draw=black!25]
         ([xshift=5mm]orch.south) -- ([shift={(5mm,5mm)}]e1);
 
-  \draw[<->,thin,dashed,draw=blue!42]
+  \draw[<->,thin,draw=blue!42]
         ([xshift=2.5mm]learner.south) -- ([shift={(2.5mm,2.5mm)}]w1);
 
-  \draw[<->,thin,dashed,draw=blue!26]
+  \draw[<->,thin,draw=blue!26]
         ([xshift=5mm]learner.south) -- ([shift={(5mm,5mm)}]w1);
 \end{scope}
 
@@ -149,20 +149,20 @@
 
 % the bridge attaches to THIS env, then forks the worker
 \draw[tap] (env) --
-      node[lbl]{match\\port=$P_i$}
+      node[lbl]{env var }
       (listener);
 
 \draw[cfg] (listener) --
-      node[lbl]{spawns +\\hand off fd}
+      node[lbl]{execl}
       (worker);
 
 % the control loop lives between the worker and its env socket
 \draw[data,->] (waction.south) to[out=-90,in=-90,looseness=0.62]
-      node[lbl,pos=.5,below=0.3mm]{set\_cwnd $\downarrow$}
+      node[lbl,pos=.5,below=0.3mm]{setsockopt(cwnd) $\downarrow$}
       ([xshift=8mm]env.south);
 
 \draw[data,->] ([xshift=-2mm]env.south east) to[out=-90,in=-90,looseness=0.42]
-      node[lbl,pos=.5,below=0.3mm]{TCP\_INFO $\uparrow$}
+      node[lbl,pos=.5,below=0.3mm]{getsockopt(tcp\_info) $\uparrow$}
       (wstate.south);
 
 \end{tikzpicture}

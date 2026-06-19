@@ -79,6 +79,7 @@ from olympus.common.bench_utils import (
     _safe_overwrite_dir,
     _safe_unlink,
     _slug,
+    _specific_plot_keys,
     _start_astraea_listener,
     _stop_astraea_listener,
     _validate_approach,
@@ -1203,6 +1204,13 @@ def _replot_all(output_root: str, cfg: dict, bench: dict,
                       os.path.join(output_root, 'convergence_summary.pdf'))
         _plot_efficiency(all_rows, bench,
                          os.path.join(output_root, 'efficiency.pdf'))
+        specific = _specific_plot_keys(cfg)
+        specific_rows = _filter_rows_by_approach(all_rows, specific) if specific else []
+        if specific_rows:
+            _plot_summary(specific_rows, bench,
+                          os.path.join(output_root, 'convergence_summary_specific.pdf'))
+            _plot_efficiency(specific_rows, bench,
+                             os.path.join(output_root, 'efficiency_specific.pdf'))
     except PermissionError as exc:
         print(f'[conv4] root summary skipped: {exc}', flush=True)
     _restore_sudo_user_ownership(output_root)

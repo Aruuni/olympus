@@ -41,7 +41,11 @@ from benchmarks.benchmark_responsive_fairness.responsive_fairness import (
     _schedule_mean,
     _slug,
 )
-from olympus.common.bench_utils import _approach_label, _load_yaml
+from olympus.common.bench_utils import (
+    _approach_label,
+    _load_yaml,
+    _specific_plot_keys,
+)
 from olympus.common.marl_team_reward import r_fair_from_avg_throughput
 
 
@@ -746,6 +750,46 @@ def _plot_srtt_by_flow_count(rows: list, flow_counts: list,
     os.replace(tmp, output)
 
 
+def _emit_aggregate(rows: list, bench: dict, aggregate_dir: str) -> None:
+    """Write the full set of aggregate CSVs and PDFs for ``rows`` into
+    ``aggregate_dir``. Rows must already carry ``avg_srtt_ms``."""
+    flow_counts = bench['flow_counts']
+    run_csv = os.path.join(aggregate_dir, 'fairness_runs.csv')
+    summary_csv = os.path.join(aggregate_dir, 'fairness_by_flow_count.csv')
+    output_pdf = os.path.join(aggregate_dir, 'fairness_by_flow_count.pdf')
+    cdf_pdf = os.path.join(aggregate_dir, 'fairness_cdfs.pdf')
+    srtt_pdf = os.path.join(aggregate_dir, 'srtt_by_flow_count.pdf')
+    all_pdf = os.path.join(aggregate_dir, 'all.pdf')
+    _write_csv(run_csv, RUN_FIELDS, _run_rows(rows))
+    _write_csv(summary_csv, SUMMARY_FIELDS, _summary_rows(rows, flow_counts))
+    _plot_fairness(rows, flow_counts, output_pdf)
+    cdf_pages = _plot_learner_cdfs(rows, flow_counts, cdf_pdf)
+    aggregate_reports = _plot_aggregate_reports(
+        rows, flow_counts, bench, aggregate_dir)
+    _plot_srtt_by_flow_count(rows, flow_counts, srtt_pdf)
+    all_pages = _plot_all_report(rows, flow_counts, bench, all_pdf)
+    _restore_sudo_user_ownership(aggregate_dir)
+
+    print(
+        f'[responsive_fairness_plot] learners='
+        f'{len({row["approach"] for row in rows})} rows={len(rows)} '
+        f'dir={aggregate_dir}',
+        flush=True)
+    print(f'[responsive_fairness_plot] runs={run_csv}', flush=True)
+    print(f'[responsive_fairness_plot] aggregate={summary_csv}', flush=True)
+    print(f'[responsive_fairness_plot] plot={output_pdf}', flush=True)
+    print(
+        f'[responsive_fairness_plot] fairness_cdfs={cdf_pdf} '
+        f'pages={cdf_pages}',
+        flush=True)
+    for report in aggregate_reports:
+        print(f'[responsive_fairness_plot] aggregate={report}', flush=True)
+    print(f'[responsive_fairness_plot] srtt={srtt_pdf}', flush=True)
+    print(
+        f'[responsive_fairness_plot] all={all_pdf} pages={all_pages}',
+        flush=True)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description='Plot responsive-fairness data from completed runs.')
@@ -789,15 +833,8 @@ def main() -> None:
         raise SystemExit(
             f'[responsive_fairness_plot] no completed rows under {data_dir}')
 
-    run_csv = os.path.join(aggregate_dir, 'fairness_runs.csv')
-    summary_csv = os.path.join(
-        aggregate_dir, 'fairness_by_flow_count.csv')
-    output_pdf = os.path.join(
-        aggregate_dir, 'fairness_by_flow_count.pdf')
-    cdf_pdf = os.path.join(aggregate_dir, 'fairness_cdfs.pdf')
-    srtt_pdf = os.path.join(aggregate_dir, 'srtt_by_flow_count.pdf')
-    all_pdf = os.path.join(aggregate_dir, 'all.pdf')
-    srtt_cache = _load_srtt_cache(run_csv)
+    srtt_cache = _load_srtt_cache(
+        os.path.join(aggregate_dir, 'fairness_runs.csv'))
     if not srtt_cache:
         srtt_cache = _load_srtt_cache(
             os.path.join(data_dir, 'fairness_runs.csv'))
@@ -806,37 +843,22 @@ def main() -> None:
         row['avg_srtt_ms'] = (
             cached if np.isfinite(cached)
             else _run_avg_srtt_ms(row, bench))
-    _write_csv(run_csv, RUN_FIELDS, _run_rows(rows))
-    _write_csv(
-        summary_csv, SUMMARY_FIELDS,
-        _summary_rows(rows, bench['flow_counts']))
-    _plot_fairness(rows, bench['flow_counts'], output_pdf)
-    cdf_pages = _plot_learner_cdfs(
-        rows, bench['flow_counts'], cdf_pdf)
-    aggregate_reports = _plot_aggregate_reports(
-        rows, bench['flow_counts'], bench, aggregate_dir)
-    _plot_srtt_by_flow_count(rows, bench['flow_counts'], srtt_pdf)
-    all_pages = _plot_all_report(
-        rows, bench['flow_counts'], bench, all_pdf)
-    _restore_sudo_user_ownership(aggregate_dir)
 
-    print(
-        f'[responsive_fairness_plot] learners='
-        f'{len({row["approach"] for row in rows})} rows={len(rows)}',
-        flush=True)
-    print(f'[responsive_fairness_plot] runs={run_csv}', flush=True)
-    print(f'[responsive_fairness_plot] aggregate={summary_csv}', flush=True)
-    print(f'[responsive_fairness_plot] plot={output_pdf}', flush=True)
-    print(
-        f'[responsive_fairness_plot] fairness_cdfs={cdf_pdf} '
-        f'pages={cdf_pages}',
-        flush=True)
-    for report in aggregate_reports:
-        print(f'[responsive_fairness_plot] aggregate={report}', flush=True)
-    print(f'[responsive_fairness_plot] srtt={srtt_pdf}', flush=True)
-    print(
-        f'[responsive_fairness_plot] all={all_pdf} pages={all_pages}',
-        flush=True)
+    _emit_aggregate(rows, bench, aggregate_dir)
+
+    # Curated subset (kernels + Astraea + 0.995-gamma credit MA-Dreamer) gets
+    # its own all.pdf-style overlay alongside the full aggregate. The subset is
+    # named by `specific_plots` in the shared benchmarks config.
+    specific_keys = _specific_plot_keys(cfg)
+    if specific_keys:
+        specific_rows = [
+            row for row in rows
+            if _slug(str(row.get('approach') or row.get('data_folder') or ''))
+            in specific_keys
+        ]
+        if specific_rows:
+            _emit_aggregate(
+                specific_rows, bench, f'{aggregate_dir}_specific')
 
 
 if __name__ == '__main__':

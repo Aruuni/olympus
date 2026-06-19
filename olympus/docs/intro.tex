@@ -1,0 +1,128 @@
+% Olympus — Introduction (USENIX ATC-style)
+% Drop-in section. Citation keys are placeholders; wire them to your .bib.
+\section{Introduction}
+
+Congestion control (CC) decides how fast each sender injects traffic into a
+shared network, and in doing so determines the throughput, latency, and
+fairness that applications ultimately experience. For three decades the
+dominant approach has been hand-crafted heuristics: Reno, CUBIC~\cite{cubic},
+and more recently BBR~\cite{bbr} that map a fixed set of congestion signals
+onto a fixed reaction. Designing a heuristic that behaves well across the
+diversity of modern paths, from data-center fabrics to cellular, satellite, and
+wide-area links, is notoriously hard, and each new network regime tends to
+expose a new failure mode.
+
+Reinforcement learning offers an appealing alternative. RL-based congestion
+control (RL-CC) casts the problem as sequential decision making: a policy
+repeatedly observes the state of a flow and adjusts its sending rate or
+congestion window to maximize a reward that trades off throughput, delay, and
+fairness. A growing body of work---Aurora~\cite{aurora}, Orca~\cite{orca},
+Sage~\cite{sage}, Astraea~\cite{astraea}, and others---has shown that learned
+policies can match or surpass hand-tuned schemes, and that they can adapt to
+conditions their designers never explicitly anticipated.
+
+Yet progress in RL-CC is far harder than this steady cadence of results
+suggests. Unfortunately, each implementation comes with its own purpose-built
+framework, meaning that significant effort has to go into either altering an
+existing framework to support a new problem formulation---such as different
+environments, actions, or states---or building a new framework altogether. An
+RL-CC framework bakes in a large set of entangled design decisions: which
+algorithm trains the policy, how network state is represented, what the action
+space looks like, how reward is computed, how flows are emulated, and how
+traffic is generated. Existing frameworks fix all of these at design time and
+weld them into a single artifact tuned to reproduce one paper's results, rather
+than a substrate for the next one. Asking a different research question---a new
+state representation, a fairness-aware reward, a more sample-efficient
+learner---means either invasive surgery on someone else's codebase or starting
+from scratch. The barrier to entry is high, cross-scheme comparisons are
+confounded by incompatible substrates, and good ideas are slow to compose.
+
+Three consequences of this status quo are especially limiting. First, existing
+frameworks are single-agent. They train one policy controlling one flow in
+isolation and treat every other flow as exogenous background traffic. This
+leaves no clean path to study the multi-agent settings---where flows jointly
+learn to share a bottleneck---that are central to the very properties
+(fairness, convergence, responsiveness under churn) congestion control exists
+to provide. Second, they are pinned to the learning algorithm that was current
+when they were written. Because the learner is fused into the framework,
+advances that have reshaped RL---model-based agents and world models,
+multi-agent transformers, more sample-efficient off-policy methods---cannot be
+adopted without effectively rebuilding the framework around them. Third,
+inference is tied to the specific traffic generator and emulator used during
+training, so a trained policy is difficult to take anywhere beyond the harness
+that produced it.
+
+ We present Olympus, a unified and modular framework for
+RL-CC research and deployment. Olympus treats the state, action, reward,
+environment, and learner as five independent, swappable components selected per
+training run. Changing any one of them---a different observation, a different
+congestion-window action mapping, a fairness-oriented reward, a new emulation
+backend, or an entirely different learning algorithm---is a configuration
+change rather than a fork, and adding a new one is a self-contained extension
+rather than a framework rewrite. A single long-lived learner is fed by many
+parallel flow rollouts, so the same design serves a single agent and a
+population of jointly trained agents without special-casing the orchestration.
+The result is a framework on which a new problem formulation can be expressed
+and run in minutes, lowering the barrier to entry and enabling the rapid
+iteration that purpose-built frameworks foreclose.
+
+A second goal of Olympus is to make trained RL-CC policies easier to use beyond
+the specific traffic generators and experimental setups in which they were
+developed. Rather than tying inference to a purpose-built traffic-generation
+application or a single emulation backend, Olympus separates the policy
+execution path from both the workload and the environment used for training or
+evaluation. This allows the same trained policy to be evaluated across
+different classes of environments, from standard tools such as
+Mahimahi~\cite{mahimahi} or Mininet~\cite{mininet}, to discrete-event network
+simulators such as OMNeT++~\cite{omnetpp}, to alternative emulators, testbeds,
+or real network deployments, while also supporting different traffic generators
+and real applications. As a result, Olympus is better suited for both
+controlled experimentation and practical deployment studies.
+
+Concretely, Olympus supports the following capabilities, which existing
+state-of-the-art RL-CC training frameworks do not provide together:
+
+\begin{itemize}
+  \item Single-agent and multi-agent training. To our knowledge, Olympus is the
+        first RL-CC framework to support both a single learned flow and multiple
+        flows that jointly learn to share a bottleneck, under one orchestration
+        model.
+  \item State-of-the-art, hot-swappable learners. Olympus ships modern learners
+        as interchangeable plugins---model-based agents and world models
+        (DreamerV3~\cite{dreamerv3}, and a multi-agent world model), multi-agent
+        transformers (MAT~\cite{mat}), off-policy actor-critics
+        (TD3~\cite{td3}), model-based policy optimization (MBPO~\cite{mbpo}),
+        recurrent PPO, and option-critic---rather than a single algorithm fixed
+        at design time.
+  \item Swappable state representations. Raw and filtered observations (e.g.\
+        Kalman-filtered, min-RTT, oracle, and Orca-style states) are selected
+        per run and shared consistently between training and inference.
+  \item Swappable action spaces. Congestion-window action mappings (e.g.\ an
+        exponential multiplier and Astraea-style relative updates) are chosen
+        independently of the learner.
+  \item Swappable reward functions. Throughput--delay and fairness-oriented
+        objectives, including team and symmetric fair-share rewards for the
+        multi-agent setting, are plugins rather than hard-coded terms.
+  \item Swappable environments and emulation backends. Emulators and
+        simulators---Mininet today, with Mahimahi, OMNeT++, testbeds, and real
+        deployments behind the same interface---are selected per run.
+  \item A decoupled policy-execution path. The same checkpoint runs in training,
+        benchmarking, and deployment without binding to a bespoke traffic
+        generator or a single backend.
+  \item Parallel rollouts with a shared learner and built-in, config-driven
+        benchmark suites for reproducible, apples-to-apples comparison across
+        schemes.
+\end{itemize}
+
+In summary, this paper makes the following contributions. (i)~We identify the
+fragmentation of RL-CC research into incompatible, purpose-built frameworks as
+a first-class obstacle to progress, and we characterize the design decisions
+that such frameworks needlessly entangle. (ii)~We present Olympus, a modular
+framework in which states, actions, rewards, environments, and learners are
+independent components that can be changed from one training run to the next and
+extended in isolation, and which is, to our knowledge, the first to support both
+single-agent and multi-agent RL-CC with state-of-the-art learners. (iii)~We
+show how decoupling the policy-execution path from the workload and the
+environment lets a single trained policy move across emulators, simulators,
+testbeds, and real deployments, narrowing the gap between RL-CC research and
+practice.

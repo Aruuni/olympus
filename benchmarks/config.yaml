@@ -104,3 +104,21 @@ approaches:
     kind: astraea
     plot_label: Astraea
 
+# Curated subset every benchmark draws into its `*_specific` comparison plot,
+# alongside the usual all-approaches output. Each benchmark filters its
+# completed runs down to these data folders and writes a parallel report:
+#   responsive_fairness -> aggregate_specific/ (all.pdf-style overlay)
+#   responsiveness       -> a "Specific Subset" page in responsiveness_summary.pdf
+#   fairness / inter_rtt -> fairness_heatmap_specific.pdf
+#   convergence_4flow    -> convergence_summary_specific.pdf + efficiency_specific.pdf
+# Names are data_folder values from the approaches list above: the four kernel
+# baselines, Astraea, and the 0.995-gamma credit MA-Dreamer. Drop the list (or
+# leave it empty) to disable the extra plots.
+specific_plots:
+  - ma_dreamer_20260615-022803
+  - cubic
+  - bbr
+  - bbr1
+  - frcc
+  - astraea
+

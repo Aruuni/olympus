@@ -154,6 +154,37 @@ def _approach_selection_keys(approach: dict) -> set:
     return {key for key in keys if key}
 
 
+def _specific_plot_keys(cfg: dict) -> set:
+    """Slugged data-folder keys naming the curated `specific_plots` subset.
+
+    The shared benchmarks config may carry a `specific_plots` list that names
+    the approaches each benchmark draws into its `*_specific` comparison plot
+    (the kernel baselines, Astraea, and the 0.995-gamma credit MA-Dreamer).
+    Entries are data_folder/name strings (or mappings carrying one). Returns an
+    empty set when the config omits the list, in which case callers skip the
+    extra plot.
+    """
+    keys = set()
+    for entry in cfg.get('specific_plots') or []:
+        if isinstance(entry, dict):
+            entry = entry.get('data_folder') or entry.get('name') or ''
+        text = str(entry).strip()
+        if text:
+            keys.add(_slug(text))
+    return keys
+
+
+def _row_in_specific(row: dict, keys: set) -> bool:
+    """True when ``row``'s approach/data_folder is in the ``specific_plots`` set."""
+    if not keys:
+        return False
+    for field in ('data_folder', 'approach', 'name'):
+        value = row.get(field)
+        if value and _slug(str(value)) in keys:
+            return True
+    return False
+
+
 def _configured_approaches(cfg: dict, only: set = None) -> list:
     approaches = []
     for raw in cfg.get('approaches') or []:
