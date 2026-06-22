@@ -30,11 +30,11 @@ _PKG = os.path.dirname(_ALG_DIR)
 _ROOT = os.path.dirname(_PKG)
 sys.path.insert(0, _ROOT)
 
-import tcp_sockopt
 from olympus.algorithms.ma_dreamer import model
 from olympus.common.action_plugins import load_action_module
 from olympus.common.registry import reward_module
 from olympus.common.bbr_probe import BbrProbe
+from olympus.common import flow_backend
 
 _ACTION_PLUGIN = load_action_module()
 
@@ -56,12 +56,17 @@ def _connect_manager():
     host, port = address.rsplit(':', 1)
     manager = _Mgr(
         address=(host, int(port)), authkey=bytes.fromhex(key))
-    try:
-        manager.connect()
-        return manager.service()
-    except Exception as exc:
-        print(f'[worker] manager connect failed: {exc}', flush=True)
-        return None
+    deadline = time.monotonic() + 10.0
+    last_error = None
+    while time.monotonic() < deadline:
+        try:
+            manager.connect()
+            return manager.service()
+        except Exception as exc:
+            last_error = exc
+            time.sleep(0.1)
+    print(f'[worker] manager connect failed: {last_error}', flush=True)
+    return None
 
 
 def _srtt_ms(raw: dict) -> float:
@@ -127,6 +132,7 @@ def run():
     deterministic = os.environ.get('SAO_DETERMINISTIC', '0') == '1'
     require_checkpoint = (
         os.environ.get('SAO_REQUIRE_CHECKPOINT', '0') == '1')
+    simulation_backend = os.environ.get('OC_FLOW_BACKEND', '').lower() == 'raynet'
 
     agent_id_raw = os.environ.get('SAO_AGENT_ID', '')
     if agent_id_raw:
@@ -278,7 +284,7 @@ def run():
         while True:
             tick_start = time.monotonic()
             try:
-                raw = tcp_sockopt.get_tcp_deepcc_info(flow_fd)
+                raw = flow_backend.get_tcp_deepcc_info(flow_fd)
             except Exception as exc:
                 print(
                     f'[worker] get_tcp_deepcc_info failed: {exc}; exiting',
@@ -318,7 +324,7 @@ def run():
 
             t_s = tick_start - episode_start
             group_step = (
-                int(round(t_s / interval_s))
+                step_in_traj if simulation_backend else int(round(t_s / interval_s))
                 if interval_s > 0.0 else step_in_traj
             )
             if previous_state is not None and flow_active and manager:
@@ -371,7 +377,7 @@ def run():
                 tick_start, current_cwnd, desired_cwnd)
             new_cwnd = int(np.clip(actual_cwnd, cwnd_min, cwnd_max))
             try:
-                tcp_sockopt.set_cwnd(flow_fd, new_cwnd)
+                flow_backend.set_cwnd(flow_fd, new_cwnd)
             except Exception as exc:
                 print(
                     f'[worker] set_cwnd failed: {exc}; exiting',
@@ -440,7 +446,7 @@ def run():
                     log_file.flush()
 
             elapsed = time.monotonic() - tick_start
-            if elapsed < interval_s:
+            if not simulation_backend and elapsed < interval_s:
                 time.sleep(interval_s - elapsed)
     finally:
         if manager and experience_buffer:
@@ -465,7 +471,7 @@ def run():
                     agent_id=agent_id,
                     group_id=group_id,
                     group_step=(
-                        int(round(
+                        step_in_traj if simulation_backend else int(round(
                             (time.monotonic() - episode_start) / interval_s))
                         if interval_s > 0.0 else step_in_traj
                     ),

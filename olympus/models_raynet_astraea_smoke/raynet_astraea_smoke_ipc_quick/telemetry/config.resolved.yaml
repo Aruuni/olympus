@@ -1,0 +1,162 @@
+runtime:
+  algorithm: ma_dreamer
+  reward: tempest_fairness_ma
+  state: tempest
+  action: astraea
+actions:
+  astraea:
+    action_min: -1.0
+    action_max: 1.0
+    step: 0.025
+environment:
+  type: raynet
+  environment_setup: astraea_smoke
+reward:
+  fairness_weight: 25.0
+  fairness_cap: 1.0
+  per_agent_credit: false
+state_options:
+  tempest_kalman:
+    init_us: 20000.0
+    q: 0.0005
+    r_down: 0.001
+    r_up: 5.0
+    jump_thresh: 1.5
+paths:
+  py: ./venv_training/bin/python
+  raynet: /home/james/raynet
+  raynet_runner: /home/james/raynet/runners/olympus_runner.sh
+outputs:
+  root: olympus/models_raynet_astraea_smoke
+  run_name: raynet_astraea_smoke_ipc_quick
+  plot_episodes: true
+  run_dir: /home/james/olympus/olympus/models_raynet_astraea_smoke/raynet_astraea_smoke_ipc_quick
+  checkpoints_dir: /home/james/olympus/olympus/models_raynet_astraea_smoke/raynet_astraea_smoke_ipc_quick/checkpoints
+  episodes_dir: /home/james/olympus/olympus/models_raynet_astraea_smoke/raynet_astraea_smoke_ipc_quick/episodes
+  plots_dir: /home/james/olympus/olympus/models_raynet_astraea_smoke/raynet_astraea_smoke_ipc_quick/plots
+  telemetry_dir: /home/james/olympus/olympus/models_raynet_astraea_smoke/raynet_astraea_smoke_ipc_quick/telemetry
+  traces_dir: /home/james/olympus/olympus/models_raynet_astraea_smoke/raynet_astraea_smoke_ipc_quick/episodes
+n_parallel: 1
+episodes: 1
+sweep:
+  flows: 2
+algorithms:
+  ma_dreamer:
+    training:
+      resume_from: null
+      batch_size: 2
+      seq_len: 4
+      min_replay: 100000
+      replay_capacity: 1024
+      updates_per_step: 1
+      worker_push_every: 1
+      save_every: 100000
+      save_every_episodes: 0
+      param_broadcast_every: 1
+      grad_clip: 100.0
+      kl_weight: 1.0
+      kl_balance: 0.8
+      kl_free_bits: 1.0
+      recon_weight: 1.0
+      reward_weight: 1.0
+      continue_weight: 1.0
+      local_world_weight: 1.0
+      global_world_weight: 1.0
+      latent_h_weight: 1.0
+      latent_z_weight: 1.0
+      lr_world: 0.0001
+      lr_actor: 3.0e-05
+      lr_critic: 3.0e-05
+      horizon: 5
+      gamma: 0.995
+      lam: 0.95
+      entropy_coef: 0.003
+      action_l2_coef: 0.02
+      action_smooth_coef: 0.02
+      actor_log_std_min: -2.0
+      actor_log_std_max: 0.0
+      target_tau: 0.02
+      actor_warmup_steps: 1000
+      value_bins: 255
+      value_low: -20.0
+      value_high: 20.0
+      reward_bins: 255
+      torch_threads: 1
+      torch_interop_threads: 1
+    agent:
+      hidden: 32
+      embed_dim: 16
+      h_dim: 32
+      latent_groups: 2
+      latent_classes: 4
+      global_hidden: 32
+      global_embed_dim: 16
+      global_h_dim: 32
+      global_latent_groups: 2
+      global_latent_classes: 4
+      interval_ms: 30
+      cwnd_min: 4
+      cwnd_max: 10000
+      dead_flow_ms: 500
+training:
+  resume_from: null
+  batch_size: 2
+  seq_len: 4
+  min_replay: 100000
+  replay_capacity: 1024
+  updates_per_step: 1
+  worker_push_every: 1
+  save_every: 100000
+  save_every_episodes: 0
+  param_broadcast_every: 1
+  grad_clip: 100.0
+  kl_weight: 1.0
+  kl_balance: 0.8
+  kl_free_bits: 1.0
+  recon_weight: 1.0
+  reward_weight: 1.0
+  continue_weight: 1.0
+  local_world_weight: 1.0
+  global_world_weight: 1.0
+  latent_h_weight: 1.0
+  latent_z_weight: 1.0
+  lr_world: 0.0001
+  lr_actor: 3.0e-05
+  lr_critic: 3.0e-05
+  horizon: 5
+  gamma: 0.995
+  lam: 0.95
+  entropy_coef: 0.003
+  action_l2_coef: 0.02
+  action_smooth_coef: 0.02
+  actor_log_std_min: -2.0
+  actor_log_std_max: 0.0
+  target_tau: 0.02
+  actor_warmup_steps: 1000
+  value_bins: 255
+  value_low: -20.0
+  value_high: 20.0
+  reward_bins: 255
+  torch_threads: 1
+  torch_interop_threads: 1
+  checkpoint: /home/james/olympus/olympus/models_raynet_astraea_smoke/raynet_astraea_smoke_ipc_quick/checkpoints/ma_dreamer_cwnd_model.pt
+  log_path: /home/james/olympus/olympus/models_raynet_astraea_smoke/raynet_astraea_smoke_ipc_quick/telemetry/learner_metrics.csv
+agent:
+  hidden: 32
+  embed_dim: 16
+  h_dim: 32
+  latent_groups: 2
+  latent_classes: 4
+  global_hidden: 32
+  global_embed_dim: 16
+  global_h_dim: 32
+  global_latent_groups: 2
+  global_latent_classes: 4
+  interval_ms: 30
+  cwnd_min: 4
+  cwnd_max: 10000
+  dead_flow_ms: 500
+action:
+  action_min: -1.0
+  action_max: 1.0
+  step: 0.025

@@ -47,7 +47,6 @@ sys.path.insert(0, _ROOT)
 sys.path.insert(0, _HERE)
 
 from olympus.environments import make_env
-from olympus.environments.raynet.runner import run_episode_raynet
 from olympus.plots.episode_plot import (
     plot as _plot_episode,
     episode_return as _episode_return,
@@ -88,6 +87,15 @@ def _terminate(proc):
             break
         except subprocess.TimeoutExpired:
             pass
+
+
+def _wait_or_terminate(proc, timeout=5):
+    if proc is None or proc.poll() is not None:
+        return
+    try:
+        proc.wait(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        _terminate(proc)
 
 
 def _run_quiet(cmd, timeout=10):
@@ -663,6 +671,8 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
     reward_name = runtime.get('reward', 'tempest')
     state_name = runtime.get('state', 'default_orca')
     ckpt = t_cfg['checkpoint']
+    backend_type = _env_backend_type(cfg)
+    is_raynet = backend_type == 'raynet'
 
     cport         = int(cfg.get('cport_base', 21000)) + instance_id * 100
     link_schedule = ecfg.get('link_schedule', [])
@@ -830,18 +840,23 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
           f'env={env_name or "config"}  bw={bw_str}Mbps  '
           f'delay={delay_str}ms  duration={duration}s', flush=True)
 
+    env_kwargs = {
+        'n': n_flows,
+        'bw': ecfg.get('bw', 100.0),
+        'delay': ecfg.get('delay', 20.0),
+        'bdp_mult': ecfg.get('bdp_mult', 4.0),
+        'duration': duration,
+        'cport': cport,
+        'cc_algo': 'astraea',
+        'instance_id': instance_id,
+        'unique_cports': bool(ecfg.get('unique_cports', False)),
+        'per_flow_delays': ecfg.get('per_flow_delays'),
+    }
+    if is_raynet:
+        env_kwargs['environment_config'] = ecfg
     env = make_env(
-        _env_backend_type(cfg),
-        n           = n_flows,
-        bw          = ecfg.get('bw',    100.0),
-        delay       = ecfg.get('delay',  20.0),
-        bdp_mult    = ecfg.get('bdp_mult', 4.0),
-        duration    = duration,
-        cport       = cport,
-        cc_algo     = 'astraea',
-        instance_id = instance_id,
-        unique_cports = bool(ecfg.get('unique_cports', False)),
-        per_flow_delays = ecfg.get('per_flow_delays'),
+        backend_type,
+        **env_kwargs,
     )
     env.start()
 
@@ -852,20 +867,32 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
     # parser cannot align timestamps for any other state's process.
     if oracle_state_active:
         worker_env['SAO_ORACLE_EPISODE_START'] = str(episode_start)
+    if is_raynet:
+        worker_env.update({
+            'OC_FLOW_BACKEND': 'raynet',
+            'OC_RAYNET_FLOW_ADDR': env.flow_addr,
+            'OC_RAYNET_FLOW_KEY': env.flow_key,
+        })
 
     worker_script = resolve_worker_script(alg_name)
-    listener_cmd = [
-        listener_bin, '--cport', str(cport), '--worker', worker_script,
-        '--mode', 'mininet', '--scan-ms', str(cfg.get('scan_ms', 20)),
-    ]
-    listener_single_flow = _as_bool(
-        ecfg.get('listener_single_flow', cfg.get('listener_single_flow', True)),
-        default=True,
-    )
-    if listener_single_flow:
-        listener_cmd += ['--single-flow', '1']
-    if not _as_bool(cfg.get('listener_state_pipe'), default=False):
-        listener_cmd += ['--no-state-pipe', '1']
+    if is_raynet:
+        worker_env['OC_FLOW_ID'] = '0'
+        worker_env['OC_FLOW_FD'] = '0'
+        worker_env['OC_CPORT'] = str(cport)
+        listener_cmd = [python_bin, worker_script]
+    else:
+        listener_cmd = [
+            listener_bin, '--cport', str(cport), '--worker', worker_script,
+            '--mode', 'mininet', '--scan-ms', str(cfg.get('scan_ms', 20)),
+        ]
+        listener_single_flow = _as_bool(
+            ecfg.get('listener_single_flow', cfg.get('listener_single_flow', True)),
+            default=True,
+        )
+        if listener_single_flow:
+            listener_cmd += ['--single-flow', '1']
+        if not _as_bool(cfg.get('listener_state_pipe'), default=False):
+            listener_cmd += ['--no-state-pipe', '1']
 
     listener_proc = subprocess.Popen(
         listener_cmd,
@@ -880,19 +907,24 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
             start_delays=ecfg.get('start_delays'),
             flow_durations=ecfg.get('flow_durations'),
         )
-        if link_schedule:
+        if link_schedule and not is_raynet:
             sched_thread = threading.Thread(
                 target=_run_link_schedule,
                 args=(env, link_schedule, episode_start, sched_stop),
                 daemon=True)
             sched_thread.start()
-        time.sleep(duration + 3)
+        if not is_raynet:
+            time.sleep(duration + 3)
     finally:
         sched_stop.set()
         if sched_thread:
             sched_thread.join(timeout=2)
-        _terminate(listener_proc)
-        env.stop()
+        if is_raynet:
+            env.stop()
+            _wait_or_terminate(listener_proc)
+        else:
+            _terminate(listener_proc)
+            env.stop()
         time.sleep(1)
 
     ep_return = None
@@ -1318,6 +1350,8 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
     reward_name = runtime.get('reward', 'tempest_fairness_ma')
     state_name = runtime.get('state', 'tempest')
     ckpt = t_cfg['checkpoint']
+    backend_type = _env_backend_type(cfg)
+    is_raynet = backend_type == 'raynet'
 
     n_flows  = _execution_flow_value(
         ecfg.get('flows', cfg.get('sweep', {}).get('flows', 2)))
@@ -1398,24 +1432,32 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
           f'{delays_str}  '
           f'lifetimes={[round(x,1) for x in flow_durations]}', flush=True)
 
-    env = make_env(
-        _env_backend_type(cfg),
-        n           = n_flows,
-        bw          = ecfg.get('bw',    100.0),
-        delay       = ecfg.get('delay',  20.0),
-        bdp_mult    = ecfg.get('bdp_mult', 4.0),
-        duration    = duration,
-        cport       = cport,
-        cc_algo     = str(cfg.get('listener_cc', 'astraea')),
-        instance_id = instance_id,
-        unique_cports = True,
-        per_flow_delays = ecfg.get('per_flow_delays'),
-    )
+    env_kwargs = {
+        'n': n_flows,
+        'bw': ecfg.get('bw', 100.0),
+        'delay': ecfg.get('delay', 20.0),
+        'bdp_mult': ecfg.get('bdp_mult', 4.0),
+        'duration': duration,
+        'cport': cport,
+        'cc_algo': str(cfg.get('listener_cc', 'astraea')),
+        'instance_id': instance_id,
+        'unique_cports': True,
+        'per_flow_delays': ecfg.get('per_flow_delays'),
+    }
+    if is_raynet:
+        env_kwargs['environment_config'] = ecfg
+    env = make_env(backend_type, **env_kwargs)
     env.start()
 
     episode_start = time.monotonic()
     worker_env['SAO_EPISODE_START'] = str(episode_start)
     worker_env['OC_EPISODE_START']  = str(episode_start)
+    if is_raynet:
+        worker_env.update({
+            'OC_FLOW_BACKEND': 'raynet',
+            'OC_RAYNET_FLOW_ADDR': env.flow_addr,
+            'OC_RAYNET_FLOW_KEY': env.flow_key,
+        })
 
     worker_script = resolve_worker_script(alg_name)
     listener_procs = []
@@ -1423,14 +1465,20 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
         listener_cport = cport + agent_id
         listener_env = dict(worker_env)
         listener_env['SAO_AGENT_ID'] = str(agent_id)
-        listener_cmd = [
-            listener_bin, '--cport', str(listener_cport), '--worker', worker_script,
-            '--mode', 'mininet', '--scan-ms', str(cfg.get('scan_ms', 20)),
-        ]
-        if _as_bool(cfg.get('listener_single_flow'), default=True):
-            listener_cmd += ['--single-flow', '1']
-        if not _as_bool(cfg.get('listener_state_pipe'), default=False):
-            listener_cmd += ['--no-state-pipe', '1']
+        listener_env['OC_FLOW_ID'] = str(agent_id)
+        if is_raynet:
+            listener_env['OC_FLOW_FD'] = str(agent_id)
+            listener_env['OC_CPORT'] = str(listener_cport)
+            listener_cmd = [python_bin, worker_script]
+        else:
+            listener_cmd = [
+                listener_bin, '--cport', str(listener_cport), '--worker', worker_script,
+                '--mode', 'mininet', '--scan-ms', str(cfg.get('scan_ms', 20)),
+            ]
+            if _as_bool(cfg.get('listener_single_flow'), default=True):
+                listener_cmd += ['--single-flow', '1']
+            if not _as_bool(cfg.get('listener_state_pipe'), default=False):
+                listener_cmd += ['--no-state-pipe', '1']
         listener_procs.append(subprocess.Popen(
             listener_cmd, env=listener_env, start_new_session=True))
 
@@ -1443,20 +1491,26 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
             start_delays=start_delays,
             flow_durations=flow_durations,
         )
-        if link_schedule:
+        if link_schedule and not is_raynet:
             sched_thread = threading.Thread(
                 target=_run_link_schedule,
                 args=(env, link_schedule, episode_start, sched_stop),
                 daemon=True)
             sched_thread.start()
-        time.sleep(duration + 3)
+        if not is_raynet:
+            time.sleep(duration + 3)
     finally:
         sched_stop.set()
         if sched_thread:
             sched_thread.join(timeout=2)
-        for listener_proc in listener_procs:
-            _terminate(listener_proc)
-        env.stop()
+        if is_raynet:
+            env.stop()
+            for listener_proc in listener_procs:
+                _wait_or_terminate(listener_proc)
+        else:
+            for listener_proc in listener_procs:
+                _terminate(listener_proc)
+            env.stop()
         time.sleep(1)
 
     ep_return = _multi_episode_return(state_log, n_agents=n_flows)
@@ -1493,15 +1547,9 @@ def run_episode_auto(cfg, ecfg, episode, listener_bin, python_bin,
                      mgr_addr, mgr_key, instance_id):
     """Dispatch one episode to the selected environment backend.
 
-    RayNet simulations do not expose Mininet sockets, cports, iperf, or listener
-    processes, so they use a backend-specific rollout driver. Mininet keeps the
-    existing single-agent / multi-agent split unchanged.
+    The selected algorithm owns the single-agent / multi-agent split. Backend
+    differences are handled inside the shared episode functions.
     """
-    backend_type = _env_backend_type(cfg)
-    if backend_type == 'raynet':
-        return run_episode_raynet(cfg, ecfg, episode, listener_bin, python_bin,
-                                  mgr_addr, mgr_key, instance_id)
-
     alg_name = (cfg.get('runtime', {}) or {}).get('algorithm', 'td3')
     episode_fn = run_episode_marl if is_multi_agent(alg_name) else run_episode
     return episode_fn(cfg, ecfg, episode, listener_bin, python_bin,

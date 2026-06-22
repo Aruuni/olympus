@@ -14,7 +14,7 @@ actions:
 
 environment:
   type: raynet
-  environment_setup: orca_smoke
+  environment_setup: orca_static
 
 reward:
   delay_margin_coef: 1.25
@@ -28,12 +28,12 @@ paths:
   raynet_runner: /home/james/raynet/runners/olympus_runner.sh
 
 outputs:
-  root: olympus/models_raynet_smoke
-  run_name: raynet_orca_smoke_ipc_quick
-  plot_episodes: false
+  root: olympus/models/orca_plot_test_5_cubic
+  run_name: plotting_test
+  plot_episodes: true
 
 n_parallel: 1
-episodes: 1
+episodes: 1000
 
 algorithms:
   orca:

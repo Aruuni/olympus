@@ -27,10 +27,10 @@ _PKG = os.path.dirname(_ALG_DIR)
 _REPO = os.path.dirname(_PKG)
 sys.path.insert(0, _REPO)
 
-import tcp_sockopt
 from olympus.algorithms.orca import model
 from olympus.common.action_plugins import load_action_module
 from olympus.common.bbr_probe import BbrProbe
+from olympus.common import flow_backend
 
 _ACTION_PLUGIN = load_action_module()
 
@@ -53,12 +53,17 @@ def _connect_manager():
         return None
     host, port = addr.rsplit(':', 1)
     mgr = _Mgr(address=(host, int(port)), authkey=bytes.fromhex(key))
-    try:
-        mgr.connect()
-        return mgr
-    except Exception as e:
-        print(f'[orca worker] manager connect failed: {e}', flush=True)
-        return None
+    deadline = time.monotonic() + 10.0
+    last_error = None
+    while time.monotonic() < deadline:
+        try:
+            mgr.connect()
+            return mgr
+        except Exception as e:
+            last_error = e
+            time.sleep(0.1)
+    print(f'[orca worker] manager connect failed: {last_error}', flush=True)
+    return None
 
 
 def _drain_state_fd(fd: int, stop: threading.Event):
@@ -109,6 +114,7 @@ def run():
     target = float(os.environ.get('SAO_ORCA_TARGET_MS',
                                   os.environ.get('OC_ORCA_TARGET_MS', '50.0')))
     use_normalizer = _bool_env('SAO_ORCA_USE_NORMALIZER', False)
+    simulation_backend = os.environ.get('OC_FLOW_BACKEND', '').lower() == 'raynet'
 
     deterministic = os.environ.get('SAO_DETERMINISTIC', '0') == '1'
     if deterministic:
@@ -254,7 +260,7 @@ def run():
         while True:
             t_step_start = time.monotonic()
             try:
-                raw = tcp_sockopt.get_tcp_deepcc_info(flow_fd)
+                raw = flow_backend.get_tcp_deepcc_info(flow_fd)
             except Exception as e:
                 print(f'[orca worker] get_tcp_deepcc_info failed: {e} - exiting',
                       flush=True)
@@ -343,7 +349,7 @@ def run():
                 t_step_start, cur_cwnd, desired_cwnd)
             new_cwnd = int(np.clip(actual_cwnd, cwnd_min, cwnd_max))
             try:
-                tcp_sockopt.set_cwnd(flow_fd, new_cwnd)
+                flow_backend.set_cwnd(flow_fd, new_cwnd)
             except Exception as e:
                 print(f'[orca worker] set_cwnd failed: {e} - exiting', flush=True)
                 break
@@ -392,7 +398,7 @@ def run():
 
             elapsed = time.monotonic() - t_step_start
             sleep_t = interval_s_cfg - elapsed
-            if sleep_t > 0:
+            if sleep_t > 0 and not simulation_backend:
                 time.sleep(sleep_t)
 
     finally:

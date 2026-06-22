@@ -6,8 +6,27 @@ experiments:
   - protocol: orca
     ini_path: /home/james/raynet/simlibs/Orca/src/training/OrcaTraining.ini
     section: General
+    observation_fields:
+      - {name: delay_ms, index: 0}
+      - {name: avg_urtt, index: 15, aliases: [delay_us]}
+      - {name: avg_thr, index: 1, aliases: [throughput]}
+      - {name: count, index: 2, aliases: [cnt, samples]}
+      - {name: interval_s, index: 3, aliases: [delta_t]}
+      - {name: target, index: 4}
+      - {name: cwnd, index: 5}
+      - {name: pacing_rate, index: 6}
+      - {name: loss_rate, index: 7, aliases: [lost_rate]}
+      - {name: srtt_us, index: 8}
+      - {name: srtt_ms, index: 8}
+      - {name: snd_ssthresh, index: 9}
+      - {name: packets_out, index: 10}
+      - {name: retrans_out, index: 11}
+      - {name: max_packets_out, index: 12}
+      - {name: mss, index: 13, aliases: [mss_cache]}
+      - {name: min_rtt, index: 16, aliases: [min_rtt_us]}
+      - {name: min_rtt_ms, index: 14}
     flows: 1
     bw: 10
     delay: 20
     duration: 1
-    quiet: true
+    quiet: false

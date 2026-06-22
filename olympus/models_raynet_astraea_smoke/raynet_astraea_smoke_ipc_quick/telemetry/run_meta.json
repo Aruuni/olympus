@@ -1,0 +1,12 @@
+{
+  "run_name": "raynet_astraea_smoke_ipc_quick",
+  "created_at": "2026-06-22 17:35:54 +0100",
+  "algorithm": "ma_dreamer",
+  "reward": "tempest_fairness_ma",
+  "state": "tempest",
+  "action": "astraea",
+  "environment": "astraea_smoke",
+  "source_config": "/home/james/olympus/olympus/config_raynet_astraea_smoke.yaml",
+  "run_dir": "/home/james/olympus/olympus/models_raynet_astraea_smoke/raynet_astraea_smoke_ipc_quick",
+  "resume_from": null
+}

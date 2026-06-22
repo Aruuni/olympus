@@ -17,7 +17,7 @@ environment:
 reward:
   fairness_weight: 25.0
   fairness_cap: 1.0
-  per_agent_credit: false
+  per_agent_credit: true
 
 state_options:
   tempest_kalman:
@@ -33,15 +33,15 @@ paths:
   raynet_runner: /home/james/raynet/runners/olympus_runner.sh
 
 outputs:
-  root: olympus/models_raynet_astraea_smoke
-  run_name: raynet_astraea_smoke_ipc_quick
+  root: olympus/models/raynet_astraea_test_5
+  run_name: astraea_test_run_name
   plot_episodes: true
 
-n_parallel: 1
-episodes: 1
+n_parallel: 16
+episodes: 1600
 
 sweep:
-  flows: 2
+  flows: 5
 
 algorithms:
   ma_dreamer:
@@ -49,11 +49,11 @@ algorithms:
       resume_from: null
       batch_size: 2
       seq_len: 4
-      min_replay: 100000
-      replay_capacity: 1024
+      min_replay: 10000
+      replay_capacity: 10240
       updates_per_step: 1
       worker_push_every: 1
-      save_every: 100000
+      save_every: 10000
       save_every_episodes: 0
       param_broadcast_every: 1
       grad_clip: 100.0
@@ -79,7 +79,7 @@ algorithms:
       actor_log_std_min: -2.0
       actor_log_std_max: 0.0
       target_tau: 0.02
-      actor_warmup_steps: 1000
+      actor_warmup_steps: 1
       value_bins: 255
       value_low: -20.0
       value_high: 20.0
