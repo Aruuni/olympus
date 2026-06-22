@@ -1,0 +1,13 @@
+name: orca_smoke
+description: Short RayNet Orca simulation episode for bridge smoke tests.
+shuffle: false
+
+experiments:
+  - protocol: orca
+    ini_path: /home/james/raynet/simlibs/Orca/src/training/OrcaTraining.ini
+    section: General
+    flows: 1
+    bw: 10
+    delay: 20
+    duration: 1
+    quiet: true

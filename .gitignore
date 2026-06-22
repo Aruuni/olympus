@@ -6,6 +6,7 @@ tcp_sockopt.egg-info/
 venv_astraea/
 data/
 models/
+models_raynet_smoke/
 .agents
 .codex
 .context

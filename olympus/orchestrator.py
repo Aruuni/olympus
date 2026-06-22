@@ -47,6 +47,7 @@ sys.path.insert(0, _ROOT)
 sys.path.insert(0, _HERE)
 
 from olympus.environments import make_env
+from olympus.environments.raynet.runner import run_episode_raynet
 from olympus.plots.episode_plot import (
     plot as _plot_episode,
     episode_return as _episode_return,
@@ -377,11 +378,15 @@ def _environment_path(env_type: str, name: str) -> str:
 def _env_backend_type(cfg: dict) -> str:
     """Resolve which network backend to build for this run.
 
-    The type is recorded on cfg['_environment_meta'] by
-    _load_environment_definition. An inline/config environment leaves it empty,
-    which falls back to the Mininet backend (legacy behavior)."""
+    Prefer metadata recorded by _load_environment_definition, but also honor the
+    inline ``environment.type`` selection so callers can branch before the
+    environment pool has been materialized.
+    """
     meta = cfg.get('_environment_meta') or {}
-    return str(meta.get('type') or _DEFAULT_ENV_TYPE).strip() or _DEFAULT_ENV_TYPE
+    env_type = meta.get('type')
+    if not env_type and isinstance(cfg.get('environment'), dict):
+        env_type = cfg['environment'].get('type')
+    return str(env_type or _DEFAULT_ENV_TYPE).strip() or _DEFAULT_ENV_TYPE
 
 
 def _load_environment_definition(cfg: dict):
@@ -1486,14 +1491,17 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
 
 def run_episode_auto(cfg, ecfg, episode, listener_bin, python_bin,
                      mgr_addr, mgr_key, instance_id):
-    """Dispatch one episode to the runner matching the configured algorithm.
+    """Dispatch one episode to the selected environment backend.
 
-    Multi-agent algorithms (``MULTI_AGENT = True``) need ``run_episode_marl``:
-    it launches one listener + worker per flow on unique cports, so every flow
-    gets an agent. ``run_episode`` attaches a worker to the first flow only,
-    which silently leaves the remaining flows uncontrolled when used with a
-    multi-agent model. Benchmarks should call this instead of picking a runner.
+    RayNet simulations do not expose Mininet sockets, cports, iperf, or listener
+    processes, so they use a backend-specific rollout driver. Mininet keeps the
+    existing single-agent / multi-agent split unchanged.
     """
+    backend_type = _env_backend_type(cfg)
+    if backend_type == 'raynet':
+        return run_episode_raynet(cfg, ecfg, episode, listener_bin, python_bin,
+                                  mgr_addr, mgr_key, instance_id)
+
     alg_name = (cfg.get('runtime', {}) or {}).get('algorithm', 'td3')
     episode_fn = run_episode_marl if is_multi_agent(alg_name) else run_episode
     return episode_fn(cfg, ecfg, episode, listener_bin, python_bin,
@@ -1551,7 +1559,6 @@ def _materialize_single_episode(ecfg: dict, episode: int) -> dict:
 def _slot_process(instance_id, work_q, result_q,
                   cfg, listener_bin, python_bin, learner_state, multi):
     signal.signal(signal.SIGINT, signal.SIG_IGN)
-    episode_fn = run_episode_marl if multi else run_episode
 
     while True:
         item = work_q.get()
@@ -1560,7 +1567,7 @@ def _slot_process(instance_id, work_q, result_q,
         ep, ecfg = item
         episode_wall_start = time.monotonic()
         try:
-            ep_return, ecfg_out, link_sched = episode_fn(
+            ep_return, ecfg_out, link_sched = run_episode_auto(
                 cfg, ecfg, ep, listener_bin, python_bin,
                 learner_state['mgr_addr'], learner_state['mgr_key'], instance_id)
         except Exception as e:
@@ -1625,9 +1632,12 @@ def main():
 
     t_cfg = cfg.get('training', cfg)
     paths = cfg.get('paths', {}) or {}
-    if 'listener' not in paths or 'py' not in paths:
-        raise SystemExit('[orch] config.yaml must define paths.listener and paths.py')
-    listener_bin = os.path.abspath(paths['listener'])
+    backend_type = _env_backend_type(cfg)
+    if 'py' not in paths:
+        raise SystemExit('[orch] config.yaml must define paths.py')
+    if backend_type != 'raynet' and 'listener' not in paths:
+        raise SystemExit('[orch] config.yaml must define paths.listener for Mininet backends')
+    listener_bin = os.path.abspath(paths.get('listener', '')) if backend_type != 'raynet' else ''
     python_bin   = os.path.abspath(paths['py'])
     n_episodes   = args.episodes or cfg.get('episodes', None)
     n_parallel   = max(1, int(cfg.get('n_parallel', 1)))
@@ -1638,7 +1648,8 @@ def main():
     runtime = cfg.get('runtime', {}) or {}
     alg_name = runtime.get('algorithm', 'td3')
     multi = is_multi_agent(alg_name)
-    _ensure_tcp_cc(cfg.get('listener_cc', 'astraea'))
+    if backend_type != 'raynet':
+        _ensure_tcp_cc(cfg.get('listener_cc', 'astraea'))
     outputs = cfg.get('outputs', {}) or {}
     run_dir = os.path.abspath(outputs['run_dir'])
     plots_dir = os.path.abspath(outputs['plots_dir'])
@@ -1685,7 +1696,7 @@ def main():
             [python_bin, selected_learner_script, '--config', learner_config_path,
              '--port', str(learner_port)],
             stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-            text=True, bufsize=1, env=learner_env)
+            text=True, bufsize=1, env=learner_env, start_new_session=True)
         key = ''
         for line in proc.stdout:
             sys.stdout.write('[learner] ' + line)
@@ -1728,6 +1739,8 @@ def main():
     def _learner_watchdog():
         while not stop_watchdog.is_set():
             time.sleep(2)
+            if stop_watchdog.is_set():
+                break
             proc = _lproc['proc']
             if proc.poll() is not None:
                 print(f'[orch] learner died (exit={proc.returncode}) - restarting in 3s',

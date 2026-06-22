@@ -1,0 +1,12 @@
+name: orca_static
+description: RayNet Orca simulation episodes from explicit OMNeT++ INI sections.
+shuffle: true
+
+experiments:
+  - protocol: orca
+    ini_path: /home/james/raynet/simlibs/Orca/src/training/OrcaTraining.ini
+    section: General
+    flows: 1
+    bw: 100
+    delay: 20
+    duration: 120

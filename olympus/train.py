@@ -29,7 +29,7 @@ import yaml
 
 _HERE = Path(__file__).resolve().parent
 _ROOT = _HERE.parent
-_LOG_DIR = _HERE / 'logs'
+_LOG_DIR = Path(os.environ.get('OLYMPUS_TRAIN_LOG_DIR', str(_HERE / 'logs')))
 
 # ── Line patterns emitted by the orchestrator / learners ────────────────────
 
@@ -333,7 +333,11 @@ def main() -> int:
     with open(config_path) as f:
         cfg = yaml.safe_load(f) or {}
 
-    if hasattr(os, 'geteuid') and os.geteuid() != 0:
+    env_type = (args.env_type or
+                ((cfg.get('environment', {}) or {}).get('type')) or
+                'mininet')
+    if (hasattr(os, 'geteuid') and os.geteuid() != 0 and
+            str(env_type).lower() != 'raynet'):
         raise SystemExit(
             '[train] training requires root for Mininet; invoke this script '
             'with sudo -E and the project virtualenv Python')
