@@ -1,0 +1,13 @@
+name: astraea_smoke
+description: Short RayNet Astraea multi-agent simulation for bridge smoke tests.
+shuffle: false
+
+experiments:
+  - protocol: astraea
+    ini_path: /home/james/raynet/simlibs/Astraea/src/training/AstraeaTraining.ini
+    section: General
+    flows: 2
+    bw: 20
+    delay: 20
+    duration: 10
+    quiet: true

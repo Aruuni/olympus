@@ -26,6 +26,20 @@ RAYNET_ORCA_OBS = [
 ]
 
 
+RAYNET_ASTRAEA_OBS = [
+    1_250_000.0,  # avg_thr B/s
+    2_000_000.0,  # max_tput B/s
+    20_000.0,     # avg_urtt us
+    18_000.0,     # min_rtt us
+    22_000.0 * 8, # srtt_us shifted
+    32.0,         # cwnd packets
+    1000.0,       # loss ratio/rate
+    10.0,         # packets_out
+    2_000_000.0,  # pacing_rate B/s
+    1.0,          # retrans_out
+]
+
+
 class FakeRayNetClient:
     instances = []
 
@@ -59,6 +73,45 @@ class FakeRayNetClient:
         self.terminated = True
 
 
+class FakeAstraeaRayNetClient:
+    instances = []
+
+    def __init__(self, command, *, cwd=None, env=None):
+        self.command = list(command)
+        self.cwd = cwd
+        self.env = dict(env or {})
+        self.started_episode = None
+        self.step_actions = []
+        self.terminated = False
+        FakeAstraeaRayNetClient.instances.append(self)
+
+    def start(self, episode_config):
+        self.started_episode = dict(episode_config)
+        return {
+            'type': 'reset',
+            'observations': {
+                'Astraea1': list(RAYNET_ASTRAEA_OBS),
+                'Astraea2': list(RAYNET_ASTRAEA_OBS),
+            },
+        }
+
+    def step(self, actions):
+        self.step_actions.append(dict(actions))
+        return {
+            'type': 'step',
+            'observations': {
+                'Astraea1': list(RAYNET_ASTRAEA_OBS),
+                'Astraea2': list(RAYNET_ASTRAEA_OBS),
+            },
+            'rewards': {},
+            'terminateds': {'__all__': False},
+            'info': {'simDone': True},
+        }
+
+    def terminate(self):
+        self.terminated = True
+
+
 class RayNetObservationAdapterTest(unittest.TestCase):
     def test_orca_observation_maps_to_olympus_raw_fields(self):
         raw = raynet_runner.raynet_orca_observation_to_raw(RAYNET_ORCA_OBS)
@@ -75,6 +128,23 @@ class RayNetObservationAdapterTest(unittest.TestCase):
     def test_rejects_wrong_observation_length(self):
         with self.assertRaisesRegex(ValueError, '15 values'):
             raynet_runner.raynet_orca_observation_to_raw([1.0, 2.0])
+
+    def test_astraea_observation_maps_to_olympus_raw_fields(self):
+        raw = raynet_runner.raynet_astraea_observation_to_raw(RAYNET_ASTRAEA_OBS)
+        self.assertEqual(raw['avg_thr'], 1_250_000.0)
+        self.assertEqual(raw['max_tput'], 2_000_000.0)
+        self.assertEqual(raw['avg_urtt'], 20_000.0)
+        self.assertEqual(raw['min_rtt'], 18_000.0)
+        self.assertEqual(raw['srtt_us'], 22_000.0 * 8)
+        self.assertEqual(raw['cwnd'], 32.0)
+        self.assertEqual(raw['loss_ratio'], 1000.0)
+        self.assertEqual(raw['packets_out'], 10.0)
+        self.assertEqual(raw['pacing_rate'], 2_000_000.0)
+        self.assertEqual(raw['retrans_out'], 1.0)
+
+    def test_rejects_wrong_astraea_observation_length(self):
+        with self.assertRaisesRegex(ValueError, '10 values'):
+            raynet_runner.raynet_astraea_observation_to_raw([1.0, 2.0])
 
 
 class RayNetEpisodeRunnerTest(unittest.TestCase):
@@ -126,6 +196,73 @@ class RayNetEpisodeRunnerTest(unittest.TestCase):
         self.assertIn('Orca1', fake.step_actions[0])
         self.assertIsInstance(fake.step_actions[0]['Orca1'], float)
         self.assertTrue(fake.command[0].endswith('olympus_runner.sh'))
+        self.assertEqual(link_sched, [])
+        self.assertIsNotNone(ep_return)
+
+    def test_fake_astraea_episode_actions_and_ini_overrides(self):
+        FakeAstraeaRayNetClient.instances.clear()
+        with tempfile.TemporaryDirectory() as directory:
+            ini = os.path.join(directory, 'AstraeaTraining.ini')
+            open(ini, 'w').close()
+            cfg = {
+                'runtime': {
+                    'algorithm': 'ma_dreamer',
+                    'reward': 'tempest_fairness_ma',
+                    'state': 'tempest',
+                    'action': 'astraea',
+                },
+                'actions': {
+                    'astraea': {
+                        'action_min': -1.0,
+                        'action_max': 1.0,
+                        'step': 0.025,
+                    },
+                },
+                'training': {
+                    'checkpoint': os.path.join(directory, 'ma_dreamer.pt'),
+                    'worker_push_every': 1,
+                    'reward_bins': 255,
+                },
+                'agent': {
+                    'hidden': 16,
+                    'embed_dim': 8,
+                    'h_dim': 16,
+                    'latent_groups': 2,
+                    'latent_classes': 4,
+                    'interval_ms': 30,
+                },
+                'reward': {
+                    'fairness_weight': 25.0,
+                    'fairness_cap': 1.0,
+                },
+                'outputs': {'episodes_dir': directory},
+                'paths': {'raynet': '/home/james/raynet'},
+            }
+            ecfg = {
+                'protocol': 'astraea',
+                'ini_path': ini,
+                'section': 'General',
+                'flows': 2,
+                'bw': 20,
+                'delay': 20,
+                'duration': 1,
+            }
+
+            ep_return, _, link_sched = raynet_runner.run_episode_raynet(
+                cfg, ecfg, 4, '', '', '', '', 0,
+                client_factory=FakeAstraeaRayNetClient)
+
+        fake = FakeAstraeaRayNetClient.instances[-1]
+        self.assertEqual(fake.started_episode['protocol'], 'astraea')
+        self.assertEqual(fake.started_episode['overrides']['**.numberOfFlows'], '2')
+        self.assertEqual(fake.started_episode['overrides']['**.fixedIntervalDuration'], '0.03')
+        self.assertTrue(fake.terminated)
+        self.assertTrue(fake.step_actions)
+        self.assertEqual(set(fake.step_actions[0]), {'Astraea1', 'Astraea2'})
+        for action in fake.step_actions[0].values():
+            self.assertIsInstance(action, float)
+            self.assertGreaterEqual(action, -1.0)
+            self.assertLessEqual(action, 1.0)
         self.assertEqual(link_sched, [])
         self.assertIsNotNone(ep_return)
 

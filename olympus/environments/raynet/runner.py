@@ -18,6 +18,7 @@ from collections import defaultdict
 from multiprocessing.managers import BaseManager
 from pathlib import Path
 
+import numpy as np
 import torch
 
 
@@ -32,6 +33,7 @@ class _Mgr(BaseManager):
 _Mgr.register('push_exp')
 _Mgr.register('push_exp_batch')
 _Mgr.register('pull_params')
+_Mgr.register('service')
 
 
 class RayNetEpisodeClient:
@@ -109,7 +111,7 @@ class RayNetEpisodeClient:
                 self._proc.wait(timeout=3)
 
 
-def _connect_manager(addr: str, key: str):
+def _connect_manager(addr: str, key: str, service: bool = False):
     if not addr or not key:
         return None
     host, port = addr.rsplit(':', 1)
@@ -119,14 +121,14 @@ def _connect_manager(addr: str, key: str):
     while time.monotonic() < deadline:
         try:
             mgr.connect()
-            return mgr
+            return mgr.service() if service else mgr
         except ConnectionRefusedError as exc:
             last_error = exc
             time.sleep(0.1)
     if last_error is not None:
         raise last_error
     mgr.connect()
-    return mgr
+    return mgr.service() if service else mgr
 
 
 def _observation_to_list(observation):
@@ -179,6 +181,99 @@ def raynet_orca_observation_to_raw(observation) -> dict:
         'min_rtt': values[14] * 1000.0,
         'min_rtt_us': values[14] * 1000.0,
     }
+
+
+def raynet_astraea_observation_to_raw(observation) -> dict:
+    """Map RayNet Astraea's 10-value observation into Olympus raw fields.
+
+    RayNet's ``Astraea::computeObservation`` emits:
+    avg_thr, max_tput, avg_urtt, min_rtt, srtt_us, cwnd, loss_ratio,
+    packets_out, pacing_rate, retrans_out. Throughput and pacing are bytes/s;
+    RTT-like values are microseconds except ``srtt_us``, which follows Linux's
+    shifted srtt representation.
+    """
+    values = [float(v) for v in _observation_to_list(observation)]
+    if len(values) != 10:
+        raise ValueError(
+            f'RayNet Astraea observation must contain 10 values, got {len(values)}')
+    return {
+        'avg_thr': values[0],
+        'throughput': values[0],
+        'max_tput': values[1],
+        'avg_urtt': values[2],
+        'delay_us': values[2],
+        'min_rtt': values[3],
+        'min_rtt_us': values[3],
+        'srtt_us': values[4],
+        'cwnd': values[5],
+        'loss_ratio': values[6],
+        'loss_rate': values[6],
+        'loss_bytes': values[6],
+        'packets_out': values[7],
+        'pacing_rate': values[8],
+        'retrans_out': values[9],
+    }
+
+
+class _TempestAgentState:
+    """Per-agent Tempest normalization state for in-process RayNet rollouts."""
+
+    def __init__(self, tempest_state, base_rtt_us: float):
+        self._tempest_state = tempest_state
+        self._kalman = tempest_state.TempestKalmanMinRTT(base_rtt_us)
+        self.previous_urtt = 0.0
+        self.previous_cwnd = 10
+        self.peak_throughput = 0.0
+
+    def normalize(self, raw: dict) -> np.ndarray:
+        """Normalize one raw Astraea observation using Tempest's feature set."""
+        cwnd = max(int(raw.get('cwnd', 1)), 1)
+        avg_thr = float(raw.get('avg_thr', 0.0))
+        avg_urtt = float(raw.get('avg_urtt', 0.0))
+        srtt_raw = float(raw.get('srtt_us', 0.0) or 0.0)
+        srtt_us = (srtt_raw / 8.0) if srtt_raw > 0.0 else avg_urtt
+        srtt_us = max(srtt_us, 1.0)
+        pacing_rate = float(raw.get('pacing_rate', 0.0))
+        packets_out = float(raw.get('packets_out', 0.0))
+        retrans_out = float(raw.get('retrans_out', 0.0))
+
+        self.peak_throughput = max(self.peak_throughput, avg_thr)
+        raw['prev_urtt'] = self.previous_urtt or avg_urtt
+        raw['prev_cwnd'] = self.previous_cwnd
+        raw['peak_thr'] = self.peak_throughput
+        kalman_min_rtt = max(self._kalman.update(avg_urtt), 1.0)
+        raw['kalman_min_rtt_us'] = kalman_min_rtt
+
+        prev_urtt = float(raw.get('prev_urtt', avg_urtt))
+        prev_cwnd = float(raw.get('prev_cwnd', cwnd))
+        bw_ref = max(self.peak_throughput, pacing_rate, 1.0)
+        delta_rtt = float(np.clip(
+            (avg_urtt - prev_urtt) / max(prev_urtt, 1.0), -1.0, 1.0))
+        delta_cwnd = float(np.clip(
+            (cwnd - prev_cwnd) / max(prev_cwnd, 1.0), -1.0, 1.0))
+        cwnd_log = np.log1p(float(cwnd)) / np.log1p(10_000.0)
+
+        state = np.asarray([
+            delta_cwnd,
+            avg_urtt / 1e5,
+            cwnd_log,
+            max(avg_thr / bw_ref, 0.0),
+            max(pacing_rate / bw_ref, 0.0),
+            max(packets_out / max(cwnd, 1), 0.0),
+            delta_rtt,
+            min(retrans_out / max(packets_out, 1.0), 1.0),
+            avg_thr / 1e7,
+            srtt_us / 1e5,
+            kalman_min_rtt / 1e5,
+        ], dtype=np.float32)
+        state = np.nan_to_num(state, nan=0.0, posinf=0.0, neginf=0.0)
+
+        if avg_urtt > 0.0:
+            self.previous_urtt = avg_urtt
+        self.previous_cwnd = cwnd
+        return np.clip(
+            state, self._tempest_state.STATE_LOW,
+            self._tempest_state.STATE_HIGH)
 
 
 def _srtt_ms(raw: dict) -> float:
@@ -329,6 +424,7 @@ def _episode_config(ecfg: dict, cfg: dict, env_vars: dict):
     episode.setdefault('section', ecfg.get('config_section', 'General'))
     episode.setdefault('interval_s', float(env_vars['SAO_INTERVAL_MS']) / 1000.0)
     replacements = dict(episode.get('replacements') or {})
+    overrides = dict(episode.get('overrides') or {})
 
     bw_mbps = float(ecfg.get('bw', 100.0))
     delay_ms = float(ecfg.get('delay', ecfg.get('base_rtt_ms', 20.0)))
@@ -355,7 +451,15 @@ def _episode_config(ecfg: dict, cfg: dict, env_vars: dict):
             'max_rl_steps',
             str(max(1, int(round(duration_s / max(interval_s, 1e-9)))))
         )
+    if str(episode.get('protocol', '')).lower() == 'astraea':
+        overrides.setdefault('**.numberOfFlows', str(int(ecfg.get('flows', 1))))
+        overrides.setdefault('**.fixedIntervalDuration', f'{interval_s:.12g}')
+        if ecfg.get('take_actions') is not None:
+            overrides.setdefault(
+                '**.takeActions',
+                'true' if bool(ecfg.get('take_actions')) else 'false')
     episode['replacements'] = replacements
+    episode['overrides'] = overrides
     return episode
 
 
@@ -363,16 +467,340 @@ def _default_client_factory(command, *, cwd=None, env=None):
     return RayNetEpisodeClient(command, cwd=cwd, env=env)
 
 
+def _load_ma_dreamer_models(model, ckpt_path: str, config: dict,
+                            require_checkpoint: bool = False):
+    local_world = model.LocalWorldModel(
+        state_dim=model.STATE_DIM,
+        action_dim=model.ACTION_DIM,
+        hidden=config['hidden'],
+        embed_dim=config['embed_dim'],
+        h_dim=config['h_dim'],
+        latent_groups=config['latent_groups'],
+        latent_classes=config['latent_classes'],
+        reward_bins=config['reward_bins'],
+    )
+    actor = model.Actor(
+        config['h_dim'],
+        local_world.latent_dim,
+        config['hidden'],
+        log_std_min=config['actor_log_std_min'],
+        log_std_max=config['actor_log_std_max'],
+    )
+    step = -1
+    if ckpt_path and os.path.exists(ckpt_path):
+        try:
+            ckpt = torch.load(ckpt_path, map_location='cpu', weights_only=False)
+            model.assert_checkpoint_state_compatible(ckpt, source=ckpt_path)
+            local_world.load_state_dict(ckpt['local_world_model'], strict=False)
+            actor.load_state_dict(ckpt['actor'], strict=False)
+            step = int(ckpt.get('step', 0))
+        except Exception:
+            if require_checkpoint:
+                raise
+    elif require_checkpoint:
+        raise FileNotFoundError(f'checkpoint not found: {ckpt_path}')
+    local_world.eval()
+    actor.eval()
+    return local_world, actor, step
+
+
+def _pull_ma_dreamer_params(manager, model, local_world, actor, step: int) -> int:
+    if manager is None:
+        return step
+    try:
+        param_bytes = manager.pull_params()
+        if param_bytes is None:
+            return step
+        payload = torch.load(io.BytesIO(param_bytes), map_location='cpu',
+                             weights_only=False)
+        payload_step = int(payload.get('step', step))
+        if payload_step <= step:
+            return step
+        model.assert_checkpoint_state_compatible(payload, source='learner payload')
+        local_world.load_state_dict(payload['local_world_model'], strict=False)
+        actor.load_state_dict(payload['actor'], strict=False)
+        local_world.eval()
+        actor.eval()
+        return payload_step
+    except Exception:
+        return step
+
+
+def _agent_index(agent_id: str, assigned: dict) -> int:
+    """Return a stable zero-based Olympus index for a RayNet agent id."""
+    if agent_id not in assigned:
+        assigned[agent_id] = len(assigned)
+    return assigned[agent_id]
+
+
+def _make_reward_calc(reward_plugin, agent_id: int):
+    if hasattr(reward_plugin, 'calc_kwargs_from_env'):
+        kwargs = reward_plugin.calc_kwargs_from_env()
+        kwargs['agent_id'] = agent_id
+        return reward_plugin.RewardCalc(**kwargs)
+
+    old_agent_id = os.environ.get('SAO_AGENT_ID')
+    os.environ['SAO_AGENT_ID'] = str(agent_id)
+    try:
+        return reward_plugin.make_reward_calc()
+    finally:
+        if old_agent_id is None:
+            os.environ.pop('SAO_AGENT_ID', None)
+        else:
+            os.environ['SAO_AGENT_ID'] = old_agent_id
+
+
+def _run_episode_raynet_ma_dreamer(cfg, ecfg, episode, mgr_addr, mgr_key,
+                                   instance_id, client_factory=None):
+    """Run one multi-agent RayNet Astraea episode with Olympus MA-Dreamer."""
+    from olympus.common.registry import reward_module
+    from olympus.states import tempest as tempest_state
+
+    protocol = str(ecfg.get('protocol', 'astraea')).lower()
+    if protocol != 'astraea':
+        raise ValueError(
+            f'RayNet MA-Dreamer supports protocol=astraea, got {protocol!r}')
+
+    outputs = cfg.get('outputs', {}) or {}
+    alg_name = (cfg.get('runtime', {}) or {}).get('algorithm', 'ma_dreamer')
+    reward_name = (cfg.get('runtime', {}) or {}).get(
+        'reward', 'tempest_fairness_ma')
+    state_log = _episode_paths(outputs, alg_name, episode)
+    env_vars = _configure_runtime_env(cfg, ecfg, episode, mgr_addr, mgr_key, state_log)
+
+    agent_cfg = cfg.get('agent', {}) or {}
+    training = cfg.get('training', cfg) or {}
+    n_agents = int(ecfg.get('flows', 1))
+    duration = float(ecfg.get('duration', 0.0) or 0.0)
+    flow_start_delays = list(ecfg.get('flow_start_delays') or [0.0] * n_agents)
+    flow_durations = list(ecfg.get('flow_durations') or [duration] * n_agents)
+    interval_ms = float(agent_cfg.get('interval_ms', 20.0))
+
+    env_vars.update({
+        'SAO_N_AGENTS': str(n_agents),
+        'SAO_INSTANCE_ID': str(instance_id),
+        'OC_FAIR_FLOW_START_DELAYS': json.dumps(flow_start_delays),
+        'OC_FAIR_FLOW_DURATIONS': json.dumps(flow_durations),
+        'OC_EPISODE_START': str(time.monotonic()),
+        'SAO_EPISODE_START': str(time.monotonic()),
+        'SAO_DREAMER_HIDDEN': str(int(agent_cfg.get('hidden', 256))),
+        'SAO_DREAMER_EMBED': str(int(agent_cfg.get('embed_dim', 128))),
+        'SAO_DREAMER_H_DIM': str(int(agent_cfg.get('h_dim', 256))),
+        'SAO_DREAMER_GROUPS': str(int(agent_cfg.get('latent_groups', 8))),
+        'SAO_DREAMER_CLASSES': str(int(agent_cfg.get('latent_classes', 8))),
+        'SAO_DREAMER_REWARD_BINS': str(
+            int(training.get('reward_bins', agent_cfg.get('reward_bins', 255)))),
+        'SAO_DREAMER_ACTOR_LOG_STD_MIN': str(
+            float(training.get('actor_log_std_min', -2.0))),
+        'SAO_DREAMER_ACTOR_LOG_STD_MAX': str(
+            float(training.get('actor_log_std_max', 0.0))),
+    })
+    os.environ.update(env_vars)
+
+    from olympus.algorithms.ma_dreamer import model
+
+    model_config = {
+        'hidden': int(agent_cfg.get('hidden', 256)),
+        'embed_dim': int(agent_cfg.get('embed_dim', 128)),
+        'h_dim': int(agent_cfg.get('h_dim', 256)),
+        'latent_groups': int(agent_cfg.get('latent_groups', 8)),
+        'latent_classes': int(agent_cfg.get('latent_classes', 8)),
+        'reward_bins': int(training.get(
+            'reward_bins', agent_cfg.get('reward_bins', 255))),
+        'actor_log_std_min': float(training.get('actor_log_std_min', -2.0)),
+        'actor_log_std_max': float(training.get('actor_log_std_max', 0.0)),
+    }
+    ckpt_path = os.path.abspath(training['checkpoint'])
+    local_world, actor, learner_step = _load_ma_dreamer_models(
+        model, ckpt_path, model_config,
+        require_checkpoint=os.environ.get('SAO_REQUIRE_CHECKPOINT', '0') == '1')
+    manager = _connect_manager(mgr_addr, mgr_key, service=True)
+    learner_step = _pull_ma_dreamer_params(
+        manager, model, local_world, actor, learner_step)
+
+    deterministic = os.environ.get('SAO_DETERMINISTIC', '0') == '1'
+    base_rtt_us = float(env_vars['SAO_BASE_RTT_US'])
+    state_by_agent = defaultdict(
+        lambda: _TempestAgentState(tempest_state, base_rtt_us))
+    reward_plugin = reward_module(reward_name)
+    reward_by_agent = {}
+    model_state_by_agent = {}
+    previous_state = {}
+    previous_action = {}
+    previous_throughput = {}
+    step_in_traj = defaultdict(int)
+    assigned_indices = {}
+    action_previous = defaultdict(lambda: torch.zeros(1, model.ACTION_DIM))
+    h_by_agent = {}
+    z_by_agent = {}
+    exp_buf = []
+    push_every = max(1, int(training.get('worker_push_every', 16)))
+    weight_pull_every = max(
+        1, int(os.environ.get('SAO_WEIGHT_PULL_EVERY', '50')))
+    weight_pull_counter = 0
+    rewards_seen = []
+    group_id = f'slot{instance_id}_ep{episode}'
+
+    command, raynet_path = _raynet_command(cfg, ecfg)
+    proc_env = dict(os.environ)
+    proc_env.update(env_vars)
+    proc_env.setdefault('RAYNET_PATH', str(raynet_path))
+    factory = client_factory or _default_client_factory
+    client = None
+
+    def push_buffer(force=False):
+        if not manager or not exp_buf:
+            exp_buf.clear()
+            return
+        if force or len(exp_buf) >= push_every:
+            try:
+                manager.push_exp_batch(list(exp_buf))
+            except Exception:
+                for exp in exp_buf:
+                    try:
+                        manager.push_exp(exp)
+                    except Exception:
+                        pass
+            exp_buf.clear()
+
+    def process_observations(observations, group_step, episode_done=False):
+        nonlocal learner_step, weight_pull_counter
+        next_actions = {}
+        for agent_id, observation in sorted((observations or {}).items()):
+            if agent_id in IGNORED_AGENT_IDS:
+                continue
+            agent_index = _agent_index(agent_id, assigned_indices)
+            if agent_index >= n_agents:
+                continue
+            if agent_index not in reward_by_agent:
+                reward_by_agent[agent_index] = _make_reward_calc(
+                    reward_plugin, agent_index)
+            if agent_id not in h_by_agent:
+                h_by_agent[agent_id], z_by_agent[agent_id] = (
+                    local_world.rssm.initial(1, torch.device('cpu')))
+
+            raw = raynet_astraea_observation_to_raw(observation)
+            raw['interval_ms'] = interval_ms
+            normalized_state = state_by_agent[agent_id].normalize(raw)
+            reward = float(reward_by_agent[agent_index].step(raw))
+            rewards_seen.append(reward)
+
+            traj_id = f'ma_dreamer_{group_id}_a{agent_index}_{agent_id}'
+            if agent_id in previous_state and manager:
+                exp_buf.append(model.Experience(
+                    state=previous_state[agent_id],
+                    action=previous_action[agent_id],
+                    reward=reward,
+                    next_state=normalized_state,
+                    avg_throughput=float(raw.get('avg_thr', 0.0)),
+                    agent_id=agent_index,
+                    group_id=group_id,
+                    group_step=int(group_step),
+                    done=bool(episode_done),
+                    traj_id=traj_id,
+                    step_in_traj=step_in_traj[agent_id],
+                ))
+                step_in_traj[agent_id] += 1
+                push_buffer()
+
+            with torch.no_grad():
+                state_tensor = torch.from_numpy(normalized_state).unsqueeze(0)
+                embedding = local_world.encoder(state_tensor)
+                h, z, _, _ = local_world.rssm.step(
+                    h_by_agent[agent_id],
+                    z_by_agent[agent_id],
+                    action_previous[agent_id],
+                    embedding,
+                )
+                action_tensor, _, _, _ = actor.act(
+                    h, z, deterministic=deterministic)
+            h_by_agent[agent_id] = h
+            z_by_agent[agent_id] = z
+            action_previous[agent_id] = action_tensor
+            if action_previous[agent_id].dim() == 1:
+                action_previous[agent_id] = action_previous[agent_id].unsqueeze(0)
+            action = float(action_tensor.reshape(-1)[0].item())
+            next_actions[agent_id] = action
+            previous_state[agent_id] = normalized_state
+            previous_action[agent_id] = action
+            previous_throughput[agent_id] = float(raw.get('avg_thr', 0.0))
+            model_state_by_agent[agent_id] = normalized_state
+
+            weight_pull_counter += 1
+            if weight_pull_counter >= weight_pull_every:
+                weight_pull_counter = 0
+                learner_step = _pull_ma_dreamer_params(
+                    manager, model, local_world, actor, learner_step)
+        return next_actions
+
+    try:
+        ini_path = Path(str(ecfg.get('ini_path', ''))).expanduser()
+        print(f'[slot={instance_id}] ep={episode} raynet protocol=astraea '
+              f'flows={n_agents} ini={ini_path} '
+              f'section={ecfg.get("section", "General")}', flush=True)
+        client = factory(command, cwd=str(raynet_path), env=proc_env)
+        reset_msg = client.start(_episode_config(ecfg, cfg, env_vars))
+        group_step = 0
+        actions = process_observations(
+            reset_msg.get('observations') or {}, group_step)
+
+        while True:
+            step_msg = client.step(actions)
+            group_step += 1
+            observations = step_msg.get('observations') or {}
+            terminateds = step_msg.get('terminateds') or {}
+            info = step_msg.get('info') or {}
+            episode_done = _runner_done(terminateds, info)
+            actions = process_observations(
+                observations, group_step, episode_done=episode_done)
+            if episode_done:
+                break
+            if not actions and not observations:
+                actions = {}
+
+        for agent_id, state in list(previous_state.items()):
+            if manager:
+                agent_index = _agent_index(agent_id, assigned_indices)
+                exp_buf.append(model.Experience(
+                    state=state,
+                    action=previous_action.get(agent_id, 0.0),
+                    reward=0.0,
+                    next_state=model_state_by_agent.get(agent_id, state),
+                    avg_throughput=previous_throughput.get(agent_id, 0.0),
+                    agent_id=agent_index,
+                    group_id=group_id,
+                    group_step=int(group_step),
+                    done=True,
+                    traj_id=f'ma_dreamer_{group_id}_a{agent_index}_{agent_id}',
+                    step_in_traj=step_in_traj[agent_id],
+                ))
+        push_buffer(force=True)
+    finally:
+        if client is not None:
+            client.terminate()
+
+    ep_return = float(sum(rewards_seen)) if rewards_seen else None
+    return ep_return, ecfg, ecfg.get('link_schedule', []) or []
+
+
 def run_episode_raynet(cfg, ecfg, episode, listener_bin, python_bin,
                        mgr_addr, mgr_key, instance_id, client_factory=None):
-    """Run one RayNet Orca episode through the RayNet-owned IPC runner."""
+    """Run one RayNet episode through the RayNet-owned IPC runner."""
     runtime = cfg.get('runtime', {}) or {}
     alg_name = runtime.get('algorithm', 'orca')
-    if alg_name != 'orca':
-        raise ValueError(f'RayNet v1 supports runtime.algorithm=orca, got {alg_name!r}')
     protocol = str(ecfg.get('protocol', 'orca')).lower()
+    if protocol == 'astraea' and alg_name == 'ma_dreamer':
+        return _run_episode_raynet_ma_dreamer(
+            cfg, ecfg, episode, mgr_addr, mgr_key,
+            instance_id, client_factory=client_factory)
+    if alg_name != 'orca':
+        raise ValueError(
+            'RayNet supports runtime.algorithm=orca for protocol=orca and '
+            f'runtime.algorithm=ma_dreamer for protocol=astraea, got {alg_name!r}')
     if protocol != 'orca':
-        raise ValueError(f'RayNet v1 supports protocol=orca, got {protocol!r}')
+        raise ValueError(
+            'RayNet supports protocol=orca for Orca episodes and '
+            f'protocol=astraea for MA-Dreamer episodes, got {protocol!r}')
 
     ini_raw = str(ecfg.get('ini_path', '')).strip()
     if not ini_raw:
