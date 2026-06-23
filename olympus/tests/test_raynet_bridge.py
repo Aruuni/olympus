@@ -186,6 +186,15 @@ class RayNetObservationAdapterTest(unittest.TestCase):
         raw = {'avg_thr': 123.0, 'cwnd': 42.0}
         self.assertEqual(env.observation_to_raw(raw), raw)
 
+    def test_episode_config_omits_empty_observation_fields(self):
+        env = raynet_env.RaynetEnv(
+            ini_path='/tmp/OrcaTraining.ini',
+            raynet_path='/tmp',
+            raynet_runner='/tmp/olympus_runner.sh',
+        )
+        config = env.episode_config()
+        self.assertNotIn('observation_fields', config)
+
     def test_astraea_field_mapping_observation_maps_to_olympus_raw_fields(self):
         env = raynet_env.RaynetEnv(
             environment_config={'observation_fields': ASTRAEA_FIELDS})

@@ -2,23 +2,13 @@ name: astraea_smoke
 description: Short RayNet Astraea multi-agent simulation for bridge smoke tests.
 shuffle: false
 
-experiments:
-  - protocol: astraea
-    ini_path: /home/james/raynet/simlibs/Astraea/src/training/AstraeaTraining.ini
-    section: General
-    observation_fields:
-      - {name: avg_thr, index: 0, aliases: [throughput]}
-      - {name: max_tput, index: 1}
-      - {name: avg_urtt, index: 2, aliases: [delay_us]}
-      - {name: min_rtt, index: 3, aliases: [min_rtt_us]}
-      - {name: srtt_us, index: 4}
-      - {name: cwnd, index: 5}
-      - {name: loss_rate, index: 6, aliases: [loss_ratio, loss_bytes]}
-      - {name: packets_out, index: 7}
-      - {name: pacing_rate, index: 8}
-      - {name: retrans_out, index: 9}
-    flows: 5
-    bw: 20
-    delay: 20
-    duration: 20
-    quiet: true
+sweep:
+  protocol: astraea
+  ini_path: /home/james/raynet/simlibs/Astraea/src/training/AstraeaTraining.ini
+  section: General
+  flows: 5
+  bws: [20]
+  delays: [20]
+  duration: 20
+  link_schedules:
+    - []

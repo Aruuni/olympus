@@ -354,16 +354,18 @@ class RaynetEnv(NetworkEnv):
             '**.numberOfFlows': str(int(self.n)),
             '**.fixedIntervalDuration': f'{interval_s:.12g}',
         }
-        return {
+        config = {
             'protocol': self.protocol,
             'ini_path': str(Path(self.ini_path).expanduser()),
             'section': self.section,
             'duration': duration,
             'quiet': True,
-            'observation_fields': self.observation_fields,
             'replacements': replacements,
             'overrides': overrides,
         }
+        if self.observation_fields:
+            config['observation_fields'] = self.observation_fields
+        return config
 
     def observation_to_raw(self, observation):
         if isinstance(observation, dict):

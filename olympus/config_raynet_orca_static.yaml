@@ -33,7 +33,7 @@ outputs:
   plot_episodes: true
 
 n_parallel: 15
-episodes: 16000
+episodes: 160000
 
 algorithms:
   orca:

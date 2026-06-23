@@ -12,7 +12,7 @@ actions:
 
 environment:
   type: raynet
-  environment_setup: astraea_smoke
+  environment_setup: astraea_static
 
 reward:
   fairness_weight: 25.0
@@ -33,9 +33,9 @@ paths:
   raynet_runner: /home/james/raynet/runners/olympus_runner.sh
 
 outputs:
-  root: olympus/models/astraea_run7
-  run_name: astraea_test_run_name
-  plot_episodes: true
+  root: olympus/models/astraea_static
+  run_name: first_full_sweep
+  plot_episodes: false
 
 n_parallel: 15
 episodes: 1600
