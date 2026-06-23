@@ -100,6 +100,7 @@ class FakeRayNetClient:
         return {
             'type': 'reset',
             'observations': {'Orca1': mapped_observation(RAYNET_ORCA_OBS, ORCA_FIELDS)},
+            'info': {'simDone': False, 'time_s': 0.25},
         }
 
     def step(self, actions):
@@ -109,7 +110,7 @@ class FakeRayNetClient:
             'observations': {'Orca1': mapped_observation(RAYNET_ORCA_OBS, ORCA_FIELDS)},
             'rewards': {},
             'terminateds': {'__all__': False},
-            'info': {'simDone': True},
+            'info': {'simDone': True, 'time_s': 0.5},
         }
 
     def terminate(self):
@@ -136,6 +137,7 @@ class FakeAstraeaRayNetClient:
                 'Astraea1': mapped_observation(RAYNET_ASTRAEA_OBS, ASTRAEA_FIELDS),
                 'Astraea2': mapped_observation(RAYNET_ASTRAEA_OBS, ASTRAEA_FIELDS),
             },
+            'info': {'simDone': False, 'time_s': 0.25},
         }
 
     def step(self, actions):
@@ -148,7 +150,7 @@ class FakeAstraeaRayNetClient:
             },
             'rewards': {},
             'terminateds': {'__all__': False},
-            'info': {'simDone': True},
+            'info': {'simDone': True, 'time_s': 0.5},
         }
 
     def terminate(self):
@@ -236,6 +238,7 @@ class RayNetFlowServiceTest(unittest.TestCase):
         self.assertEqual(fake.started_episode['section'], 'General')
         self.assertTrue(fake.terminated)
         self.assertEqual(raw['avg_thr'], 1_250_000)
+        self.assertEqual(raw['time_s'], 0.25)
         self.assertTrue(fake.step_actions)
         self.assertIn('Orca1', fake.step_actions[0])
         self.assertEqual(fake.step_actions[0]['Orca1'], 64.0)
@@ -277,6 +280,8 @@ class RayNetFlowServiceTest(unittest.TestCase):
         self.assertTrue(fake.terminated)
         self.assertEqual(raw0['avg_thr'], 1_250_000.0)
         self.assertEqual(raw1['avg_thr'], 1_250_000.0)
+        self.assertEqual(raw0['time_s'], 0.25)
+        self.assertEqual(raw1['time_s'], 0.25)
         self.assertTrue(fake.step_actions)
         self.assertEqual(set(fake.step_actions[0]), {'Astraea1', 'Astraea2'})
         for action in fake.step_actions[0].values():

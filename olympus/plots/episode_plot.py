@@ -104,7 +104,7 @@ def _sibling_flow_logs(path: str) -> list:
     )
 
 
-def _load_flow_throughput(path: str):
+def _load_flow_throughput(path: str, trim_tail_s: float = 5.0):
     t_s, thr = [], []
     try:
         with open(path, newline='') as f:
@@ -120,10 +120,11 @@ def _load_flow_throughput(path: str):
         return None
     t_s = np.asarray(t_s, dtype=float)
     thr = np.asarray(thr, dtype=float)
-    mask = t_s <= t_s[-1] - 5.0
-    if mask.any():
-        t_s = t_s[mask]
-        thr = thr[mask]
+    if trim_tail_s and len(t_s) > 1:
+        mask = t_s <= t_s[-1] - float(trim_tail_s)
+        if mask.any():
+            t_s = t_s[mask]
+            thr = thr[mask]
     flow_id = _flow_id_from_path(path)
     return {
         'path': os.path.abspath(path),
@@ -133,13 +134,13 @@ def _load_flow_throughput(path: str):
     }
 
 
-def _sibling_flow_throughputs(path: str) -> list:
+def _sibling_flow_throughputs(path: str, trim_tail_s: float = 5.0) -> list:
     current = os.path.abspath(path)
     flows = []
     for flow_path in _sibling_flow_logs(path):
         if os.path.abspath(flow_path) == current:
             continue
-        item = _load_flow_throughput(flow_path)
+        item = _load_flow_throughput(flow_path, trim_tail_s=trim_tail_s)
         if item is not None and len(item['t_s']):
             flows.append(item)
     return flows
@@ -154,10 +155,10 @@ def _rolling(arr: np.ndarray, window: int) -> np.ndarray:
     return np.concatenate([pad, out])
 
 
-def episode_return(state_log_path: str) -> float:
+def episode_return(state_log_path: str, trim_tail_s: float = 5.0) -> float:
     """Compute the episode return (sum of reward column) without rendering.
 
-    Mirrors plot()'s 5-second tail trim so the returned value matches what the
+    Mirrors plot()'s tail trim so the returned value matches what the
     figure would have shown when per-episode plotting is disabled. Streams just
     `t_s` and `reward` instead of materialising all eleven trace columns.
     """
@@ -176,7 +177,9 @@ def episode_return(state_log_path: str) -> float:
         return None
     t_s    = np.array(t_s)
     reward = np.array(reward)
-    return float(reward[t_s <= t_s[-1] - 5.0].sum())
+    if trim_tail_s and len(t_s) > 1:
+        return float(reward[t_s <= t_s[-1] - float(trim_tail_s)].sum())
+    return float(reward.sum())
 
 
 def _option_spans(t_s, options):
@@ -211,7 +214,8 @@ def _step_series(t_s, base_val, schedule, key, scale=1.0):
 def plot(state_log_path: str, output: str,
          bw: float, delay: float,
          title: str = None,
-         link_schedule: list = None):
+         link_schedule: list = None,
+         trim_tail_s: float = 5.0):
     """
     Read state_log_path, render figure, save to output (.pdf or .png).
 
@@ -231,12 +235,14 @@ def plot(state_log_path: str, output: str,
     if len(d['t_s']) == 0:
         print(f'[ep_plot] state log empty or missing: {state_log_path}', flush=True)
         return None
-    sibling_flows = _sibling_flow_throughputs(state_log_path)
+    sibling_flows = _sibling_flow_throughputs(
+        state_log_path, trim_tail_s=trim_tail_s)
 
-    # Trim last 5 seconds (iperf teardown noise)
-    mask = d['t_s'] <= d['t_s'][-1] - 5.0
-    if mask.any():
-        d = {k: v[mask] for k, v in d.items()}
+    # Trim the iperf teardown tail for emulation runs. Simulations pass 0.
+    if trim_tail_s and len(d['t_s']) > 1:
+        mask = d['t_s'] <= d['t_s'][-1] - float(trim_tail_s)
+        if mask.any():
+            d = {k: v[mask] for k, v in d.items()}
 
     t         = d['t_s']
     x_max = float(t[-1]) if len(t) else 0.0

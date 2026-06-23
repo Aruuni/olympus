@@ -33,15 +33,12 @@ paths:
   raynet_runner: /home/james/raynet/runners/olympus_runner.sh
 
 outputs:
-  root: olympus/models/raynet_astraea_test_5
+  root: olympus/models/astraea_run7
   run_name: astraea_test_run_name
   plot_episodes: true
 
-n_parallel: 16
+n_parallel: 15
 episodes: 1600
-
-sweep:
-  flows: 5
 
 algorithms:
   ma_dreamer:

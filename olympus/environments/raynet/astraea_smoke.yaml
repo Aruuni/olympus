@@ -17,8 +17,8 @@ experiments:
       - {name: packets_out, index: 7}
       - {name: pacing_rate, index: 8}
       - {name: retrans_out, index: 9}
-    flows: 2
+    flows: 5
     bw: 20
     delay: 20
-    duration: 10
+    duration: 20
     quiet: true

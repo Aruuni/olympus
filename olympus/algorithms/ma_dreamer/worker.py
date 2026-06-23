@@ -132,7 +132,7 @@ def run():
     deterministic = os.environ.get('SAO_DETERMINISTIC', '0') == '1'
     require_checkpoint = (
         os.environ.get('SAO_REQUIRE_CHECKPOINT', '0') == '1')
-    simulation_backend = os.environ.get('OC_FLOW_BACKEND', '').lower() == 'raynet'
+    simulation_backend = flow_backend.is_simulation_backend()
 
     agent_id_raw = os.environ.get('SAO_AGENT_ID', '')
     if agent_id_raw:
@@ -322,7 +322,8 @@ def run():
                 previous_urtt = urtt
             previous_cwnd = int(raw.get('cwnd', previous_cwnd))
 
-            t_s = tick_start - episode_start
+            t_s = flow_backend.episode_seconds(
+                raw, episode_start, wall_now=tick_start)
             group_step = (
                 step_in_traj if simulation_backend else int(round(t_s / interval_s))
                 if interval_s > 0.0 else step_in_traj
@@ -372,9 +373,10 @@ def run():
                 srtt_raw / 8.0 if srtt_raw > 0.0
                 else float(raw.get('avg_urtt', 0.0) or 0.0)
             )
-            probe.observe_rtt(tick_start, filter_rtt_us)
+            clock_t = flow_backend.observation_clock(raw, wall_now=tick_start)
+            probe.observe_rtt(clock_t, filter_rtt_us)
             actual_cwnd, agent_locked, _ = probe.decide(
-                tick_start, current_cwnd, desired_cwnd)
+                clock_t, current_cwnd, desired_cwnd)
             new_cwnd = int(np.clip(actual_cwnd, cwnd_min, cwnd_max))
             try:
                 flow_backend.set_cwnd(flow_fd, new_cwnd)

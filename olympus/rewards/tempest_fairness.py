@@ -65,8 +65,16 @@ class RewardCalc(TempestRewardCalc):
         self._r_fair_cap = float(r_fair_cap)
         self._w_jain = float(w_jain)
 
-    def _active_flow_count(self) -> int:
-        elapsed = max(0.0, time.monotonic() - self._episode_start)
+    def _elapsed(self, info: dict) -> float:
+        if isinstance(info, dict) and 'time_s' in info:
+            try:
+                return max(0.0, float(info.get('time_s') or 0.0))
+            except (TypeError, ValueError):
+                pass
+        return max(0.0, time.monotonic() - self._episode_start)
+
+    def _active_flow_count(self, info: dict = None) -> int:
+        elapsed = self._elapsed(info)
         active = 0
         for start, duration in zip(self._flow_start_delays, self._flow_durations):
             if elapsed + 1e-6 < start:
@@ -76,9 +84,9 @@ class RewardCalc(TempestRewardCalc):
             active += 1
         return max(1, active)
 
-    def _current_fair_bw(self) -> tuple:
-        link_bw = max(self._current_link_bw(), 1.0)
-        active = self._active_flow_count()
+    def _current_fair_bw(self, info: dict = None) -> tuple:
+        link_bw = max(self._current_link_bw(info), 1.0)
+        active = self._active_flow_count(info)
         return max(link_bw / float(active), 1.0), link_bw, active
 
     def step(self, info: dict) -> float:
@@ -89,8 +97,8 @@ class RewardCalc(TempestRewardCalc):
         if avg_thr > self._max_tput:
             self._max_tput = avg_thr
 
-        bw_ref, link_bw, active_flows = self._current_fair_bw()
-        rtt_ref = max(self._current_link_rtt_us(), 1.0)
+        bw_ref, link_bw, active_flows = self._current_fair_bw(info)
+        rtt_ref = max(self._current_link_rtt_us(info), 1.0)
 
         thr_ratio = min(avg_thr / bw_ref, 1.0)
         rtt_rate = min(rtt_ref / avg_urtt, 1.0) if avg_urtt > 0 else 1.0

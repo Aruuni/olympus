@@ -673,6 +673,7 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
     ckpt = t_cfg['checkpoint']
     backend_type = _env_backend_type(cfg)
     is_raynet = backend_type == 'raynet'
+    plot_trim_tail_s = 0.0 if is_raynet else 5.0
 
     cport         = int(cfg.get('cport_base', 21000)) + instance_id * 100
     link_schedule = ecfg.get('link_schedule', [])
@@ -944,7 +945,8 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
     )
     if agent_logs:
         n_agents = len(agent_logs)
-        ep_return = _multi_episode_return(state_log, n_agents=n_agents)
+        ep_return = _multi_episode_return(
+            state_log, n_agents=n_agents, trim_tail_s=plot_trim_tail_s)
         if plot_episodes:
             try:
                 pdf_path = os.path.join(
@@ -961,6 +963,7 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
                            f'({"scheduled" if link_schedule else "static"})'),
                     link_schedule=link_schedule,
                     n_agents=n_agents,
+                    trim_tail_s=plot_trim_tail_s,
                 )
                 if plotted_return is not None:
                     ep_return = plotted_return
@@ -1006,13 +1009,15 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
                                           f'env={env_name or "config"}  '
                                           f'({"scheduled" if link_schedule else "static"})'),
                         link_schedule  = link_schedule,
+                        trim_tail_s    = plot_trim_tail_s,
                     )
                     if log_path == primary_log:
                         ep_return = ret
                     print(f'[ep_plot] ep={episode}{flow_suffix} -> {pdf_path}  '
                           f'return={ret}', flush=True)
                 elif log_path == primary_log:
-                    ep_return = _episode_return(log_path)
+                    ep_return = _episode_return(
+                        log_path, trim_tail_s=plot_trim_tail_s)
         except Exception as e:
             print(f'[slot={instance_id}] ep={episode} plot failed: {e}', flush=True)
 
@@ -1352,6 +1357,7 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
     ckpt = t_cfg['checkpoint']
     backend_type = _env_backend_type(cfg)
     is_raynet = backend_type == 'raynet'
+    plot_trim_tail_s = 0.0 if is_raynet else 5.0
 
     n_flows  = _execution_flow_value(
         ecfg.get('flows', cfg.get('sweep', {}).get('flows', 2)))
@@ -1513,7 +1519,8 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
             env.stop()
         time.sleep(1)
 
-    ep_return = _multi_episode_return(state_log, n_agents=n_flows)
+    ep_return = _multi_episode_return(
+        state_log, n_agents=n_flows, trim_tail_s=plot_trim_tail_s)
     plot_episodes = _as_bool(outputs.get('plot_episodes'), default=True)
     try:
         if plot_episodes:
@@ -1529,6 +1536,7 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
                                   f'({"scheduled" if link_schedule else "static"})'),
                 link_schedule  = link_schedule,
                 n_agents       = n_flows,
+                trim_tail_s    = plot_trim_tail_s,
             )
             if plotted_return is not None:
                 ep_return = plotted_return

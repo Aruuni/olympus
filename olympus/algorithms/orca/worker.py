@@ -114,7 +114,7 @@ def run():
     target = float(os.environ.get('SAO_ORCA_TARGET_MS',
                                   os.environ.get('OC_ORCA_TARGET_MS', '50.0')))
     use_normalizer = _bool_env('SAO_ORCA_USE_NORMALIZER', False)
-    simulation_backend = os.environ.get('OC_FLOW_BACKEND', '').lower() == 'raynet'
+    simulation_backend = flow_backend.is_simulation_backend()
 
     deterministic = os.environ.get('SAO_DETERMINISTIC', '0') == '1'
     if deterministic:
@@ -193,7 +193,7 @@ def run():
     t0 = float(os.environ.get('SAO_EPISODE_START', '0')) or time.monotonic()
     traj_id = f'orca_{cport}_{episode}_{flow_id}'
     interval_s_cfg = interval_ms / 1000.0
-    last_sample_t = time.monotonic()
+    last_sample_t = 0.0 if simulation_backend else time.monotonic()
 
     prev_state = None
     prev_action = 0.0
@@ -303,14 +303,15 @@ def run():
                 ever_alive = True
             flow_active = (not ever_alive) or (dead_steps < dead_steps_limit)
 
-            interval_s = max(t_step_start - last_sample_t, 1e-6)
-            last_sample_t = t_step_start
+            interval_s, last_sample_t = flow_backend.interval_seconds(
+                raw, last_sample_t, wall_now=t_step_start)
             # Orca's envwrapper.py:240 only updates Welford stats in training mode.
             base_state, reward = transform.step(raw, interval_s=interval_s,
                                                 target=target,
                                                 evaluation=deterministic)
             norm_s = history.push(base_state)
-            t_s = t_step_start - t0
+            t_s = flow_backend.episode_seconds(
+                raw, t0, wall_now=t_step_start)
 
             if prev_state is not None and flow_active and mgr:
                 exp_buf.append(model.Experience(
@@ -343,10 +344,11 @@ def run():
             # only if srtt isn't populated yet (pre-handshake).
             srtt_raw_us = float(raw.get('srtt_us', 0) or 0)
             filter_rtt_us = (srtt_raw_us / 8.0) if srtt_raw_us > 0 else float(raw.get('avg_urtt', 0) or 0)
-            probe.observe_rtt(t_step_start, filter_rtt_us)
+            clock_t = flow_backend.observation_clock(raw, wall_now=t_step_start)
+            probe.observe_rtt(clock_t, filter_rtt_us)
 
             actual_cwnd, agent_locked, _probe_transition = probe.decide(
-                t_step_start, cur_cwnd, desired_cwnd)
+                clock_t, cur_cwnd, desired_cwnd)
             new_cwnd = int(np.clip(actual_cwnd, cwnd_min, cwnd_max))
             try:
                 flow_backend.set_cwnd(flow_fd, new_cwnd)

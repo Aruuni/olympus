@@ -28,20 +28,20 @@ paths:
   raynet_runner: /home/james/raynet/runners/olympus_runner.sh
 
 outputs:
-  root: olympus/models/orca_plot_test_5_cubic
+  root: olympus/models/orca_run7
   run_name: plotting_test
   plot_episodes: true
 
-n_parallel: 1
-episodes: 1000
+n_parallel: 15
+episodes: 16000
 
 algorithms:
   orca:
     training:
       resume_from: null
       batch_size: 8
-      min_replay: 100000
-      replay_capacity: 1024
+      min_replay: 10000
+      replay_capacity: 10240
       gamma: 0.995
       target_tau: 0.001
       lr_actor: 1.0e-4

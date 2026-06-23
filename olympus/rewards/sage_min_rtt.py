@@ -49,8 +49,16 @@ class RewardCalc:
                 self._bw_schedule.append((t_abs, float(entry['bw']) * 1e6 / 8.0))
         self._bw_schedule.sort()
 
-    def _current_link_bw(self) -> float:
-        now = time.monotonic()
+    def _schedule_time(self, info: dict = None) -> float:
+        if isinstance(info, dict) and 'time_s' in info:
+            try:
+                return self._episode_start + float(info.get('time_s') or 0.0)
+            except (TypeError, ValueError):
+                pass
+        return time.monotonic()
+
+    def _current_link_bw(self, info: dict = None) -> float:
+        now = self._schedule_time(info)
         val = self._initial_bw
         for t_abs, bw_bs in self._bw_schedule:
             if now >= t_abs:
@@ -77,7 +85,7 @@ class RewardCalc:
         if avg_thr > self._max_tput:
             self._max_tput = avg_thr
 
-        bw_ref = max(self._current_link_bw(), 1.0)
+        bw_ref = max(self._current_link_bw(info), 1.0)
 
         thr_ratio = min(avg_thr / bw_ref, 1.0)
         if avg_urtt > 0.0 and min_rtt_us > 0.0:

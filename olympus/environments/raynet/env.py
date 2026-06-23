@@ -106,6 +106,7 @@ class _RayNetFlowService:
         self.agent_by_flow = {}
         self.flow_by_agent = {}
         self.last_raw = {}
+        self.info = {}
         self.done = False
         self.error = None
 
@@ -145,7 +146,10 @@ class _RayNetFlowService:
             )
             reset_msg = self.client.start(self.env.episode_config())
             with self.condition:
-                self._publish_observations_locked(reset_msg.get('observations') or {})
+                self._publish_observations_locked(
+                    reset_msg.get('observations') or {},
+                    reset_msg.get('info') or {},
+                )
                 self.condition.notify_all()
         except BaseException as exc:
             with self.condition:
@@ -188,18 +192,23 @@ class _RayNetFlowService:
                 self.expected_flows = set()
             else:
                 self._publish_observations_locked(
-                    step_msg.get('observations') or {})
+                    step_msg.get('observations') or {},
+                    info,
+                )
         except BaseException as exc:
             self.error = str(exc)
             self.done = True
 
-    def _publish_observations_locked(self, observations):
+    def _publish_observations_locked(self, observations, info=None):
+        self.info = dict(info or {})
         raw_by_flow = {}
         for agent_id, observation in sorted((observations or {}).items()):
             flow_id = self._flow_id_for_agent(agent_id)
             if flow_id >= self.env.n:
                 continue
             raw = self.env.observation_to_raw(observation)
+            if 'time_s' in self.info:
+                raw['time_s'] = self.info['time_s']
             raw_by_flow[flow_id] = raw
             self.last_raw[flow_id] = raw
         self.observations = raw_by_flow

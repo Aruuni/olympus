@@ -23,6 +23,35 @@ def _backend_name():
     return str(os.environ.get('OC_FLOW_BACKEND', 'tcp')).strip().lower()
 
 
+def is_simulation_backend():
+    """Return True when workers are reading from a simulation backend."""
+    return _backend_name() == 'raynet'
+
+
+def observation_clock(raw, wall_now=None):
+    """Return the clock value workers should use for one observation."""
+    if is_simulation_backend() and isinstance(raw, dict) and 'time_s' in raw:
+        try:
+            return float(raw.get('time_s') or 0.0)
+        except (TypeError, ValueError):
+            return 0.0
+    return time.monotonic() if wall_now is None else float(wall_now)
+
+
+def episode_seconds(raw, episode_start, wall_now=None):
+    """Return episode-relative seconds for logs and plots."""
+    if is_simulation_backend() and isinstance(raw, dict) and 'time_s' in raw:
+        return max(0.0, observation_clock(raw, wall_now=wall_now))
+    now = time.monotonic() if wall_now is None else float(wall_now)
+    return max(0.0, now - float(episode_start))
+
+
+def interval_seconds(raw, previous_clock, wall_now=None, minimum=1e-6):
+    """Return elapsed seconds since a previous backend clock sample."""
+    current_clock = observation_clock(raw, wall_now=wall_now)
+    return max(current_clock - float(previous_clock), minimum), current_clock
+
+
 def _tcp_sockopt():
     import tcp_sockopt
     return tcp_sockopt

@@ -28,5 +28,5 @@ experiments:
     flows: 1
     bw: 20
     delay: 10
-    duration: 60
+    duration: 20
     quiet: true
