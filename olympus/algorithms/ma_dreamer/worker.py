@@ -347,48 +347,64 @@ def run():
                                 pass
                     experience_buffer.clear()
 
-            with torch.no_grad():
-                state_tensor = torch.from_numpy(
-                    normalized_state).unsqueeze(0)
-                embedding = local_world.encoder(state_tensor)
-                h, z, _, _ = local_world.rssm.step(
-                    h, z, action_previous_tensor, embedding)
-                action_tensor, multiplier_tensor, mu, log_std = actor.act(
-                    h, z, deterministic=deterministic)
-            action = float(action_tensor.item())
-            multiplier = float(multiplier_tensor.item())
-
-            current_cwnd = int(raw.get('cwnd', 10))
-            desired_cwnd = _ACTION_PLUGIN.apply_cwnd(
-                current_cwnd, action, cwnd_min, cwnd_max)
-            srtt_raw = float(raw.get('srtt_us', 0.0) or 0.0)
-            filter_rtt_us = (
-                srtt_raw / 8.0 if srtt_raw > 0.0
-                else float(raw.get('avg_urtt', 0.0) or 0.0)
-            )
-            probe.observe_rtt(tick_start, filter_rtt_us)
-            actual_cwnd, agent_locked, _ = probe.decide(
-                tick_start, current_cwnd, desired_cwnd)
-            new_cwnd = int(np.clip(actual_cwnd, cwnd_min, cwnd_max))
-            try:
-                tcp_sockopt.set_cwnd(flow_fd, new_cwnd)
-            except Exception as exc:
-                print(
-                    f'[worker] set_cwnd failed: {exc}; exiting',
-                    flush=True,
-                )
-                break
-
-            if agent_locked:
+            # Once a flow leaves the episode schedule (flow_present == 0) it is
+            # no longer part of the experiment. Stop running the actor and stop
+            # driving its cwnd; otherwise the departed flow keeps inferring and
+            # ramps cwnd to the ceiling, polluting the link for the flows that
+            # remain. We still fall through to the logging block below with the
+            # current (frozen) cwnd so the trace stays full-length: ending it
+            # early would truncate the aggregate sum-throughput / fairness
+            # curves (they align to the shortest trace) for the flows that stay.
+            if not flow_active:
                 previous_state = None
                 previous_action = 0.0
+                new_cwnd = int(raw.get('cwnd', previous_cwnd))
+                multiplier = 0.0
+                mu = torch.zeros(1)
+                log_std = torch.zeros(1)
             else:
-                previous_state = normalized_state
-                previous_action = action
-                previous_avg_throughput = avg_throughput
-            action_previous_tensor = action_tensor
-            if action_previous_tensor.dim() == 1:
-                action_previous_tensor = action_previous_tensor.unsqueeze(0)
+                with torch.no_grad():
+                    state_tensor = torch.from_numpy(
+                        normalized_state).unsqueeze(0)
+                    embedding = local_world.encoder(state_tensor)
+                    h, z, _, _ = local_world.rssm.step(
+                        h, z, action_previous_tensor, embedding)
+                    action_tensor, multiplier_tensor, mu, log_std = actor.act(
+                        h, z, deterministic=deterministic)
+                action = float(action_tensor.item())
+                multiplier = float(multiplier_tensor.item())
+
+                current_cwnd = int(raw.get('cwnd', 10))
+                desired_cwnd = _ACTION_PLUGIN.apply_cwnd(
+                    current_cwnd, action, cwnd_min, cwnd_max)
+                srtt_raw = float(raw.get('srtt_us', 0.0) or 0.0)
+                filter_rtt_us = (
+                    srtt_raw / 8.0 if srtt_raw > 0.0
+                    else float(raw.get('avg_urtt', 0.0) or 0.0)
+                )
+                probe.observe_rtt(tick_start, filter_rtt_us)
+                actual_cwnd, agent_locked, _ = probe.decide(
+                    tick_start, current_cwnd, desired_cwnd)
+                new_cwnd = int(np.clip(actual_cwnd, cwnd_min, cwnd_max))
+                try:
+                    tcp_sockopt.set_cwnd(flow_fd, new_cwnd)
+                except Exception as exc:
+                    print(
+                        f'[worker] set_cwnd failed: {exc}; exiting',
+                        flush=True,
+                    )
+                    break
+
+                if agent_locked:
+                    previous_state = None
+                    previous_action = 0.0
+                else:
+                    previous_state = normalized_state
+                    previous_action = action
+                    previous_avg_throughput = avg_throughput
+                action_previous_tensor = action_tensor
+                if action_previous_tensor.dim() == 1:
+                    action_previous_tensor = action_previous_tensor.unsqueeze(0)
 
             weight_pull_counter += 1
             if manager and weight_pull_counter >= weight_pull_every:

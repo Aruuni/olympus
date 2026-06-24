@@ -3,3 +3,11 @@ figures:
     description: Single-flow MA-Dreamer responsiveness.
     data_folders:
       - ma_dreamer_20260609-022904
+  - name: ablation
+    description: RLCC vs dreamer single and multi-agent
+    data_folders:
+      - cubic
+      - astraea
+      - ma_dreamer_20260615-022803
+      - sa_dreamer_20260521-145020
+
