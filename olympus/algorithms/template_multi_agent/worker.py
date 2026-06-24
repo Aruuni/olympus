@@ -279,26 +279,39 @@ def run():
                             except Exception: pass
                     exp_buf.clear()
 
-            # TODO: decentralized action with N=1 (own observation only).
-            (action_raw, mult, log_prob, value, act_mu, act_sig) = net.act(
-                norm_s, deterministic=deterministic)
+            # Once a flow leaves the episode schedule (flow_present == 0) it is
+            # no longer part of the experiment. Stop running the actor and stop
+            # driving its cwnd; otherwise the departed flow keeps inferring and
+            # ramps cwnd to the ceiling, polluting the link for the flows that
+            # remain. We still fall through to the logging block below with the
+            # current (frozen) cwnd so the trace stays full-length: ending it
+            # early would truncate the aggregate sum-throughput / fairness
+            # curves (they align to the shortest trace) for the flows that stay.
+            if not flow_active:
+                prev_state = None
+                new_cwnd = int(raw.get('cwnd', prev_cwnd))
+                mult = act_mu = act_sig = 0.0
+            else:
+                # TODO: decentralized action with N=1 (own observation only).
+                (action_raw, mult, log_prob, value, act_mu, act_sig) = net.act(
+                    norm_s, deterministic=deterministic)
 
-            cur_cwnd = int(raw.get('cwnd', 10))
-            new_cwnd = int(np.clip(
-                _ACTION_PLUGIN.apply_cwnd(cur_cwnd, math.tanh(action_raw), cwnd_min, cwnd_max),
-                cwnd_min, cwnd_max))
-            try:
-                tcp_sockopt.set_cwnd(flow_fd, new_cwnd)
-            except Exception as e:
-                print(f'[worker] set_cwnd failed: {e} - exiting', flush=True)
-                break
+                cur_cwnd = int(raw.get('cwnd', 10))
+                new_cwnd = int(np.clip(
+                    _ACTION_PLUGIN.apply_cwnd(cur_cwnd, math.tanh(action_raw), cwnd_min, cwnd_max),
+                    cwnd_min, cwnd_max))
+                try:
+                    tcp_sockopt.set_cwnd(flow_fd, new_cwnd)
+                except Exception as e:
+                    print(f'[worker] set_cwnd failed: {e} - exiting', flush=True)
+                    break
 
-            prev_state = norm_s
-            prev_action_raw = action_raw
-            prev_log_prob = log_prob
-            prev_value = value
-            prev_throughput = avg_thr
-            last_norm_s = norm_s
+                prev_state = norm_s
+                prev_action_raw = action_raw
+                prev_log_prob = log_prob
+                prev_value = value
+                prev_throughput = avg_thr
+                last_norm_s = norm_s
 
             weight_pull_counter += 1
             if mgr and weight_pull_counter >= weight_pull_every:

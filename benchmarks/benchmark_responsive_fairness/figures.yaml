@@ -1,0 +1,9 @@
+figures:
+  - name: kernel_astraea
+    description: Kernel CCAs vs Astraea goodput/SRTT + 7-flow Jain fairness.
+    data_folders:
+      - cubic
+      - bbr
+      - bbr1
+      - astraea
+      - frcc

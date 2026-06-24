@@ -745,20 +745,13 @@ def _approach_color_map(rows: list) -> dict:
     approaches = sorted({
         str(r.get('approach') or '')
         for r in rows
-        if r.get('approach') and not _is_cubic_reference(r)
+        if r.get('approach')
     })
     palette = _approach_color_palette(len(approaches))
     return {
         approach: palette[idx]
         for idx, approach in enumerate(approaches)
     }
-
-
-def _is_cubic_reference(row: dict) -> bool:
-    return (
-        str(row.get('approach') or '').lower() == 'cubic'
-        or str(row.get('algorithm') or '').lower() == 'cubic'
-    )
 
 
 def _row_run_number(row: dict) -> int:
@@ -961,7 +954,7 @@ def _plot_summary_page(pdf: PdfPages, rows: list, title: str,
     fig, axes = plt.subplots(1, 3, figsize=(16.0, 6.2))
     fig.suptitle(title, fontsize=12, fontweight='bold')
 
-    plot_rows = [r for r in rows if not _is_cubic_reference(r)]
+    plot_rows = list(rows)
     schedule_refs = _schedule_reference_rows(rows)
     labels = sorted({r['approach'] for r in plot_rows})
     goodput_plotted = False

@@ -369,6 +369,13 @@ def _materialize_lagged_policy_episode(ecfg: dict, episode: int) -> dict:
         lag_cfg.get('require_checkpoint', False), False)
     out['lagged_policy_join_times'] = join_times
     out['lagged_policy_extra_flows'] = n_extra
+    # Per-flow base-RTT diversity: each flow (train + lagged background flows)
+    # propagates at base_delay * U(min, max). Generated from the same seeded rng
+    # so the episode stays reproducible; only set when the env opts in.
+    per_flow_delays = _per_flow_rtt_delays(
+        out['flows'], out.get('delay', 20.0), out, out, rng)
+    if per_flow_delays is not None:
+        out['per_flow_delays'] = per_flow_delays
     return out
 
 
@@ -693,6 +700,14 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
     )
     worker_link_bw = 100.0 if hide_link_oracle else float(ecfg.get('bw', 100.0))
     worker_base_rtt_us = 20_000.0 if hide_link_oracle else float(ecfg.get('delay', 20.0)) * 1000
+    # Heterogeneous-RTT envs: the live training flow is flow 1, which propagates
+    # at its own base RTT, so reference its reward/state to per_flow_delays[0]
+    # instead of the shared episode delay. (The lagged background flows replay a
+    # checkpoint and compute no learning reward, so only flow 1's reference
+    # matters on the single-agent path.)
+    _per_flow_delays = ecfg.get('per_flow_delays')
+    if _per_flow_delays and not hide_link_oracle:
+        worker_base_rtt_us = float(_per_flow_delays[0]) * 1000.0
     worker_link_schedule = [] if hide_link_oracle else link_schedule
 
     # Oracle state plugin: feed the REAL scheduled link via dedicated env
@@ -1273,6 +1288,34 @@ def _flow_timings(n_flows: int, duration: float, ecfg: dict,
     return start_delays, flow_durations
 
 
+def _per_flow_rtt_delays(n_flows: int, base_delay: float, ecfg: dict,
+                         sweep_cfg: dict, rng):
+    """Per-flow one-way propagation delays for inter-RTT-diversity episodes.
+
+    When the environment sets ``per_flow_rtt_mult: true`` each flow propagates
+    at its own base RTT: the one-way delay of flow i is
+    ``base_delay * U(min_mult, max_mult)``, sampled once per flow per episode
+    (default range 0.20x .. 5.0x). The Mininet backend applies these on each
+    sender's access link (see ``per_flow_delays`` in
+    environments/mininet/env.py), so every flow shares the one bottleneck but
+    propagates at its own RTT. Returns ``None`` when disabled, leaving the
+    single shared-delay topology untouched (legacy behaviour).
+    """
+    enabled = _as_bool(
+        ecfg.get('per_flow_rtt_mult', sweep_cfg.get('per_flow_rtt_mult', False)),
+        default=False,
+    )
+    if not enabled or n_flows < 1:
+        return None
+    lo = float(ecfg.get('per_flow_rtt_mult_min',
+                        sweep_cfg.get('per_flow_rtt_mult_min', 0.20)))
+    hi = float(ecfg.get('per_flow_rtt_mult_max',
+                        sweep_cfg.get('per_flow_rtt_mult_max', 5.0)))
+    lo, hi = sorted((max(0.0, lo), max(0.0, hi)))
+    base = max(0.0, float(base_delay))
+    return [round(base * rng.uniform(lo, hi), 3) for _ in range(n_flows)]
+
+
 def _estimate_collection_rate(cfg: dict, n_parallel: int) -> tuple:
     sweep = cfg.get('sweep', {}) or {}
     agent = cfg.get('agent', {}) or {}
@@ -1378,6 +1421,10 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
         (instance_id * 1_000_003 + episode) ^ int(cport))
     start_delays, flow_durations = _flow_timings(
         n_flows, duration, ecfg, sweep_cfg, timing_rng)
+    per_flow_delays = _per_flow_rtt_delays(
+        n_flows, ecfg.get('delay', 20.0), ecfg, sweep_cfg, timing_rng)
+    if per_flow_delays is None:
+        per_flow_delays = ecfg.get('per_flow_delays')
 
     plots_dir    = os.path.abspath(outputs['plots_dir'])
     episodes_dir = os.path.abspath(outputs['episodes_dir'])
@@ -1442,10 +1489,12 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
     delay_str = f"{ecfg.get('delay', 20):.0f}"
     delays_str = ('simul' if max(start_delays) == 0
                   else f'delays={[round(x,1) for x in start_delays]}')
+    rtts_str = ('' if not per_flow_delays
+                else f'  rtts={[round(x,1) for x in per_flow_delays]}ms')
     print(f'[slot={instance_id}] ep={episode}  flows={n_flows}  '
           f'bw={bw_str}Mbps  delay={delay_str}ms  duration={duration}s  '
           f'{delays_str}  '
-          f'lifetimes={[round(x,1) for x in flow_durations]}', flush=True)
+          f'lifetimes={[round(x,1) for x in flow_durations]}{rtts_str}', flush=True)
 
     env_kwargs = {
         'n': n_flows,
@@ -1457,7 +1506,7 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
         'cc_algo': str(cfg.get('listener_cc', 'astraea')),
         'instance_id': instance_id,
         'unique_cports': True,
-        'per_flow_delays': ecfg.get('per_flow_delays'),
+        'per_flow_delays': per_flow_delays,
     }
     if is_raynet:
         env_kwargs['environment_config'] = ecfg
@@ -1481,6 +1530,14 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
         listener_env = dict(worker_env)
         listener_env['SAO_AGENT_ID'] = str(agent_id)
         listener_env['OC_FLOW_ID'] = str(agent_id)
+        # Heterogeneous-RTT envs: each flow propagates at its own base RTT, so
+        # its reward/state reference must be its own delay, not the shared
+        # episode base. per_flow_delays[i] is flow i's one-way delay in ms,
+        # matching the existing OC_BASE_RTT_US = delay*1000 convention.
+        if per_flow_delays and agent_id < len(per_flow_delays):
+            flow_rtt_us = str(float(per_flow_delays[agent_id]) * 1000.0)
+            listener_env['OC_BASE_RTT_US'] = flow_rtt_us
+            listener_env['SAO_BASE_RTT_US'] = flow_rtt_us
         if is_raynet:
             listener_env['OC_FLOW_FD'] = str(agent_id)
             listener_env['OC_CPORT'] = str(listener_cport)

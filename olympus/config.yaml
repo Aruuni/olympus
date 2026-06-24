@@ -56,11 +56,14 @@ environment:
   #   multiflow_interleave  up to N flows join at random times and leave after
   #                         random lifetimes (multi-agent joint training, or
   #                         lagged self-play under a single-agent algorithm).
+  #   multiflow_interleave_rtt  same join/leave dynamics, but each flow
+  #                         propagates at its own base RTT (one-way delay =
+  #                         base delay * U(0.20, 5.0) per flow per episode).
   #   dynamic               one flow under changing BW/RTT link schedules.
   #   static                one flow on a steady link (no schedule changes).
   #   lagged_fairness       one flow plus lagged-policy background flows (join only).
   type: mininet
-  environment_setup: multiflow_interleave
+  environment_setup: multiflow_interleave_rtt
 
 reward:
   delay_margin_coef: 1.25
@@ -125,7 +128,7 @@ n_parallel: 20
 # Hard cap on total dispatched episodes. The orchestrator stops handing out new
 # work once this many have been launched and lets in-flight slots drain. Omit
 # (or set null) to run until interrupted.
-episodes: 10000
+episodes: 20000
 
 algorithms:
 
@@ -291,7 +294,7 @@ algorithms:
   # single-agent `reward:` block above.
   ma_dreamer:
     training:
-      resume_from: olympus/models/astraea_static/first_full_sweep/checkpoints/ma_dreamer_cwnd_model.pt
+      resume_from: olympus/models/ma_dreamer_20260624-160040/checkpoints/ma_dreamer_cwnd_model.pt
       batch_size: 128
       seq_len: 48
       min_replay: 50000

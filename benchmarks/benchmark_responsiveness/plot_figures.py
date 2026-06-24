@@ -35,7 +35,6 @@ from benchmarks.benchmark_responsiveness.responsiveness import (
     _collect_approach_rows_with_labels,
     _enrich_kernel_rtt_rows,
     _float_values,
-    _is_cubic_reference,
     _load_benchmark_config,
     _plot_cdf,
     _plot_histogram_cdf,
@@ -81,12 +80,11 @@ def _render_figure(figure: dict, all_rows: list, output_root: str, output_path: 
     wanted = list(dict.fromkeys(figure['data_folders']))   # preserve order, dedupe
 
     rows = [r for r in all_rows if str(r.get('data_folder') or r.get('approach') or '') in set(wanted)]
-    rows = [r for r in rows if not _is_cubic_reference(r)]
     if not rows:
         print(f'[plot_figures] {name}: no rows for {wanted}; skipping', flush=True)
         return False
 
-    fig, axes = plt.subplots(1, 2, figsize=(11.0, 6.2))
+    fig, axes = plt.subplots(1, 2, figsize=(11.0, 5.8))
     title = name
     if description:
         title = f'{name}  —  {description}'
@@ -98,23 +96,28 @@ def _render_figure(figure: dict, all_rows: list, output_root: str, output_path: 
 
     goodput_plotted = False
     srtt_plotted = False
+    srtt_all = []   # every finite SRTT value plotted, for adaptive x-limits
     for folder in sorted_folders:
         subset = [r for r in rows if r.get('data_folder') == folder]
         plot_label = next((r.get('plot_label') for r in subset if r.get('plot_label')), folder)
         wrapped = '\n'.join(textwrap.wrap(plot_label, width=24)) or plot_label
         color = color_map[folder]
 
+        srtt_vals = _rtt_values_for_plot(subset, output_root)
+        srtt_all.extend(float(v) for v in srtt_vals if math.isfinite(float(v)))
         goodput_plotted |= _plot_cdf(
             axes[0], _float_values(subset, 'mean_thr_mbps'), wrapped, color=color)
         srtt_plotted |= _plot_histogram_cdf(
-            axes[1], _rtt_values_for_plot(subset, output_root), wrapped, color=color)
+            axes[1], srtt_vals, wrapped, color=color)
 
     schedule_refs = _schedule_reference_rows(rows)
+    base_rtt_vals = _float_values(schedule_refs, 'mean_scheduled_rtt_ms')
+    srtt_all.extend(float(v) for v in base_rtt_vals if math.isfinite(float(v)))
     goodput_plotted |= _plot_cdf(
         axes[0], _float_values(schedule_refs, 'mean_scheduled_bw_mbps'),
         'Scheduled BW', color='black', linewidth=1.7, zorder=10)
     srtt_plotted |= _plot_histogram_cdf(
-        axes[1], _float_values(schedule_refs, 'mean_scheduled_rtt_ms'),
+        axes[1], base_rtt_vals,
         'Base RTT', color='black', linewidth=1.7, zorder=10)
 
     axes[0].set_xlabel('Average Goodput (Mbps)')
@@ -123,7 +126,15 @@ def _render_figure(figure: dict, all_rows: list, output_root: str, output_path: 
     axes[1].set_xlabel('Average SRTT (ms)')
     axes[1].set_ylabel('Percent of Trials (%)')
     axes[1].set_title('SRTT CDF')
-    axes[1].set_xlim(30, 90)
+    # Adapt the SRTT window to the data: the legacy 30-90 ms window clipped
+    # kernel CCAs (BBR/CUBIC/FRCC) whose queueing RTT runs well past 90 ms.
+    # Cap at 250 ms so a few extreme FRCC tail runs don't squash everything.
+    if srtt_all:
+        lo = max(0.0, min(30.0, min(srtt_all) - 5.0))
+        hi = min(250.0, max(90.0, max(srtt_all) * 1.05))
+        axes[1].set_xlim(lo, hi)
+    else:
+        axes[1].set_xlim(30, 250)
     if not goodput_plotted:
         axes[0].text(0.5, 0.5, 'No goodput data',
                      transform=axes[0].transAxes, ha='center', va='center')
@@ -140,15 +151,15 @@ def _render_figure(figure: dict, all_rows: list, output_root: str, output_path: 
             unique.setdefault(label, handle)
     if unique:
         n = len(unique)
-        ncol = min(6, max(1, n))
+        ncol = min(8, max(1, n))
         legend_rows = int(math.ceil(n / float(ncol)))
-        bottom = min(0.56, 0.17 + 0.09 * legend_rows)
-        fig.subplots_adjust(left=0.07, right=0.985, top=0.88, bottom=bottom)
+        bottom = 0.18 + 0.07 * legend_rows
+        fig.subplots_adjust(left=0.07, right=0.985, top=0.84, bottom=bottom)
         fig.legend(unique.values(), unique.keys(), loc='lower center',
                    ncol=ncol, frameon=False, fontsize=9,
-                   bbox_to_anchor=(0.5, 0.02))
+                   bbox_to_anchor=(0.5, 0.0))
     else:
-        fig.subplots_adjust(left=0.07, right=0.985, top=0.88, bottom=0.12)
+        fig.subplots_adjust(left=0.07, right=0.985, top=0.84, bottom=0.14)
 
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     fig.savefig(output_path, dpi=180, bbox_inches='tight')
