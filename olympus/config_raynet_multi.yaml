@@ -59,8 +59,8 @@ environment:
   #   dynamic               one flow under changing BW/RTT link schedules.
   #   static                one flow on a steady link (no schedule changes).
   #   lagged_fairness       one flow plus lagged-policy background flows (join only).
-  type: mininet
-  environment_setup: multiflow_interleave
+  type: raynet
+  environment_setup: astraea_static_multi
 
 reward:
   delay_margin_coef: 1.25
@@ -117,10 +117,12 @@ outputs:
   # Optional: set run_name to force a specific folder name under root.
   # run_name: debug_run
   # Set false to skip per-episode PDFs in plots/ (episode_returns.csv and
-  # telemetry/episode_returns.pdf are still generated).
+  # telemetry/episode_returns.pdf are still generated). When true,
+  # plot_every_n renders only episodes whose id is divisible by this value.
   plot_episodes: true
+  plot_every_n: 7
 
-n_parallel: 20
+n_parallel: 8
 
 # Hard cap on total dispatched episodes. The orchestrator stops handing out new
 # work once this many have been launched and lets in-flight slots drain. Omit
@@ -291,10 +293,10 @@ algorithms:
   # single-agent `reward:` block above.
   ma_dreamer:
     training:
-      resume_from: olympus/models/astraea_static/first_full_sweep/checkpoints/ma_dreamer_cwnd_model.pt
+      resume_from: null
       batch_size: 128
       seq_len: 48
-      min_replay: 50000
+      min_replay: 5000
       replay_capacity: 400000
       updates_per_step: 1
       worker_push_every: 16
@@ -324,7 +326,7 @@ algorithms:
       actor_log_std_min: -2.0
       actor_log_std_max: 0.0
       target_tau: 0.02
-      actor_warmup_steps: 1000
+      actor_warmup_steps: 10
       value_bins: 255
       value_low: -20.0
       value_high: 20.0

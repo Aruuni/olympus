@@ -29,8 +29,6 @@ state_options:
 
 paths:
   py: ./venv_training/bin/python
-  raynet: /home/james/raynet
-  raynet_runner: /home/james/raynet/runners/olympus_runner.sh
 
 outputs:
   root: olympus/models_raynet_astraea_smoke

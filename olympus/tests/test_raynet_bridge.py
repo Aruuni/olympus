@@ -195,6 +195,19 @@ class RayNetObservationAdapterTest(unittest.TestCase):
         config = env.episode_config()
         self.assertNotIn('observation_fields', config)
 
+    def test_raynet_paths_default_inside_environment(self):
+        with mock.patch.dict(os.environ, {'RAYNET_PATH': '/opt/raynet-test'}, clear=False):
+            env = raynet_env.RaynetEnv(
+                ini_path='/tmp/OrcaTraining.ini',
+                environment_config={'protocol': 'orca'},
+            )
+
+        self.assertEqual(str(env.raynet_path), '/opt/raynet-test')
+        self.assertEqual(
+            str(env.raynet_runner),
+            '/opt/raynet-test/runners/olympus_runner.sh',
+        )
+
     def test_astraea_field_mapping_observation_maps_to_olympus_raw_fields(self):
         env = raynet_env.RaynetEnv(
             environment_config={'observation_fields': ASTRAEA_FIELDS})

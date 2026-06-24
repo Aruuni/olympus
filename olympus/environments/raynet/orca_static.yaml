@@ -9,6 +9,6 @@ sweep:
   flows: 1
   bws: [10, 20, 30, 40, 50]
   delays: [10, 20, 30, 40, 50]
-  duration: 20
+  duration: 10
   link_schedules:
     - []

@@ -126,6 +126,15 @@ def _as_bool(value, default=False):
     return default
 
 
+def _should_plot_episode(outputs, episode):
+    if not _as_bool(outputs.get('plot_episodes'), default=True):
+        return False
+    every_n = int(outputs.get('plot_every_n', 1) or 1)
+    if every_n <= 1:
+        return True
+    return int(episode) % every_n == 0
+
+
 def _final_runtime_cleanup(learner_port: int):
     """Parent-side cleanup sweep. Preserves checkpoints and run data."""
     print('[orch] runtime cleanup sweep', flush=True)
@@ -929,7 +938,7 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
         time.sleep(1)
 
     ep_return = None
-    plot_episodes = _as_bool(outputs.get('plot_episodes'), default=True)
+    plot_episodes = _should_plot_episode(outputs, episode)
     root, ext = os.path.splitext(state_log)
     ext = ext or '.csv'
 
@@ -1521,7 +1530,7 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
 
     ep_return = _multi_episode_return(
         state_log, n_agents=n_flows, trim_tail_s=plot_trim_tail_s)
-    plot_episodes = _as_bool(outputs.get('plot_episodes'), default=True)
+    plot_episodes = _should_plot_episode(outputs, episode)
     try:
         if plot_episodes:
             pdf_path = os.path.join(plots_dir,

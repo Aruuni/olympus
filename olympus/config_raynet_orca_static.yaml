@@ -24,13 +24,11 @@ state_options:
 
 paths:
   py: ./venv_training/bin/python
-  raynet: /home/james/raynet
-  raynet_runner: /home/james/raynet/runners/olympus_runner.sh
 
 outputs:
-  root: olympus/models/orca_run7
-  run_name: plotting_test
-  plot_episodes: true
+  root: olympus/models/orca
+  run_name: full_sweep
+  plot_episodes: false
 
 n_parallel: 15
 episodes: 160000

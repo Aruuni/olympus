@@ -20,8 +20,8 @@
 #                                   via reward.per_agent_credit (team_alpha / over_weight).
 
 runtime:
-  algorithm: ma_dreamer
-  reward: tempest_fairness_ma
+  algorithm: dreamer_v3
+  reward: tempest
   state: tempest
   action: cwnd_multiplier
 
@@ -59,8 +59,8 @@ environment:
   #   dynamic               one flow under changing BW/RTT link schedules.
   #   static                one flow on a steady link (no schedule changes).
   #   lagged_fairness       one flow plus lagged-policy background flows (join only).
-  type: mininet
-  environment_setup: multiflow_interleave
+  type: raynet
+  environment_setup: astraea_static
 
 reward:
   delay_margin_coef: 1.25

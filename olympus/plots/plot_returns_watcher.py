@@ -260,6 +260,18 @@ def _wants_log(name: str) -> bool:
     return ('loss' in n) or n.startswith('lr') or n.endswith('_lr') or n in ('lr_a', 'lr_c')
 
 
+def _lightness_rainbow_colors(values):
+    ordered = sorted(np.unique(values))
+    cmap = plt.get_cmap('turbo')
+    if len(ordered) <= 1:
+        return {ordered[0]: cmap(0.50)} if ordered else {}
+
+    # Use the cool-to-warm part of Turbo's lightness-varying rainbow so larger
+    # environment values land on orange/red instead of cyclic purple.
+    stops = np.linspace(0.08, 0.88, len(ordered))
+    return {value: cmap(stop) for value, stop in zip(ordered, stops)}
+
+
 # ── Pages ─────────────────────────────────────────────────────────────────────
 
 def _page_returns_bw(episodes, returns, bws, n, alg_name, elapsed_s=None):
@@ -268,8 +280,7 @@ def _page_returns_bw(episodes, returns, bws, n, alg_name, elapsed_s=None):
                  f'{_elapsed_title(elapsed_s)})',
                  fontsize=12, fontweight='bold')
     bw_vals = np.unique(bws)
-    cmap = plt.get_cmap('tab10')
-    color = {bw: cmap(i % 10) for i, bw in enumerate(sorted(bw_vals))}
+    color = _lightness_rainbow_colors(bw_vals)
     for bw in sorted(bw_vals):
         m = bws == bw
         ax.scatter(episodes[m], returns[m],
@@ -294,8 +305,7 @@ def _page_returns_delay(episodes, returns, delays, n, alg_name, elapsed_s=None):
                  f'{_elapsed_title(elapsed_s)})',
                  fontsize=12, fontweight='bold')
     delay_vals = np.unique(delays)
-    dcmap = plt.get_cmap('Set2')
-    dcolor = {d: dcmap(i % 8) for i, d in enumerate(sorted(delay_vals))}
+    dcolor = _lightness_rainbow_colors(delay_vals)
     for d in sorted(delay_vals):
         m = delays == d
         ax.scatter(episodes[m], returns[m],
