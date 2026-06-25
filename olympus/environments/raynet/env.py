@@ -244,6 +244,7 @@ class RaynetEnv(NetworkEnv):
                  raynet_path=None, ini_path=None, section='General',
                  protocol=None, raynet_runner=None, **extra):
         environment_config = dict(extra.get('environment_config') or {})
+        self.environment_config = environment_config
         self.n = int(n)
         self.bw = float(bw)
         self.delay = float(delay)
@@ -284,6 +285,8 @@ class RaynetEnv(NetworkEnv):
         self._service = None
         self._manager = None
         self._server_thread = None
+        self.start_delays = None
+        self.flow_durations = None
         self.flow_addr = ''
         self.flow_key = ''
 
@@ -317,6 +320,8 @@ class RaynetEnv(NetworkEnv):
                   flow_durations=None) -> None:
         if self._service is None:
             raise RuntimeError('RayNet environment not started')
+        self.start_delays = start_delays
+        self.flow_durations = flow_durations
         self._service.start_episode()
         self._service.wait()
 
@@ -341,6 +346,7 @@ class RaynetEnv(NetworkEnv):
         replacements = {
             'home': os.environ.get('HOME', str(Path.home())),
             'raynet_path': str(self.raynet_path),
+            'protocol': self.protocol,
             'bw': f'{self.bw:.12g}Mbps',
             'delay': f'{self.delay / 2.0:.12g}ms',
             'qsize': self._qsize_bits(),
@@ -358,11 +364,27 @@ class RaynetEnv(NetworkEnv):
             'protocol': self.protocol,
             'ini_path': str(Path(self.ini_path).expanduser()),
             'section': self.section,
+            'bw': self.bw,
+            'delay': self.delay,
+            'flows': int(self.n),
+            'bdp_mult': self.bdp_mult,
             'duration': duration,
             'quiet': True,
             'replacements': replacements,
             'overrides': overrides,
         }
+        if 'link_schedule' in self.environment_config:
+            config['link_schedule'] = self.environment_config.get('link_schedule') or []
+        if self.start_delays is not None:
+            config['start_delays'] = self.start_delays
+        if self.flow_durations is not None:
+            config['flow_durations'] = self.flow_durations
+        if self.per_flow_delays is not None:
+            config['per_flow_delays'] = self.per_flow_delays
+        if self.environment_config.get('episode') is not None:
+            config['episode'] = self.environment_config.get('episode')
+        if self.environment_config.get('slot') is not None:
+            config['slot'] = self.environment_config.get('slot')
         if self.observation_fields:
             config['observation_fields'] = self.observation_fields
         return config

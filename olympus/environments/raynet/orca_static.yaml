@@ -3,7 +3,7 @@ description: RayNet Orca simulation episodes from explicit OMNeT++ INI sections.
 shuffle: true
 
 sweep:
-  protocol: orca
+  protocol: Orca
   ini_path: /home/james/raynet/simlibs/Orca/src/training/OrcaTraining.ini
   section: General
   flows: 1

@@ -849,7 +849,8 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
         'OC_FAIR_FLOW_START_DELAYS': json.dumps(fair_flow_starts),
         'OC_FAIR_FLOW_DURATIONS': json.dumps(fair_flow_durations),
         'SAO_LAGGED_POLICY_CHECKPOINT': lagged_checkpoint,
-        'SAO_LAGGED_POLICY_FLOW_IDS': ','.join(str(v) for v in lagged_flow_ids),
+        'SAO_LAGGED_POLICY_FLOW_IDS': ','.join(
+            str(v - 1 if is_raynet else v) for v in lagged_flow_ids),
         'SAO_LAGGED_POLICY_DETERMINISTIC': (
             '1' if _as_bool(ecfg.get('lagged_policy_deterministic', True), True) else '0'),
         'SAO_LAGGED_POLICY_DISABLE_LEARNING': (
@@ -878,7 +879,10 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
         'per_flow_delays': ecfg.get('per_flow_delays'),
     }
     if is_raynet:
-        env_kwargs['environment_config'] = ecfg
+        raynet_ecfg = dict(ecfg)
+        raynet_ecfg['episode'] = int(episode)
+        raynet_ecfg['slot'] = int(instance_id)
+        env_kwargs['environment_config'] = raynet_ecfg
     env = make_env(
         backend_type,
         **env_kwargs,
@@ -900,11 +904,21 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
         })
 
     worker_script = resolve_worker_script(alg_name)
+    listener_procs = []
     if is_raynet:
-        worker_env['OC_FLOW_ID'] = '0'
-        worker_env['OC_FLOW_FD'] = '0'
-        worker_env['OC_CPORT'] = str(cport)
-        listener_cmd = [python_bin, worker_script]
+        for flow_id in range(n_flows):
+            listener_env = dict(worker_env)
+            listener_env['SAO_AGENT_ID'] = str(flow_id)
+            listener_env['OC_FLOW_ID'] = str(flow_id)
+            listener_env['OC_FLOW_FD'] = str(flow_id)
+            listener_env['OC_CPORT'] = str(cport + flow_id)
+            if _per_flow_delays and flow_id < len(_per_flow_delays):
+                flow_rtt_us = str(float(_per_flow_delays[flow_id]) * 1000.0)
+                listener_env['OC_BASE_RTT_US'] = flow_rtt_us
+                listener_env['SAO_BASE_RTT_US'] = flow_rtt_us
+            listener_procs.append(subprocess.Popen(
+                [python_bin, worker_script],
+                env=listener_env, start_new_session=True))
     else:
         listener_cmd = [
             listener_bin, '--cport', str(cport), '--worker', worker_script,
@@ -918,10 +932,9 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
             listener_cmd += ['--single-flow', '1']
         if not _as_bool(cfg.get('listener_state_pipe'), default=False):
             listener_cmd += ['--no-state-pipe', '1']
-
-    listener_proc = subprocess.Popen(
-        listener_cmd,
-        env=worker_env, start_new_session=True)
+        listener_procs.append(subprocess.Popen(
+            listener_cmd,
+            env=worker_env, start_new_session=True))
 
     sched_stop   = threading.Event()
     sched_thread = None
@@ -946,9 +959,11 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
             sched_thread.join(timeout=2)
         if is_raynet:
             env.stop()
-            _wait_or_terminate(listener_proc)
+            for listener_proc in listener_procs:
+                _wait_or_terminate(listener_proc)
         else:
-            _terminate(listener_proc)
+            for listener_proc in listener_procs:
+                _terminate(listener_proc)
             env.stop()
         time.sleep(1)
 
@@ -1509,7 +1524,10 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
         'per_flow_delays': per_flow_delays,
     }
     if is_raynet:
-        env_kwargs['environment_config'] = ecfg
+        raynet_ecfg = dict(ecfg)
+        raynet_ecfg['episode'] = int(episode)
+        raynet_ecfg['slot'] = int(instance_id)
+        env_kwargs['environment_config'] = raynet_ecfg
     env = make_env(backend_type, **env_kwargs)
     env.start()
 

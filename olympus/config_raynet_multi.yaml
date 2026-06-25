@@ -60,7 +60,7 @@ environment:
   #   static                one flow on a steady link (no schedule changes).
   #   lagged_fairness       one flow plus lagged-policy background flows (join only).
   type: raynet
-  environment_setup: astraea_static_multi
+  environment_setup: multiflow_interleave
 
 reward:
   delay_margin_coef: 1.25
@@ -122,7 +122,7 @@ outputs:
   plot_episodes: true
   plot_every_n: 7
 
-n_parallel: 8
+n_parallel: 2
 
 # Hard cap on total dispatched episodes. The orchestrator stops handing out new
 # work once this many have been launched and lets in-flight slots drain. Omit

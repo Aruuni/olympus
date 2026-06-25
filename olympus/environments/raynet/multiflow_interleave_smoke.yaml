@@ -1,0 +1,21 @@
+name: multiflow_interleave_smoke
+description: Short RayNet multiflow interleave smoke test.
+shuffle: false
+
+sweep:
+  protocol: Astraea
+  ini_path: /home/james/raynet/_environments/multiflow_interleave/config_multiflow_interleave.ini
+  section: General
+  bws: [10]
+  delays: [20]
+  bdp_mult: 1
+  flows: [2]
+  agent_join_pattern: random
+  agent_join_max_frac: 0.2
+  flow_lifetime_pattern: random
+  flow_lifetime_min_frac: 0.5
+  flow_lifetime_max_frac: 1.0
+  flow_lifetime_keep_one: true
+  duration: 3
+  link_schedules:
+    - [{t: 1, bw_frac: 0.5}, {t: 2, bw_frac: 1.0}]

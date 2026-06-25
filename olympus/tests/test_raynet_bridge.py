@@ -370,9 +370,59 @@ class RayNetFlowServiceTest(unittest.TestCase):
                     cfg, ecfg, 0, 'listener', 'python', 'addr', 'key', 0)
 
         _, kwargs = make_env.call_args
-        self.assertEqual(kwargs['environment_config'], ecfg)
+        environment_config = kwargs['environment_config']
+        for key, value in ecfg.items():
+            self.assertEqual(environment_config[key], value)
+        self.assertEqual(environment_config['episode'], 0)
+        self.assertEqual(environment_config['slot'], 0)
         self.assertNotIn('ini_path', kwargs)
         self.assertNotIn('section', kwargs)
+
+    def test_run_episode_raynet_single_agent_launches_worker_per_flow(self):
+        with tempfile.TemporaryDirectory() as directory:
+            ecfg = {
+                'protocol': 'astraea',
+                'ini_path': os.path.join(directory, 'AstraeaTraining.ini'),
+                'section': 'General',
+                'flows': 2,
+                'bw': 20,
+                'delay': 20,
+                'duration': 1,
+                'lagged_policy_flow_ids': [2],
+                'per_flow_delays': [5.0, 15.0],
+            }
+            cfg = {
+                'environment': {'type': 'raynet', 'environment_setup': 'lagged_smoke'},
+                'runtime': {'algorithm': 'td3', 'reward': 'tempest', 'state': 'tempest'},
+                'training': {'checkpoint': os.path.join(directory, 'model.pt')},
+                'agent': {},
+                'outputs': {
+                    'plots_dir': directory,
+                    'episodes_dir': directory,
+                    'plot_episodes': False,
+                },
+            }
+            fake_env = mock.Mock()
+            fake_env.flow_addr = '127.0.0.1:1'
+            fake_env.flow_key = 'aa'
+
+            with mock.patch.object(orchestrator, 'make_env',
+                                   return_value=fake_env), \
+                    mock.patch.object(orchestrator.subprocess, 'Popen') as popen, \
+                    mock.patch.object(orchestrator, '_wait_or_terminate'):
+                popen.side_effect = [mock.Mock(), mock.Mock()]
+                orchestrator.run_episode(
+                    cfg, ecfg, 0, 'listener', 'python', 'addr', 'key', 0)
+
+        self.assertEqual(popen.call_count, 2)
+        envs = [call.kwargs['env'] for call in popen.call_args_list]
+        self.assertEqual([env['OC_FLOW_ID'] for env in envs], ['0', '1'])
+        self.assertEqual([env['OC_FLOW_FD'] for env in envs], ['0', '1'])
+        self.assertEqual([env['OC_CPORT'] for env in envs], ['21000', '21001'])
+        self.assertEqual(envs[0]['SAO_LAGGED_POLICY_FLOW_IDS'], '1')
+        self.assertEqual(envs[1]['SAO_LAGGED_POLICY_FLOW_IDS'], '1')
+        self.assertEqual(envs[0]['SAO_BASE_RTT_US'], '5000.0')
+        self.assertEqual(envs[1]['SAO_BASE_RTT_US'], '15000.0')
 
 
 class RayNetOrchestratorDispatchTest(unittest.TestCase):

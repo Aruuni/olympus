@@ -3,7 +3,7 @@ description: Short RayNet Orca simulation episode for bridge smoke tests.
 shuffle: false
 
 sweep:
-  protocol: orca
+  protocol: Orca
   ini_path: /home/james/raynet/simlibs/Orca/src/training/OrcaTraining.ini
   section: General
   flows: 1

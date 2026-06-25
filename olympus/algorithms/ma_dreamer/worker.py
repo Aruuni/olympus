@@ -369,6 +369,15 @@ def run():
                 multiplier = 0.0
                 mu = torch.zeros(1)
                 log_std = torch.zeros(1)
+                if simulation_backend:
+                    try:
+                        flow_backend.set_cwnd(flow_fd, new_cwnd)
+                    except Exception as exc:
+                        print(
+                            f'[worker] set_cwnd failed: {exc}; exiting',
+                            flush=True,
+                        )
+                        break
             else:
                 with torch.no_grad():
                     state_tensor = torch.from_numpy(
