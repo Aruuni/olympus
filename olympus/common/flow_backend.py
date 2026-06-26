@@ -46,6 +46,16 @@ def episode_seconds(raw, episode_start, wall_now=None):
     return max(0.0, now - float(episode_start))
 
 
+def episode_step(raw, episode_start, interval_s, step_in_traj, wall_now=None):
+    """Return the backend's episode-alignment step for learner grouping."""
+    if is_simulation_backend() and isinstance(raw, dict):
+        return max(0, int(raw['group_step']))
+    seconds = episode_seconds(raw, episode_start, wall_now=wall_now)
+    if interval_s > 0.0:
+        return max(0, int(round(seconds / interval_s)))
+    return max(0, int(step_in_traj))
+
+
 def interval_seconds(raw, previous_clock, wall_now=None, minimum=1e-6):
     """Return elapsed seconds since a previous backend clock sample."""
     current_clock = observation_clock(raw, wall_now=wall_now)

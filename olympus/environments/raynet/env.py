@@ -262,6 +262,10 @@ class _RayNetFlowService:
             raw = self.env.observation_to_raw(observation)
             if 'time_s' in self.info:
                 raw['time_s'] = self.info['time_s']
+            if 'step_id' in self.info:
+                raw['step_id'] = self.info['step_id']
+            if 'group_step' in self.info:
+                raw['group_step'] = self.info['group_step']
             raw_by_flow[flow_id] = raw
             self.last_raw[flow_id] = raw
         self.observations = raw_by_flow

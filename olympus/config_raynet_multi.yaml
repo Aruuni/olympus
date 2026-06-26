@@ -120,7 +120,10 @@ outputs:
   # telemetry/episode_returns.pdf are still generated). When true,
   # plot_every_n renders only episodes whose id is divisible by this value.
   plot_episodes: true
-  plot_every_n: 100
+  plot_every_n: 25
+  # When true, also plot normalized state columns (s0, s1, ...) whenever an
+  # episode PDF is emitted.
+  plot_observations: true
 
 n_parallel: 12
 
@@ -373,7 +376,7 @@ algorithms:
       # so only the flow above its fair share pays the targeted penalty.
       # Changes the global reward head to one output per agent (checkpoints
       # not compatible with shared-scalar runs).
-      per_agent_credit: false
+      per_agent_credit: true
       team_alpha: 0.5
       over_weight: 50.0
 

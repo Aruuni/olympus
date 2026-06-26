@@ -9,9 +9,9 @@ sweep:
   section: General
   observation_plots: true
 
-  flows: [2,3,4]
-  bws: [20, 30, 40, 50]
-  delays: [10, 20, 30, 40, 50]
+  flows: [2]
+  bws: [40]
+  delays: [40]
   bdp_mult: 5
   duration: 20
   link_schedules:

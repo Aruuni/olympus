@@ -75,8 +75,8 @@ class RewardCalc(TempestRewardCalc):
         return min(avg_thr / fair_bw, 1.0)
 
     def step(self, info):
-        avg_thr = float(info.get('avg_thr', 0))
-        avg_urtt = float(info.get('avg_urtt', 0))
+        avg_thr = float(info['avg_thr'])
+        avg_urtt = float(info['avg_urtt'])
         srtt_us = self._srtt_us(info, fallback_us=avg_urtt)
 
         if avg_thr > self._max_tput:

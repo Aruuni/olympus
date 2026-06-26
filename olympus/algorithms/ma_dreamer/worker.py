@@ -43,43 +43,14 @@ class _Mgr(BaseManager):
     pass
 
 
-class _SyncMgr(BaseManager):
-    pass
-
-
 _Mgr.register('service')
-_SyncMgr.register('collection_sync')
 
 _LOG_FLUSH_EVERY = 50
 
 
-def _connect_collection_sync():
-    address = os.environ.get('OC_RAYNET_SYNC_ADDR', '')
-    key = os.environ.get('OC_RAYNET_SYNC_KEY', '')
-    if not address or not key:
-        return None
-    host, port = address.rsplit(':', 1)
-    manager = _SyncMgr(
-        address=(host, int(port)), authkey=bytes.fromhex(key))
-    deadline = time.monotonic() + 10.0
-    last_error = None
-    while time.monotonic() < deadline:
-        try:
-            manager.connect()
-            return manager.collection_sync()
-        except Exception as exc:
-            last_error = exc
-            time.sleep(0.1)
-    print(f'[worker] RayNet sync connect failed: {last_error}', flush=True)
-    return None
-
-
-def _push_experience_batch(manager, sync_service, buffer, slot, episode):
+def _push_experience_batch(manager, buffer):
     if not buffer:
         return
-    if sync_service is not None:
-        sync_step = int(buffer[-1].group_step)
-        sync_service.wait_until_allowed(slot, episode, sync_step)
     try:
         manager.push_exp_batch(list(buffer))
     except Exception:
@@ -114,8 +85,8 @@ def _connect_manager():
 
 def _srtt_ms(raw: dict) -> float:
     try:
-        srtt_raw = float(raw.get('srtt_us', 0.0) or 0.0)
-        fallback_us = float(raw.get('avg_urtt', 0.0) or 0.0)
+        srtt_raw = float(raw['srtt_us'] or 0.0)
+        fallback_us = float(raw['avg_urtt'] or 0.0)
     except (TypeError, ValueError):
         return 0.0
     srtt_us = srtt_raw / 8.0 if srtt_raw > 0.0 else fallback_us
@@ -233,7 +204,6 @@ def run():
     actor.eval()
 
     manager = _connect_manager()
-    sync_service = _connect_collection_sync()
     if manager:
         try:
             parameter_bytes = manager.pull_params()
@@ -299,6 +269,7 @@ def run():
     previous_cwnd = 10
     peak_throughput = 0.0
     step_in_traj = 0
+    last_group_step = 0
     ever_alive = False
 
     push_every = max(1, int(os.environ.get('OC_PUSH_EVERY', '16')))
@@ -336,7 +307,7 @@ def run():
                 )
                 break
 
-            avg_throughput = float(raw.get('avg_thr', 0.0))
+            avg_throughput = float(raw['avg_thr'])
             peak_throughput = max(peak_throughput, avg_throughput)
             if avg_throughput <= 0.0:
                 dead_steps += 1
@@ -361,17 +332,17 @@ def run():
             flow_present = reward_components.get('flow_present')
             if flow_present is not None:
                 flow_active = bool(flow_present)
-            urtt = float(raw.get('avg_urtt', 0.0))
+            urtt = float(raw['avg_urtt'])
             if urtt > 0.0:
                 previous_urtt = urtt
-            previous_cwnd = int(raw.get('cwnd', previous_cwnd))
+            previous_cwnd = int(raw['cwnd'])
 
             t_s = flow_backend.episode_seconds(
                 raw, episode_start, wall_now=tick_start)
-            group_step = (
-                step_in_traj if simulation_backend else int(round(t_s / interval_s))
-                if interval_s > 0.0 else step_in_traj
-            )
+            group_step = flow_backend.episode_step(
+                raw, episode_start, interval_s, step_in_traj,
+                wall_now=tick_start)
+            last_group_step = group_step
             if previous_state is not None and flow_active and manager:
                 experience_buffer.append(model.Experience(
                     state=previous_state,
@@ -388,9 +359,7 @@ def run():
                 ))
                 step_in_traj += 1
                 if len(experience_buffer) >= push_every:
-                    _push_experience_batch(
-                        manager, sync_service, experience_buffer,
-                        instance_id, episode)
+                    _push_experience_batch(manager, experience_buffer)
 
             # Once a flow leaves the episode schedule (flow_present == 0) it is
             # no longer part of the experiment. Stop running the actor and stop
@@ -403,7 +372,7 @@ def run():
             if not flow_active:
                 previous_state = None
                 previous_action = 0.0
-                new_cwnd = int(raw.get('cwnd', previous_cwnd))
+                new_cwnd = int(raw['cwnd'])
                 multiplier = 0.0
                 mu = torch.zeros(1)
                 log_std = torch.zeros(1)
@@ -428,13 +397,13 @@ def run():
                 action = float(action_tensor.item())
                 multiplier = float(multiplier_tensor.item())
 
-                current_cwnd = int(raw.get('cwnd', 10))
+                current_cwnd = int(raw['cwnd'])
                 desired_cwnd = _ACTION_PLUGIN.apply_cwnd(
                     current_cwnd, action, cwnd_min, cwnd_max)
-                srtt_raw = float(raw.get('srtt_us', 0.0) or 0.0)
+                srtt_raw = float(raw['srtt_us'] or 0.0)
                 filter_rtt_us = (
                     srtt_raw / 8.0 if srtt_raw > 0.0
-                    else float(raw.get('avg_urtt', 0.0) or 0.0)
+                    else float(raw['avg_urtt'] or 0.0)
                 )
                 clock_t = flow_backend.observation_clock(
                     raw, wall_now=tick_start)
@@ -536,11 +505,7 @@ def run():
                     avg_throughput=previous_avg_throughput,
                     agent_id=agent_id,
                     group_id=group_id,
-                    group_step=(
-                        step_in_traj if simulation_backend else int(round(
-                            (time.monotonic() - episode_start) / interval_s))
-                        if interval_s > 0.0 else step_in_traj
-                    ),
+                    group_step=last_group_step + 1,
                     done=True,
                     traj_id=traj_id,
                     step_in_traj=step_in_traj,

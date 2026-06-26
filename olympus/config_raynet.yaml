@@ -119,6 +119,9 @@ outputs:
   # Set false to skip per-episode PDFs in plots/ (episode_returns.csv and
   # telemetry/episode_returns.pdf are still generated).
   plot_episodes: true
+  # When true, also plot normalized state columns (s0, s1, ...) whenever an
+  # episode PDF is emitted.
+  plot_observations: false
 
 n_parallel: 12
 

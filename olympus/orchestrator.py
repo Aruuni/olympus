@@ -55,6 +55,10 @@ from olympus.plots.multi_flow_episode_plot import (
     plot as _plot_multi_episode,
     episode_return as _multi_episode_return,
 )
+from olympus.plots.normalized_state_plot import (
+    plot as _plot_normalized_state,
+    _state_plot_path,
+)
 from olympus.common.checkpoint_config import (
     apply_model_config_from_checkpoint,
 )
@@ -186,6 +190,28 @@ def _should_plot_episode(outputs, episode):
     if every_n <= 1:
         return True
     return int(episode) % every_n == 0
+
+
+def _should_plot_observations(outputs, episode):
+    if not _should_plot_episode(outputs, episode):
+        return False
+    return _as_bool(outputs.get('plot_observations'), default=False)
+
+
+def _plot_normalized_state_if_requested(outputs, episode, state_logs,
+                                        episode_plot_path, title,
+                                        trim_tail_s):
+    if not _should_plot_observations(outputs, episode):
+        return
+    try:
+        _plot_normalized_state(
+            state_logs=state_logs,
+            output=_state_plot_path(episode_plot_path),
+            title=title,
+            trim_tail_s=trim_tail_s,
+        )
+    except Exception as exc:
+        print(f'[state_plot] ep={episode} plot failed: {exc}', flush=True)
 
 
 def _final_runtime_cleanup(learner_port: int):
@@ -1055,19 +1081,23 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
                 pdf_path = os.path.join(
                     plots_dir,
                     f'ep{episode:06d}_bw{bw_str}_d{delay_str}_n{n_agents}.pdf')
+                plot_title = (f'Episode {episode}  flows={n_agents}  '
+                              f'bw={bw_str}Mbps  delay={delay_str}ms  '
+                              f'env={env_name or "config"}  '
+                              f'({"scheduled" if link_schedule else "static"})')
                 plotted_return = _plot_multi_episode(
                     state_log_path=state_log,
                     output=pdf_path,
                     bw=float(ecfg.get('bw', 100.0)),
                     delay=float(ecfg.get('delay', 20.0)),
-                    title=(f'Episode {episode}  flows={n_agents}  '
-                           f'bw={bw_str}Mbps  delay={delay_str}ms  '
-                           f'env={env_name or "config"}  '
-                           f'({"scheduled" if link_schedule else "static"})'),
+                    title=plot_title,
                     link_schedule=link_schedule,
                     n_agents=n_agents,
                     trim_tail_s=plot_trim_tail_s,
                 )
+                _plot_normalized_state_if_requested(
+                    outputs, episode, agent_logs, pdf_path, plot_title,
+                    plot_trim_tail_s)
                 if plotted_return is not None:
                     ep_return = plotted_return
                 print(f'[ep_plot] ep={episode} -> {pdf_path}  '
@@ -1102,18 +1132,22 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
                     pdf_path = os.path.join(
                         plots_dir,
                         f'ep{episode:06d}_bw{bw_str}_d{delay_str}{flow_suffix}.pdf')
+                    plot_title = (f'Episode {episode}{flow_suffix}  '
+                                  f'bw={bw_str}Mbps  delay={delay_str}ms  '
+                                  f'env={env_name or "config"}  '
+                                  f'({"scheduled" if link_schedule else "static"})')
                     ret = _plot_episode(
                         state_log_path = log_path,
                         output         = pdf_path,
                         bw             = float(ecfg.get('bw',   100.0)),
                         delay          = float(ecfg.get('delay', 20.0)),
-                        title          = (f'Episode {episode}{flow_suffix}  '
-                                          f'bw={bw_str}Mbps  delay={delay_str}ms  '
-                                          f'env={env_name or "config"}  '
-                                          f'({"scheduled" if link_schedule else "static"})'),
+                        title          = plot_title,
                         link_schedule  = link_schedule,
                         trim_tail_s    = plot_trim_tail_s,
                     )
+                    _plot_normalized_state_if_requested(
+                        outputs, episode, [log_path], pdf_path, plot_title,
+                        plot_trim_tail_s)
                     if log_path == primary_log:
                         ep_return = ret
                     print(f'[ep_plot] ep={episode}{flow_suffix} -> {pdf_path}  '
@@ -1685,18 +1719,31 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
         if plot_episodes:
             pdf_path = os.path.join(plots_dir,
                                     f'ep{episode:06d}_bw{bw_str}_d{delay_str}_n{n_flows}.pdf')
+            plot_title = (f'Episode {episode}  flows={n_flows}  '
+                          f'bw={bw_str}Mbps  delay={delay_str}ms  '
+                          f'({"scheduled" if link_schedule else "static"})')
             plotted_return = _plot_multi_episode(
                 state_log_path = state_log,
                 output         = pdf_path,
                 bw             = float(ecfg.get('bw',   100.0)),
                 delay          = float(ecfg.get('delay', 20.0)),
-                title          = (f'Episode {episode}  flows={n_flows}  '
-                                  f'bw={bw_str}Mbps  delay={delay_str}ms  '
-                                  f'({"scheduled" if link_schedule else "static"})'),
+                title          = plot_title,
                 link_schedule  = link_schedule,
                 n_agents       = n_flows,
                 trim_tail_s    = plot_trim_tail_s,
             )
+            root, ext = os.path.splitext(state_log)
+            ext = ext or '.csv'
+            state_logs = [
+                f'{root}_a{agent_id}{ext}'
+                for agent_id in range(int(n_flows))
+                if os.path.exists(f'{root}_a{agent_id}{ext}')
+            ]
+            if not state_logs and os.path.exists(state_log):
+                state_logs = [state_log]
+            _plot_normalized_state_if_requested(
+                outputs, episode, state_logs, pdf_path, plot_title,
+                plot_trim_tail_s)
             if plotted_return is not None:
                 ep_return = plotted_return
             print(f'[ep_plot] ep={episode} -> {pdf_path}  return={ep_return}', flush=True)
