@@ -43,9 +43,52 @@ class _Mgr(BaseManager):
     pass
 
 
+class _SyncMgr(BaseManager):
+    pass
+
+
 _Mgr.register('service')
+_SyncMgr.register('collection_sync')
 
 _LOG_FLUSH_EVERY = 50
+
+
+def _connect_collection_sync():
+    address = os.environ.get('OC_RAYNET_SYNC_ADDR', '')
+    key = os.environ.get('OC_RAYNET_SYNC_KEY', '')
+    if not address or not key:
+        return None
+    host, port = address.rsplit(':', 1)
+    manager = _SyncMgr(
+        address=(host, int(port)), authkey=bytes.fromhex(key))
+    deadline = time.monotonic() + 10.0
+    last_error = None
+    while time.monotonic() < deadline:
+        try:
+            manager.connect()
+            return manager.collection_sync()
+        except Exception as exc:
+            last_error = exc
+            time.sleep(0.1)
+    print(f'[worker] RayNet sync connect failed: {last_error}', flush=True)
+    return None
+
+
+def _push_experience_batch(manager, sync_service, buffer, slot, episode):
+    if not buffer:
+        return
+    if sync_service is not None:
+        sync_step = int(buffer[-1].group_step)
+        sync_service.wait_until_allowed(slot, episode, sync_step)
+    try:
+        manager.push_exp_batch(list(buffer))
+    except Exception:
+        for experience in buffer:
+            try:
+                manager.push_exp(experience)
+            except Exception:
+                pass
+    buffer.clear()
 
 
 def _connect_manager():
@@ -190,6 +233,7 @@ def run():
     actor.eval()
 
     manager = _connect_manager()
+    sync_service = _connect_collection_sync()
     if manager:
         try:
             parameter_bytes = manager.pull_params()
@@ -344,15 +388,9 @@ def run():
                 ))
                 step_in_traj += 1
                 if len(experience_buffer) >= push_every:
-                    try:
-                        manager.push_exp_batch(list(experience_buffer))
-                    except Exception:
-                        for experience in experience_buffer:
-                            try:
-                                manager.push_exp(experience)
-                            except Exception:
-                                pass
-                    experience_buffer.clear()
+                    _push_experience_batch(
+                        manager, sync_service, experience_buffer,
+                        instance_id, episode)
 
             # Once a flow leaves the episode schedule (flow_present == 0) it is
             # no longer part of the experiment. Stop running the actor and stop

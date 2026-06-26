@@ -68,6 +68,59 @@ from olympus.common.registry import (
 )
 
 
+def _raynet_sync_enabled(cfg, backend_type):
+    if backend_type != 'raynet':
+        return False
+    t_cfg = cfg.get('training', cfg) or {}
+    return _as_bool(
+        t_cfg.get('synchronized_collection',
+                  cfg.get('synchronized_collection', False)),
+        default=False,
+    )
+
+
+def _raynet_observation_plot_request(ecfg):
+    if 'observation_plots' in ecfg:
+        return ecfg.get('observation_plots')
+    if 'plot_observations' in ecfg:
+        return ecfg.get('plot_observations')
+    return ecfg.get('observation_plot')
+
+
+def _raynet_observation_plots_enabled(ecfg):
+    raw = _raynet_observation_plot_request(ecfg)
+    if isinstance(raw, dict):
+        return _as_bool(raw.get('enabled', True), default=True)
+    return _as_bool(raw, default=False)
+
+
+def _observation_plot_path(episode_plot_path):
+    root, ext = os.path.splitext(str(episode_plot_path))
+    return f'{root}_observations{ext or ".pdf"}'
+
+
+def _configure_raynet_observation_plot(ecfg, episode_plot_path, should_plot):
+    raw = _raynet_observation_plot_request(ecfg)
+    requested = _raynet_observation_plots_enabled(ecfg)
+    for key in ('observation_plots', 'plot_observations', 'observation_plot',
+                'observation_plot_dir'):
+        ecfg.pop(key, None)
+    if not requested or not should_plot or not episode_plot_path:
+        return
+
+    if isinstance(raw, dict):
+        options = {
+            key: value for key, value in raw.items()
+            if key not in (
+                'path', 'output_path', 'filename', 'dir', 'output_dir')
+        }
+    else:
+        options = {}
+    options['enabled'] = True
+    options['output_path'] = _observation_plot_path(episode_plot_path)
+    ecfg['observation_plots'] = options
+
+
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 def _terminate(proc):
@@ -882,6 +935,11 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
         raynet_ecfg = dict(ecfg)
         raynet_ecfg['episode'] = int(episode)
         raynet_ecfg['slot'] = int(instance_id)
+        episode_plot_path = os.path.join(
+            plots_dir,
+            f'ep{episode:06d}_bw{bw_str}_d{delay_str}.pdf')
+        _configure_raynet_observation_plot(
+            raynet_ecfg, episode_plot_path, _should_plot_episode(outputs, episode))
         env_kwargs['environment_config'] = raynet_ecfg
     env = make_env(
         backend_type,
@@ -902,6 +960,12 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
             'OC_RAYNET_FLOW_ADDR': env.flow_addr,
             'OC_RAYNET_FLOW_KEY': env.flow_key,
         })
+        sync_cfg = cfg.get('_raynet_collection_sync') or {}
+        if sync_cfg:
+            worker_env.update({
+                'OC_RAYNET_SYNC_ADDR': str(sync_cfg.get('addr', '')),
+                'OC_RAYNET_SYNC_KEY': str(sync_cfg.get('key', '')),
+            })
 
     worker_script = resolve_worker_script(alg_name)
     listener_procs = []
@@ -1527,6 +1591,11 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
         raynet_ecfg = dict(ecfg)
         raynet_ecfg['episode'] = int(episode)
         raynet_ecfg['slot'] = int(instance_id)
+        episode_plot_path = os.path.join(
+            plots_dir,
+            f'ep{episode:06d}_bw{bw_str}_d{delay_str}_n{n_flows}.pdf')
+        _configure_raynet_observation_plot(
+            raynet_ecfg, episode_plot_path, _should_plot_episode(outputs, episode))
         env_kwargs['environment_config'] = raynet_ecfg
     env = make_env(backend_type, **env_kwargs)
     env.start()
@@ -1540,6 +1609,12 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
             'OC_RAYNET_FLOW_ADDR': env.flow_addr,
             'OC_RAYNET_FLOW_KEY': env.flow_key,
         })
+        sync_cfg = cfg.get('_raynet_collection_sync') or {}
+        if sync_cfg:
+            worker_env.update({
+                'OC_RAYNET_SYNC_ADDR': str(sync_cfg.get('addr', '')),
+                'OC_RAYNET_SYNC_KEY': str(sync_cfg.get('key', '')),
+            })
 
     worker_script = resolve_worker_script(alg_name)
     listener_procs = []
@@ -1790,6 +1865,22 @@ def main():
     multi = is_multi_agent(alg_name)
     if backend_type != 'raynet':
         _ensure_tcp_cc(cfg.get('listener_cc', 'astraea'))
+
+    raynet_sync_handle = None
+    if _raynet_sync_enabled(cfg, backend_type):
+        from olympus.environments.raynet.env import start_collection_sync
+        if n_episodes is None:
+            initial_sync_slots = n_parallel
+        else:
+            initial_sync_slots = min(n_parallel, max(1, int(n_episodes)))
+        raynet_sync_handle = start_collection_sync(initial_sync_slots)
+        cfg['_raynet_collection_sync'] = {
+            'addr': raynet_sync_handle['addr'],
+            'key': raynet_sync_handle['key'],
+        }
+        print(f'[orch] RayNet synchronized collection enabled '
+              f'slots={initial_sync_slots}', flush=True)
+
     outputs = cfg.get('outputs', {}) or {}
     run_dir = os.path.abspath(outputs['run_dir'])
     plots_dir = os.path.abspath(outputs['plots_dir'])
@@ -2101,6 +2192,8 @@ def main():
             if item is not None:
                 work_q.put(item)
                 in_flight += 1
+            elif raynet_sync_handle is not None and in_flight > 0:
+                raynet_sync_handle['service'].set_target_slots(in_flight)
 
     except KeyboardInterrupt:
         interrupted = True

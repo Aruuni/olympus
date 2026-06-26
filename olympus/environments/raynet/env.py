@@ -92,6 +92,59 @@ class _FlowManager(BaseManager):
     pass
 
 
+class _CollectionSyncManager(BaseManager):
+    pass
+
+
+class _RayNetCollectionSync:
+    """Step barrier for RayNet simulations that share one learner."""
+
+    def __init__(self, target_slots):
+        self.condition = threading.Condition()
+        self.target_slots = max(1, int(target_slots))
+        self.slot_episode = {}
+        self.slot_offset = {}
+        self.slot_total = {}
+
+    def set_target_slots(self, target_slots):
+        with self.condition:
+            self.target_slots = max(1, int(target_slots))
+            self.condition.notify_all()
+
+    def wait_until_allowed(self, slot, episode, step):
+        slot = int(slot)
+        episode = int(episode)
+        step = max(0, int(step))
+        with self.condition:
+            total = self._update_slot_locked(slot, episode, step)
+            while not self._ready_locked(total):
+                self.condition.wait()
+            self.condition.notify_all()
+        return None
+
+    def _update_slot_locked(self, slot, episode, step):
+        previous_episode = self.slot_episode.get(slot)
+        if previous_episode is None:
+            self.slot_episode[slot] = episode
+            self.slot_offset[slot] = 0
+        elif previous_episode != episode:
+            self.slot_offset[slot] = self.slot_total.get(slot, 0)
+            self.slot_episode[slot] = episode
+
+        total = int(self.slot_offset.get(slot, 0)) + step
+        total = max(total, int(self.slot_total.get(slot, 0)))
+        self.slot_total[slot] = total
+        return total
+
+    def _ready_locked(self, total):
+        if len(self.slot_total) < self.target_slots:
+            return False
+        active_totals = sorted(self.slot_total.values(), reverse=True)
+        if len(active_totals) < self.target_slots:
+            return False
+        return min(active_totals[:self.target_slots]) >= total
+
+
 class _RayNetFlowService:
     """Virtual TCP-flow service backed by one RayNet simulation episode."""
 
@@ -226,13 +279,41 @@ class _RayNetFlowService:
 
 
 _FLOW_SERVICE = None
+_COLLECTION_SYNC_SERVICE = None
 
 
 def _get_flow_service():
     return _FLOW_SERVICE
 
 
+def _get_collection_sync_service():
+    return _COLLECTION_SYNC_SERVICE
+
+
 _FlowManager.register('flow_service', callable=_get_flow_service)
+_CollectionSyncManager.register(
+    'collection_sync', callable=_get_collection_sync_service)
+
+
+def start_collection_sync(target_slots):
+    global _COLLECTION_SYNC_SERVICE
+    _COLLECTION_SYNC_SERVICE = _RayNetCollectionSync(target_slots)
+    key = secrets.token_hex(16)
+    manager = _CollectionSyncManager(
+        address=('127.0.0.1', 0),
+        authkey=bytes.fromhex(key),
+    )
+    server = manager.get_server()
+    host, port = server.address
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    return {
+        'addr': f'{host}:{port}',
+        'key': key,
+        'manager': manager,
+        'service': _COLLECTION_SYNC_SERVICE,
+        'thread': thread,
+    }
 
 
 class RaynetEnv(NetworkEnv):
@@ -385,8 +466,37 @@ class RaynetEnv(NetworkEnv):
             config['episode'] = self.environment_config.get('episode')
         if self.environment_config.get('slot') is not None:
             config['slot'] = self.environment_config.get('slot')
+        observation_plot = self._observation_plot_config()
+        if observation_plot is not None:
+            config['observation_plots'] = observation_plot
         if self.observation_fields:
             config['observation_fields'] = self.observation_fields
+        return config
+
+    def _observation_plot_config(self):
+        raw = self.environment_config.get(
+            'observation_plots',
+            self.environment_config.get(
+                'plot_observations',
+                self.environment_config.get('observation_plot'),
+            ),
+        )
+        if raw in (None, False):
+            return None
+        if isinstance(raw, dict):
+            config = dict(raw)
+            enabled = config.get('enabled', True)
+        else:
+            config = {'enabled': raw}
+            enabled = raw
+        if str(enabled).lower() in ('0', 'false', 'no', 'off'):
+            return None
+        config['enabled'] = True
+        if self.environment_config.get('observation_plot_dir') is not None:
+            config.setdefault(
+                'output_dir',
+                self.environment_config.get('observation_plot_dir'),
+            )
         return config
 
     def observation_to_raw(self, observation):

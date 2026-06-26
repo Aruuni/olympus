@@ -3,12 +3,16 @@ description: RayNet Orca simulation episodes from explicit OMNeT++ INI sections.
 shuffle: true
 
 sweep:
+  # RayNet Meta parameters
   protocol: Astraea
   ini_path: /home/james/raynet/simlibs/Astraea/src/training/AstraeaTraining.ini
   section: General
-  flows: [1]
-  bws: [10, 20, 30, 40, 50]
+  observation_plots: true
+
+  flows: [2,3,4]
+  bws: [20, 30, 40, 50]
   delays: [10, 20, 30, 40, 50]
+  bdp_mult: 5
   duration: 20
   link_schedules:
     - []

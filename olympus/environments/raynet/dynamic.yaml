@@ -3,14 +3,17 @@ description: Current training sweep with the existing BW/RTT link schedules.
 shuffle: true
 
 sweep:
+  # RayNet meta parameters
   protocol: Astraea
   ini_path: /home/james/raynet/_environments/dynamic/config_dynamic.ini
   section: General
-  bws: [40]
-  delays: [20]
-  bdp_mult: 1
+  observation_plots: true
+
+  bws: [10, 20, 40, 60, 80, 100]
+  delays: [10, 20, 40, 60, 80]
+  bdp_mult: 4
   flows: 1
-  duration: 40
+  duration: 120
   link_schedules:
     # 7-change / 15s cadence: BW only
     - [{t: 15, bw_frac: 0.5},  {t: 30, bw_frac: 1.0}, {t: 45, bw_frac: 0.5},  {t: 60, bw_frac: 1.0}, {t: 75, bw_frac: 0.5},  {t: 90, bw_frac: 1.0}, {t: 105, bw_frac: 0.5}]
