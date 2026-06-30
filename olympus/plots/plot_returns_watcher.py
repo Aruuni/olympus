@@ -24,6 +24,7 @@ import csv
 import json
 import math
 import os
+import sys
 import time
 
 import matplotlib
@@ -34,6 +35,9 @@ import numpy as np
 
 
 _HERE        = os.path.dirname(os.path.abspath(__file__))
+_REPO        = os.path.dirname(os.path.dirname(_HERE))
+if _REPO not in sys.path:
+    sys.path.insert(0, _REPO)
 _CSV_PATH    = os.path.join(_HERE, 'episode_returns.csv')
 _OUTPUT      = os.path.join(_HERE, 'episode_returns.pdf')
 _LEARNER_LOG = os.path.join(_HERE, 'learner_metrics.csv')
@@ -45,7 +49,7 @@ _PLOT_EVERY  = 10
 def _load_returns(csv_path: str):
     episodes, returns, bws, delays = [], [], [], []
     scheduled, changes, episode_types = [], [], []
-    elapsed_s, episode_wall_s = [], []
+    flows, elapsed_s, episode_wall_s = [], [], []
     try:
         with open(csv_path, newline='') as f:
             reader = csv.DictReader(f)
@@ -58,6 +62,8 @@ def _load_returns(csv_path: str):
                     returns.append(float(ret))
                     bws.append(float(row.get('bw', 0)))
                     delays.append(float(row.get('delay', 0)))
+                    flow_raw = row.get('flows', '')
+                    flows.append(float(flow_raw) if flow_raw not in ('', None) else np.nan)
                     scheduled_i = int(row.get('scheduled', 0))
                     scheduled.append(scheduled_i)
                     if row.get('schedule_changes', '') != '':
@@ -82,13 +88,14 @@ def _load_returns(csv_path: str):
     scheduled     = np.array(scheduled)
     changes       = np.array(changes)
     episode_types = np.array(episode_types, dtype=object)
+    flows         = np.array(flows, dtype=np.float64)
     elapsed_s     = np.array(elapsed_s, dtype=np.float64)
     episode_wall_s = np.array(episode_wall_s, dtype=np.float64)
     order = np.argsort(episodes)
     return (
         episodes[order], returns[order], bws[order], delays[order],
         scheduled[order], changes[order], episode_types[order],
-        elapsed_s[order], episode_wall_s[order],
+        flows[order], elapsed_s[order], episode_wall_s[order],
     )
 
 
@@ -568,7 +575,7 @@ def _page_learner_metrics_auto(ld: dict, n_ep: int, alg_name: str,
 def generate_plot(csv_path: str = _CSV_PATH, output: str = _OUTPUT,
                   learner_log: str = _LEARNER_LOG) -> int:
     (episodes, returns, bws, delays, scheduled,
-     changes, episode_types, elapsed_s, episode_wall_s) = _load_returns(csv_path)
+     changes, episode_types, flows, elapsed_s, episode_wall_s) = _load_returns(csv_path)
     n = len(episodes)
     if n == 0:
         print('[plot] no episode data yet — skipping', flush=True)
@@ -609,6 +616,7 @@ def generate_plot(csv_path: str = _CSV_PATH, output: str = _OUTPUT,
                 continue
             pdf.savefig(fig, dpi=120, bbox_inches='tight')
             plt.close(fig)
+
 
         for fig in _page_learner_metrics_auto(ld, n, alg_name):
             pdf.savefig(fig, dpi=120, bbox_inches='tight')

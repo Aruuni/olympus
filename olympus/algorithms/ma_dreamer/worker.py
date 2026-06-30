@@ -30,11 +30,11 @@ _PKG = os.path.dirname(_ALG_DIR)
 _ROOT = os.path.dirname(_PKG)
 sys.path.insert(0, _ROOT)
 
-import tcp_sockopt
 from olympus.algorithms.ma_dreamer import model
 from olympus.common.action_plugins import load_action_module
 from olympus.common.registry import reward_module
 from olympus.common.bbr_probe import BbrProbe
+from olympus.common import flow_backend
 
 _ACTION_PLUGIN = load_action_module()
 
@@ -48,6 +48,20 @@ _Mgr.register('service')
 _LOG_FLUSH_EVERY = 50
 
 
+def _push_experience_batch(manager, buffer):
+    if not buffer:
+        return
+    try:
+        manager.push_exp_batch(list(buffer))
+    except Exception:
+        for experience in buffer:
+            try:
+                manager.push_exp(experience)
+            except Exception:
+                pass
+    buffer.clear()
+
+
 def _connect_manager():
     address = os.environ.get('SAO_MANAGER_ADDR', '')
     key = os.environ.get('SAO_MANAGER_KEY', '')
@@ -56,12 +70,17 @@ def _connect_manager():
     host, port = address.rsplit(':', 1)
     manager = _Mgr(
         address=(host, int(port)), authkey=bytes.fromhex(key))
-    try:
-        manager.connect()
-        return manager.service()
-    except Exception as exc:
-        print(f'[worker] manager connect failed: {exc}', flush=True)
-        return None
+    deadline = time.monotonic() + 10.0
+    last_error = None
+    while time.monotonic() < deadline:
+        try:
+            manager.connect()
+            return manager.service()
+        except Exception as exc:
+            last_error = exc
+            time.sleep(0.1)
+    print(f'[worker] manager connect failed: {last_error}', flush=True)
+    return None
 
 
 def _srtt_ms(raw: dict) -> float:
@@ -127,6 +146,7 @@ def run():
     deterministic = os.environ.get('SAO_DETERMINISTIC', '0') == '1'
     require_checkpoint = (
         os.environ.get('SAO_REQUIRE_CHECKPOINT', '0') == '1')
+    simulation_backend = flow_backend.is_simulation_backend()
 
     agent_id_raw = os.environ.get('SAO_AGENT_ID', '')
     if agent_id_raw:
@@ -249,6 +269,7 @@ def run():
     previous_cwnd = 10
     peak_throughput = 0.0
     step_in_traj = 0
+    last_group_step = 0
     ever_alive = False
 
     push_every = max(1, int(os.environ.get('OC_PUSH_EVERY', '16')))
@@ -278,7 +299,7 @@ def run():
         while True:
             tick_start = time.monotonic()
             try:
-                raw = tcp_sockopt.get_tcp_deepcc_info(flow_fd)
+                raw = flow_backend.get_tcp_deepcc_info(flow_fd)
             except Exception as exc:
                 print(
                     f'[worker] get_tcp_deepcc_info failed: {exc}; exiting',
@@ -286,7 +307,7 @@ def run():
                 )
                 break
 
-            avg_throughput = float(raw.get('avg_thr', 0.0))
+            avg_throughput = float(raw.get('avg_thr', 0.0) or 0.0)
             peak_throughput = max(peak_throughput, avg_throughput)
             if avg_throughput <= 0.0:
                 dead_steps += 1
@@ -311,16 +332,18 @@ def run():
             flow_present = reward_components.get('flow_present')
             if flow_present is not None:
                 flow_active = bool(flow_present)
-            urtt = float(raw.get('avg_urtt', 0.0))
+            urtt = float(raw.get('avg_urtt', 0.0) or 0.0)
             if urtt > 0.0:
                 previous_urtt = urtt
-            previous_cwnd = int(raw.get('cwnd', previous_cwnd))
+            previous_cwnd = int(raw.get('cwnd', previous_cwnd) or previous_cwnd)
 
-            t_s = tick_start - episode_start
-            group_step = (
-                int(round(t_s / interval_s))
-                if interval_s > 0.0 else step_in_traj
-            )
+            t_s = flow_backend.episode_seconds(
+                raw, episode_start, wall_now=tick_start)
+            group_step = flow_backend.episode_step(
+                raw, episode_start, interval_s, step_in_traj,
+                wall_now=tick_start)
+            flow_backend.wait_collection_step(raw, group_step)
+            last_group_step = group_step
             if previous_state is not None and flow_active and manager:
                 experience_buffer.append(model.Experience(
                     state=previous_state,
@@ -337,15 +360,7 @@ def run():
                 ))
                 step_in_traj += 1
                 if len(experience_buffer) >= push_every:
-                    try:
-                        manager.push_exp_batch(list(experience_buffer))
-                    except Exception:
-                        for experience in experience_buffer:
-                            try:
-                                manager.push_exp(experience)
-                            except Exception:
-                                pass
-                    experience_buffer.clear()
+                    _push_experience_batch(manager, experience_buffer)
 
             # Once a flow leaves the episode schedule (flow_present == 0) it is
             # no longer part of the experiment. Stop running the actor and stop
@@ -358,10 +373,19 @@ def run():
             if not flow_active:
                 previous_state = None
                 previous_action = 0.0
-                new_cwnd = int(raw.get('cwnd', previous_cwnd))
+                new_cwnd = int(raw.get('cwnd', previous_cwnd) or previous_cwnd)
                 multiplier = 0.0
                 mu = torch.zeros(1)
                 log_std = torch.zeros(1)
+                if simulation_backend:
+                    try:
+                        flow_backend.set_cwnd(flow_fd, new_cwnd)
+                    except Exception as exc:
+                        print(
+                            f'[worker] set_cwnd failed: {exc}; exiting',
+                            flush=True,
+                        )
+                    break
             else:
                 with torch.no_grad():
                     state_tensor = torch.from_numpy(
@@ -374,7 +398,7 @@ def run():
                 action = float(action_tensor.item())
                 multiplier = float(multiplier_tensor.item())
 
-                current_cwnd = int(raw.get('cwnd', 10))
+                current_cwnd = int(raw.get('cwnd', previous_cwnd) or previous_cwnd)
                 desired_cwnd = _ACTION_PLUGIN.apply_cwnd(
                     current_cwnd, action, cwnd_min, cwnd_max)
                 srtt_raw = float(raw.get('srtt_us', 0.0) or 0.0)
@@ -382,12 +406,14 @@ def run():
                     srtt_raw / 8.0 if srtt_raw > 0.0
                     else float(raw.get('avg_urtt', 0.0) or 0.0)
                 )
-                probe.observe_rtt(tick_start, filter_rtt_us)
+                clock_t = flow_backend.observation_clock(
+                    raw, wall_now=tick_start)
+                probe.observe_rtt(clock_t, filter_rtt_us)
                 actual_cwnd, agent_locked, _ = probe.decide(
-                    tick_start, current_cwnd, desired_cwnd)
+                    clock_t, current_cwnd, desired_cwnd)
                 new_cwnd = int(np.clip(actual_cwnd, cwnd_min, cwnd_max))
                 try:
-                    tcp_sockopt.set_cwnd(flow_fd, new_cwnd)
+                    flow_backend.set_cwnd(flow_fd, new_cwnd)
                 except Exception as exc:
                     print(
                         f'[worker] set_cwnd failed: {exc}; exiting',
@@ -456,7 +482,7 @@ def run():
                     log_file.flush()
 
             elapsed = time.monotonic() - tick_start
-            if elapsed < interval_s:
+            if not simulation_backend and elapsed < interval_s:
                 time.sleep(interval_s - elapsed)
     finally:
         if manager and experience_buffer:
@@ -480,11 +506,7 @@ def run():
                     avg_throughput=previous_avg_throughput,
                     agent_id=agent_id,
                     group_id=group_id,
-                    group_step=(
-                        int(round(
-                            (time.monotonic() - episode_start) / interval_s))
-                        if interval_s > 0.0 else step_in_traj
-                    ),
+                    group_step=last_group_step + 1,
                     done=True,
                     traj_id=traj_id,
                     step_in_traj=step_in_traj,

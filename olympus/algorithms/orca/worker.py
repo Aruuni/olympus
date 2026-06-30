@@ -27,10 +27,10 @@ _PKG = os.path.dirname(_ALG_DIR)
 _REPO = os.path.dirname(_PKG)
 sys.path.insert(0, _REPO)
 
-import tcp_sockopt
 from olympus.algorithms.orca import model
 from olympus.common.action_plugins import load_action_module
 from olympus.common.bbr_probe import BbrProbe
+from olympus.common import flow_backend
 
 _ACTION_PLUGIN = load_action_module()
 
@@ -53,12 +53,17 @@ def _connect_manager():
         return None
     host, port = addr.rsplit(':', 1)
     mgr = _Mgr(address=(host, int(port)), authkey=bytes.fromhex(key))
-    try:
-        mgr.connect()
-        return mgr
-    except Exception as e:
-        print(f'[orca worker] manager connect failed: {e}', flush=True)
-        return None
+    deadline = time.monotonic() + 10.0
+    last_error = None
+    while time.monotonic() < deadline:
+        try:
+            mgr.connect()
+            return mgr
+        except Exception as e:
+            last_error = e
+            time.sleep(0.1)
+    print(f'[orca worker] manager connect failed: {last_error}', flush=True)
+    return None
 
 
 def _drain_state_fd(fd: int, stop: threading.Event):
@@ -109,6 +114,7 @@ def run():
     target = float(os.environ.get('SAO_ORCA_TARGET_MS',
                                   os.environ.get('OC_ORCA_TARGET_MS', '50.0')))
     use_normalizer = _bool_env('SAO_ORCA_USE_NORMALIZER', False)
+    simulation_backend = flow_backend.is_simulation_backend()
 
     deterministic = os.environ.get('SAO_DETERMINISTIC', '0') == '1'
     if deterministic:
@@ -187,7 +193,7 @@ def run():
     t0 = float(os.environ.get('SAO_EPISODE_START', '0')) or time.monotonic()
     traj_id = f'orca_{cport}_{episode}_{flow_id}'
     interval_s_cfg = interval_ms / 1000.0
-    last_sample_t = time.monotonic()
+    last_sample_t = 0.0 if simulation_backend else time.monotonic()
 
     prev_state = None
     prev_action = 0.0
@@ -254,7 +260,7 @@ def run():
         while True:
             t_step_start = time.monotonic()
             try:
-                raw = tcp_sockopt.get_tcp_deepcc_info(flow_fd)
+                raw = flow_backend.get_tcp_deepcc_info(flow_fd)
             except Exception as e:
                 print(f'[orca worker] get_tcp_deepcc_info failed: {e} - exiting',
                       flush=True)
@@ -297,14 +303,16 @@ def run():
                 ever_alive = True
             flow_active = (not ever_alive) or (dead_steps < dead_steps_limit)
 
-            interval_s = max(t_step_start - last_sample_t, 1e-6)
-            last_sample_t = t_step_start
+            interval_s, last_sample_t = flow_backend.interval_seconds(
+                raw, last_sample_t, wall_now=t_step_start)
             # Orca's envwrapper.py:240 only updates Welford stats in training mode.
             base_state, reward = transform.step(raw, interval_s=interval_s,
                                                 target=target,
                                                 evaluation=deterministic)
             norm_s = history.push(base_state)
-            t_s = t_step_start - t0
+            t_s = flow_backend.episode_seconds(
+                raw, t0, wall_now=t_step_start)
+            flow_backend.wait_collection_step(raw)
 
             if prev_state is not None and flow_active and mgr:
                 exp_buf.append(model.Experience(
@@ -337,13 +345,14 @@ def run():
             # only if srtt isn't populated yet (pre-handshake).
             srtt_raw_us = float(raw.get('srtt_us', 0) or 0)
             filter_rtt_us = (srtt_raw_us / 8.0) if srtt_raw_us > 0 else float(raw.get('avg_urtt', 0) or 0)
-            probe.observe_rtt(t_step_start, filter_rtt_us)
+            clock_t = flow_backend.observation_clock(raw, wall_now=t_step_start)
+            probe.observe_rtt(clock_t, filter_rtt_us)
 
             actual_cwnd, agent_locked, _probe_transition = probe.decide(
-                t_step_start, cur_cwnd, desired_cwnd)
+                clock_t, cur_cwnd, desired_cwnd)
             new_cwnd = int(np.clip(actual_cwnd, cwnd_min, cwnd_max))
             try:
-                tcp_sockopt.set_cwnd(flow_fd, new_cwnd)
+                flow_backend.set_cwnd(flow_fd, new_cwnd)
             except Exception as e:
                 print(f'[orca worker] set_cwnd failed: {e} - exiting', flush=True)
                 break
@@ -392,7 +401,7 @@ def run():
 
             elapsed = time.monotonic() - t_step_start
             sleep_t = interval_s_cfg - elapsed
-            if sleep_t > 0:
+            if sleep_t > 0 and not simulation_backend:
                 time.sleep(sleep_t)
 
     finally:

@@ -42,8 +42,16 @@ class RewardCalc:
         self._bw_schedule.sort()
         self._rtt_schedule.sort()
 
-    def _current_link_bw(self) -> float:
-        now = time.monotonic()
+    def _schedule_time(self, info: dict = None) -> float:
+        if isinstance(info, dict) and 'time_s' in info:
+            try:
+                return self._episode_start + float(info.get('time_s') or 0.0)
+            except (TypeError, ValueError):
+                pass
+        return time.monotonic()
+
+    def _current_link_bw(self, info: dict = None) -> float:
+        now = self._schedule_time(info)
         val = self._initial_bw
         for t_abs, bw_bs in self._bw_schedule:
             if now >= t_abs:
@@ -52,8 +60,8 @@ class RewardCalc:
                 break
         return val
 
-    def _current_link_rtt_us(self) -> float:
-        now = time.monotonic()
+    def _current_link_rtt_us(self, info: dict = None) -> float:
+        now = self._schedule_time(info)
         val = self._initial_rtt
         for t_abs, rtt_us in self._rtt_schedule:
             if now >= t_abs:
@@ -78,8 +86,8 @@ class RewardCalc:
         if avg_thr > self._max_tput:
             self._max_tput = avg_thr
 
-        bw_ref = max(self._current_link_bw(), 1.0)
-        rtt_ref = max(self._current_link_rtt_us(), 1.0)
+        bw_ref = max(self._current_link_bw(info), 1.0)
+        rtt_ref = max(self._current_link_rtt_us(info), 1.0)
 
         thr_ratio = min(avg_thr / bw_ref, 1.0)
         rtt_rate = min(rtt_ref / avg_urtt, 1.0) if avg_urtt > 0 else 1.0

@@ -56,13 +56,10 @@ environment:
   #   multiflow_interleave  up to N flows join at random times and leave after
   #                         random lifetimes (multi-agent joint training, or
   #                         lagged self-play under a single-agent algorithm).
-  #   multiflow_interleave_rtt  same join/leave dynamics, but each flow
-  #                         propagates at its own base RTT (one-way delay =
-  #                         base delay * U(0.20, 5.0) per flow per episode).
   #   dynamic               one flow under changing BW/RTT link schedules.
   #   static                one flow on a steady link (no schedule changes).
   #   lagged_fairness       one flow plus lagged-policy background flows (join only).
-  type: mininet
+  type: raynet
   environment_setup: multiflow_interleave_rtt
 
 reward:
@@ -120,18 +117,25 @@ outputs:
   # Optional: set run_name to force a specific folder name under root.
   # run_name: debug_run
   # Set false to skip per-episode PDFs in plots/ (episode_returns.csv and
-  # telemetry/episode_returns.pdf are still generated).
+  # telemetry/episode_returns.pdf are still generated). When true,
+  # plot_every_n renders only episodes whose id is divisible by this value.
   plot_episodes: true
+  plot_every_n: 1
   # When true, also plot normalized state columns (s0, s1, ...) whenever an
   # episode PDF is emitted.
   plot_observations: false
 
-n_parallel: 20
+n_parallel: 4
+
+# RayNet-only: block worker experience pushes until every parallel simulation
+# has reached the same collection step. This intentionally lets the slowest
+# simulation set the pace so fast low-cwnd runs cannot dominate replay.
+synchronized_collection: true
 
 # Hard cap on total dispatched episodes. The orchestrator stops handing out new
 # work once this many have been launched and lets in-flight slots drain. Omit
 # (or set null) to run until interrupted.
-episodes: 20000
+episodes: 10000
 
 algorithms:
 
@@ -297,10 +301,11 @@ algorithms:
   # single-agent `reward:` block above.
   ma_dreamer:
     training:
-      resume_from: olympus/models/ma_dreamer_20260624-160040/checkpoints/ma_dreamer_cwnd_model.pt
+      resume_from: null
+      # resume_from: olympus/models/ma_dreamer_20260630-015953/checkpoints/ma_dreamer_cwnd_model.pt
       batch_size: 128
       seq_len: 48
-      min_replay: 50000
+      min_replay: 5000
       replay_capacity: 400000
       updates_per_step: 1
       worker_push_every: 16
@@ -330,7 +335,7 @@ algorithms:
       actor_log_std_min: -2.0
       actor_log_std_max: 0.0
       target_tau: 0.02
-      actor_warmup_steps: 1000
+      actor_warmup_steps: 10
       value_bins: 255
       value_low: -20.0
       value_high: 20.0
@@ -350,7 +355,7 @@ algorithms:
       global_latent_classes: 8
       interval_ms: 20
       cwnd_min: 4
-      cwnd_max: 10000
+      cwnd_max: 500
       dead_flow_ms: 500
       noise_start: 0.2
       noise_end: 0.05

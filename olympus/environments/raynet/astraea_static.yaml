@@ -1,0 +1,17 @@
+name: astraea_static
+description: RayNet Orca simulation episodes from explicit OMNeT++ INI sections.
+shuffle: true
+
+sweep:
+  # RayNet Meta parameters
+  protocol: Astraea
+  ini_path: /home/james/raynet/simlibs/Astraea/src/training/AstraeaTraining.ini
+  section: General
+
+  flows: [2]
+  bws: [40]
+  delays: [40]
+  bdp_mult: 1
+  duration: 20
+  link_schedules:
+    - []

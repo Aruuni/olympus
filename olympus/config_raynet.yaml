@@ -20,8 +20,8 @@
 #                                   via reward.per_agent_credit (team_alpha / over_weight).
 
 runtime:
-  algorithm: ma_dreamer
-  reward: tempest_fairness_ma
+  algorithm: dreamer_v3
+  reward: tempest
   state: tempest
   action: cwnd_multiplier
 
@@ -56,14 +56,11 @@ environment:
   #   multiflow_interleave  up to N flows join at random times and leave after
   #                         random lifetimes (multi-agent joint training, or
   #                         lagged self-play under a single-agent algorithm).
-  #   multiflow_interleave_rtt  same join/leave dynamics, but each flow
-  #                         propagates at its own base RTT (one-way delay =
-  #                         base delay * U(0.20, 5.0) per flow per episode).
   #   dynamic               one flow under changing BW/RTT link schedules.
   #   static                one flow on a steady link (no schedule changes).
   #   lagged_fairness       one flow plus lagged-policy background flows (join only).
-  type: mininet
-  environment_setup: multiflow_interleave_rtt
+  type: raynet
+  environment_setup: dynamic
 
 reward:
   delay_margin_coef: 1.25
@@ -126,12 +123,12 @@ outputs:
   # episode PDF is emitted.
   plot_observations: false
 
-n_parallel: 20
+n_parallel: 12
 
 # Hard cap on total dispatched episodes. The orchestrator stops handing out new
 # work once this many have been launched and lets in-flight slots drain. Omit
 # (or set null) to run until interrupted.
-episodes: 20000
+episodes: 10000
 
 algorithms:
 
@@ -297,7 +294,7 @@ algorithms:
   # single-agent `reward:` block above.
   ma_dreamer:
     training:
-      resume_from: olympus/models/ma_dreamer_20260624-160040/checkpoints/ma_dreamer_cwnd_model.pt
+      resume_from: null
       batch_size: 128
       seq_len: 48
       min_replay: 50000

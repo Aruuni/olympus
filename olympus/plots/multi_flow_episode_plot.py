@@ -8,8 +8,9 @@ Each MAT worker writes a per-flow trace beside the requested state log:
     ...
 
 This module overlays all available agents in one PDF and returns the summed
-episode return, trimming the final five seconds to match the single-agent
-plotter's iperf teardown handling.
+episode return. By default it trims the final five seconds to match the
+single-agent plotter's iperf teardown handling; simulation callers can disable
+that trim.
 """
 
 import csv
@@ -176,20 +177,26 @@ def _r_fair_matrix(values: np.ndarray) -> np.ndarray:
     return out.astype(np.float32)
 
 
-def fairness_series(state_log_path: str, n_agents: int = None):
-    traces = load_agent_traces(state_log_path, n_agents=n_agents)
+def fairness_series(state_log_path: str, n_agents: int = None,
+                    trim_tail_s: float = 5.0):
+    traces = load_agent_traces(
+        state_log_path, n_agents=n_agents, trim_tail_s=trim_tail_s)
     t, thr = _aligned_matrix(traces, 'avg_thr_mbps')
     return t, _jains_matrix(thr)
 
 
-def r_fair_series(state_log_path: str, n_agents: int = None):
-    traces = load_agent_traces(state_log_path, n_agents=n_agents)
+def r_fair_series(state_log_path: str, n_agents: int = None,
+                  trim_tail_s: float = 5.0):
+    traces = load_agent_traces(
+        state_log_path, n_agents=n_agents, trim_tail_s=trim_tail_s)
     t, thr = _aligned_matrix(traces, 'avg_thr_mbps')
     return t, _r_fair_matrix(thr)
 
 
-def episode_return(state_log_path: str, n_agents: int = None) -> float:
-    traces = load_agent_traces(state_log_path, n_agents=n_agents)
+def episode_return(state_log_path: str, n_agents: int = None,
+                   trim_tail_s: float = 5.0) -> float:
+    traces = load_agent_traces(
+        state_log_path, n_agents=n_agents, trim_tail_s=trim_tail_s)
     if not traces:
         return None
     total = 0.0
@@ -214,18 +221,22 @@ def _agent_label(agent_id):
 
 
 def plot(state_log_path: str, output: str, bw: float, delay: float,
-         title: str = None, link_schedule: list = None, n_agents: int = None):
-    traces = load_agent_traces(state_log_path, n_agents=n_agents)
+         title: str = None, link_schedule: list = None, n_agents: int = None,
+         trim_tail_s: float = 5.0):
+    traces = load_agent_traces(
+        state_log_path, n_agents=n_agents, trim_tail_s=trim_tail_s)
     if not traces:
         print(f'[multi_ep_plot] no agent traces for: {state_log_path}', flush=True)
         return None
 
-    ep_return = episode_return(state_log_path, n_agents=n_agents)
+    ep_return = episode_return(
+        state_log_path, n_agents=n_agents, trim_tail_s=trim_tail_s)
     t_ref = max((item['data']['t_s'] for item in traces),
                 key=lambda arr: len(arr))
     bw_ref = _step_series(t_ref, bw, link_schedule or [], 'bw')
     delay_ref = _step_series(t_ref, delay, link_schedule or [], 'delay')
-    fair_t, fair = r_fair_series(state_log_path, n_agents=n_agents)
+    fair_t, fair = r_fair_series(
+        state_log_path, n_agents=n_agents, trim_tail_s=trim_tail_s)
     fair_mean = float(np.nanmean(fair)) if len(fair) else np.nan
 
     fig, axes = plt.subplots(8, 1, figsize=(14, 22), sharex=False)

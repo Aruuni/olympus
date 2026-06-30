@@ -1,4 +1,4 @@
-README.txt
+README.md
 setup.py
 tcp_sockopt.c
 tcp_sockopt.egg-info/PKG-INFO

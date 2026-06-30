@@ -61,25 +61,33 @@ class RewardCalc(TempestRewardCalc):
         )
         return max(1, active)
 
+    def _elapsed(self, info: dict) -> float:
+        if isinstance(info, dict) and 'time_s' in info:
+            try:
+                return max(0.0, float(info.get('time_s') or 0.0))
+            except (TypeError, ValueError):
+                pass
+        return max(0.0, time.monotonic() - self._episode_start)
+
     def _thr_term(self, avg_thr: float, fair_bw: float) -> float:
         """Throughput factor of the base reward: rises to 1 at the fair share
         and stays flat beyond it (over-grabbing earns nothing extra)."""
         return min(avg_thr / fair_bw, 1.0)
 
     def step(self, info):
-        avg_thr = float(info.get('avg_thr', 0))
-        avg_urtt = float(info.get('avg_urtt', 0))
+        avg_thr = float(info.get('avg_thr', 0.0) or 0.0)
+        avg_urtt = float(info.get('avg_urtt', 0.0) or 0.0)
         srtt_us = self._srtt_us(info, fallback_us=avg_urtt)
 
         if avg_thr > self._max_tput:
             self._max_tput = avg_thr
 
-        elapsed = max(0.0, time.monotonic() - self._episode_start)
-        link_bw = max(self._current_link_bw(), 1.0)
+        elapsed = self._elapsed(info)
+        link_bw = max(self._current_link_bw(info), 1.0)
         active_flows = self._active_flow_count(elapsed)
         flow_present = self._flow_is_active(self._agent_id, elapsed)
         fair_bw = max(link_bw / float(active_flows), 1.0)
-        rtt_ref = max(self._current_link_rtt_us(), 1.0)
+        rtt_ref = max(self._current_link_rtt_us(info), 1.0)
 
         thr_ratio = self._thr_term(avg_thr, fair_bw)
         rtt_rate = min(rtt_ref / avg_urtt, 1.0) if avg_urtt > 0 else 1.0
