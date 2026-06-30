@@ -39,8 +39,8 @@ _PKG = os.path.dirname(_ALG_DIR)
 _REPO = os.path.dirname(_PKG)
 sys.path.insert(0, _REPO)
 
-import tcp_sockopt
 from olympus.algorithms.template_multi_agent import model   # TODO: your package
+from olympus.common import flow_backend
 from olympus.common.action_plugins import load_action_module
 from olympus.common.registry import reward_module
 
@@ -211,7 +211,7 @@ def run():
             t_step_start = time.monotonic()
 
             try:
-                raw = tcp_sockopt.get_tcp_deepcc_info(flow_fd)
+                raw = flow_backend.get_tcp_deepcc_info(flow_fd)
             except Exception as e:
                 print(f'[worker] get_tcp_deepcc_info failed: {e} - exiting', flush=True)
                 break
@@ -245,11 +245,11 @@ def run():
                 prev_urtt = urtt
             prev_cwnd = int(raw.get('cwnd', prev_cwnd))
 
-            t_s = t_step_start - t0
-            # Slot-wide tick this experience belongs to. All flows share
-            # t0 = SAO_EPISODE_START, so a late-joining flow's first push lands
-            # at group_step ≈ delay/interval, letting the learner align siblings.
-            group_step = int(round(t_s / interval_s)) if interval_s > 0 else step_in_traj
+            t_s = flow_backend.episode_seconds(
+                raw, t0, wall_now=t_step_start)
+            group_step = flow_backend.episode_step(
+                raw, t0, interval_s, step_in_traj, wall_now=t_step_start)
+            flow_backend.wait_collection_step(raw, group_step)
 
             # Push the previous step's transition. `throughput` carries the
             # avg_thr observed at the NEXT state so the learner can build the
@@ -291,6 +291,12 @@ def run():
                 prev_state = None
                 new_cwnd = int(raw.get('cwnd', prev_cwnd))
                 mult = act_mu = act_sig = 0.0
+                if flow_backend.is_simulation_backend():
+                    try:
+                        flow_backend.set_cwnd(flow_fd, new_cwnd)
+                    except Exception as e:
+                        print(f'[worker] set_cwnd failed: {e} - exiting', flush=True)
+                    break
             else:
                 # TODO: decentralized action with N=1 (own observation only).
                 (action_raw, mult, log_prob, value, act_mu, act_sig) = net.act(
@@ -301,7 +307,7 @@ def run():
                     _ACTION_PLUGIN.apply_cwnd(cur_cwnd, math.tanh(action_raw), cwnd_min, cwnd_max),
                     cwnd_min, cwnd_max))
                 try:
-                    tcp_sockopt.set_cwnd(flow_fd, new_cwnd)
+                    flow_backend.set_cwnd(flow_fd, new_cwnd)
                 except Exception as e:
                     print(f'[worker] set_cwnd failed: {e} - exiting', flush=True)
                     break

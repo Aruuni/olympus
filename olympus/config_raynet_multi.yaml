@@ -123,10 +123,7 @@ outputs:
   plot_every_n: 1
   # When true, also plot normalized state columns (s0, s1, ...) whenever an
   # episode PDF is emitted.
-  plot_observations: true
-  # Temporary MA-Dreamer debugging plot: reconstructs learner-side team reward
-  # terms from per-agent episode traces whenever an episode PDF is emitted.
-  plot_team_reward_debug: true
+  plot_observations: false
 
 n_parallel: 4
 

@@ -7,7 +7,6 @@ sweep:
   protocol: Astraea
   ini_path: /home/james/raynet/simlibs/Astraea/src/training/AstraeaTraining.ini
   section: General
-  observation_plots: true
 
   flows: [2]
   bws: [40]

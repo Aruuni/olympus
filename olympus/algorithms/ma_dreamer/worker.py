@@ -85,8 +85,8 @@ def _connect_manager():
 
 def _srtt_ms(raw: dict) -> float:
     try:
-        srtt_raw = float(raw['srtt_us'] or 0.0)
-        fallback_us = float(raw['avg_urtt'] or 0.0)
+        srtt_raw = float(raw.get('srtt_us', 0.0) or 0.0)
+        fallback_us = float(raw.get('avg_urtt', 0.0) or 0.0)
     except (TypeError, ValueError):
         return 0.0
     srtt_us = srtt_raw / 8.0 if srtt_raw > 0.0 else fallback_us
@@ -307,7 +307,7 @@ def run():
                 )
                 break
 
-            avg_throughput = float(raw['avg_thr'])
+            avg_throughput = float(raw.get('avg_thr', 0.0) or 0.0)
             peak_throughput = max(peak_throughput, avg_throughput)
             if avg_throughput <= 0.0:
                 dead_steps += 1
@@ -332,10 +332,10 @@ def run():
             flow_present = reward_components.get('flow_present')
             if flow_present is not None:
                 flow_active = bool(flow_present)
-            urtt = float(raw['avg_urtt'])
+            urtt = float(raw.get('avg_urtt', 0.0) or 0.0)
             if urtt > 0.0:
                 previous_urtt = urtt
-            previous_cwnd = int(raw['cwnd'])
+            previous_cwnd = int(raw.get('cwnd', previous_cwnd) or previous_cwnd)
 
             t_s = flow_backend.episode_seconds(
                 raw, episode_start, wall_now=tick_start)
@@ -373,7 +373,7 @@ def run():
             if not flow_active:
                 previous_state = None
                 previous_action = 0.0
-                new_cwnd = int(raw['cwnd'])
+                new_cwnd = int(raw.get('cwnd', previous_cwnd) or previous_cwnd)
                 multiplier = 0.0
                 mu = torch.zeros(1)
                 log_std = torch.zeros(1)
@@ -398,13 +398,13 @@ def run():
                 action = float(action_tensor.item())
                 multiplier = float(multiplier_tensor.item())
 
-                current_cwnd = int(raw['cwnd'])
+                current_cwnd = int(raw.get('cwnd', previous_cwnd) or previous_cwnd)
                 desired_cwnd = _ACTION_PLUGIN.apply_cwnd(
                     current_cwnd, action, cwnd_min, cwnd_max)
-                srtt_raw = float(raw['srtt_us'] or 0.0)
+                srtt_raw = float(raw.get('srtt_us', 0.0) or 0.0)
                 filter_rtt_us = (
                     srtt_raw / 8.0 if srtt_raw > 0.0
-                    else float(raw['avg_urtt'] or 0.0)
+                    else float(raw.get('avg_urtt', 0.0) or 0.0)
                 )
                 clock_t = flow_backend.observation_clock(
                     raw, wall_now=tick_start)

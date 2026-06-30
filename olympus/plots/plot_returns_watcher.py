@@ -21,7 +21,6 @@ a half-written PDF.
 
 import argparse
 import csv
-import glob
 import json
 import math
 import os
@@ -33,7 +32,6 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import numpy as np
-import yaml
 
 
 _HERE        = os.path.dirname(os.path.abspath(__file__))
@@ -262,19 +260,6 @@ def _alg_name_from_output(output_path: str) -> str:
     return 'learner'
 
 
-def _reward_config_from_output(output_path: str) -> dict:
-    config_path = os.path.join(
-        os.path.dirname(os.path.abspath(output_path)),
-        'config.resolved.yaml',
-    )
-    try:
-        with open(config_path) as f:
-            cfg = yaml.safe_load(f) or {}
-    except (FileNotFoundError, OSError, yaml.YAMLError):
-        return {}
-    return dict(cfg.get('reward') or {})
-
-
 def _wants_log(name: str) -> bool:
     n = name.lower()
     if any(tok in n for tok in ('mass', 'usage', 'fraction', 'frac', 'ratio', 'mean_beta')):
@@ -495,172 +480,6 @@ def _page_returns_time(episodes, returns, elapsed_s, n, alg_name):
     return fig
 
 
-def _state_log_path_for_episode(csv_path: str, alg_name: str, episode: int):
-    episodes_dir = os.path.dirname(os.path.abspath(csv_path))
-    preferred = os.path.join(
-        episodes_dir, f'{alg_name}_state_ep{int(episode):06d}.csv')
-    if os.path.exists(preferred):
-        return preferred
-    pattern = os.path.join(episodes_dir, f'*_state_ep{int(episode):06d}_a*.csv')
-    matches = sorted(glob.glob(pattern))
-    if not matches:
-        return None
-    first = matches[0]
-    root, ext = os.path.splitext(first)
-    return root.rsplit('_a', 1)[0] + ext
-
-
-def _episode_team_return(state_log_path: str, reward_config: dict,
-                         n_agents: int = None, trim_tail_s: float = 5.0):
-    from olympus.common.marl_team_reward import (
-        per_agent_team_reward,
-        shared_team_reward,
-    )
-    from olympus.plots.multi_flow_episode_plot import (
-        _aligned_matrix,
-        load_agent_traces,
-    )
-
-    traces = load_agent_traces(
-        state_log_path, n_agents=n_agents, trim_tail_s=trim_tail_s)
-    if len(traces) < 2:
-        return None
-    _, local_reward = _aligned_matrix(traces, 'reward')
-    _, avg_thr_mbps = _aligned_matrix(traces, 'avg_thr_mbps')
-    if local_reward.size == 0 or avg_thr_mbps.size == 0:
-        return None
-
-    # Team-reward helpers expect timestep-major arrays.
-    local_reward = local_reward.T
-    avg_thr_mbps = avg_thr_mbps.T
-    mask = np.isfinite(local_reward) & np.isfinite(avg_thr_mbps)
-    local_reward = np.nan_to_num(local_reward, nan=0.0)
-    avg_thr_mbps = np.nan_to_num(avg_thr_mbps, nan=0.0)
-
-    if bool(reward_config.get('per_agent_credit', False)):
-        team_rewards, _, _ = per_agent_team_reward(
-            local_reward,
-            avg_thr_mbps,
-            mask,
-            team_alpha=float(reward_config.get('team_alpha', 0.5)),
-            fairness_weight=float(reward_config.get('fairness_weight', 25.0)),
-            fairness_cap=float(reward_config.get('fairness_cap', 1.0)),
-            over_weight=float(reward_config.get('over_weight', 50.0)),
-        )
-        return float(np.nansum(team_rewards))
-
-    shared_rewards, _, _ = shared_team_reward(
-        local_reward,
-        avg_thr_mbps,
-        mask,
-        fairness_weight=float(reward_config.get('fairness_weight', 25.0)),
-        fairness_cap=float(reward_config.get('fairness_cap', 1.0)),
-    )
-    return float(np.nansum(shared_rewards))
-
-
-def _load_episode_team_returns(csv_path: str, episodes: np.ndarray,
-                               flows: np.ndarray, alg_name: str,
-                               reward_config: dict):
-    out = np.full(len(episodes), np.nan, dtype=np.float64)
-    for i, episode in enumerate(episodes):
-        state_log = _state_log_path_for_episode(csv_path, alg_name, int(episode))
-        if not state_log:
-            continue
-        n_agents = None
-        if flows is not None and i < len(flows) and np.isfinite(flows[i]):
-            n_agents = int(flows[i])
-        value = _episode_team_return(
-            state_log, reward_config, n_agents=n_agents, trim_tail_s=5.0)
-        if value is not None and np.isfinite(value):
-            out[i] = value
-    return out
-
-
-def _page_team_returns_bw(episodes, team_returns, bws, n, alg_name,
-                          elapsed_s=None):
-    finite = np.isfinite(team_returns)
-    if not finite.any():
-        return None
-    fig, ax = plt.subplots(figsize=(14, 5))
-    fig.suptitle(f'{alg_name} — Episode team reward by BW  '
-                 f'({int(finite.sum())}/{n} episodes'
-                 f'{_elapsed_title(elapsed_s)})',
-                 fontsize=12, fontweight='bold')
-    bw_vals = np.unique(bws[finite])
-    cmap = plt.get_cmap('tab10')
-    color = {bw: cmap(i % 10) for i, bw in enumerate(sorted(bw_vals))}
-    for bw in sorted(bw_vals):
-        m = finite & (bws == bw)
-        ax.scatter(episodes[m], team_returns[m],
-                   s=18, alpha=0.55, color=color[bw],
-                   label=f'{int(bw)} Mbps', zorder=3)
-    ax.plot(episodes[finite], _rolling(team_returns[finite], 20),
-            color='black', linewidth=1.8, label='20-ep rolling mean', zorder=4)
-    ax.axhline(team_returns[finite].mean(), color='red', linewidth=1.0,
-               linestyle='--', alpha=0.7,
-               label=f'mean={team_returns[finite].mean():.1f}')
-    ax.set_xlabel('Episode')
-    ax.set_ylabel('Team reward')
-    ax.grid(True, alpha=0.3)
-    ax.legend(fontsize=8, ncol=2, framealpha=0.8)
-    return fig
-
-
-def _page_team_returns_delay(episodes, team_returns, delays, n, alg_name,
-                             elapsed_s=None):
-    finite = np.isfinite(team_returns)
-    if not finite.any():
-        return None
-    fig, ax = plt.subplots(figsize=(14, 5))
-    fig.suptitle(f'{alg_name} — Episode team reward by delay  '
-                 f'({int(finite.sum())}/{n} episodes'
-                 f'{_elapsed_title(elapsed_s)})',
-                 fontsize=12, fontweight='bold')
-    delay_vals = np.unique(delays[finite])
-    dcmap = plt.get_cmap('Set2')
-    dcolor = {d: dcmap(i % 8) for i, d in enumerate(sorted(delay_vals))}
-    for d in sorted(delay_vals):
-        m = finite & (delays == d)
-        ax.scatter(episodes[m], team_returns[m],
-                   s=18, alpha=0.6, color=dcolor[d],
-                   label=f'{int(d)} ms', zorder=3)
-    ax.plot(episodes[finite], _rolling(team_returns[finite], 20),
-            color='black', linewidth=1.8, label='20-ep rolling mean', zorder=4)
-    ax.set_xlabel('Episode')
-    ax.set_ylabel('Team reward')
-    ax.grid(True, alpha=0.3)
-    ax.legend(fontsize=8, ncol=2, framealpha=0.8)
-    return fig
-
-
-def _page_team_returns_type(episodes, team_returns, changes, episode_types, n,
-                            alg_name, elapsed_s=None):
-    finite = np.isfinite(team_returns)
-    if not finite.any():
-        return None
-    labels = list(dict.fromkeys(str(v) for v in episode_types[finite]))
-    cmap = plt.get_cmap('tab10')
-    colors = {label: cmap(i % 10) for i, label in enumerate(labels)}
-    fig, ax = plt.subplots(figsize=(14, 5))
-    fig.suptitle(f'{alg_name} — Episode team reward by type  '
-                 f'({int(finite.sum())}/{n} episodes'
-                 f'{_elapsed_title(elapsed_s)})',
-                 fontsize=12, fontweight='bold')
-    for label in labels:
-        m = finite & (episode_types == label)
-        ax.scatter(episodes[m], team_returns[m],
-                   s=20, alpha=0.62, color=colors[label],
-                   label=_episode_type_display(label), zorder=3)
-    ax.plot(episodes[finite], _rolling(team_returns[finite], 20),
-            color='black', linewidth=1.8, label='20-ep rolling mean', zorder=4)
-    ax.set_xlabel('Episode')
-    ax.set_ylabel('Team reward')
-    ax.grid(True, alpha=0.3)
-    ax.legend(fontsize=8, ncol=2, framealpha=0.8)
-    return fig
-
-
 def _page_learner_metrics_auto(ld: dict, n_ep: int, alg_name: str,
                                panels_per_page: int = 12):
     """
@@ -763,7 +582,6 @@ def generate_plot(csv_path: str = _CSV_PATH, output: str = _OUTPUT,
         return 0
 
     alg_name = _alg_name_from_output(output)
-    reward_config = _reward_config_from_output(output)
     ld       = _load_metrics_csv(learner_log)
     n_steps  = 0
     if ld and 'step' in ld and ld['step'].size:
@@ -799,22 +617,6 @@ def generate_plot(csv_path: str = _CSV_PATH, output: str = _OUTPUT,
             pdf.savefig(fig, dpi=120, bbox_inches='tight')
             plt.close(fig)
 
-        team_returns = _load_episode_team_returns(
-            csv_path, episodes, flows, alg_name, reward_config)
-        team_return_figs = [
-            _page_team_returns_bw(
-                episodes, team_returns, bws, n, alg_name, elapsed_s),
-            _page_team_returns_delay(
-                episodes, team_returns, delays, n, alg_name, elapsed_s),
-            _page_team_returns_type(
-                episodes, team_returns, changes, episode_types, n,
-                alg_name, elapsed_s),
-        ]
-        for fig in team_return_figs:
-            if fig is None:
-                continue
-            pdf.savefig(fig, dpi=120, bbox_inches='tight')
-            plt.close(fig)
 
         for fig in _page_learner_metrics_auto(ld, n, alg_name):
             pdf.savefig(fig, dpi=120, bbox_inches='tight')

@@ -107,25 +107,25 @@ def update_tempest_kalman_min_rtt(info: dict) -> float:
     if _KALMAN is None:
         reset_tempest_kalman()
 
-    avg_urtt = float(info['avg_urtt'])
+    avg_urtt = float(info.get('avg_urtt', 0.0) or 0.0)
     if avg_urtt > 0:
         return _KALMAN.update(avg_urtt)
     return _KALMAN.estimate
 
 
 def normalize_state(info: dict) -> np.ndarray:
-    cwnd = max(int(info['cwnd']), 1)
-    avg_thr = float(info['avg_thr'])
-    avg_urtt = float(info['avg_urtt'])
-    srtt_raw = float(info['srtt_us'])
+    cwnd = max(int(info.get('cwnd', 1) or 1), 1)
+    avg_thr = float(info.get('avg_thr', 0.0) or 0.0)
+    avg_urtt = float(info.get('avg_urtt', 0.0) or 0.0)
+    srtt_raw = float(info.get('srtt_us', 0.0) or 0.0)
     srtt_us = (srtt_raw / 8.0) if srtt_raw > 0 else avg_urtt
     srtt_us = max(srtt_us, 1.0)
-    pacing_rate = float(info['pacing_rate'])
-    packets_out = float(info['packets_out'])
-    retrans_out = float(info['retrans_out'])
-    prev_urtt = float(info['prev_urtt'])
-    prev_cwnd = float(info['prev_cwnd'])
-    peak_thr = float(info['peak_thr'])
+    pacing_rate = float(info.get('pacing_rate', 0.0) or 0.0)
+    packets_out = float(info.get('packets_out', 0.0) or 0.0)
+    retrans_out = float(info.get('retrans_out', 0.0) or 0.0)
+    prev_urtt = float(info.get('prev_urtt', 0.0) or 0.0)
+    prev_cwnd = float(info.get('prev_cwnd', cwnd) or cwnd)
+    peak_thr = float(info.get('peak_thr', 0.0) or 0.0)
 
     kalman_min_rtt = max(update_tempest_kalman_min_rtt(info), 1.0)
     info['kalman_min_rtt_us'] = kalman_min_rtt

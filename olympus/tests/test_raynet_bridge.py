@@ -246,7 +246,7 @@ class RayNetFlowServiceTest(unittest.TestCase):
                                   return_value=sync):
             flow_backend.wait_collection_step(raw)
 
-        sync.wait_until_allowed.assert_called_once_with(3, 11, 7)
+        sync.wait_until_allowed.assert_called_once_with(3, 11, 7, None, 1)
 
     def test_fake_omnet_episode_actions_and_cleanup(self):
         FakeRayNetClient.instances.clear()
@@ -361,7 +361,7 @@ class RayNetFlowServiceTest(unittest.TestCase):
                 'duration': 1,
             }
             cfg = {
-                'environment': {'type': 'raynet', 'environment_setup': 'astraea_smoke'},
+                'environment': {'type': 'raynet', 'environment_setup': 'astraea_static'},
                 'runtime': {'algorithm': 'ma_dreamer'},
                 'training': {'checkpoint': os.path.join(directory, 'model.pt')},
                 'agent': {},
@@ -408,7 +408,7 @@ class RayNetFlowServiceTest(unittest.TestCase):
                 'per_flow_delays': [5.0, 15.0],
             }
             cfg = {
-                'environment': {'type': 'raynet', 'environment_setup': 'lagged_smoke'},
+                'environment': {'type': 'raynet', 'environment_setup': 'lagged_fairness'},
                 'runtime': {'algorithm': 'td3', 'reward': 'tempest', 'state': 'tempest'},
                 'training': {'checkpoint': os.path.join(directory, 'model.pt')},
                 'agent': {},
@@ -446,7 +446,7 @@ class RayNetFlowServiceTest(unittest.TestCase):
 class RayNetOrchestratorDispatchTest(unittest.TestCase):
     def test_run_episode_auto_uses_algorithm_dispatch_for_raynet_marl(self):
         cfg = {
-            'environment': {'type': 'raynet', 'environment_setup': 'astraea_smoke'},
+            'environment': {'type': 'raynet', 'environment_setup': 'astraea_static'},
             'runtime': {'algorithm': 'ma_dreamer'},
         }
         with mock.patch.object(orchestrator, 'run_episode') as single, \

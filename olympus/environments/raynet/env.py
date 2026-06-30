@@ -515,37 +515,8 @@ class RaynetEnv(NetworkEnv):
             config['episode'] = self.environment_config.get('episode')
         if self.environment_config.get('slot') is not None:
             config['slot'] = self.environment_config.get('slot')
-        observation_plot = self._observation_plot_config()
-        if observation_plot is not None:
-            config['observation_plots'] = observation_plot
         if self.observation_fields:
             config['observation_fields'] = self.observation_fields
-        return config
-
-    def _observation_plot_config(self):
-        raw = self.environment_config.get(
-            'observation_plots',
-            self.environment_config.get(
-                'plot_observations',
-                self.environment_config.get('observation_plot'),
-            ),
-        )
-        if raw in (None, False):
-            return None
-        if isinstance(raw, dict):
-            config = dict(raw)
-            enabled = config.get('enabled', True)
-        else:
-            config = {'enabled': raw}
-            enabled = raw
-        if str(enabled).lower() in ('0', 'false', 'no', 'off'):
-            return None
-        config['enabled'] = True
-        if self.environment_config.get('observation_plot_dir') is not None:
-            config.setdefault(
-                'output_dir',
-                self.environment_config.get('observation_plot_dir'),
-            )
         return config
 
     def observation_to_raw(self, observation):

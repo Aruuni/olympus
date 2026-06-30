@@ -77,15 +77,15 @@ class RewardCalc:
 
     def _srtt_us(self, info: dict, fallback_us: float = 0.0) -> float:
         try:
-            srtt_raw = float(info['srtt_us'] or 0.0)
+            srtt_raw = float(info.get('srtt_us', 0.0) or 0.0)
         except (TypeError, ValueError):
             srtt_raw = 0.0
         srtt_us = (srtt_raw / 8.0) if srtt_raw > 0.0 else float(fallback_us or 0.0)
         return srtt_us if math.isfinite(srtt_us) and srtt_us > 0.0 else 0.0
 
     def step(self, info: dict) -> float:
-        avg_thr = float(info['avg_thr'])
-        avg_urtt = float(info['avg_urtt'])
+        avg_thr = float(info.get('avg_thr', 0.0) or 0.0)
+        avg_urtt = float(info.get('avg_urtt', 0.0) or 0.0)
         srtt_us = self._srtt_us(info, fallback_us=avg_urtt)
 
         if avg_thr > self._max_tput:
