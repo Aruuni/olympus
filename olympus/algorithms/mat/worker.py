@@ -302,6 +302,12 @@ def run():
                 prev_state = None
                 new_cwnd = int(raw.get('cwnd', prev_cwnd))
                 mult = act_mu = act_sig = 0.0
+                if flow_backend.is_simulation_backend():
+                    try:
+                        flow_backend.set_cwnd(flow_fd, new_cwnd)
+                    except Exception as e:
+                        print(f'[worker] set_cwnd failed: {e} - exiting', flush=True)
+                    break
             else:
                 # Sample action from the parameter-shared transformer policy
                 # with N=1 (own observation). The transformer self-attends on a

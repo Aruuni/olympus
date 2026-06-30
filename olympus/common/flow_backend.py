@@ -15,8 +15,14 @@ class _RayNetManager(BaseManager):
     pass
 
 
+class _RayNetSyncManager(BaseManager):
+    pass
+
+
 _RayNetManager.register('flow_service')
+_RayNetSyncManager.register('collection_sync')
 _RAYNET_SERVICE = None
+_RAYNET_SYNC_SERVICE = None
 
 
 def _backend_name():
@@ -54,6 +60,32 @@ def episode_step(raw, episode_start, interval_s, step_in_traj, wall_now=None):
     if interval_s > 0.0:
         return max(0, int(round(seconds / interval_s)))
     return max(0, int(step_in_traj))
+
+
+def wait_collection_step(raw, step=None):
+    """Block RayNet workers until every active slot completes this step."""
+    if _backend_name() != 'raynet':
+        return None
+    sync = _raynet_sync_service()
+    if sync is None:
+        return None
+    if step is None:
+        step = episode_step(raw, 0.0, 0.0, 0)
+    slot = int(os.environ.get(
+        'OC_RAYNET_SYNC_SLOT',
+        os.environ.get('SAO_INSTANCE_ID', os.environ.get('OC_CPORT', '0')),
+    ))
+    episode = int(os.environ.get(
+        'OC_RAYNET_SYNC_EPISODE',
+        os.environ.get('SAO_EPISODE', os.environ.get('OC_EPISODE', '0')),
+    ))
+    participant = os.environ.get(
+        'OC_FLOW_ID', os.environ.get('SAO_AGENT_ID', os.environ.get('OC_CPORT')))
+    participants = 1
+    if isinstance(raw, dict):
+        participants = raw.get('collection_participants', participants)
+    return sync.wait_until_allowed(
+        slot, episode, int(step), participant, int(participants or 1))
 
 
 def interval_seconds(raw, previous_clock, wall_now=None, minimum=1e-6):
@@ -97,6 +129,38 @@ def _raynet_service():
     manager.connect()
     _RAYNET_SERVICE = manager.flow_service()
     return _RAYNET_SERVICE
+
+
+def _raynet_sync_service():
+    global _RAYNET_SYNC_SERVICE
+    if _RAYNET_SYNC_SERVICE is not None:
+        return _RAYNET_SYNC_SERVICE
+
+    address = os.environ.get('OC_RAYNET_SYNC_ADDR', '')
+    key = os.environ.get('OC_RAYNET_SYNC_KEY', '')
+    if not address or not key:
+        return None
+
+    host, port = address.rsplit(':', 1)
+    manager = _RayNetSyncManager(
+        address=(host, int(port)),
+        authkey=bytes.fromhex(key),
+    )
+    deadline = time.monotonic() + 30.0
+    last_error = None
+    while time.monotonic() < deadline:
+        try:
+            manager.connect()
+            _RAYNET_SYNC_SERVICE = manager.collection_sync()
+            return _RAYNET_SYNC_SERVICE
+        except (ConnectionRefusedError, FileNotFoundError, OSError) as exc:
+            last_error = exc
+            time.sleep(0.05)
+    if last_error is not None:
+        raise last_error
+    manager.connect()
+    _RAYNET_SYNC_SERVICE = manager.collection_sync()
+    return _RAYNET_SYNC_SERVICE
 
 
 def get_tcp_deepcc_info(flow_fd):

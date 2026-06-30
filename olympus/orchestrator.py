@@ -59,6 +59,10 @@ from olympus.plots.normalized_state_plot import (
     plot as _plot_normalized_state,
     _state_plot_path,
 )
+from olympus.plots.team_reward_debug_plot import (
+    plot as _plot_team_reward_debug,
+    _team_reward_plot_path,
+)
 from olympus.common.checkpoint_config import (
     apply_model_config_from_checkpoint,
 )
@@ -212,6 +216,26 @@ def _plot_normalized_state_if_requested(outputs, episode, state_logs,
         )
     except Exception as exc:
         print(f'[state_plot] ep={episode} plot failed: {exc}', flush=True)
+
+
+def _plot_team_reward_debug_if_requested(outputs, cfg, episode, state_log,
+                                         episode_plot_path, title, n_agents,
+                                         trim_tail_s):
+    if not _should_plot_episode(outputs, episode):
+        return
+    if not _as_bool(outputs.get('plot_team_reward_debug'), default=False):
+        return
+    try:
+        _plot_team_reward_debug(
+            state_log_path=state_log,
+            output=_team_reward_plot_path(episode_plot_path),
+            title=title,
+            n_agents=n_agents,
+            trim_tail_s=trim_tail_s,
+            reward_config=cfg.get('reward', {}),
+        )
+    except Exception as exc:
+        print(f'[team_reward_plot] ep={episode} plot failed: {exc}', flush=True)
 
 
 def _final_runtime_cleanup(learner_port: int):
@@ -985,6 +1009,8 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
             'OC_FLOW_BACKEND': 'raynet',
             'OC_RAYNET_FLOW_ADDR': env.flow_addr,
             'OC_RAYNET_FLOW_KEY': env.flow_key,
+            'OC_RAYNET_SYNC_SLOT': str(int(instance_id)),
+            'OC_RAYNET_SYNC_EPISODE': str(int(episode)),
         })
         sync_cfg = cfg.get('_raynet_collection_sync') or {}
         if sync_cfg:
@@ -1642,6 +1668,8 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
             'OC_FLOW_BACKEND': 'raynet',
             'OC_RAYNET_FLOW_ADDR': env.flow_addr,
             'OC_RAYNET_FLOW_KEY': env.flow_key,
+            'OC_RAYNET_SYNC_SLOT': str(int(instance_id)),
+            'OC_RAYNET_SYNC_EPISODE': str(int(episode)),
         })
         sync_cfg = cfg.get('_raynet_collection_sync') or {}
         if sync_cfg:
@@ -1744,6 +1772,9 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
             _plot_normalized_state_if_requested(
                 outputs, episode, state_logs, pdf_path, plot_title,
                 plot_trim_tail_s)
+            _plot_team_reward_debug_if_requested(
+                outputs, cfg, episode, state_log, pdf_path, plot_title,
+                n_flows, plot_trim_tail_s)
             if plotted_return is not None:
                 ep_return = plotted_return
             print(f'[ep_plot] ep={episode} -> {pdf_path}  return={ep_return}', flush=True)

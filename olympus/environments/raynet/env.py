@@ -105,36 +105,64 @@ class _RayNetCollectionSync:
         self.slot_episode = {}
         self.slot_offset = {}
         self.slot_total = {}
+        self.step_arrivals = {}
+        self.step_required = {}
 
     def set_target_slots(self, target_slots):
         with self.condition:
             self.target_slots = max(1, int(target_slots))
             self.condition.notify_all()
 
-    def wait_until_allowed(self, slot, episode, step):
+    def wait_until_allowed(self, slot, episode, step, participant=None,
+                           participants=1):
         slot = int(slot)
         episode = int(episode)
         step = max(0, int(step))
+        participant = 'slot' if participant is None else str(participant)
+        participants = max(1, int(participants or 1))
         with self.condition:
-            total = self._update_slot_locked(slot, episode, step)
-            while not self._ready_locked(total):
+            total = self._step_total_locked(slot, episode, step)
+            key = (slot, episode, total)
+            self.step_required[key] = max(
+                participants, int(self.step_required.get(key, 0)))
+            arrivals = self.step_arrivals.setdefault(key, set())
+            arrivals.add(participant)
+            self._mark_complete_locked(slot, key, total)
+            self.condition.notify_all()
+
+            while (not self._step_complete_locked(key)
+                   or not self._ready_locked(total)):
                 self.condition.wait()
             self.condition.notify_all()
         return None
 
-    def _update_slot_locked(self, slot, episode, step):
+    def _step_total_locked(self, slot, episode, step):
         previous_episode = self.slot_episode.get(slot)
         if previous_episode is None:
             self.slot_episode[slot] = episode
             self.slot_offset[slot] = 0
         elif previous_episode != episode:
-            self.slot_offset[slot] = self.slot_total.get(slot, 0)
+            self.slot_offset[slot] = self.slot_total.get(slot, 0) + 1
             self.slot_episode[slot] = episode
+            self._clear_slot_steps_locked(slot)
+        return int(self.slot_offset.get(slot, 0)) + step
 
-        total = int(self.slot_offset.get(slot, 0)) + step
-        total = max(total, int(self.slot_total.get(slot, 0)))
-        self.slot_total[slot] = total
-        return total
+    def _clear_slot_steps_locked(self, slot):
+        for key in list(self.step_arrivals):
+            if key[0] == slot:
+                self.step_arrivals.pop(key, None)
+                self.step_required.pop(key, None)
+
+    def _mark_complete_locked(self, slot, key, total):
+        if not self._step_complete_locked(key):
+            return
+        previous = int(self.slot_total.get(slot, -1))
+        self.slot_total[slot] = max(previous, int(total))
+
+    def _step_complete_locked(self, key):
+        required = max(1, int(self.step_required.get(key, 1)))
+        arrivals = self.step_arrivals.get(key, set())
+        return len(arrivals) >= required
 
     def _ready_locked(self, total):
         if len(self.slot_total) < self.target_slots:
@@ -158,6 +186,7 @@ class _RayNetFlowService:
         self.expected_flows = set()
         self.agent_by_flow = {}
         self.flow_by_agent = {}
+        self.flow_assignment_order = []
         self.last_raw = {}
         self.info = {}
         self.done = False
@@ -268,15 +297,30 @@ class _RayNetFlowService:
                 raw['group_step'] = self.info['group_step']
             raw_by_flow[flow_id] = raw
             self.last_raw[flow_id] = raw
+        participants = max(1, len(raw_by_flow))
+        for raw in raw_by_flow.values():
+            raw['collection_participants'] = participants
         self.observations = raw_by_flow
         self.expected_flows = set(raw_by_flow)
         self.consumed = set()
         self.pending_actions = {}
 
+    def set_flow_schedule(self, start_delays=None):
+        delays = list(start_delays or [])[:self.env.n]
+        delays.extend([0.0] * (self.env.n - len(delays)))
+        self.flow_assignment_order = [
+            flow_id for flow_id, _ in sorted(
+                enumerate(delays), key=lambda item: (float(item[1]), item[0]))
+        ]
+
     def _flow_id_for_agent(self, agent_id):
         agent_id = str(agent_id)
         if agent_id not in self.flow_by_agent:
-            flow_id = len(self.flow_by_agent)
+            assigned = len(self.flow_by_agent)
+            if assigned < len(self.flow_assignment_order):
+                flow_id = self.flow_assignment_order[assigned]
+            else:
+                flow_id = assigned
             self.flow_by_agent[agent_id] = flow_id
             self.agent_by_flow[flow_id] = agent_id
         return self.flow_by_agent[agent_id]
@@ -407,6 +451,7 @@ class RaynetEnv(NetworkEnv):
             raise RuntimeError('RayNet environment not started')
         self.start_delays = start_delays
         self.flow_durations = flow_durations
+        self._service.set_flow_schedule(start_delays)
         self._service.start_episode()
         self._service.wait()
 

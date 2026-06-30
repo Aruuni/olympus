@@ -5,8 +5,9 @@ description: >
   random multiple of the selected environment's base RTT, drawn uniformly in
   [per_flow_rtt_mult_min, per_flow_rtt_mult_max] (default 0.20x .. 5.0x) per
   flow, per episode. The shared s1-s2 link then carries no propagation delay and
-  each flow's RTT lives on its own sender access link (see `per_flow_delays` in
-  environments/mininet/env.py), so flows with very different RTTs contend on the
+  each flow's one-way forward-path delay lives on the router-to-server
+  access link (see `per_flow_delays` in RayNet scenario generation), so packets
+  reach the bottleneck immediately and flows with very different RTTs contend on the
   same bottleneck — an inter-RTT-fairness stress test on top of the interleave
   join/leave dynamics. Multi-agent algorithms (mat, ma_dreamer) train every flow
   jointly; single-agent algorithms run the extra flows as lagged self-play.
@@ -16,11 +17,11 @@ sweep:
   protocol: Astraea
   ini_path: /home/james/raynet/_environments/multiflow_interleave_rtt/config_multiflow_interleave_rtt.ini
   section: General
-  bw_range:    [20, 100]
+  bw_range:    [10, 20]
   bw_step:     10
-  delay_range: [10, 80]
+  delay_range: [10, 20]
   delay_step:  10
-  bdp_mult: 4
+  bdp_mult: 1
   # Concurrent flows (agents) per slot. A list sweeps all listed counts, padding
   # smaller-N episodes with masks. The count is NOT hard-coded — adjust freely:
   #   [1, 2, 3, 4]  up to 4 (default)   |   [1, 2]  up to 2   |   [4]  exactly 4.
@@ -41,7 +42,7 @@ sweep:
   flow_lifetime_keep_one: true
   duration: 120
   # NOTE: schedules vary BW ONLY. Each flow's RTT is fixed for the episode by
-  # its per-flow access-link delay; the shared s1-s2 link carries no netem, so a
+  # its per-flow router-to-server access-link delay; the shared bottleneck carries no delay, so a
   # delay_frac schedule would be a no-op on the wire AND would overwrite each
   # flow's per-flow reward reference (rtt_ref) with the shared episode delay —
   # re-introducing the very RTT unfairness this env exists to remove. Keep RTT

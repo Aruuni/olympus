@@ -260,6 +260,7 @@ def run():
 
             t_s = flow_backend.episode_seconds(
                 raw, t0, wall_now=t_step_start)
+            flow_backend.wait_collection_step(raw)
 
             if prev_state is not None and flow_active and mgr:
                 exp_buf.append(model.Experience(

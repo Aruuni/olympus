@@ -60,7 +60,7 @@ environment:
   #   static                one flow on a steady link (no schedule changes).
   #   lagged_fairness       one flow plus lagged-policy background flows (join only).
   type: raynet
-  environment_setup: astraea_static
+  environment_setup: multiflow_interleave_rtt
 
 reward:
   delay_margin_coef: 1.25
@@ -120,12 +120,15 @@ outputs:
   # telemetry/episode_returns.pdf are still generated). When true,
   # plot_every_n renders only episodes whose id is divisible by this value.
   plot_episodes: true
-  plot_every_n: 25
+  plot_every_n: 1
   # When true, also plot normalized state columns (s0, s1, ...) whenever an
   # episode PDF is emitted.
   plot_observations: true
+  # Temporary MA-Dreamer debugging plot: reconstructs learner-side team reward
+  # terms from per-agent episode traces whenever an episode PDF is emitted.
+  plot_team_reward_debug: true
 
-n_parallel: 12
+n_parallel: 4
 
 # RayNet-only: block worker experience pushes until every parallel simulation
 # has reached the same collection step. This intentionally lets the slowest
@@ -302,7 +305,7 @@ algorithms:
   ma_dreamer:
     training:
       resume_from: null
-      #resume_from: olympus/models/ma_dreamer_20260625-214813/checkpoints/ma_dreamer_cwnd_model.pt
+      # resume_from: olympus/models/ma_dreamer_20260630-015953/checkpoints/ma_dreamer_cwnd_model.pt
       batch_size: 128
       seq_len: 48
       min_replay: 5000
@@ -355,7 +358,7 @@ algorithms:
       global_latent_classes: 8
       interval_ms: 20
       cwnd_min: 4
-      cwnd_max: 1000
+      cwnd_max: 500
       dead_flow_ms: 500
       noise_start: 0.2
       noise_end: 0.05

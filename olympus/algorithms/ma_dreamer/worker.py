@@ -342,6 +342,7 @@ def run():
             group_step = flow_backend.episode_step(
                 raw, episode_start, interval_s, step_in_traj,
                 wall_now=tick_start)
+            flow_backend.wait_collection_step(raw, group_step)
             last_group_step = group_step
             if previous_state is not None and flow_active and manager:
                 experience_buffer.append(model.Experience(
@@ -384,7 +385,7 @@ def run():
                             f'[worker] set_cwnd failed: {exc}; exiting',
                             flush=True,
                         )
-                        break
+                    break
             else:
                 with torch.no_grad():
                     state_tensor = torch.from_numpy(

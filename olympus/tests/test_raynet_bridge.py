@@ -4,6 +4,7 @@ import unittest
 from unittest import mock
 
 from olympus import orchestrator
+from olympus.common import flow_backend
 from olympus.environments.raynet import env as raynet_env
 
 
@@ -232,6 +233,21 @@ class RayNetObservationAdapterTest(unittest.TestCase):
 
 
 class RayNetFlowServiceTest(unittest.TestCase):
+    def test_wait_collection_step_uses_raynet_sync_service_identity(self):
+        sync = mock.Mock()
+        raw = {'group_step': 7}
+        env = {
+            'OC_FLOW_BACKEND': 'raynet',
+            'OC_RAYNET_SYNC_SLOT': '3',
+            'OC_RAYNET_SYNC_EPISODE': '11',
+        }
+        with mock.patch.dict(os.environ, env, clear=False), \
+                mock.patch.object(flow_backend, '_raynet_sync_service',
+                                  return_value=sync):
+            flow_backend.wait_collection_step(raw)
+
+        sync.wait_until_allowed.assert_called_once_with(3, 11, 7)
+
     def test_fake_omnet_episode_actions_and_cleanup(self):
         FakeRayNetClient.instances.clear()
         env = raynet_env.RaynetEnv(
@@ -419,6 +435,8 @@ class RayNetFlowServiceTest(unittest.TestCase):
         self.assertEqual([env['OC_FLOW_ID'] for env in envs], ['0', '1'])
         self.assertEqual([env['OC_FLOW_FD'] for env in envs], ['0', '1'])
         self.assertEqual([env['OC_CPORT'] for env in envs], ['21000', '21001'])
+        self.assertEqual([env['OC_RAYNET_SYNC_SLOT'] for env in envs], ['0', '0'])
+        self.assertEqual([env['OC_RAYNET_SYNC_EPISODE'] for env in envs], ['0', '0'])
         self.assertEqual(envs[0]['SAO_LAGGED_POLICY_FLOW_IDS'], '1')
         self.assertEqual(envs[1]['SAO_LAGGED_POLICY_FLOW_IDS'], '1')
         self.assertEqual(envs[0]['SAO_BASE_RTT_US'], '5000.0')
