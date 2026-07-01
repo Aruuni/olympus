@@ -261,12 +261,20 @@ def _run_link_schedule(env, schedule, episode_start, stop):
             print(f'[orch] link change failed: {e}', flush=True)
 
 
+def _eval_mode(cfg: dict) -> bool:
+    raw = cfg.get('eval', {}) or {}
+    if isinstance(raw, dict):
+        return _as_bool(raw.get('enabled', False), default=False)
+    return _as_bool(raw, default=False)
+
 def _decayed_noise(cfg: dict, episode: int) -> float:
     """
     Linear decay of exploration σ (pre-tanh Gaussian) from noise_start →
     noise_end across noise_decay_episodes episodes.  Per-episode granularity
     is sufficient because one episode ≈ 6000 control steps.
     """
+    if _eval_mode(cfg):
+        return 0.0
     a_cfg = cfg.get('agent', {}) or {}
     n0 = float(a_cfg.get('noise_start',           0.3))
     n1 = float(a_cfg.get('noise_end',             0.05))
@@ -833,6 +841,10 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
             'actor_log_std_max', 0.0))),
         'SAO_DEAD_FLOW_MS': str(int(a_cfg.get('dead_flow_ms', 1000))),
         'SAO_NOISE_STD':    str(float(_decayed_noise(cfg, episode))),
+        'SAO_DETERMINISTIC': '1' if _eval_mode(cfg) else '0',
+        'SAO_REQUIRE_CHECKPOINT': '1' if _eval_mode(cfg) else '0',
+        'OC_DETERMINISTIC': '1' if _eval_mode(cfg) else '0',
+        'OC_REQUIRE_CHECKPOINT': '1' if _eval_mode(cfg) else '0',
         'SAO_TRACE_LOG':    state_log,
         'SAO_EPISODE':      str(int(episode)),
         'SAO_HIDE_LINK_ORACLE': '1' if hide_link_oracle else '0',
@@ -862,8 +874,8 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
         'OC_Q_VALUE_CLIP':   str(float(a_cfg.get('q_value_clip', 1500.0))),
         'OC_BETA_TEMPERATURE': str(float(a_cfg.get('beta_temperature', 1.0))),
         'OC_BETA_FLOOR':     str(float(a_cfg.get('beta_floor', 0.0))),
-        'OC_EPS_START':      str(float(a_cfg.get('epsilon_start', 0.20))),
-        'OC_EPS_END':        str(float(a_cfg.get('epsilon_end', 0.03))),
+        'OC_EPS_START':      ('0.0' if _eval_mode(cfg) else str(float(a_cfg.get('epsilon_start', 0.20)))),
+        'OC_EPS_END':        ('0.0' if _eval_mode(cfg) else str(float(a_cfg.get('epsilon_end', 0.03)))),
         'OC_EPS_DECAY':      str(float(a_cfg.get('epsilon_decay', 30000))),
         'OC_DWELL_MIN_STEPS': str(int(a_cfg.get('dwell_min_steps', 1))),
         'OC_DWELL_MAX_STEPS': str(int(a_cfg.get('dwell_max_steps', 0))),
@@ -1522,6 +1534,10 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
         'SAO_HIDDEN':        str(int(a_cfg.get('hidden', 128))),
         'SAO_DEAD_FLOW_MS':  str(int(a_cfg.get('dead_flow_ms', 1000))),
         'SAO_NOISE_STD':     str(float(_decayed_noise(cfg, episode))),
+        'SAO_DETERMINISTIC':  '1' if _eval_mode(cfg) else '0',
+        'SAO_REQUIRE_CHECKPOINT': '1' if _eval_mode(cfg) else '0',
+        'OC_DETERMINISTIC':   '1' if _eval_mode(cfg) else '0',
+        'OC_REQUIRE_CHECKPOINT': '1' if _eval_mode(cfg) else '0',
         'OC_PUSH_EVERY':      str(int(t_cfg.get('worker_push_every', 16))),
         'SAO_TRACE_LOG':     state_log,
         'SAO_EPISODE':       str(int(episode)),
@@ -1805,6 +1821,10 @@ def main():
     ap.add_argument('--env-type', default=None,
                     help=f'environment backend type (subfolder of environments/); '
                          f'default {_DEFAULT_ENV_TYPE}')
+    ap.add_argument('--eval', action='store_true',
+                    help='run deterministic checkpoint inference without starting a learner')
+    ap.add_argument('--checkpoint', default=None,
+                    help='checkpoint to load when --eval is set')
     args = ap.parse_args()
 
     with open(args.config) as f:
@@ -1824,7 +1844,26 @@ def main():
             sel = dict(existing) if isinstance(existing, dict) else {}
             sel['type'] = env_type
             cfg['environment'] = sel
+    if args.eval:
+        cfg.setdefault('eval', {})['enabled'] = True
+    if args.checkpoint:
+        cfg.setdefault('eval', {})['checkpoint'] = args.checkpoint
+        cfg.setdefault('training', {})['resume_from'] = args.checkpoint
     _activate_runtime_blocks(cfg)
+    eval_mode = _eval_mode(cfg)
+    eval_checkpoint = ''
+    if eval_mode:
+        eval_cfg = cfg.get('eval', {}) or {}
+        eval_checkpoint = args.checkpoint or eval_cfg.get('checkpoint') or (
+            cfg.get('training', {}) or {}).get('resume_from')
+        if not eval_checkpoint:
+            raise SystemExit('[orch] --eval requires --checkpoint or eval.checkpoint')
+        eval_checkpoint = _resolve_repo_path(str(eval_checkpoint))
+        if not os.path.exists(eval_checkpoint):
+            raise SystemExit(f'[orch] eval checkpoint not found: {eval_checkpoint}')
+        cfg.setdefault('training', {})['resume_from'] = eval_checkpoint
+        cfg.setdefault('eval', {})['checkpoint'] = eval_checkpoint
+        cfg.setdefault('eval', {})['enabled'] = True
     resume_from = (cfg.get('training', {}) or {}).get('resume_from')
     if resume_from:
         resume_from = _resolve_repo_path(str(resume_from))
@@ -1858,6 +1897,8 @@ def main():
     episode_ckpt_every = max(0, int(
         t_cfg.get('checkpoint_every_episodes',
                   t_cfg.get('save_every_episodes', 0)) or 0))
+    if eval_mode:
+        episode_ckpt_every = 0
 
     runtime = cfg.get('runtime', {}) or {}
     alg_name = runtime.get('algorithm', 'td3')
@@ -1898,7 +1939,7 @@ def main():
         print(f'[orch] episode checkpoint copies every {episode_ckpt_every} '
               'completed episodes', flush=True)
 
-    selected_learner_script = learner_script(alg_name)
+    selected_learner_script = None if eval_mode else learner_script(alg_name)
     learner_port   = int(cfg.get('learner', {}).get('port', 6301))
     shutdown_requested = {'seen': False}
 
@@ -1943,7 +1984,7 @@ def main():
             raise RuntimeError('learner closed stdout without printing SAO_MANAGER_KEY')
         return proc, key
 
-    learner_proc, mgr_key = _start_learner()
+    learner_proc, mgr_key = (None, '') if eval_mode else _start_learner()
 
     old_sigterm = signal.getsignal(signal.SIGTERM)
     old_sigint = signal.getsignal(signal.SIGINT)
@@ -1951,18 +1992,22 @@ def main():
     signal.signal(signal.SIGINT, _signal_shutdown)
     interrupted = False
 
-    _mp_mgr       = multiprocessing.Manager()
-    learner_state = _mp_mgr.dict({
-        'mgr_addr': f'127.0.0.1:{learner_port}',
-        'mgr_key':  mgr_key,
-    })
+    _mp_mgr = None if eval_mode else multiprocessing.Manager()
+    if eval_mode:
+        learner_state = {'mgr_addr': '', 'mgr_key': ''}
+    else:
+        learner_state = _mp_mgr.dict({
+            'mgr_addr': f'127.0.0.1:{learner_port}',
+            'mgr_key':  mgr_key,
+        })
     _lproc = {'proc': learner_proc}
 
     def _fwd(proc):
         for line in proc.stdout:
             sys.stdout.write('[learner] ' + line)
             sys.stdout.flush()
-    threading.Thread(target=_fwd, args=(learner_proc,), daemon=True).start()
+    if not eval_mode:
+        threading.Thread(target=_fwd, args=(learner_proc,), daemon=True).start()
 
     stop_watchdog = threading.Event()
 
@@ -1986,9 +2031,11 @@ def main():
                 except Exception as e:
                     print(f'[orch] learner restart failed: {e}', flush=True)
 
-    threading.Thread(target=_learner_watchdog, daemon=True).start()
-
-    print(f'[orch] learner ready addr={learner_state["mgr_addr"]}', flush=True)
+    if not eval_mode:
+        threading.Thread(target=_learner_watchdog, daemon=True).start()
+        print(f'[orch] learner ready addr={learner_state["mgr_addr"]}', flush=True)
+    else:
+        print(f'[orch] eval mode checkpoint={eval_checkpoint}', flush=True)
     training_start = time.monotonic()
 
     if multi:
@@ -1996,10 +2043,15 @@ def main():
         env_meta = {}
         _, interval_ms, rollout_steps, ceiling, min_update_s = (
             _estimate_collection_rate(cfg, n_parallel))
-        print(f'[orch] MARL collection ceiling~{ceiling:.0f} transitions/s '
-              f'({n_parallel} slots x {1000.0 / interval_ms:.0f}Hz); batch '
-              f'threshold={rollout_steps} -> learner updates >= ~{min_update_s:.1f}s apart',
-              flush=True)
+        if eval_mode:
+            print(f'[orch] MARL eval collection ceiling~{ceiling:.0f} transitions/s '
+                  f'({n_parallel} slots x {1000.0 / interval_ms:.0f}Hz)',
+                  flush=True)
+        else:
+            print(f'[orch] MARL collection ceiling~{ceiling:.0f} transitions/s '
+                  f'({n_parallel} slots x {1000.0 / interval_ms:.0f}Hz); batch '
+                  f'threshold={rollout_steps} -> learner updates >= ~{min_update_s:.1f}s apart',
+                  flush=True)
     else:
         pool, do_shuffle = _build_pool(cfg)
         env_meta = cfg.get('_environment_meta', {}) or {}
@@ -2212,16 +2264,18 @@ def main():
             if p.is_alive():
                 p.kill()
 
-        _terminate(_lproc['proc'])
+        if _lproc['proc'] is not None:
+            _terminate(_lproc['proc'])
         if interrupted or shutdown_requested['seen']:
-            if not _run_reset_script():
+            if not _run_reset_script() and not eval_mode:
                 _final_runtime_cleanup(learner_port)
-        else:
+        elif not eval_mode:
             _final_runtime_cleanup(learner_port)
-        try:
-            _mp_mgr.shutdown()
-        except Exception:
-            pass
+        if _mp_mgr is not None:
+            try:
+                _mp_mgr.shutdown()
+            except Exception:
+                pass
         if os.path.exists(returns_csv):
             _generate_returns_plot()
         if pending_episode_ckpts:
