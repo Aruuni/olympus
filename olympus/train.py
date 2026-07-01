@@ -39,6 +39,9 @@ _TAG_PREFIX_RE = re.compile(r'^(?:\[[^\]]*\]\s+)+')
 _EPISODE_RE = re.compile(
     r'^\[orch\] ep=(\d+)\s+env=(\S*)\s+type=\S+\s+return=(\S+)\s+elapsed=')
 _LEARNER_STEP_RE = re.compile(r'^step=\s*(\d+)\s+(.*)$')
+_LEARNER_HB_RE = re.compile(
+    r'\bhb\b.*?\b(?:buf|buffer)=(\d+)(?:/(\d+))?.*?\brecv=(\d+)'
+    r'(?:\s+\(([^)]*)\))?')
 _CKPT_SAVE_RE = re.compile(r'\bsaved\b.*\bstep=(\d+)')
 _EPISODE_CKPT_RE = re.compile(
     r'^\[orch\] saved episode checkpoint completed=(\d+)\s+path=(\S+)')
@@ -112,6 +115,10 @@ class _Dashboard:
         self.last_return = None
         self.learner_step = None
         self.learner_tail = ''
+        self.transitions_received = None
+        self.transition_rate = ''
+        self.replay_buffer = None
+        self.replay_capacity = None
         self.last_ckpt_step = None
         self.last_ckpt_time = None
         self.episode_ckpts = 0
@@ -186,6 +193,16 @@ class _Dashboard:
             parts.append(f'ep/h {self.completed / elapsed * 3600.0:.1f}')
         if self.n_parallel:
             parts.append(f'slots {self.n_parallel}')
+        if self.transitions_received is not None:
+            recv = f'transitions {self.transitions_received}'
+            if self.transition_rate:
+                recv += f' ({self.transition_rate})'
+            parts.append(recv)
+        if self.replay_buffer is not None:
+            buf = f'buf {self.replay_buffer}'
+            if self.replay_capacity is not None:
+                buf += f'/{self.replay_capacity}'
+            parts.append(buf)
         if self.last_ckpt_step is not None:
             age = _fmt_time(time.monotonic() - self.last_ckpt_time)
             ckpt = f'ckpt step={self.last_ckpt_step} ({age} ago)'
@@ -214,6 +231,7 @@ class _Dashboard:
                 total = f'/{self.total}' if self.total else ''
                 _print(f'[train] episodes={self.completed}{total} '
                        f'learner_step={self.learner_step} '
+                       f'transitions={self.transitions_received} '
                        f'last_ckpt_step={self.last_ckpt_step} '
                        f'elapsed={_fmt_time(time.monotonic() - self.started)}')
             return
@@ -253,6 +271,15 @@ def _handle_line(raw: str, dash: _Dashboard) -> None:
         return
 
     if '[learner]' in raw:
+        match = _LEARNER_HB_RE.search(stripped)
+        if match:
+            dash.replay_buffer = int(match.group(1))
+            dash.replay_capacity = (
+                int(match.group(2)) if match.group(2) is not None else None)
+            dash.transitions_received = int(match.group(3))
+            dash.transition_rate = match.group(4) or ''
+            dash.render(force=True)
+            return
         match = _LEARNER_STEP_RE.match(stripped)
         if match:
             dash.learner_step = int(match.group(1))

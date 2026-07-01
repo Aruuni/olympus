@@ -8,6 +8,8 @@ with the same ``get_tcp_deepcc_info`` / ``set_cwnd`` shape.
 
 import os
 import time
+
+from olympus.common import raw_state_logger
 from multiprocessing.managers import BaseManager
 
 
@@ -167,8 +169,11 @@ def get_tcp_deepcc_info(flow_fd):
     """Return one raw metrics dictionary for the selected flow backend."""
     if _backend_name() == 'raynet':
         flow_id = int(os.environ.get('OC_FLOW_ID', flow_fd))
-        return dict(_raynet_service().get_tcp_deepcc_info(flow_id))
-    return _tcp_sockopt().get_tcp_deepcc_info(flow_fd)
+        raw = dict(_raynet_service().get_tcp_deepcc_info(flow_id))
+    else:
+        raw = _tcp_sockopt().get_tcp_deepcc_info(flow_fd)
+    raw_state_logger.record(raw)
+    return raw
 
 
 def set_cwnd(flow_fd, cwnd):

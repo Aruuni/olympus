@@ -59,6 +59,10 @@ from olympus.plots.normalized_state_plot import (
     plot as _plot_normalized_state,
     _state_plot_path,
 )
+from olympus.plots.raw_state_plot import (
+    plot as _plot_raw_state,
+    raw_state_plot_path as _raw_state_plot_path,
+)
 from olympus.common.checkpoint_config import (
     apply_model_config_from_checkpoint,
 )
@@ -154,6 +158,43 @@ def _should_plot_observations(outputs, episode):
     if not _should_plot_episode(outputs, episode):
         return False
     return _as_bool(outputs.get('plot_observations'), default=False)
+
+
+def _plot_raw_state_enabled(outputs, episode):
+    return (
+        _should_plot_episode(outputs, episode)
+        and _as_bool(outputs.get('plot_raw_state'), default=False)
+    )
+
+
+def _raw_state_base_path(episodes_dir, alg_name, episode):
+    return os.path.join(
+        episodes_dir, f'{alg_name}_raw_state_ep{int(episode):06d}.jsonl')
+
+
+def _raw_state_logs(raw_state_base):
+    root, ext = os.path.splitext(raw_state_base)
+    ext = ext or '.jsonl'
+    return sorted(
+        glob.glob(f'{root}_flow*{ext}'),
+        key=lambda p: int(re.search(r'_flow(\d+)', p).group(1))
+        if re.search(r'_flow(\d+)', p) else 10 ** 9,
+    )
+
+
+def _plot_raw_state_if_requested(outputs, episode, raw_state_base,
+                                  episode_plot_path, title):
+    if not _plot_raw_state_enabled(outputs, episode):
+        return
+    logs = _raw_state_logs(raw_state_base)
+    if not logs:
+        return
+    try:
+        out = _raw_state_plot_path(episode_plot_path)
+        if _plot_raw_state(logs, out, title=title):
+            print(f'[raw_state_plot] ep={episode} -> {out}', flush=True)
+    except Exception as exc:
+        print(f'[raw_state_plot] ep={episode} plot failed: {exc}', flush=True)
 
 
 def _plot_normalized_state_if_requested(outputs, episode, state_logs,
@@ -771,6 +812,7 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
     os.makedirs(plots_dir, exist_ok=True)
     os.makedirs(episodes_dir, exist_ok=True)
     state_log = os.path.join(episodes_dir, f'{alg_name}_state_ep{episode:06d}.csv')
+    raw_state_log = _raw_state_base_path(episodes_dir, alg_name, episode)
 
     n_flows = int(ecfg.get('flows', 1))
     lagged_flow_ids = [
@@ -846,6 +888,8 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
         'OC_DETERMINISTIC': '1' if _eval_mode(cfg) else '0',
         'OC_REQUIRE_CHECKPOINT': '1' if _eval_mode(cfg) else '0',
         'SAO_TRACE_LOG':    state_log,
+        'SAO_RAW_STATE_LOG': raw_state_log,
+        'SAO_RAW_STATE_LOG_ENABLED': '1' if _plot_raw_state_enabled(outputs, episode) else '0',
         'SAO_EPISODE':      str(int(episode)),
         'SAO_HIDE_LINK_ORACLE': '1' if hide_link_oracle else '0',
         # Oracle state plugin only: scheduled-link ground truth via dedicated
@@ -1065,6 +1109,8 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
                 _plot_normalized_state_if_requested(
                     outputs, episode, agent_logs, pdf_path, plot_title,
                     plot_trim_tail_s)
+                _plot_raw_state_if_requested(
+                    outputs, episode, raw_state_log, pdf_path, plot_title)
                 if plotted_return is not None:
                     ep_return = plotted_return
                 print(f'[ep_plot] ep={episode} -> {pdf_path}  '
@@ -1116,6 +1162,9 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
                         outputs, episode, [log_path], pdf_path, plot_title,
                         plot_trim_tail_s)
                     if log_path == primary_log:
+                        _plot_raw_state_if_requested(
+                            outputs, episode, raw_state_log, pdf_path,
+                            plot_title)
                         ep_return = ret
                     print(f'[ep_plot] ep={episode}{flow_suffix} -> {pdf_path}  '
                           f'return={ret}', flush=True)
@@ -1511,6 +1560,7 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
     os.makedirs(plots_dir, exist_ok=True)
     os.makedirs(episodes_dir, exist_ok=True)
     state_log = os.path.join(episodes_dir, f'{alg_name}_state_ep{episode:06d}.csv')
+    raw_state_log = _raw_state_base_path(episodes_dir, alg_name, episode)
 
     worker_env = dict(os.environ)
     worker_env.update({
@@ -1540,6 +1590,8 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
         'OC_REQUIRE_CHECKPOINT': '1' if _eval_mode(cfg) else '0',
         'OC_PUSH_EVERY':      str(int(t_cfg.get('worker_push_every', 16))),
         'SAO_TRACE_LOG':     state_log,
+        'SAO_RAW_STATE_LOG': raw_state_log,
+        'SAO_RAW_STATE_LOG_ENABLED': '1' if _plot_raw_state_enabled(outputs, episode) else '0',
         'SAO_EPISODE':       str(int(episode)),
         # Multi-agent specifics
         'SAO_N_AGENTS':      str(n_flows),
@@ -1712,6 +1764,8 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
             _plot_normalized_state_if_requested(
                 outputs, episode, state_logs, pdf_path, plot_title,
                 plot_trim_tail_s)
+            _plot_raw_state_if_requested(
+                outputs, episode, raw_state_log, pdf_path, plot_title)
             if plotted_return is not None:
                 ep_return = plotted_return
             print(f'[ep_plot] ep={episode} -> {pdf_path}  return={ep_return}', flush=True)

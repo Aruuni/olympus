@@ -125,6 +125,9 @@ outputs:
   # When true, also plot normalized state columns (s0, s1, ...) whenever an
   # episode PDF is emitted.
   plot_observations: false
+  # When true, also capture schema-free raw observations from workers
+  # and emit a sibling *_raw_state.pdf for plotted episodes.
+  plot_raw_state: false
 
 n_parallel: 20
 

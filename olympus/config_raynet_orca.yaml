@@ -20,9 +20,9 @@
 #                                   via reward.per_agent_credit (team_alpha / over_weight).
 
 runtime:
-  algorithm: ma_dreamer
-  reward: tempest_fairness_ma
-  state: tempest
+  algorithm: orca
+  reward: sage
+  state: default_orca
   action: cwnd_multiplier
 
 # Action mappings are selected independently of the learner. Both current
@@ -34,8 +34,8 @@ actions:
   cwnd_multiplier:
     action_min: -1.0
     action_max: 1.0
-    multiplier_min: 0.5
-    multiplier_max: 2.0
+    multiplier_min: 0.25
+    multiplier_max: 4.0
     min_cwnd_change: 1
 
   # Original Astraea-style small relative adjustment. At step=0.025,
@@ -60,7 +60,7 @@ environment:
   #   static                one flow on a steady link (no schedule changes).
   #   lagged_fairness       one flow plus lagged-policy background flows (join only).
   type: raynet
-  environment_setup: multiflow_interleave_rtt
+  environment_setup: static
 
 reward:
   delay_margin_coef: 1.25
@@ -128,20 +128,57 @@ outputs:
   # and emit a sibling *_raw_state.pdf for plotted episodes.
   plot_raw_state: true
 
-n_parallel: 4
+n_parallel: 32
 
 # RayNet-only: block worker experience pushes until every parallel simulation
 # has reached the same collection step. This intentionally lets the slowest
 # simulation set the pace so fast low-cwnd runs cannot dominate replay.
-synchronized_collection: true
+synchronized_collection: false
 
 # Hard cap on total dispatched episodes. The orchestrator stops handing out new
 # work once this many have been launched and lets in-flight slots drain. Omit
 # (or set null) to run until interrupted.
-episodes: 10000
+episodes: 160000
 
 algorithms:
-
+  orca:
+    training:
+      resume_from: null
+      batch_size: 8
+      min_replay: 10000
+      replay_capacity: 10240
+      gamma: 0.995
+      target_tau: 0.001
+      lr_actor: 0.0001
+      lr_critic: 0.001
+      actor_update_every: 1
+      target_noise_std: 0.1
+      target_noise_clip: 0.2
+      grad_clip: 0.0
+      updates_per_step: 1
+      save_every: 100000
+      save_every_episodes: 0
+      param_broadcast_every: 1
+      update_delay_ms: 20
+      persist_replay_on_stop: false
+    agent:
+      hidden: 64
+      head_hidden: 64
+      interval_ms: 20
+      cwnd_min: 4
+      cwnd_max: 100
+      noise_std: 0.0
+      noise_start: 0.0
+      noise_end: 0.0
+      noise_decay_episodes: 1
+    action:
+      action_min: -1.0
+      action_max: 1.0
+      multiplier_min: 0.25
+      multiplier_max: 4.0
+      min_cwnd_change: 1
+    sweep:
+      flows: 1
   td3:
     training:
       # The orchestrator rewrites checkpoint and log_path into the current run dir.

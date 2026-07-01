@@ -39,8 +39,8 @@ _PKG = os.path.dirname(_ALG_DIR)
 _REPO = os.path.dirname(_PKG)
 sys.path.insert(0, _REPO)
 
-import tcp_sockopt
 from olympus.algorithms.template_single_agent import model   # TODO: your package
+from olympus.common import flow_backend
 from olympus.common.action_plugins import load_action_module
 from olympus.common.registry import reward_module
 
@@ -114,6 +114,7 @@ def run():
 
     interval_ms = float(os.environ.get('SAO_INTERVAL_MS', '20'))
     interval_s = interval_ms / 1000.0
+    simulation_backend = flow_backend.is_simulation_backend()
     cwnd_min = int(os.environ.get('SAO_CWND_MIN', '10'))
     cwnd_max = int(os.environ.get('SAO_CWND_MAX', '10000'))
     hidden = int(os.environ.get('SAO_HIDDEN', '128'))
@@ -212,7 +213,7 @@ def run():
             t_step_start = time.monotonic()
 
             try:
-                raw = tcp_sockopt.get_tcp_deepcc_info(flow_fd)
+                raw = flow_backend.get_tcp_deepcc_info(flow_fd)
             except Exception as e:
                 print(f'[worker] get_tcp_deepcc_info failed: {e} - exiting', flush=True)
                 break
@@ -241,7 +242,7 @@ def run():
             if urtt > 0:
                 prev_urtt = urtt
             prev_cwnd = int(raw.get('cwnd', prev_cwnd))
-            t_s = t_step_start - t0
+            t_s = flow_backend.episode_seconds(raw, t0, wall_now=t_step_start)
 
             # Push the PREVIOUS step's transition now that we have its reward and
             # next_state. Batch up to push_every before crossing the IPC boundary.
@@ -276,7 +277,7 @@ def run():
                 _ACTION_PLUGIN.apply_cwnd(cur_cwnd, a, cwnd_min, cwnd_max),
                 cwnd_min, cwnd_max))
             try:
-                tcp_sockopt.set_cwnd(flow_fd, new_cwnd)
+                flow_backend.set_cwnd(flow_fd, new_cwnd)
             except Exception as e:
                 print(f'[worker] set_cwnd failed: {e} - exiting', flush=True)
                 break
@@ -319,7 +320,7 @@ def run():
 
             # Hold the control interval.
             sleep_t = interval_s - (time.monotonic() - t_step_start)
-            if sleep_t > 0:
+            if sleep_t > 0 and not simulation_backend:
                 time.sleep(sleep_t)
 
     finally:
