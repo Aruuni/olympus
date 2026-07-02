@@ -1,6 +1,17 @@
 
 
 approaches:
+  - data_folder: ma_dreamer_inter_rtt
+    name: ma_dreamer_inter_rtt
+    kind: model
+    algorithm: ma_dreamer
+    state: tempest
+    reward: tempest_fairness_ma
+    environment: multiflow_interleave_rtt
+    plot_label: MA-Dreamer inter-RTT
+    config: olympus/models/ma_dreamer_20260624-195022/telemetry/config.resolved.yaml
+    checkpoint: olympus/models/ma_dreamer_20260624-195022/checkpoints/ma_dreamer_cwnd_model.pt
+
   - data_folder: ma_dreamer_20260615-022803
     kind: model
     algorithm: ma_dreamer
@@ -121,4 +132,3 @@ specific_plots:
   - bbr1
   - frcc
   - astraea
-

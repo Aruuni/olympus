@@ -13,7 +13,9 @@ Pages:
   2 — Episode returns coloured by propagation delay
   3 — Episode returns grouped by schedule-change count
   4 — Return summary (trend + histogram)
-  5 — Learner metrics: auto grid, one panel per CSV column
+  5 — Episode returns by collection source (emulation vs simulation; mixed runs)
+  6 — Episode returns over wall-clock training time
+  7 — Learner metrics: auto grid, one panel per CSV column
 
 Written atomically (temp file + os.replace) so a concurrent reader can't see
 a half-written PDF.
@@ -50,6 +52,7 @@ def _load_returns(csv_path: str):
     episodes, returns, bws, delays = [], [], [], []
     scheduled, changes, episode_types = [], [], []
     flows, elapsed_s, episode_wall_s = [], [], []
+    sources = []
     try:
         with open(csv_path, newline='') as f:
             reader = csv.DictReader(f)
@@ -62,6 +65,10 @@ def _load_returns(csv_path: str):
                     returns.append(float(ret))
                     bws.append(float(row.get('bw', 0)))
                     delays.append(float(row.get('delay', 0)))
+                    # Collection source ('emulation'/'simulation'/'single').
+                    # Older CSVs lack the column — fall back to the environment
+                    # name so mixed runs still split into two groups.
+                    sources.append(_collection_source_label(row))
                     flow_raw = row.get('flows', '')
                     flows.append(float(flow_raw) if flow_raw not in ('', None) else np.nan)
                     scheduled_i = int(row.get('scheduled', 0))
@@ -91,11 +98,13 @@ def _load_returns(csv_path: str):
     flows         = np.array(flows, dtype=np.float64)
     elapsed_s     = np.array(elapsed_s, dtype=np.float64)
     episode_wall_s = np.array(episode_wall_s, dtype=np.float64)
+    sources       = np.array(sources, dtype=object)
     order = np.argsort(episodes)
     return (
         episodes[order], returns[order], bws[order], delays[order],
         scheduled[order], changes[order], episode_types[order],
         flows[order], elapsed_s[order], episode_wall_s[order],
+        sources[order],
     )
 
 
@@ -197,6 +206,34 @@ def _episode_type_label(change_count: int) -> str:
 def _episode_type_display(label: str) -> str:
     text = str(label).replace('_', ' ')
     return text
+
+
+def _collection_source_label(row: dict) -> str:
+    src = (row.get('source') or '').strip().lower()
+    if src in ('emulation', 'simulation'):
+        return src
+    if src and src != 'single':
+        return src
+
+    backend = (row.get('backend') or '').strip().lower()
+    if backend == 'raynet':
+        return 'simulation'
+    if backend == 'mininet':
+        return 'emulation'
+
+    # Backward compatibility for older mixed CSVs before source/backend existed.
+    env = (row.get('environment') or '').strip().lower()
+    if env in ('dynamic', 'static', 'multiflow_interleave',
+               'multiflow_interleave_rtt', 'lagged_fairness'):
+        return 'emulation'
+    if env in ('orca_static', 'raynet', 'raynet_static'):
+        return 'simulation'
+    return src or env or 'single'
+
+
+def _source_sort_key(label: str):
+    order = {'emulation': 0, 'simulation': 1, 'single': 2}
+    return (order.get(str(label), 50), str(label))
 
 
 def _last_finite(arr: np.ndarray):
@@ -480,6 +517,66 @@ def _page_returns_time(episodes, returns, elapsed_s, n, alg_name):
     return fig
 
 
+def _page_returns_source(episodes, returns, sources, n, alg_name,
+                         elapsed_s=None):
+    """Compare episode returns per collection source (e.g. emulation vs
+    simulation in a mixed run). Returns None when there is only one source,
+    since the split would be redundant with the summary page.
+    """
+    if sources is None or len(sources) == 0:
+        return None
+    labels = sorted(np.unique(sources), key=_source_sort_key)
+    if len(labels) < 2:
+        return None
+
+    fig, axes = plt.subplots(1, 2, figsize=(15, 5),
+                             gridspec_kw={'wspace': 0.28})
+    fig.suptitle(f'{alg_name} — Episode returns by collection source  '
+                 f'({n} episodes{_elapsed_title(elapsed_s)})',
+                 fontsize=12, fontweight='bold')
+
+    cmap = plt.get_cmap('tab10')
+    color = {label: cmap(i % 10) for i, label in enumerate(labels)}
+
+    ax = axes[0]
+    for label in labels:
+        m = sources == label
+        if not m.any():
+            continue
+        ax.scatter(episodes[m], returns[m], s=18, alpha=0.55,
+                   color=color[label],
+                   label=f'{label} n={int(m.sum())} mean={returns[m].mean():.1f}')
+        if m.sum() >= 5:
+            order = np.argsort(episodes[m])
+            x = episodes[m][order]
+            y = returns[m][order]
+            ax.plot(x, _rolling(y, min(20, max(2, int(m.sum())))),
+                    color=color[label], linewidth=1.8, alpha=0.9, zorder=4)
+    ax.set_title('Trend by source')
+    ax.set_xlabel('Episode')
+    ax.set_ylabel('Return')
+    ax.grid(True, alpha=0.3)
+    ax.legend(fontsize=8, loc='best', framealpha=0.8)
+    ax.set_xlim(left=0)
+
+    ax = axes[1]
+    box_data = [returns[sources == label] for label in labels
+                if np.any(sources == label)]
+    box_labels = [str(label) for label in labels if np.any(sources == label)]
+    if box_data:
+        ax.boxplot(box_data, showmeans=True)
+        ax.set_xticks(np.arange(1, len(box_labels) + 1))
+        ax.set_xticklabels(box_labels)
+    ax.set_title('Distribution by source')
+    ax.set_xlabel('Collection source')
+    ax.set_ylabel('Return')
+    ax.grid(True, axis='y', alpha=0.3)
+    ax.tick_params(axis='x', rotation=15)
+
+    fig.subplots_adjust(top=0.84, bottom=0.18)
+    return fig
+
+
 def _page_learner_metrics_auto(ld: dict, n_ep: int, alg_name: str,
                                panels_per_page: int = 12):
     """
@@ -575,7 +672,8 @@ def _page_learner_metrics_auto(ld: dict, n_ep: int, alg_name: str,
 def generate_plot(csv_path: str = _CSV_PATH, output: str = _OUTPUT,
                   learner_log: str = _LEARNER_LOG) -> int:
     (episodes, returns, bws, delays, scheduled,
-     changes, episode_types, flows, elapsed_s, episode_wall_s) = _load_returns(csv_path)
+     changes, episode_types, flows, elapsed_s, episode_wall_s,
+     sources) = _load_returns(csv_path)
     n = len(episodes)
     if n == 0:
         print('[plot] no episode data yet — skipping', flush=True)
@@ -609,6 +707,8 @@ def generate_plot(csv_path: str = _CSV_PATH, output: str = _OUTPUT,
                                alg_name, elapsed_s),
             _page_returns_summary(episodes, returns, n, alg_name, elapsed_s,
                                   episode_wall_s),
+            _page_returns_source(episodes, returns, sources, n, alg_name,
+                                 elapsed_s),
             _page_returns_time(episodes, returns, elapsed_s, n, alg_name),
         ]
         for fig in return_figs:
@@ -642,7 +742,7 @@ def watch(csv_path: str = _CSV_PATH, output: str = _OUTPUT,
           f'(plot every {_PLOT_EVERY} episodes, poll every {interval}s)',
           flush=True)
     while True:
-        episodes, *_ = _load_returns(csv_path)
+        episodes = _load_returns(csv_path)[0]
         n = len(episodes)
         if n > 0 and (n - last) >= _PLOT_EVERY:
             generate_plot(csv_path, output, learner_log)

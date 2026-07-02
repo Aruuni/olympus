@@ -31,11 +31,11 @@ _PKG = os.path.dirname(_ALG_DIR)
 _REPO = os.path.dirname(_PKG)
 sys.path.insert(0, _REPO)
 
-import tcp_sockopt
 from olympus.algorithms.mbpo_td3 import model
 from olympus.common.action_plugins import load_action_module
 from olympus.common.bbr_probe import BbrProbe
 from olympus.common.registry import reward_module
+from olympus.common import flow_backend
 
 _ACTION_PLUGIN = load_action_module()
 
@@ -144,6 +144,7 @@ def run():
         deterministic = True
     if deterministic:
         noise_std = 0.0
+    simulation_backend = flow_backend.is_simulation_backend()
 
     state_log_path = os.environ.get('SAO_TRACE_LOG', '')
     if state_log_path and os.environ.get('SAO_TRACE_LOG_SUFFIX_BY_FLOW', '0') == '1':
@@ -172,6 +173,16 @@ def run():
         and os.environ.get('SAO_LAGGED_POLICY_DISABLE_LEARNING', '1') == '1'
     )
     mgr = None if lagged_disable_learning else _connect_manager()
+
+    # Tag pushed experiences with their collection backend (emulation/simulation)
+    # so a mixed learner routes them into the matching replay buffer.
+    _exp_src = flow_backend.experience_source()
+
+    def _push_batch(exps):
+        getattr(mgr, 'push_exp_batch')(exps, _exp_src)
+
+    def _push_one(e):
+        getattr(mgr, 'push_exp')(e, _exp_src)
 
     stop_drain = threading.Event()
     if state_fd >= 0:
@@ -230,7 +241,11 @@ def run():
             t_step_start = time.monotonic()
 
             try:
-                raw = tcp_sockopt.get_tcp_deepcc_info(flow_fd)
+                raw = flow_backend.get_tcp_deepcc_info(flow_fd)
+            except flow_backend.SimulationFinished:
+                print('[worker] RayNet simulation finished - exiting',
+                      flush=True)
+                break
             except Exception as e:
                 print(f'[worker] get_tcp_deepcc_info failed: {e} - exiting', flush=True)
                 break
@@ -257,7 +272,7 @@ def run():
                 prev_urtt = urtt
             prev_cwnd = int(raw.get('cwnd', prev_cwnd))
 
-            t_s = t_step_start - t0
+            t_s = flow_backend.episode_seconds(raw, t0, wall_now=t_step_start)
 
             if prev_state is not None and flow_active and mgr:
                 exp_buf.append(model.Experience(
@@ -272,11 +287,11 @@ def run():
                 step_in_traj += 1
                 if len(exp_buf) >= push_every:
                     try:
-                        mgr.push_exp_batch(list(exp_buf))
+                        _push_batch(list(exp_buf))
                     except Exception:
                         for e in exp_buf:
                             try:
-                                mgr.push_exp(e)
+                                _push_one(e)
                             except Exception:
                                 pass
                     exp_buf.clear()
@@ -288,12 +303,13 @@ def run():
 
             srtt_raw_us = float(raw.get('srtt_us', 0) or 0)
             filter_rtt_us = (srtt_raw_us / 8.0) if srtt_raw_us > 0 else float(raw.get('avg_urtt', 0) or 0)
-            probe.observe_rtt(t_step_start, filter_rtt_us)
+            clock_t = flow_backend.observation_clock(raw, wall_now=t_step_start)
+            probe.observe_rtt(clock_t, filter_rtt_us)
             actual_cwnd, agent_locked, _ = probe.decide(
-                t_step_start, cur_cwnd, desired_cwnd)
+                clock_t, cur_cwnd, desired_cwnd)
             new_cwnd = int(np.clip(actual_cwnd, cwnd_min, cwnd_max))
             try:
-                tcp_sockopt.set_cwnd(flow_fd, new_cwnd)
+                flow_backend.set_cwnd(flow_fd, new_cwnd)
             except Exception as e:
                 print(f'[worker] set_cwnd failed: {e} - exiting', flush=True)
                 break
@@ -342,23 +358,23 @@ def run():
 
             elapsed = time.monotonic() - t_step_start
             sleep_t = interval_s - elapsed
-            if sleep_t > 0:
+            if sleep_t > 0 and not simulation_backend:
                 time.sleep(sleep_t)
 
     finally:
         if mgr and exp_buf:
             try:
-                mgr.push_exp_batch(list(exp_buf))
+                _push_batch(list(exp_buf))
             except Exception:
                 for e in exp_buf:
                     try:
-                        mgr.push_exp(e)
+                        _push_one(e)
                     except Exception:
                         pass
             exp_buf.clear()
         if prev_state is not None and mgr:
             try:
-                mgr.push_exp(model.Experience(
+                _push_one(model.Experience(
                     state=prev_state,
                     action=prev_action,
                     reward=0.0,

@@ -300,6 +300,9 @@ def run():
             tick_start = time.monotonic()
             try:
                 raw = flow_backend.get_tcp_deepcc_info(flow_fd)
+            except flow_backend.SimulationFinished:
+                print('[worker] RayNet simulation finished; exiting', flush=True)
+                break
             except Exception as exc:
                 print(
                     f'[worker] get_tcp_deepcc_info failed: {exc}; exiting',

@@ -4,7 +4,7 @@ shuffle: true
 
 sweep:
   protocol: Orca
-  ini_path: /home/james/raynet/simlibs/Orca/src/training/OrcaTraining.ini
+  ini_path: ~/extra/raynet_olympus/simlibs/Orca/src/training/OrcaTraining.ini
   section: General
   flows: 1
   bws: [10, 20, 30, 40, 50]

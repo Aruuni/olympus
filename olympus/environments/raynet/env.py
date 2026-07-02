@@ -16,17 +16,42 @@ from olympus.environments.base import NetworkEnv
 class RayNetEpisodeClient:
     """JSON-lines client for one RayNet-owned simulation process."""
 
-    def __init__(self, command, *, cwd=None, env=None):
+    def __init__(self, command, *, cwd=None, env=None, log_path=None,
+                 trace_path=None):
         parent_sock, child_sock = socket.socketpair()
         self._sock = parent_sock
         self._reader = parent_sock.makefile('r', encoding='utf-8', newline='\n')
         self._writer = parent_sock.makefile('w', encoding='utf-8', newline='\n')
+        self._log_file = None
+        self._trace_file = None
         command = list(command) + ['--control-fd', str(child_sock.fileno())]
+        popen_kwargs = {}
+        if log_path:
+            log_path = Path(log_path).expanduser()
+            log_path.parent.mkdir(parents=True, exist_ok=True)
+            self._log_file = open(log_path, 'a', buffering=1, encoding='utf-8')
+            self._log_file.write(
+                f'[raynet-runner] command={" ".join(command)} cwd={cwd or ""}\n')
+            self._log_file.flush()
+            popen_kwargs.update({
+                'stdout': self._log_file,
+                'stderr': subprocess.STDOUT,
+            })
+        if trace_path:
+            trace_path = Path(trace_path).expanduser()
+            trace_path.parent.mkdir(parents=True, exist_ok=True)
+            self._trace_file = open(
+                trace_path, 'a', buffering=1, encoding='utf-8')
+            self._trace('runner_start', {
+                'command': command,
+                'cwd': cwd or '',
+            })
         self._proc = subprocess.Popen(
             command,
             cwd=cwd,
             env=env,
             pass_fds=(child_sock.fileno(),),
+            **popen_kwargs,
         )
         child_sock.close()
 
@@ -49,16 +74,35 @@ class RayNetEpisodeClient:
             raise RuntimeError(f'RayNet runner error:\n{detail}')
         return message
 
+    def _trace(self, event, payload=None):
+        if self._trace_file is None:
+            return
+        record = {
+            'event': event,
+            'wall_time': time.time(),
+        }
+        if payload:
+            record.update(payload)
+        self._trace_file.write(
+            json.dumps(record, separators=(',', ':'), default=str) + '\n')
+        self._trace_file.flush()
+
     def start(self, episode_config):
-        self._send({'type': 'start', 'episode': episode_config})
+        request = {'type': 'start', 'episode': episode_config}
+        self._trace('send_start', {'message': request})
+        self._send(request)
         message = self._recv()
+        self._trace('recv_reset', {'message': message})
         if message.get('type') != 'reset':
             raise RuntimeError(f'expected RayNet reset message, got {message.get("type")!r}')
         return message
 
     def step(self, actions):
-        self._send({'type': 'step', 'actions': actions})
+        request = {'type': 'step', 'actions': actions}
+        self._trace('send_step', {'message': request})
+        self._send(request)
         message = self._recv()
+        self._trace('recv_step', {'message': message})
         if message.get('type') != 'step':
             raise RuntimeError(f'expected RayNet step message, got {message.get("type")!r}')
         return message
@@ -66,8 +110,10 @@ class RayNetEpisodeClient:
     def close(self):
         if self._proc.poll() is None:
             try:
-                self._send({'type': 'close'})
-                self._recv()
+                request = {'type': 'close'}
+                self._trace('send_close', {'message': request})
+                self._send(request)
+                self._trace('recv_close', {'message': self._recv()})
             except Exception:
                 pass
         self.terminate()
@@ -86,6 +132,20 @@ class RayNetEpisodeClient:
             except subprocess.TimeoutExpired:
                 self._proc.kill()
                 self._proc.wait(timeout=3)
+        if self._log_file is not None:
+            try:
+                self._log_file.flush()
+                self._log_file.close()
+            except OSError:
+                pass
+            self._log_file = None
+        if self._trace_file is not None:
+            try:
+                self._trace_file.flush()
+                self._trace_file.close()
+            except OSError:
+                pass
+            self._trace_file = None
 
 
 class _FlowManager(BaseManager):
@@ -225,6 +285,8 @@ class _RayNetFlowService:
                 command,
                 cwd=str(self.env.raynet_path),
                 env=self.env.process_env(),
+                log_path=self.env.runner_log_path,
+                trace_path=self.env.control_trace_path,
             )
             reset_msg = self.client.start(self.env.episode_config())
             with self.condition:
@@ -232,6 +294,11 @@ class _RayNetFlowService:
                     reset_msg.get('observations') or {},
                     reset_msg.get('info') or {},
                 )
+                # Some RayNet protocols (e.g. Orca) expose no learner observation
+                # during the connection/slow-start warm-up. Advance the simulation
+                # through that no-observation window so the worker has a real
+                # observation to act on instead of blocking forever.
+                self._pump_warmup_locked()
                 self.condition.notify_all()
         except BaseException as exc:
             with self.condition:
@@ -261,7 +328,19 @@ class _RayNetFlowService:
                 actions[agent_id] = float(self.pending_actions[flow_id])
         self.pending_actions.clear()
         self.consumed.clear()
+        self._step_locked(actions)
+        # Carry on through any subsequent no-observation interval (warm-up gaps)
+        # so the worker is never handed an empty observation set.
+        self._pump_warmup_locked()
 
+    def _pump_warmup_locked(self, cap=20000):
+        steps = 0
+        while ((not self.done) and self.error is None
+               and not self.observations and steps < cap):
+            steps += 1
+            self._step_locked({})
+
+    def _step_locked(self, actions):
         try:
             step_msg = self.client.step(actions)
             terminateds = step_msg.get('terminateds') or {}
@@ -371,7 +450,7 @@ class RaynetEnv(NetworkEnv):
                  loss=None, duration=60, cport=11111, cc_algo='raynet',
                  instance_id=None, unique_cports=False, per_flow_delays=None,
                  raynet_path=None, ini_path=None, section='General',
-                 protocol=None, raynet_runner=None, **extra):
+                 protocol=None, raynet_runner=None, omnet_path=None, **extra):
         environment_config = dict(extra.get('environment_config') or {})
         self.environment_config = environment_config
         self.n = int(n)
@@ -405,6 +484,24 @@ class RaynetEnv(NetworkEnv):
             or environment_config.get('raynet_runner')
             or self.raynet_path / 'runners' / 'olympus_runner.sh'
         ).expanduser()
+        omnet_value = (
+            omnet_path
+            or extra.get('omnet_root')
+            or environment_config.get('omnet_path')
+            or environment_config.get('omnetpp_path')
+            or os.environ.get('OMNET_PATH', '')
+        )
+        self.omnet_path = Path(str(omnet_value)).expanduser() if omnet_value else None
+        self.runner_log_path = (
+            environment_config.get('runner_log_path')
+            or environment_config.get('raynet_log_path')
+            or environment_config.get('log_path')
+        )
+        self.control_trace_path = (
+            environment_config.get('control_trace_path')
+            or environment_config.get('raynet_trace_path')
+            or environment_config.get('trace_path')
+        )
         self.observation_fields = (
             environment_config.get('observation_fields')
             or environment_config.get('raw_observation_fields')
@@ -432,6 +529,8 @@ class RaynetEnv(NetworkEnv):
             raise ValueError('RayNet environment config must define ini_path')
         if self.ini_path is not None and not Path(self.ini_path).expanduser().exists():
             raise FileNotFoundError(f'RayNet ini_path not found: {self.ini_path}')
+        if self.omnet_path is not None and not self.omnet_path.exists():
+            raise FileNotFoundError(f'OMNeT++ path not found: {self.omnet_path}')
         self._start_flow_service()
         self.started = True
 
@@ -467,7 +566,9 @@ class RaynetEnv(NetworkEnv):
 
     def process_env(self):
         env = dict(os.environ)
-        env.setdefault('RAYNET_PATH', str(self.raynet_path))
+        env['RAYNET_PATH'] = str(self.raynet_path)
+        if self.omnet_path is not None:
+            env['OMNET_PATH'] = str(self.omnet_path)
         return env
 
     def episode_config(self):
@@ -481,6 +582,8 @@ class RaynetEnv(NetworkEnv):
             'delay': f'{self.delay / 2.0:.12g}ms',
             'qsize': self._qsize_bits(),
         }
+        if self.omnet_path is not None:
+            replacements['omnet_path'] = str(self.omnet_path)
         duration = None if self.duration is None else float(self.duration)
         if duration is not None:
             replacements['max_rl_steps'] = str(max(
@@ -503,6 +606,8 @@ class RaynetEnv(NetworkEnv):
             'replacements': replacements,
             'overrides': overrides,
         }
+        if self.omnet_path is not None:
+            config['omnet_path'] = str(self.omnet_path)
         if 'link_schedule' in self.environment_config:
             config['link_schedule'] = self.environment_config.get('link_schedule') or []
         if self.start_delays is not None:

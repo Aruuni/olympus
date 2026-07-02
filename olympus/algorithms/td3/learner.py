@@ -51,6 +51,7 @@ from olympus.algorithms.td3.model import (
     actor_arch_from_checkpoint, actor_loss, actor_model_meta,
     assert_checkpoint_state_compatible, critic_loss, model_state_meta, soft_update,
 )
+from olympus.common.mixed_replay import MixedReplay, mixed_settings
 
 
 # ── Manager IPC ───────────────────────────────────────────────────────────────
@@ -62,13 +63,13 @@ _param_size  = multiprocessing.Value('i', 0)
 _param_blob  = multiprocessing.RawArray('B', _PARAM_CACHE_BYTES)
 
 
-def _push_exp(exp):
-    try:    _exp_queue.put_nowait(exp)
+def _push_exp(exp, source=None):
+    try:    _exp_queue.put_nowait((source, exp))
     except: pass
 
-def _push_exp_batch(exps):
+def _push_exp_batch(exps, source=None):
     for exp in exps:
-        try:    _exp_queue.put_nowait(exp)
+        try:    _exp_queue.put_nowait((source, exp))
         except: pass
 
 def _pull_params():
@@ -321,7 +322,16 @@ class Learner:
         self.opt_actor  = optim.Adam(self.actor.parameters(),  lr=self.lr_actor)
         self.opt_critic = optim.Adam(self.critic.parameters(), lr=self.lr_critic)
 
-        self.buf       = ReplayBuffer(max_transitions=self.replay_capacity)
+        self._mixed_enabled, self._mix_frac, _mix_cap = mixed_settings(cfg)
+        if self._mixed_enabled:
+            _cap = _mix_cap or self.replay_capacity
+            self.buf = MixedReplay(
+                lambda: ReplayBuffer(max_transitions=_cap), self._mix_frac)
+            print(f'[learner] mixed collection enabled '
+                  f'emulation_fraction={self._mix_frac} '
+                  f'buffer_capacity={_cap} (x2)', flush=True)
+        else:
+            self.buf   = ReplayBuffer(max_transitions=self.replay_capacity)
         self.step      = 0
         self.ckpt_path = ckpt_path
         self._completed_episode_ids = set()
@@ -382,8 +392,11 @@ class Learner:
             drained = 0
             try:
                 while True:
-                    exp = _exp_queue.get_nowait()
-                    self.buf.push(exp)
+                    source, exp = _exp_queue.get_nowait()
+                    if self._mixed_enabled:
+                        self.buf.push(exp, source)
+                    else:
+                        self.buf.push(exp)
                     self._note_episode_done(exp)
                     drained += 1
             except Exception:
@@ -394,12 +407,17 @@ class Learner:
             if now - last_hb >= 5.0:
                 dt   = now - last_hb
                 rate = total_drained / max(dt, 1e-6)
-                print(f'[learner] hb buf={self.buf.size()}/{self.replay_capacity}  '
+                mix  = (f' emu={self.buf.size_emu()} sim={self.buf.size_sim()}'
+                        if self._mixed_enabled else '')
+                print(f'[learner] hb buf={self.buf.size()}/{self.replay_capacity}{mix}  '
                       f'recv={total_drained} ({rate:.0f}/s)  trajs={self.buf.n_trajs()}',
                       flush=True)
                 last_hb = now; total_drained = 0
 
-            if self.buf.size() < self.min_replay:
+            _gate = ((not self.buf.ready(self.min_replay))
+                     if self._mixed_enabled
+                     else (self.buf.size() < self.min_replay))
+            if _gate:
                 if drained == 0:
                     time.sleep(0.05)
                 continue

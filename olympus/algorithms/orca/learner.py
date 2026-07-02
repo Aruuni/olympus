@@ -30,6 +30,13 @@ _ROOT = os.path.dirname(_PKG)
 sys.path.insert(0, _ROOT)
 sys.path.insert(0, _HERE)
 
+from olympus.common.mixed_replay import (
+    MixedReplay,
+    mixed_buffer_capacities,
+    mixed_settings,
+    sim_strata_edges,
+)
+
 from olympus.algorithms.orca.model import (
     ACTION_DIM,
     STATE_DIM,
@@ -53,16 +60,16 @@ _param_size = multiprocessing.Value('i', 0)
 _param_blob = multiprocessing.RawArray('B', _PARAM_CACHE_BYTES)
 
 
-def _push_exp(exp):
+def _push_exp(exp, source=None):
     try:
-        _exp_queue.put_nowait(exp)
+        _exp_queue.put_nowait((source, exp))
     except Exception:
         pass
 
 
-def _push_exp_batch(exps):
+def _push_exp_batch(exps, source=None):
     for exp in exps:
-        _push_exp(exp)
+        _push_exp(exp, source)
 
 
 def _pull_params():
@@ -231,8 +238,35 @@ class Learner:
         self.opt_actor = optim.Adam(self.actor.parameters(), lr=self.lr_actor)
         self.opt_critic = optim.Adam(self.critic.parameters(), lr=self.lr_critic)
 
-        self.buf = ReplayBuffer(self.replay_capacity)
-        if self.persist_replay and self.replay_pickle_path and os.path.exists(self.replay_pickle_path):
+        self._mixed_enabled, self._mix_frac, _mix_cap = mixed_settings(cfg)
+        if self._mixed_enabled:
+            default_cap = _mix_cap or self.replay_capacity
+            emu_cap, sim_total = mixed_buffer_capacities(cfg, default_cap)
+            strata = sim_strata_edges(cfg)
+            # Emulation is one buffer of emu_cap. Simulation's total footprint is
+            # sim_total; when stratified it is split evenly across the BDP classes.
+            n_bins = (len(strata) + 1) if strata else 1
+            sim_cap = sim_total // n_bins
+            self.buf = MixedReplay(
+                lambda: ReplayBuffer(emu_cap), self._mix_frac,
+                sim_strata=strata,
+                sim_factory=lambda: ReplayBuffer(sim_cap))
+            # Replay persistence assumes a single ReplayBuffer pickle; skip it.
+            self.persist_replay = False
+            if strata:
+                print(f'[orca learner] mixed collection enabled '
+                      f'emulation_fraction={self._mix_frac} '
+                      f'emu cap={emu_cap} | sim BDP strata={strata} '
+                      f'({n_bins} bins x {sim_cap} = {sim_cap * n_bins})',
+                      flush=True)
+            else:
+                print(f'[orca learner] mixed collection enabled '
+                      f'emulation_fraction={self._mix_frac} '
+                      f'emu cap={emu_cap} sim cap={sim_cap}', flush=True)
+        else:
+            self.buf = ReplayBuffer(self.replay_capacity)
+        if (not self._mixed_enabled and self.persist_replay
+                and self.replay_pickle_path and os.path.exists(self.replay_pickle_path)):
             try:
                 with open(self.replay_pickle_path, 'rb') as fp:
                     restored = pickle.load(fp)
@@ -305,8 +339,11 @@ class Learner:
             drained = 0
             try:
                 while True:
-                    exp = _exp_queue.get_nowait()
-                    self.buf.push(exp)
+                    source, exp = _exp_queue.get_nowait()
+                    if self._mixed_enabled:
+                        self.buf.push(exp, source)
+                    else:
+                        self.buf.push(exp)
                     self._note_episode_done(exp)
                     drained += 1
             except Exception:
@@ -317,13 +354,18 @@ class Learner:
             if now - last_hb >= 5.0:
                 dt = now - last_hb
                 rate = total_drained / max(dt, 1e-6)
-                print(f'[orca learner] hb buf={self.buf.size()}/{self.replay_capacity}  '
+                mix = (f' emu={self.buf.size_emu()} sim={self.buf.size_sim()}'
+                       if self._mixed_enabled else '')
+                print(f'[orca learner] hb buf={self.buf.size()}/{self.replay_capacity}{mix}  '
                       f'recv={total_drained} ({rate:.0f}/s)  trajs={self.buf.n_trajs()}',
                       flush=True)
                 last_hb = now
                 total_drained = 0
 
-            if self.buf.size() < self.min_replay:
+            not_ready = ((not self.buf.ready(self.min_replay))
+                         if self._mixed_enabled
+                         else (self.buf.size() < self.min_replay))
+            if not_ready:
                 if drained == 0:
                     time.sleep(0.05)
                 continue

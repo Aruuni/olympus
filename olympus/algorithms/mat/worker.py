@@ -221,6 +221,9 @@ def run():
 
             try:
                 raw = flow_backend.get_tcp_deepcc_info(flow_fd)
+            except flow_backend.SimulationFinished:
+                print('[worker] RayNet simulation finished - exiting', flush=True)
+                break
             except Exception as e:
                 print(f'[worker] get_tcp_deepcc_info failed: {e} - exiting', flush=True)
                 break

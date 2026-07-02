@@ -1,0 +1,430 @@
+# Unified Olympus configuration.
+#
+# One file that merges the full scaffolding of config.yaml (all algorithm
+# blocks, listener/learner settings, state options, bbr probe) with the mixed
+# emulation+simulation Orca experiment from config_mixed_orca.yaml. The active
+# pipeline is chosen entirely by `runtime.algorithm`:
+#
+#   - orca (default here): mixed collection — a single learner fed by BOTH a
+#     Mininet (real-kernel) pool and a RayNet/OMNeT++ pool at once, with a
+#     BDP-stratified simulation replay buffer (see mixed_collection below).
+#   - td3 / mbpo_td3 / dreamer_v3: single-agent, single backend. Set
+#     mixed_collection.enabled: false and pick an `environment` below.
+#   - ma_dreamer / mat: multi-agent (MULTI_AGENT = True), joint training over the
+#     `sweep` flow counts defined in the environment files.
+#
+# Run (mixed Orca needs root for the Mininet pool; RayNet tolerates it):
+#   sudo mn -c
+#   sudo -E env PATH="$PATH" HOME="$HOME" \
+#     ./venv_training/bin/python olympus/train.py --config olympus/unify.yaml
+
+runtime:
+  algorithm: dreamer_v3
+  reward: tempest
+  state: tempest
+  action: cwnd_multiplier
+
+# Action mappings are selected independently of the learner. Both plugins keep
+# the policy output one-dimensional in [-1, 1].
+actions:
+  # Exponential relative CWND multiplier. With the range below,
+  # -1 -> 0.25x, 0 -> 1.0x, +1 -> 4.0x (Orca-style wide range).
+  cwnd_multiplier:
+    action_min: -1.0
+    action_max: 1.0
+    multiplier_min: 0.25
+    multiplier_max: 4.0
+    min_cwnd_change: 1
+  # Original Astraea-style small relative adjustment.
+  astraea:
+    action_min: -1.0
+    action_max: 1.0
+    step: 0.025
+
+# Top-level environment is used for pre-flight only in a mixed run (it makes the
+# orchestrator load the Mininet listener + kernel CC). For non-mixed runs it is
+# THE collection environment: pick a type + environment_setup here.
+environment:
+  type: mininet
+  environment_setup: dynamic
+
+# Unsynchronised collection: emulation and simulation slots each run at their own
+# pace (no cross-slot step barrier). Default, pinned explicitly. The fast RayNet
+# slots outrunning the Mininet ones is expected and handled on the learning side
+# by the per-source mix fraction plus the BDP-stratified sim buffer, not by
+# lock-stepping collection.
+synchronized_collection: false
+
+# ── Mixed emulation + simulation collection (orca) ───────────────────────────
+# Only active when enabled AND the learner supports it (orca). A single learner
+# keeps a separate replay buffer per source and samples each minibatch as a blend.
+mixed_collection:
+  enabled: true
+  emulation:
+    type: mininet
+    environment_setup: dynamic       # one flow under changing BW/RTT
+    n_parallel: 20
+    # Total emulation replay capacity (transitions). Falls back to
+    # mix.buffer_capacity, then the algorithm's replay_capacity.
+    buffer_capacity: 400000
+  
+  simulation:
+    type: raynet
+    environment_setup: orca_static    # RayNet Orca sweep (bws x delays)
+    n_parallel: 1
+    # Total simulation replay capacity (transitions), split evenly across the
+    # BDP classes below. Sized independently of the emulation buffer.
+    buffer_capacity: 400000
+    # BDP-stratified simulation replay. RayNet finishes low-bandwidth episodes
+    # far faster in wall-clock, so a single FIFO sim buffer fills with low-BDP /
+    # low-cwnd transitions and evicts the rare high-BDP experience. Instead we
+    # keep one reserved sub-buffer per bandwidth-delay-product class (bw*rtt in
+    # Mbps*ms) and sample every class evenly, so all link regimes stay
+    # represented regardless of how quickly they are produced. Emulation is never
+    # stratified.
+    #
+    # Set n_buckets: the orchestrator reads the simulation sweep and auto-derives
+    # quantile edges (written into telemetry/config.resolved.yaml). Buckets
+    # auto-cap at the number of distinct BDP products in the sweep. To pin exact
+    # edges instead, set `bdp_edges: [...]` (that always overrides n_buckets).
+    strata:
+      n_buckets: 20
+  mix:
+    # Share of each training minibatch drawn from the EMULATION buffer; the rest
+    # comes from the SIMULATION buffer. Independent of buffer sizes above.
+    emulation_batch_fraction: 0.0
+    # buffer_capacity: 10240          # shared default if a side omits its own
+
+reward:
+  delay_margin_coef: 1.25
+  # Fairness fields below are used only by fairness rewards (multi-agent); inert
+  # for the single-agent tempest reward Orca uses, kept for a unified superset.
+  fairness_metric: r_fair
+  w_r_fair: 25.0
+  r_fair_cap: 1.0
+  w_jain: 25.0
+
+# BBR3-style independent cwnd probe. Algorithm- and reward-agnostic; every worker
+# honours it when enabled.
+bbr_probe:
+  enabled: false
+  interval_s: 5.0
+  duration_s: 0.2
+  factor: 0.5
+  min_rtt_window_s: 5.0
+
+state_options:
+  # Used only by runtime.state: orca — Orca's fixed delay target feature.
+  orca_target_ms: 50.0
+  # Used only by runtime.state: tempest.
+  tempest_kalman:
+    init_us: 20000.0
+    q: 5.0e-4
+    r_down: 1.0e-3
+    r_up: 5.0
+    jump_thresh: 1.5
+
+paths:
+  listener: olympus/oc_bridge
+  py: ./venv_training/bin/python
+  # RayNet/OMNeT++ install paths (needed for the simulation pool).
+  raynet_path: ~/extra/raynet_olympus
+  omnet_path: ~/extra/omnetpp
+
+listener_cc: astraea
+
+learner:
+  port: 6301
+
+scan_ms: 20
+# When true, oc_bridge attaches the first matching worker and never connects
+# another during that listener lifetime.
+listener_single_flow: true
+# Workers read TCP state from tcp_sockopt directly; the listener need not emit.
+listener_state_pipe: false
+cport_base: 23000
+
+outputs:
+  root: olympus/models/orca
+  run_name: 
+  # Worker CSV traces always go to episodes/. Render every completed emulation
+  # and simulation episode into plots/.
+  plot_episodes: true
+  plot_every_n: 1
+  plot_observations: true
+  plot_raw_state: true
+  plot_filename_include_env: true
+  require_state_logs: true
+
+# Fallback parallelism; per-side counts are set inside mixed_collection.
+n_parallel: 6
+
+# Hard cap on total dispatched episodes; omit / null to run until interrupted.
+episodes: 160000
+
+algorithms:
+
+  orca:
+    training:
+      resume_from: null
+      batch_size: 8
+      min_replay: 10000
+      replay_capacity: 10240          # default per-side cap if buffer_capacity omitted
+      gamma: 0.995
+      target_tau: 0.001
+      lr_actor: 1.0e-4
+      lr_critic: 1.0e-3
+      actor_update_every: 1
+      target_noise_std: 0.1
+      target_noise_clip: 0.2
+      grad_clip: 0.0
+      updates_per_step: 1
+      save_every: 100000
+      save_every_episodes: 0
+      param_broadcast_every: 1
+      update_delay_ms: 20
+      persist_replay_on_stop: false
+    agent:
+      hidden: 64
+      head_hidden: 64
+      interval_ms: 20
+      cwnd_min: 4
+      cwnd_max: 10000
+      noise_std: 0.0
+      noise_start: 0.0
+      noise_end: 0.0
+      noise_decay_episodes: 1
+
+  td3:
+    training:
+      resume_from: null
+      batch_size: 256
+      seq_len: 32
+      min_replay: 5000
+      replay_capacity: 400000
+      gamma: 0.99
+      target_tau: 0.005
+      lr_actor: 1.0e-4
+      lr_critic: 1.0e-3
+      lr_critic_decay_after_steps: 250000
+      lr_critic_final: 3.0e-4
+      policy_delay: 2
+      target_noise_std: 0.2
+      target_noise_clip: 0.5
+      grad_clip: 5.0
+      updates_per_step: 1
+      save_every: 500
+      save_every_episodes: 500
+      param_broadcast_every: 50
+      use_reward_normalizer: true
+    agent:
+      hidden: 128
+      interval_ms: 20
+      cwnd_min: 10
+      cwnd_max: 10000
+      dead_flow_ms: 500
+      noise_start: 0.3
+      noise_end: 0.05
+      noise_decay_episodes: 300
+
+  mbpo_td3:
+    training:
+      resume_from: null
+      batch_size: 256
+      seq_len: 32
+      min_replay: 5000
+      replay_capacity: 400000
+      gamma: 0.99
+      target_tau: 0.005
+      lr_actor: 1.0e-4
+      lr_critic: 1.0e-3
+      lr_critic_decay_after_steps: 250000
+      lr_critic_final: 3.0e-4
+      policy_delay: 2
+      target_noise_std: 0.2
+      target_noise_clip: 0.5
+      grad_clip: 5.0
+      updates_per_step: 1
+      save_every: 500
+      save_every_episodes: 200
+      param_broadcast_every: 50
+      model_hidden: 200
+      model_ensemble_size: 5
+      model_lr: 1.0e-3
+      model_batch_size: 256
+      model_train_every: 250
+      model_epochs: 5
+      rollout_horizon: 5
+      rollouts_per_cycle: 1000
+      rollout_every: 250
+      rollout_noise_std: 0.1
+      model_buffer_capacity: 400000
+      real_ratio: 0.5
+      model_min_real: 5000
+    agent:
+      hidden: 128
+      interval_ms: 20
+      cwnd_min: 4
+      cwnd_max: 10000
+      dead_flow_ms: 500
+      noise_start: 0.3
+      noise_end: 0.05
+      noise_decay_episodes: 300
+
+  dreamer_v3:
+    training:
+      resume_from: null
+      batch_size: 16
+      seq_len: 48
+      min_replay: 5000
+      replay_capacity: 400000
+      grad_clip: 1000.0
+      updates_per_step: 1
+      save_every: 500
+      save_every_episodes: 500
+      param_broadcast_every: 50
+      kl_weight: 1.0
+      kl_balance: 0.8
+      kl_free_bits: 1.0
+      recon_weight: 1.0
+      reward_weight: 1.0
+      continue_weight: 1.0
+      lr_world: 1.0e-4
+      lr_actor: 3.0e-5
+      lr_critic: 3.0e-5
+      horizon: 15
+      gamma: 0.99
+      lam: 0.95
+      entropy_coef: 3.0e-3
+      action_l2_coef: 2.0e-2
+      action_smooth_coef: 2.0e-2
+      actor_log_std_min: -2.0
+      actor_log_std_max: 0.0
+      target_tau: 0.02
+      actor_warmup_steps: 1000
+      value_bins: 255
+      value_low: -20.0
+      value_high: 20.0
+      reward_bins: 255
+    agent:
+      hidden: 256
+      embed_dim: 128
+      h_dim: 256
+      latent_groups: 8
+      latent_classes: 8
+      reward_bins: 255
+      interval_ms: 20
+      cwnd_min: 10
+      cwnd_max: 10000
+      dead_flow_ms: 500
+      noise_start: 0.2
+      noise_end: 0.05
+      noise_decay_episodes: 300
+
+  # ── Multi-agent algorithms (MULTI_AGENT = True) ──────────────────────────────
+  ma_dreamer:
+    training:
+      resume_from: null
+      batch_size: 128
+      seq_len: 48
+      min_replay: 50000
+      replay_capacity: 400000
+      updates_per_step: 1
+      worker_push_every: 16
+      save_every: 200
+      param_broadcast_every: 25
+      grad_clip: 100.0
+      kl_weight: 1.0
+      kl_balance: 0.8
+      kl_free_bits: 1.0
+      recon_weight: 1.0
+      reward_weight: 1.0
+      continue_weight: 1.0
+      local_world_weight: 1.0
+      global_world_weight: 1.0
+      latent_h_weight: 1.0
+      latent_z_weight: 1.0
+      lr_world: 1.0e-4
+      lr_actor: 3.0e-5
+      lr_critic: 3.0e-5
+      horizon: 15
+      gamma: 0.995
+      lam: 0.95
+      entropy_coef: 3.0e-3
+      action_l2_coef: 2.0e-2
+      action_smooth_coef: 2.0e-2
+      actor_log_std_min: -2.0
+      actor_log_std_max: 0.0
+      target_tau: 0.02
+      actor_warmup_steps: 1000
+      value_bins: 255
+      value_low: -20.0
+      value_high: 20.0
+      reward_bins: 255
+      torch_threads: 2
+      torch_interop_threads: 1
+    agent:
+      hidden: 256
+      embed_dim: 128
+      h_dim: 256
+      latent_groups: 8
+      latent_classes: 8
+      global_hidden: 256
+      global_embed_dim: 128
+      global_h_dim: 256
+      global_latent_groups: 8
+      global_latent_classes: 8
+      interval_ms: 20
+      cwnd_min: 4
+      cwnd_max: 10000
+      dead_flow_ms: 500
+      noise_start: 0.2
+      noise_end: 0.05
+      noise_decay_episodes: 300
+    reward:
+      fairness_metric: r_fair_avg_throughput
+      fairness_weight: 25.0
+      fairness_cap: 1.0
+      per_agent_credit: true
+      team_alpha: 0.5
+      over_weight: 50.0
+
+  mat:
+    training:
+      resume_from: null
+      rollout_steps: 8000
+      n_epochs: 5
+      minibatches_per_epoch: 8
+      clip_eps: 0.2
+      value_clip: 0.2
+      gamma: 0.99
+      lam: 0.95
+      c_value: 0.25
+      c_entropy: 0.02
+      lr: 5.0e-4
+      grad_clip: 0.3
+      target_kl: 0.05
+      use_reward_normalizer: true
+      torch_threads: 2
+      torch_interop_threads: 1
+      fairness_weight: 2.0
+      fairness_centered: true
+      team_reward_aggregation: mean
+      worker_push_every: 32
+      save_every: 5
+      param_broadcast_every: 1
+    agent:
+      hidden: 128
+      n_layers: 2
+      n_heads: 4
+      interval_ms: 20
+      cwnd_min: 10
+      cwnd_max: 10000
+      dead_flow_ms: 500
+      noise_start: 0.2
+      noise_end: 0.05
+      noise_decay_episodes: 300
+    reward:
+      fairness_metric: r_fair_avg_throughput
+      fairness_weight: 25.0
+      fairness_cap: 1.0

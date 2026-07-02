@@ -10,6 +10,8 @@ import os
 import time
 from multiprocessing.managers import BaseManager
 
+from olympus.common import raw_state_logger
+
 
 class _RayNetManager(BaseManager):
     pass
@@ -23,6 +25,11 @@ _RayNetManager.register('flow_service')
 _RayNetSyncManager.register('collection_sync')
 _RAYNET_SERVICE = None
 _RAYNET_SYNC_SERVICE = None
+_RAYNET_FINISHED = 'RayNet simulation finished'
+
+
+class SimulationFinished(Exception):
+    """Raised when a simulation backend has completed the episode normally."""
 
 
 def _backend_name():
@@ -32,6 +39,16 @@ def _backend_name():
 def is_simulation_backend():
     """Return True when workers are reading from a simulation backend."""
     return _backend_name() == 'raynet'
+
+
+def experience_source():
+    """Tag identifying which collection backend produced an experience.
+
+    Used by mixed emulation+simulation training so the learner can route each
+    pushed transition into the matching replay buffer. ``'simulation'`` for the
+    RayNet backend, ``'emulation'`` otherwise (real-kernel / Mininet).
+    """
+    return 'simulation' if is_simulation_backend() else 'emulation'
 
 
 def observation_clock(raw, wall_now=None):
@@ -167,8 +184,16 @@ def get_tcp_deepcc_info(flow_fd):
     """Return one raw metrics dictionary for the selected flow backend."""
     if _backend_name() == 'raynet':
         flow_id = int(os.environ.get('OC_FLOW_ID', flow_fd))
-        return dict(_raynet_service().get_tcp_deepcc_info(flow_id))
-    return _tcp_sockopt().get_tcp_deepcc_info(flow_fd)
+        try:
+            raw = dict(_raynet_service().get_tcp_deepcc_info(flow_id))
+        except RuntimeError as exc:
+            if _RAYNET_FINISHED in str(exc):
+                raise SimulationFinished(_RAYNET_FINISHED) from None
+            raise
+    else:
+        raw = _tcp_sockopt().get_tcp_deepcc_info(flow_fd)
+    raw_state_logger.record(raw)
+    return raw
 
 
 def set_cwnd(flow_fd, cwnd):

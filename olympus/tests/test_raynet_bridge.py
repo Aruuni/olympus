@@ -1,3 +1,4 @@
+import json
 import os
 import tempfile
 import unittest
@@ -87,10 +88,13 @@ def mapped_observation(values, fields):
 class FakeRayNetClient:
     instances = []
 
-    def __init__(self, command, *, cwd=None, env=None):
+    def __init__(self, command, *, cwd=None, env=None, log_path=None,
+                 trace_path=None):
         self.command = list(command)
         self.cwd = cwd
         self.env = dict(env or {})
+        self.log_path = log_path
+        self.trace_path = trace_path
         self.started_episode = None
         self.step_actions = []
         self.terminated = False
@@ -121,10 +125,13 @@ class FakeRayNetClient:
 class FakeAstraeaRayNetClient:
     instances = []
 
-    def __init__(self, command, *, cwd=None, env=None):
+    def __init__(self, command, *, cwd=None, env=None, log_path=None,
+                 trace_path=None):
         self.command = list(command)
         self.cwd = cwd
         self.env = dict(env or {})
+        self.log_path = log_path
+        self.trace_path = trace_path
         self.started_episode = None
         self.step_actions = []
         self.terminated = False
@@ -159,6 +166,53 @@ class FakeAstraeaRayNetClient:
 
 
 class RayNetObservationAdapterTest(unittest.TestCase):
+    def test_episode_client_redirects_runner_output_to_log_path(self):
+        with tempfile.TemporaryDirectory() as directory:
+            log_path = os.path.join(directory, 'runner.log')
+            proc = mock.Mock()
+            proc.poll.return_value = 0
+            with mock.patch.object(raynet_env.subprocess, 'Popen',
+                                   return_value=proc) as popen:
+                client = raynet_env.RayNetEpisodeClient(
+                    ['/tmp/runner'], cwd='/tmp', env={},
+                    log_path=log_path)
+                client.terminate()
+
+            _, kwargs = popen.call_args
+            self.assertEqual(kwargs['stderr'], raynet_env.subprocess.STDOUT)
+            self.assertEqual(kwargs['stdout'].name, log_path)
+            self.assertTrue(kwargs['stdout'].closed)
+            with open(log_path) as f:
+                self.assertIn('[raynet-runner] command=', f.read())
+
+    def test_episode_client_writes_control_trace(self):
+        with tempfile.TemporaryDirectory() as directory:
+            trace_path = os.path.join(directory, 'trace.jsonl')
+            proc = mock.Mock()
+            proc.poll.return_value = 0
+            with mock.patch.object(raynet_env.subprocess, 'Popen',
+                                   return_value=proc):
+                client = raynet_env.RayNetEpisodeClient(
+                    ['/tmp/runner'], cwd='/tmp', env={},
+                    trace_path=trace_path)
+                client._send = mock.Mock()
+                client._recv = mock.Mock(side_effect=[
+                    {'type': 'reset', 'observations': {'a0': {'cwnd': 4}},
+                     'info': {'time_s': 0.0}},
+                    {'type': 'step', 'observations': {'a0': {'cwnd': 8}},
+                     'info': {'time_s': 0.02}},
+                ])
+                client.start({'episode': 7})
+                client.step({'a0': 8})
+                client.terminate()
+
+            with open(trace_path) as f:
+                events = [json.loads(line)['event'] for line in f]
+            self.assertEqual(events, [
+                'runner_start', 'send_start', 'recv_reset',
+                'send_step', 'recv_step',
+            ])
+
     def test_field_mapping_observation_maps_to_olympus_raw_fields(self):
         env = raynet_env.RaynetEnv(
             environment_config={'observation_fields': ORCA_FIELDS})
@@ -233,6 +287,20 @@ class RayNetObservationAdapterTest(unittest.TestCase):
 
 
 class RayNetFlowServiceTest(unittest.TestCase):
+    def test_flow_backend_translates_raynet_finished_to_normal_signal(self):
+        service = mock.Mock()
+        service.get_tcp_deepcc_info.side_effect = RuntimeError(
+            'RayNet simulation finished')
+        env = {
+            'OC_FLOW_BACKEND': 'raynet',
+            'OC_FLOW_ID': '0',
+        }
+        with mock.patch.dict(os.environ, env, clear=False), \
+                mock.patch.object(flow_backend, '_raynet_service',
+                                  return_value=service):
+            with self.assertRaises(flow_backend.SimulationFinished):
+                flow_backend.get_tcp_deepcc_info(0)
+
     def test_wait_collection_step_uses_raynet_sync_service_identity(self):
         sync = mock.Mock()
         raw = {'group_step': 7}
@@ -261,6 +329,8 @@ class RayNetFlowServiceTest(unittest.TestCase):
                 'ini_path': '/tmp/OrcaTraining.ini',
                 'section': 'General',
                 'observation_fields': ORCA_FIELDS,
+                'runner_log_path': '/tmp/raynet-runner.log',
+                'control_trace_path': '/tmp/raynet-trace.jsonl',
             },
         )
         service = raynet_env._RayNetFlowService(env)
@@ -272,6 +342,8 @@ class RayNetFlowServiceTest(unittest.TestCase):
             service.close()
 
         fake = FakeRayNetClient.instances[-1]
+        self.assertEqual(fake.log_path, '/tmp/raynet-runner.log')
+        self.assertEqual(fake.trace_path, '/tmp/raynet-trace.jsonl')
         self.assertEqual(fake.started_episode['ini_path'], '/tmp/OrcaTraining.ini')
         self.assertEqual(fake.started_episode['section'], 'General')
         self.assertTrue(fake.terminated)
@@ -349,6 +421,18 @@ class RayNetFlowServiceTest(unittest.TestCase):
         self.assertEqual(env.ini_path, ini)
         self.assertEqual(env.protocol, 'astraea')
 
+    def test_raynet_env_process_env_uses_configured_paths(self):
+        env = raynet_env.RaynetEnv(
+            raynet_path='/tmp/raynet-from-config',
+            raynet_runner='/tmp/raynet-from-config/olympus_runner.sh',
+            ini_path='/tmp/raynet-from-config/scenario.ini',
+            environment_config={'omnet_path': '/tmp/omnet-from-config'},
+        )
+        process_env = env.process_env()
+
+        self.assertEqual(process_env['RAYNET_PATH'], '/tmp/raynet-from-config')
+        self.assertEqual(process_env['OMNET_PATH'], '/tmp/omnet-from-config')
+
     def test_run_episode_marl_passes_opaque_environment_config_to_backend(self):
         with tempfile.TemporaryDirectory() as directory:
             ecfg = {
@@ -363,6 +447,10 @@ class RayNetFlowServiceTest(unittest.TestCase):
             cfg = {
                 'environment': {'type': 'raynet', 'environment_setup': 'astraea_static'},
                 'runtime': {'algorithm': 'ma_dreamer'},
+                'paths': {
+                    'raynet_path': '/tmp/raynet-from-config',
+                    'omnet_path': '/tmp/omnet-from-config',
+                },
                 'training': {'checkpoint': os.path.join(directory, 'model.pt')},
                 'agent': {},
                 'outputs': {
@@ -391,6 +479,18 @@ class RayNetFlowServiceTest(unittest.TestCase):
             self.assertEqual(environment_config[key], value)
         self.assertEqual(environment_config['episode'], 0)
         self.assertEqual(environment_config['slot'], 0)
+        self.assertEqual(
+            environment_config['raynet_path'], '/tmp/raynet-from-config')
+        self.assertEqual(
+            environment_config['omnet_path'], '/tmp/omnet-from-config')
+        self.assertIn('runner_log_path', environment_config)
+        self.assertTrue(
+            environment_config['runner_log_path'].endswith(
+                'raynet_runner_ep000000_slot0.log'))
+        self.assertIn('control_trace_path', environment_config)
+        self.assertTrue(
+            environment_config['control_trace_path'].endswith(
+                'raynet_trace_ep000000_slot0.jsonl'))
         self.assertNotIn('ini_path', kwargs)
         self.assertNotIn('section', kwargs)
 

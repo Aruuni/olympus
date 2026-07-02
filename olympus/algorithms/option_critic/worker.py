@@ -5,10 +5,10 @@ Spawned by oc_bridge (same binary as training/) for each TCP flow.
 
 Protocol with oc_bridge:
   OC_STATE_FD   — optional C state pipe. In the single-agent fast path this is
-                  -1 because the worker reads TCP state directly via tcp_sockopt.
+                  -1 because the worker reads state through flow_backend.
   OC_ACTION_FD  — legacy field; the single-agent listener sets this to -1.
-  OC_FLOW_FD    — duplicated TCP socket fd; we call get_tcp_deepcc_info() on it
-                  and set_cwnd() on it every INTERVAL_MS.
+  OC_FLOW_FD    — duplicated TCP socket fd or simulation flow id; flow_backend
+                  reads observations and applies set_cwnd every INTERVAL_MS.
 
 The worker connects to the central learner via multiprocessing Manager IPC
 (OC_MANAGER_ADDR / OC_MANAGER_KEY) to push experiences and pull weights.
@@ -54,7 +54,6 @@ _REPO = os.path.dirname(_PKG)
 sys.path.insert(0, _REPO)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-import tcp_sockopt
 from olympus.algorithms.option_critic.model import (
     Experience,
     N_OPTIONS,
@@ -65,6 +64,7 @@ from olympus.algorithms.option_critic.model import (
     normalize_state,
     option_critic_meta_from_checkpoint,
 )
+from olympus.common import flow_backend
 from olympus.common.action_plugins import load_action_module
 from olympus.common.bbr_probe import BbrProbe
 from olympus.common.registry import reward_module
@@ -262,6 +262,7 @@ def run():
     gru_h_val = net.initial_hidden(batch_size=1)
 
     interval_s = interval_ms / 1000.0
+    simulation_backend = flow_backend.is_simulation_backend()
     exp_buf    = []      # local buffer before pushing to learner
     push_every = max(1, int(os.environ.get('OC_PUSH_EVERY', '16')))
 
@@ -288,7 +289,11 @@ def run():
 
             # ── Read DeepCC state ─────────────────────────────────────────────
             try:
-                raw = tcp_sockopt.get_tcp_deepcc_info(flow_fd)
+                raw = flow_backend.get_tcp_deepcc_info(flow_fd)
+            except flow_backend.SimulationFinished:
+                print('[worker] RayNet simulation finished - exiting',
+                      flush=True)
+                break
             except Exception as e:
                 print(f'[worker] get_tcp_deepcc_info failed: {e} — exiting', flush=True)
                 break
@@ -316,7 +321,7 @@ def run():
                 prev_urtt = _urtt   # don't overwrite with zero — no ACKs in window
             prev_cwnd = int(raw.get('cwnd', prev_cwnd))
 
-            t_s = t_step_start - t0
+            t_s = flow_backend.episode_seconds(raw, t0, wall_now=t_step_start)
 
             # ── Act ───────────────────────────────────────────────────────────
             option_age_now = option_age
@@ -349,7 +354,7 @@ def run():
             applied_mult = new_cwnd / max(cur_cwnd, 1)
 
             try:
-                tcp_sockopt.set_cwnd(flow_fd, new_cwnd)
+                flow_backend.set_cwnd(flow_fd, new_cwnd)
             except Exception as e:
                 print(f'[worker] set_cwnd failed: {e} — exiting', flush=True)
                 break
@@ -461,7 +466,7 @@ def run():
             # ── Sleep for rest of interval ────────────────────────────────────
             elapsed = time.monotonic() - t_step_start
             sleep_t = interval_s - elapsed
-            if sleep_t > 0:
+            if sleep_t > 0 and not simulation_backend:
                 time.sleep(sleep_t)
 
     finally:

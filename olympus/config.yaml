@@ -20,10 +20,17 @@
 #                                   via reward.per_agent_credit (team_alpha / over_weight).
 
 runtime:
-  algorithm: ma_dreamer
-  reward: tempest_fairness_ma
+  algorithm: dreamer_v3
+  reward: tempest
   state: tempest
   action: cwnd_multiplier
+
+
+# runtime:
+#   algorithm: ma_dreamer
+#   reward: tempest_fairness_ma
+#   state: tempest
+#   action: cwnd_multiplier
 
 # Action mappings are selected independently of the learner. Both current
 # plugins keep the policy output one-dimensional in [-1, 1], so changing the
@@ -63,7 +70,7 @@ environment:
   #   static                one flow on a steady link (no schedule changes).
   #   lagged_fairness       one flow plus lagged-policy background flows (join only).
   type: mininet
-  environment_setup: multiflow_interleave_rtt
+  environment_setup: dynamic
 
 reward:
   delay_margin_coef: 1.25
@@ -125,13 +132,16 @@ outputs:
   # When true, also plot normalized state columns (s0, s1, ...) whenever an
   # episode PDF is emitted.
   plot_observations: false
+  # When true, also capture schema-free raw observations from workers
+  # and emit a sibling *_raw_state.pdf for plotted episodes.
+  plot_raw_state: false
 
 n_parallel: 20
 
 # Hard cap on total dispatched episodes. The orchestrator stops handing out new
 # work once this many have been launched and lets in-flight slots drain. Omit
 # (or set null) to run until interrupted.
-episodes: 20000
+episodes: 2000
 
 algorithms:
 

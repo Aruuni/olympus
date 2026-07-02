@@ -7,6 +7,8 @@ figures:
     description: RLCC vs dreamer single and multi-agent
     data_folders:
       - cubic
+      - bbr
+      - bbr1
       - astraea
       - ma_dreamer_20260615-022803
       - sa_dreamer_20260521-145020

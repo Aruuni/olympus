@@ -59,6 +59,10 @@ from olympus.plots.normalized_state_plot import (
     plot as _plot_normalized_state,
     _state_plot_path,
 )
+from olympus.plots.raw_state_plot import (
+    plot as _plot_raw_state,
+    raw_state_plot_path as _raw_state_plot_path,
+)
 from olympus.common.checkpoint_config import (
     apply_model_config_from_checkpoint,
 )
@@ -154,6 +158,77 @@ def _should_plot_observations(outputs, episode):
     if not _should_plot_episode(outputs, episode):
         return False
     return _as_bool(outputs.get('plot_observations'), default=False)
+
+
+def _plot_raw_state_enabled(outputs, episode):
+    return (
+        _should_plot_episode(outputs, episode)
+        and _as_bool(outputs.get('plot_raw_state'), default=False)
+    )
+
+
+def _raw_state_base_path(episodes_dir, alg_name, episode):
+    return os.path.join(
+        episodes_dir, f'{alg_name}_raw_state_ep{int(episode):06d}.jsonl')
+
+
+def _raw_state_logs(raw_state_base):
+    root, ext = os.path.splitext(raw_state_base)
+    ext = ext or '.jsonl'
+    return sorted(
+        glob.glob(f'{root}_flow*{ext}'),
+        key=lambda p: int(re.search(r'_flow(\d+)', p).group(1))
+        if re.search(r'_flow(\d+)', p) else 10 ** 9,
+    )
+
+
+def _plot_raw_state_if_requested(outputs, episode, raw_state_base,
+                                 episode_plot_path, title):
+    if not _plot_raw_state_enabled(outputs, episode):
+        return
+    logs = _raw_state_logs(raw_state_base)
+    if not logs:
+        return
+    try:
+        out = _raw_state_plot_path(episode_plot_path)
+        if _plot_raw_state(logs, out, title=title):
+            print(f'[raw_state_plot] ep={episode} -> {out}', flush=True)
+    except Exception as exc:
+        print(f'[raw_state_plot] ep={episode} plot failed: {exc}', flush=True)
+
+
+def _plot_filename_env_part(outputs, env_name):
+    if not _as_bool(outputs.get('plot_filename_include_env'), default=False):
+        return ''
+    label = _slug(env_name or 'config')
+    return f'_{label}' if label else ''
+
+
+def _state_log_has_observations(path):
+    try:
+        if not path or not os.path.exists(path) or os.path.getsize(path) <= 0:
+            return False
+        with open(path, newline='') as f:
+            # Header + at least one observation row.
+            for line_no, _ in enumerate(f):
+                if line_no >= 1:
+                    return True
+        return False
+    except OSError:
+        return False
+
+
+def _ensure_state_logs_saved(outputs, episode, state_logs, expected_hint):
+    if not _as_bool(outputs.get('require_state_logs'), default=False):
+        return
+    logs = [p for p in (state_logs or []) if p]
+    missing = [p for p in logs if not _state_log_has_observations(p)]
+    if logs and not missing:
+        return
+    detail = ', '.join(missing) if missing else str(expected_hint)
+    raise RuntimeError(
+        f'episode {episode} did not save a non-empty state observation CSV '
+        f'(expected {detail})')
 
 
 def _plot_normalized_state_if_requested(outputs, episode, state_logs,
@@ -261,12 +336,21 @@ def _run_link_schedule(env, schedule, episode_start, stop):
             print(f'[orch] link change failed: {e}', flush=True)
 
 
+def _eval_mode(cfg: dict) -> bool:
+    raw = cfg.get('eval', {}) or {}
+    if isinstance(raw, dict):
+        return _as_bool(raw.get('enabled', False), default=False)
+    return _as_bool(raw, default=False)
+
+
 def _decayed_noise(cfg: dict, episode: int) -> float:
     """
     Linear decay of exploration σ (pre-tanh Gaussian) from noise_start →
     noise_end across noise_decay_episodes episodes.  Per-episode granularity
     is sufficient because one episode ≈ 6000 control steps.
     """
+    if _eval_mode(cfg):
+        return 0.0
     a_cfg = cfg.get('agent', {}) or {}
     n0 = float(a_cfg.get('noise_start',           0.3))
     n1 = float(a_cfg.get('noise_end',             0.05))
@@ -606,6 +690,10 @@ def _prepare_run(cfg: dict, config_path: str) -> str:
     with open(os.path.join(telemetry_dir, 'run_meta.json'), 'w') as f:
         json.dump(meta, f, indent=2)
 
+    # Auto-derive BDP strata edges from the simulation sweep when the config asks
+    # for a bucket count instead of explicit edges, so the learner reads them.
+    _resolve_sim_strata(cfg)
+
     resolved_config = os.path.join(telemetry_dir, 'config.resolved.yaml')
     with open(resolved_config, 'w') as f:
         yaml.safe_dump(cfg, f, sort_keys=False)
@@ -635,6 +723,77 @@ def _build_sweep_pool(sw: dict, env_meta: dict):
         ep['environment_path'] = env_meta.get('path', '')
         pool.append(ep)
     return pool
+
+
+def _quantile(sorted_vals, q):
+    """Linear-interpolated quantile of an ascending list (no numpy dependency)."""
+    n = len(sorted_vals)
+    if n == 0:
+        return 0.0
+    if q <= 0.0:
+        return float(sorted_vals[0])
+    if q >= 1.0:
+        return float(sorted_vals[-1])
+    pos = q * (n - 1)
+    lo = int(pos)
+    hi = min(lo + 1, n - 1)
+    frac = pos - lo
+    return float(sorted_vals[lo]) * (1.0 - frac) + float(sorted_vals[hi]) * frac
+
+
+def _auto_bdp_edges(bws, delays, n_buckets):
+    """Split the sweep's BDP range (bw*rtt over all bw x delay pairs) into
+    ``n_buckets`` roughly equal-population classes, returning the interior edges.
+
+    Edges are quantile cuts over every ``bw*delay`` product in the sweep, so each
+    class holds a similar number of link combinations. Deduplicated to stay
+    strictly increasing; returns ``[]`` when fewer than two distinct products
+    exist (a single class needs no edges).
+    """
+    products = sorted(float(b) * float(d) for b in bws for d in delays)
+    n_buckets = int(n_buckets)
+    if n_buckets <= 1 or len(set(products)) <= 1:
+        return []
+    n_buckets = min(n_buckets, len(set(products)))
+    edges = []
+    for i in range(1, n_buckets):
+        e = round(_quantile(products, i / n_buckets), 3)
+        if not edges or e > edges[-1]:
+            edges.append(e)
+    return edges
+
+
+def _resolve_sim_strata(cfg):
+    """Fill in ``mixed_collection.simulation.strata.bdp_edges`` from ``n_buckets``.
+
+    When the simulation strata block specifies ``n_buckets`` (and no explicit
+    ``bdp_edges``), load the simulation environment's sweep and derive the BDP bin
+    edges automatically. Explicit ``bdp_edges`` always win. Mutates ``cfg`` in
+    place so the resolved config the learner receives carries the edges.
+    """
+    mc = cfg.get('mixed_collection') or {}
+    if not mc.get('enabled'):
+        return
+    sim = mc.get('simulation') or {}
+    strata = sim.get('strata')
+    if not strata or strata.get('bdp_edges'):
+        return
+    n_buckets = int(strata.get('n_buckets', 0) or 0)
+    if n_buckets <= 1:
+        return
+    sub_env = {'type': sim.get('type')}
+    if sim.get('environment_setup'):
+        sub_env['environment_setup'] = sim['environment_setup']
+    elif sim.get('path'):
+        sub_env['path'] = sim['path']
+    env_cfg, _meta = _load_environment_definition({'environment': sub_env})
+    sw = env_cfg.get('sweep') or {}
+    bws = sw.get('bws', [sw.get('bw', 100.0)])
+    delays = sw.get('delays', [sw.get('delay', 20.0)])
+    edges = _auto_bdp_edges(bws, delays, n_buckets)
+    strata['bdp_edges'] = edges
+    print(f'[orch] auto BDP strata: n_buckets={n_buckets} bws={list(bws)} '
+          f'delays={list(delays)} -> bdp_edges={edges}', flush=True)
 
 
 def _bbr_probe_env(cfg, agent_cfg):
@@ -709,6 +868,44 @@ def _build_pool(cfg):
     return list(envs), False
 
 
+def _build_mixed_subconfigs(cfg):
+    """Split a ``mixed_collection`` config into (emulation_cfg, simulation_cfg).
+
+    Each sub-config is a deep copy of ``cfg`` with its own ``environment``
+    selection and ``n_parallel``, so it flows through the normal backend / pool
+    resolution (``_env_backend_type`` / ``_build_pool``) unchanged. Both feed the
+    same learner; the learner reads the mix fraction from ``mixed_collection``.
+    """
+    import copy
+    mc = cfg.get('mixed_collection') or {}
+    subs = []
+    for side in ('emulation', 'simulation'):
+        block = mc.get(side) or {}
+        sub = copy.deepcopy(cfg)
+        env = {'type': block.get('type')}
+        if block.get('environment_setup'):
+            env['environment_setup'] = block['environment_setup']
+        elif block.get('path'):
+            env['path'] = block['path']
+        sub['environment'] = env
+        sub['n_parallel'] = max(1, int(block.get('n_parallel',
+                                                 cfg.get('n_parallel', 1))))
+        subs.append(sub)
+    return subs[0], subs[1]
+
+
+def _raynet_config_overrides(cfg):
+    """Return RayNet process/path settings supplied by the run config."""
+    paths = cfg.get('paths') or {}
+    raynet = cfg.get('raynet') or {}
+    out = {}
+    for key in ('raynet_path', 'raynet_runner', 'omnet_path'):
+        value = raynet.get(key, paths.get(key))
+        if value:
+            out[key] = value
+    return out
+
+
 # ── Episode runner ────────────────────────────────────────────────────────────
 
 def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
@@ -763,6 +960,7 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
     os.makedirs(plots_dir, exist_ok=True)
     os.makedirs(episodes_dir, exist_ok=True)
     state_log = os.path.join(episodes_dir, f'{alg_name}_state_ep{episode:06d}.csv')
+    raw_state_log = _raw_state_base_path(episodes_dir, alg_name, episode)
 
     n_flows = int(ecfg.get('flows', 1))
     lagged_flow_ids = [
@@ -833,8 +1031,18 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
             'actor_log_std_max', 0.0))),
         'SAO_DEAD_FLOW_MS': str(int(a_cfg.get('dead_flow_ms', 1000))),
         'SAO_NOISE_STD':    str(float(_decayed_noise(cfg, episode))),
+        'SAO_DETERMINISTIC': '1' if _eval_mode(cfg) else '0',
+        'SAO_REQUIRE_CHECKPOINT': '1' if _eval_mode(cfg) else '0',
+        'OC_DETERMINISTIC': '1' if _eval_mode(cfg) else '0',
+        'OC_REQUIRE_CHECKPOINT': '1' if _eval_mode(cfg) else '0',
         'SAO_TRACE_LOG':    state_log,
+        'SAO_RAW_STATE_LOG': raw_state_log,
+        'SAO_RAW_STATE_LOG_ENABLED': '1' if _plot_raw_state_enabled(outputs, episode) else '0',
         'SAO_EPISODE':      str(int(episode)),
+        # BDP proxy (bw_mbps * rtt_ms) from the TRUE episode link, independent of
+        # oracle hiding. Simulation workers append it to their experience tag so a
+        # BDP-stratified sim replay buffer can reserve a slice per link regime.
+        'SAO_SIM_BDP':      str(float(ecfg.get('bw', 0.0)) * float(ecfg.get('delay', 0.0))),
         'SAO_HIDE_LINK_ORACLE': '1' if hide_link_oracle else '0',
         # Oracle state plugin only: scheduled-link ground truth via dedicated
         # env vars. Empty when state != oracle so the data is structurally
@@ -862,8 +1070,8 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
         'OC_Q_VALUE_CLIP':   str(float(a_cfg.get('q_value_clip', 1500.0))),
         'OC_BETA_TEMPERATURE': str(float(a_cfg.get('beta_temperature', 1.0))),
         'OC_BETA_FLOOR':     str(float(a_cfg.get('beta_floor', 0.0))),
-        'OC_EPS_START':      str(float(a_cfg.get('epsilon_start', 0.20))),
-        'OC_EPS_END':        str(float(a_cfg.get('epsilon_end', 0.03))),
+        'OC_EPS_START':      ('0.0' if _eval_mode(cfg) else str(float(a_cfg.get('epsilon_start', 0.20)))),
+        'OC_EPS_END':        ('0.0' if _eval_mode(cfg) else str(float(a_cfg.get('epsilon_end', 0.03)))),
         'OC_EPS_DECAY':      str(float(a_cfg.get('epsilon_decay', 30000))),
         'OC_DWELL_MIN_STEPS': str(int(a_cfg.get('dwell_min_steps', 1))),
         'OC_DWELL_MAX_STEPS': str(int(a_cfg.get('dwell_max_steps', 0))),
@@ -917,6 +1125,22 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
     }
     if is_raynet:
         raynet_ecfg = dict(ecfg)
+        for key, value in _raynet_config_overrides(cfg).items():
+            raynet_ecfg.setdefault(key, value)
+        raynet_ecfg.setdefault(
+            'runner_log_path',
+            os.path.join(
+                episodes_dir,
+                f'raynet_runner_ep{episode:06d}_slot{instance_id}.log',
+            ),
+        )
+        raynet_ecfg.setdefault(
+            'control_trace_path',
+            os.path.join(
+                episodes_dir,
+                f'raynet_trace_ep{episode:06d}_slot{instance_id}.jsonl',
+            ),
+        )
         raynet_ecfg['episode'] = int(episode)
         raynet_ecfg['slot'] = int(instance_id)
         env_kwargs['environment_config'] = raynet_ecfg
@@ -1016,6 +1240,7 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
     plot_episodes = _should_plot_episode(outputs, episode)
     root, ext = os.path.splitext(state_log)
     ext = ext or '.csv'
+    env_part = _plot_filename_env_part(outputs, env_name or 'config')
 
     # Per-agent traces: parameter-shared multi-agent models (and single-agent
     # models, which still use the per-agent trace writer) write one trace per
@@ -1028,6 +1253,8 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
                        if re.search(r'_a(\d+)', p) else 10 ** 9),
     )
     if agent_logs:
+        _ensure_state_logs_saved(
+            outputs, episode, agent_logs, f'{root}_a*{ext}')
         n_agents = len(agent_logs)
         ep_return = _multi_episode_return(
             state_log, n_agents=n_agents, trim_tail_s=plot_trim_tail_s)
@@ -1035,7 +1262,7 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
             try:
                 pdf_path = os.path.join(
                     plots_dir,
-                    f'ep{episode:06d}_bw{bw_str}_d{delay_str}_n{n_agents}.pdf')
+                    f'ep{episode:06d}{env_part}_bw{bw_str}_d{delay_str}_n{n_agents}.pdf')
                 plot_title = (f'Episode {episode}  flows={n_agents}  '
                               f'bw={bw_str}Mbps  delay={delay_str}ms  '
                               f'env={env_name or "config"}  '
@@ -1053,6 +1280,8 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
                 _plot_normalized_state_if_requested(
                     outputs, episode, agent_logs, pdf_path, plot_title,
                     plot_trim_tail_s)
+                _plot_raw_state_if_requested(
+                    outputs, episode, raw_state_log, pdf_path, plot_title)
                 if plotted_return is not None:
                     ep_return = plotted_return
                 print(f'[ep_plot] ep={episode} -> {pdf_path}  '
@@ -1074,6 +1303,14 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
         if flow_logs:
             state_logs = flow_logs
 
+    required_state_logs = (
+        [f'{root}_flow{flow_id}{ext}' for flow_id in range(n_flows)]
+        if ecfg.get('per_flow_state_logs') else [state_log]
+    )
+    _ensure_state_logs_saved(
+        outputs, episode, required_state_logs,
+        ', '.join(required_state_logs))
+
     if state_logs:
         primary_log = next(
             (p for p in state_logs if re.search(r'_flow0(?:\.|$)', p)),
@@ -1086,7 +1323,7 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
                 if plot_episodes:
                     pdf_path = os.path.join(
                         plots_dir,
-                        f'ep{episode:06d}_bw{bw_str}_d{delay_str}{flow_suffix}.pdf')
+                        f'ep{episode:06d}{env_part}_bw{bw_str}_d{delay_str}{flow_suffix}.pdf')
                     plot_title = (f'Episode {episode}{flow_suffix}  '
                                   f'bw={bw_str}Mbps  delay={delay_str}ms  '
                                   f'env={env_name or "config"}  '
@@ -1104,6 +1341,9 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
                         outputs, episode, [log_path], pdf_path, plot_title,
                         plot_trim_tail_s)
                     if log_path == primary_log:
+                        _plot_raw_state_if_requested(
+                            outputs, episode, raw_state_log, pdf_path,
+                            plot_title)
                         ep_return = ret
                     print(f'[ep_plot] ep={episode}{flow_suffix} -> {pdf_path}  '
                           f'return={ret}', flush=True)
@@ -1499,6 +1739,7 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
     os.makedirs(plots_dir, exist_ok=True)
     os.makedirs(episodes_dir, exist_ok=True)
     state_log = os.path.join(episodes_dir, f'{alg_name}_state_ep{episode:06d}.csv')
+    raw_state_log = _raw_state_base_path(episodes_dir, alg_name, episode)
 
     worker_env = dict(os.environ)
     worker_env.update({
@@ -1522,8 +1763,14 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
         'SAO_HIDDEN':        str(int(a_cfg.get('hidden', 128))),
         'SAO_DEAD_FLOW_MS':  str(int(a_cfg.get('dead_flow_ms', 1000))),
         'SAO_NOISE_STD':     str(float(_decayed_noise(cfg, episode))),
+        'SAO_DETERMINISTIC':  '1' if _eval_mode(cfg) else '0',
+        'SAO_REQUIRE_CHECKPOINT': '1' if _eval_mode(cfg) else '0',
+        'OC_DETERMINISTIC':   '1' if _eval_mode(cfg) else '0',
+        'OC_REQUIRE_CHECKPOINT': '1' if _eval_mode(cfg) else '0',
         'OC_PUSH_EVERY':      str(int(t_cfg.get('worker_push_every', 16))),
         'SAO_TRACE_LOG':     state_log,
+        'SAO_RAW_STATE_LOG': raw_state_log,
+        'SAO_RAW_STATE_LOG_ENABLED': '1' if _plot_raw_state_enabled(outputs, episode) else '0',
         'SAO_EPISODE':       str(int(episode)),
         # Multi-agent specifics
         'SAO_N_AGENTS':      str(n_flows),
@@ -1555,6 +1802,8 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
 
     bw_str    = f"{ecfg.get('bw', 100):.0f}"
     delay_str = f"{ecfg.get('delay', 20):.0f}"
+    env_name  = str(ecfg.get('environment', ''))
+    env_part  = _plot_filename_env_part(outputs, env_name or 'config')
     delays_str = ('simul' if max(start_delays) == 0
                   else f'delays={[round(x,1) for x in start_delays]}')
     rtts_str = ('' if not per_flow_delays
@@ -1578,6 +1827,22 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
     }
     if is_raynet:
         raynet_ecfg = dict(ecfg)
+        for key, value in _raynet_config_overrides(cfg).items():
+            raynet_ecfg.setdefault(key, value)
+        raynet_ecfg.setdefault(
+            'runner_log_path',
+            os.path.join(
+                episodes_dir,
+                f'raynet_runner_ep{episode:06d}_slot{instance_id}.log',
+            ),
+        )
+        raynet_ecfg.setdefault(
+            'control_trace_path',
+            os.path.join(
+                episodes_dir,
+                f'raynet_trace_ep{episode:06d}_slot{instance_id}.jsonl',
+            ),
+        )
         raynet_ecfg['episode'] = int(episode)
         raynet_ecfg['slot'] = int(instance_id)
         env_kwargs['environment_config'] = raynet_ecfg
@@ -1667,12 +1932,30 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
     ep_return = _multi_episode_return(
         state_log, n_agents=n_flows, trim_tail_s=plot_trim_tail_s)
     plot_episodes = _should_plot_episode(outputs, episode)
+    root, ext = os.path.splitext(state_log)
+    ext = ext or '.csv'
+    expected_state_logs = [
+        f'{root}_a{agent_id}{ext}' for agent_id in range(int(n_flows))
+    ]
+    existing_state_logs = [
+        path for path in expected_state_logs if os.path.exists(path)
+    ]
+    if not existing_state_logs and os.path.exists(state_log):
+        existing_state_logs = [state_log]
+    required_state_logs = (
+        existing_state_logs if existing_state_logs == [state_log]
+        else expected_state_logs
+    )
+    _ensure_state_logs_saved(
+        outputs, episode, required_state_logs,
+        ', '.join(required_state_logs) if required_state_logs else state_log)
     try:
         if plot_episodes:
             pdf_path = os.path.join(plots_dir,
-                                    f'ep{episode:06d}_bw{bw_str}_d{delay_str}_n{n_flows}.pdf')
+                                    f'ep{episode:06d}{env_part}_bw{bw_str}_d{delay_str}_n{n_flows}.pdf')
             plot_title = (f'Episode {episode}  flows={n_flows}  '
                           f'bw={bw_str}Mbps  delay={delay_str}ms  '
+                          f'env={env_name or "config"}  '
                           f'({"scheduled" if link_schedule else "static"})')
             plotted_return = _plot_multi_episode(
                 state_log_path = state_log,
@@ -1684,18 +1967,11 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
                 n_agents       = n_flows,
                 trim_tail_s    = plot_trim_tail_s,
             )
-            root, ext = os.path.splitext(state_log)
-            ext = ext or '.csv'
-            state_logs = [
-                f'{root}_a{agent_id}{ext}'
-                for agent_id in range(int(n_flows))
-                if os.path.exists(f'{root}_a{agent_id}{ext}')
-            ]
-            if not state_logs and os.path.exists(state_log):
-                state_logs = [state_log]
             _plot_normalized_state_if_requested(
-                outputs, episode, state_logs, pdf_path, plot_title,
+                outputs, episode, existing_state_logs, pdf_path, plot_title,
                 plot_trim_tail_s)
+            _plot_raw_state_if_requested(
+                outputs, episode, raw_state_log, pdf_path, plot_title)
             if plotted_return is not None:
                 ep_return = plotted_return
             print(f'[ep_plot] ep={episode} -> {pdf_path}  return={ep_return}', flush=True)
@@ -1805,6 +2081,10 @@ def main():
     ap.add_argument('--env-type', default=None,
                     help=f'environment backend type (subfolder of environments/); '
                          f'default {_DEFAULT_ENV_TYPE}')
+    ap.add_argument('--eval', action='store_true',
+                    help='run deterministic checkpoint inference without starting a learner')
+    ap.add_argument('--checkpoint', default=None,
+                    help='checkpoint to load when --eval is set')
     args = ap.parse_args()
 
     with open(args.config) as f:
@@ -1824,7 +2104,26 @@ def main():
             sel = dict(existing) if isinstance(existing, dict) else {}
             sel['type'] = env_type
             cfg['environment'] = sel
+    if args.eval:
+        cfg.setdefault('eval', {})['enabled'] = True
+    if args.checkpoint:
+        cfg.setdefault('eval', {})['checkpoint'] = args.checkpoint
+        cfg.setdefault('training', {})['resume_from'] = args.checkpoint
     _activate_runtime_blocks(cfg)
+    eval_mode = _eval_mode(cfg)
+    eval_checkpoint = ''
+    if eval_mode:
+        eval_cfg = cfg.get('eval', {}) or {}
+        eval_checkpoint = args.checkpoint or eval_cfg.get('checkpoint') or (
+            cfg.get('training', {}) or {}).get('resume_from')
+        if not eval_checkpoint:
+            raise SystemExit('[orch] --eval requires --checkpoint or eval.checkpoint')
+        eval_checkpoint = _resolve_repo_path(str(eval_checkpoint))
+        if not os.path.exists(eval_checkpoint):
+            raise SystemExit(f'[orch] eval checkpoint not found: {eval_checkpoint}')
+        cfg.setdefault('training', {})['resume_from'] = eval_checkpoint
+        cfg.setdefault('eval', {})['checkpoint'] = eval_checkpoint
+        cfg.setdefault('eval', {})['enabled'] = True
     resume_from = (cfg.get('training', {}) or {}).get('resume_from')
     if resume_from:
         resume_from = _resolve_repo_path(str(resume_from))
@@ -1847,22 +2146,33 @@ def main():
     t_cfg = cfg.get('training', cfg)
     paths = cfg.get('paths', {}) or {}
     backend_type = _env_backend_type(cfg)
+    # A run needs the Mininet listener + kernel CC whenever any collection pool
+    # uses a non-raynet (Mininet) backend — including the emulation side of a
+    # mixed run.
+    _mixed_cfg = cfg.get('mixed_collection') or {}
+    mixed_cfg_enabled = bool(_mixed_cfg.get('enabled'))
+    _mixed_uses_mininet = mixed_cfg_enabled and any(
+        (_mixed_cfg.get(side) or {}).get('type', 'mininet') != 'raynet'
+        for side in ('emulation', 'simulation'))
+    needs_emulation = (backend_type != 'raynet') or _mixed_uses_mininet
     if 'py' not in paths:
         raise SystemExit('[orch] config.yaml must define paths.py')
-    if backend_type != 'raynet' and 'listener' not in paths:
+    if needs_emulation and 'listener' not in paths:
         raise SystemExit('[orch] config.yaml must define paths.listener for Mininet backends')
-    listener_bin = os.path.abspath(paths.get('listener', '')) if backend_type != 'raynet' else ''
+    listener_bin = os.path.abspath(paths.get('listener', '')) if needs_emulation else ''
     python_bin   = os.path.abspath(paths['py'])
     n_episodes   = args.episodes or cfg.get('episodes', None)
     n_parallel   = max(1, int(cfg.get('n_parallel', 1)))
     episode_ckpt_every = max(0, int(
         t_cfg.get('checkpoint_every_episodes',
                   t_cfg.get('save_every_episodes', 0)) or 0))
+    if eval_mode:
+        episode_ckpt_every = 0
 
     runtime = cfg.get('runtime', {}) or {}
     alg_name = runtime.get('algorithm', 'td3')
     multi = is_multi_agent(alg_name)
-    if backend_type != 'raynet':
+    if needs_emulation:
         _ensure_tcp_cc(cfg.get('listener_cc', 'astraea'))
 
     raynet_sync_handle = None
@@ -1898,7 +2208,7 @@ def main():
         print(f'[orch] episode checkpoint copies every {episode_ckpt_every} '
               'completed episodes', flush=True)
 
-    selected_learner_script = learner_script(alg_name)
+    selected_learner_script = None if eval_mode else learner_script(alg_name)
     learner_port   = int(cfg.get('learner', {}).get('port', 6301))
     shutdown_requested = {'seen': False}
 
@@ -1943,7 +2253,7 @@ def main():
             raise RuntimeError('learner closed stdout without printing SAO_MANAGER_KEY')
         return proc, key
 
-    learner_proc, mgr_key = _start_learner()
+    learner_proc, mgr_key = (None, '') if eval_mode else _start_learner()
 
     old_sigterm = signal.getsignal(signal.SIGTERM)
     old_sigint = signal.getsignal(signal.SIGINT)
@@ -1951,18 +2261,22 @@ def main():
     signal.signal(signal.SIGINT, _signal_shutdown)
     interrupted = False
 
-    _mp_mgr       = multiprocessing.Manager()
-    learner_state = _mp_mgr.dict({
-        'mgr_addr': f'127.0.0.1:{learner_port}',
-        'mgr_key':  mgr_key,
-    })
+    _mp_mgr = None if eval_mode else multiprocessing.Manager()
+    if eval_mode:
+        learner_state = {'mgr_addr': '', 'mgr_key': ''}
+    else:
+        learner_state = _mp_mgr.dict({
+            'mgr_addr': f'127.0.0.1:{learner_port}',
+            'mgr_key':  mgr_key,
+        })
     _lproc = {'proc': learner_proc}
 
     def _fwd(proc):
         for line in proc.stdout:
             sys.stdout.write('[learner] ' + line)
             sys.stdout.flush()
-    threading.Thread(target=_fwd, args=(learner_proc,), daemon=True).start()
+    if not eval_mode:
+        threading.Thread(target=_fwd, args=(learner_proc,), daemon=True).start()
 
     stop_watchdog = threading.Event()
 
@@ -1986,65 +2300,108 @@ def main():
                 except Exception as e:
                     print(f'[orch] learner restart failed: {e}', flush=True)
 
-    threading.Thread(target=_learner_watchdog, daemon=True).start()
-
-    print(f'[orch] learner ready addr={learner_state["mgr_addr"]}', flush=True)
+    if not eval_mode:
+        threading.Thread(target=_learner_watchdog, daemon=True).start()
+        print(f'[orch] learner ready addr={learner_state["mgr_addr"]}', flush=True)
+    else:
+        print(f'[orch] eval mode checkpoint={eval_checkpoint}', flush=True)
     training_start = time.monotonic()
 
-    if multi:
-        pool, do_shuffle = _build_pool_marl(cfg)
-        env_meta = {}
-        _, interval_ms, rollout_steps, ceiling, min_update_s = (
-            _estimate_collection_rate(cfg, n_parallel))
-        print(f'[orch] MARL collection ceiling~{ceiling:.0f} transitions/s '
-              f'({n_parallel} slots x {1000.0 / interval_ms:.0f}Hz); batch '
-              f'threshold={rollout_steps} -> learner updates >= ~{min_update_s:.1f}s apart',
-              flush=True)
-    else:
-        pool, do_shuffle = _build_pool(cfg)
-        env_meta = cfg.get('_environment_meta', {}) or {}
-    print(f'[orch] mode={"multi-agent" if multi else "single-agent"}  '
-          f'environment={env_meta.get("name", "config")}  '
-          f'pool={len(pool)}  shuffle={do_shuffle}', flush=True)
-
-    work_q   = multiprocessing.Queue()
     result_q = multiprocessing.Queue()
+    mixed_enabled = (not multi) and mixed_cfg_enabled
+
+    # Each collection "group" owns a backend sub-config, a listener binary, a
+    # parallel slot count, an episode pool, and its own work queue. Non-mixed
+    # runs use a single group (identical to the original behaviour); mixed runs
+    # use one emulation group and one simulation group feeding the same learner.
+    groups = []
+    if mixed_enabled:
+        emu_cfg, sim_cfg = _build_mixed_subconfigs(cfg)
+        for gname, gcfg, gbin in (('emulation', emu_cfg, listener_bin),
+                                  ('simulation', sim_cfg, '')):
+            gpool, gshuf = _build_pool(gcfg)
+            groups.append({
+                'name': gname, 'cfg': gcfg, 'listener_bin': gbin,
+                'n_parallel': max(1, int(gcfg.get('n_parallel', 1))),
+                'pool': gpool, 'shuffle': gshuf,
+                'work_q': multiprocessing.Queue(),
+            })
+        env_meta = {}
+        frac = float(((cfg.get('mixed_collection') or {}).get('mix') or {})
+                     .get('emulation_batch_fraction', 0.5))
+        for g in groups:
+            print(f'[orch] mixed group={g["name"]} '
+                  f'backend={_env_backend_type(g["cfg"])} '
+                  f'slots={g["n_parallel"]} pool={len(g["pool"])}', flush=True)
+        print(f'[orch] mode=mixed (single-agent)  '
+              f'emulation_batch_fraction={frac}', flush=True)
+    else:
+        if multi:
+            pool, do_shuffle = _build_pool_marl(cfg)
+            env_meta = {}
+            _, interval_ms, rollout_steps, ceiling, min_update_s = (
+                _estimate_collection_rate(cfg, n_parallel))
+            if eval_mode:
+                print(f'[orch] MARL eval collection ceiling~{ceiling:.0f} transitions/s '
+                      f'({n_parallel} slots x {1000.0 / interval_ms:.0f}Hz)',
+                      flush=True)
+            else:
+                print(f'[orch] MARL collection ceiling~{ceiling:.0f} transitions/s '
+                      f'({n_parallel} slots x {1000.0 / interval_ms:.0f}Hz); batch '
+                      f'threshold={rollout_steps} -> learner updates >= ~{min_update_s:.1f}s apart',
+                      flush=True)
+        else:
+            pool, do_shuffle = _build_pool(cfg)
+            env_meta = cfg.get('_environment_meta', {}) or {}
+        print(f'[orch] mode={"multi-agent" if multi else "single-agent"}  '
+              f'environment={env_meta.get("name", "config")}  '
+              f'pool={len(pool)}  shuffle={do_shuffle}', flush=True)
+        groups.append({
+            'name': 'single', 'cfg': cfg, 'listener_bin': listener_bin,
+            'n_parallel': n_parallel, 'pool': pool, 'shuffle': do_shuffle,
+            'work_q': multiprocessing.Queue(),
+        })
 
     slot_procs = []
-    for i in range(n_parallel):
-        p = multiprocessing.Process(
-            target = _slot_process,
-            args   = (i, work_q, result_q, cfg,
-                      listener_bin, python_bin, learner_state, multi),
-            daemon = True,
-        )
-        p.start()
-        slot_procs.append(p)
+    _slot_idx  = 0
+    for g in groups:
+        g['pending'] = list(g['pool'])
+        if g['shuffle']:
+            random.shuffle(g['pending'])
+        for _ in range(g['n_parallel']):
+            p = multiprocessing.Process(
+                target = _slot_process,
+                args   = (_slot_idx, g['work_q'], result_q, g['cfg'],
+                          g['listener_bin'], python_bin, learner_state, multi),
+                daemon = True,
+            )
+            p.start()
+            slot_procs.append(p)
+            _slot_idx += 1
 
-    pending         = list(pool)
-    if do_shuffle:
-        random.shuffle(pending)
     episode_counter = 0
     in_flight       = 0
+    ep_to_group     = {}
 
-    def _next():
-        nonlocal pending, episode_counter
+    def _next_for(g):
+        nonlocal episode_counter
         if n_episodes is not None and episode_counter >= n_episodes:
             return None
-        if not pending:
-            pending.extend(pool)
-            if do_shuffle:
-                random.shuffle(pending)
-        ep   = episode_counter
+        if not g['pending']:
+            g['pending'].extend(g['pool'])
+            if g['shuffle']:
+                random.shuffle(g['pending'])
+        ep = episode_counter
         if multi:
-            ecfg = materialize_episode_config(pending.pop(0))
+            ecfg = materialize_episode_config(g['pending'].pop(0))
         else:
-            ecfg = _materialize_single_episode(pending.pop(0), ep)
+            ecfg = _materialize_single_episode(g['pending'].pop(0), ep)
         episode_counter += 1
+        ep_to_group[ep] = g
         return ep, ecfg
 
     returns_fields = [
-        'episode', 'environment', 'bw', 'delay', 'scheduled',
+        'episode', 'environment', 'source', 'backend', 'bw', 'delay', 'scheduled',
         'schedule_changes', 'episode_type', 'flows', 'return',
         'elapsed_s', 'episode_wall_s', 'completed_at',
     ]
@@ -2082,6 +2439,11 @@ def main():
 
     def _log_return(ep, ecfg, ep_return, link_sched, episode_wall_s):
         env_name = ecfg.get('environment') or env_meta.get('name', '')
+        # Collection source group ('emulation'/'simulation' for mixed runs,
+        # 'single' otherwise) so the plotter can compare returns per source.
+        group = ep_to_group.get(ep)
+        source = group['name'] if group else 'single'
+        backend = _env_backend_type(group['cfg'] if group else cfg)
         schedule_changes = len(link_sched or [])
         episode_type = f'{schedule_changes}_change' if schedule_changes == 1 else f'{schedule_changes}_changes'
         elapsed_s = time.monotonic() - training_start
@@ -2091,6 +2453,8 @@ def main():
             w.writerow({
                 'episode': ep,
                 'environment': env_name,
+                'source': source,
+                'backend': backend,
                 'bw': ecfg.get('bw', 100),
                 'delay': ecfg.get('delay', 20),
                 'scheduled': int(bool(link_sched)),
@@ -2102,7 +2466,8 @@ def main():
                 'episode_wall_s': f'{float(episode_wall_s):.3f}',
                 'completed_at': time.strftime('%Y-%m-%d %H:%M:%S %z'),
             })
-        print(f'[orch] ep={ep}  env={env_name}  type={episode_type}  '
+        print(f'[orch] ep={ep}  source={source}  backend={backend}  '
+              f'env={env_name}  type={episode_type}  '
               f'return={ep_return}  elapsed={elapsed_s/3600.0:.2f}h',
               flush=True)
 
@@ -2172,11 +2537,12 @@ def main():
             pending_episode_ckpts.add(completed_count)
         _flush_episode_checkpoints()
 
-    for _ in range(n_parallel):
-        item = _next()
-        if item is not None:
-            work_q.put(item)
-            in_flight += 1
+    for g in groups:
+        for _ in range(g['n_parallel']):
+            item = _next_for(g)
+            if item is not None:
+                g['work_q'].put(item)
+                in_flight += 1
 
     completed_episodes = 0
     try:
@@ -2187,9 +2553,10 @@ def main():
             _log_return(ep, ecfg, ep_return, link_sched, episode_wall_s)
             _maybe_save_episode_checkpoint(completed_episodes)
 
-            item = _next()
+            g = ep_to_group.pop(ep, groups[0])
+            item = _next_for(g)
             if item is not None:
-                work_q.put(item)
+                g['work_q'].put(item)
                 in_flight += 1
             elif raynet_sync_handle is not None and in_flight > 0:
                 raynet_sync_handle['service'].set_target_slots(in_flight)
@@ -2200,9 +2567,10 @@ def main():
 
     finally:
         stop_watchdog.set()
-        for _ in slot_procs:
-            try: work_q.put(None)
-            except Exception: pass
+        for g in groups:
+            for _ in range(g['n_parallel']):
+                try: g['work_q'].put(None)
+                except Exception: pass
 
         for p in slot_procs:
             p.join(timeout=3 if shutdown_requested['seen'] else 10)
@@ -2212,16 +2580,18 @@ def main():
             if p.is_alive():
                 p.kill()
 
-        _terminate(_lproc['proc'])
+        if _lproc['proc'] is not None:
+            _terminate(_lproc['proc'])
         if interrupted or shutdown_requested['seen']:
-            if not _run_reset_script():
+            if not _run_reset_script() and not eval_mode:
                 _final_runtime_cleanup(learner_port)
-        else:
+        elif not eval_mode:
             _final_runtime_cleanup(learner_port)
-        try:
-            _mp_mgr.shutdown()
-        except Exception:
-            pass
+        if _mp_mgr is not None:
+            try:
+                _mp_mgr.shutdown()
+            except Exception:
+                pass
         if os.path.exists(returns_csv):
             _generate_returns_plot()
         if pending_episode_ckpts:

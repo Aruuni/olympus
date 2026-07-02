@@ -34,8 +34,8 @@ _PKG = os.path.dirname(_ALG_DIR)
 _REPO = os.path.dirname(_PKG)
 sys.path.insert(0, _REPO)
 
-import tcp_sockopt
 from olympus.algorithms.recurrent_ppo import model
+from olympus.common import flow_backend
 from olympus.common.action_plugins import load_action_module
 from olympus.common.bbr_probe import BbrProbe
 from olympus.common.registry import reward_module
@@ -110,6 +110,7 @@ def run():
     require_checkpoint = os.environ.get('SAO_REQUIRE_CHECKPOINT', '0') == '1'
 
     deterministic = os.environ.get('SAO_DETERMINISTIC', '0') == '1'
+    simulation_backend = flow_backend.is_simulation_backend()
 
     state_log_path = os.environ.get('SAO_TRACE_LOG', '')
     if state_log_path and os.environ.get('SAO_TRACE_LOG_SUFFIX_BY_FLOW', '0') == '1':
@@ -195,7 +196,11 @@ def run():
             t_step_start = time.monotonic()
 
             try:
-                raw = tcp_sockopt.get_tcp_deepcc_info(flow_fd)
+                raw = flow_backend.get_tcp_deepcc_info(flow_fd)
+            except flow_backend.SimulationFinished:
+                print('[worker] RayNet simulation finished - exiting',
+                      flush=True)
+                break
             except Exception as e:
                 print(f'[worker] get_tcp_deepcc_info failed: {e} - exiting', flush=True)
                 break
@@ -221,7 +226,7 @@ def run():
                 prev_urtt = urtt
             prev_cwnd = int(raw.get('cwnd', prev_cwnd))
 
-            t_s = t_step_start - t0
+            t_s = flow_backend.episode_seconds(raw, t0, wall_now=t_step_start)
 
             # Push the previous-step transition with the just-observed reward.
             if prev_state is not None and flow_active and mgr:
@@ -257,12 +262,13 @@ def run():
 
             srtt_raw_us = float(raw.get('srtt_us', 0) or 0)
             filter_rtt_us = (srtt_raw_us / 8.0) if srtt_raw_us > 0 else float(raw.get('avg_urtt', 0) or 0)
-            probe.observe_rtt(t_step_start, filter_rtt_us)
+            clock_t = flow_backend.observation_clock(raw, wall_now=t_step_start)
+            probe.observe_rtt(clock_t, filter_rtt_us)
             actual_cwnd, agent_locked, _ = probe.decide(
-                t_step_start, cur_cwnd, desired_cwnd)
+                clock_t, cur_cwnd, desired_cwnd)
             new_cwnd = int(np.clip(actual_cwnd, cwnd_min, cwnd_max))
             try:
-                tcp_sockopt.set_cwnd(flow_fd, new_cwnd)
+                flow_backend.set_cwnd(flow_fd, new_cwnd)
             except Exception as e:
                 print(f'[worker] set_cwnd failed: {e} - exiting', flush=True)
                 break
@@ -319,7 +325,7 @@ def run():
 
             elapsed = time.monotonic() - t_step_start
             sleep_t = interval_s - elapsed
-            if sleep_t > 0:
+            if sleep_t > 0 and not simulation_backend:
                 time.sleep(sleep_t)
 
     finally:

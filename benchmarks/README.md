@@ -35,8 +35,7 @@ listeners, iperf, and cleanup are host-global resources.
 Run every configured approach through all five suites:
 
 ```bash
-sudo -E env PATH="$PATH" HOME="$HOME" \
-  ./venv_training/bin/python benchmarks/run_all.py
+sudo -E env PATH="$PATH" HOME="$HOME" ./venv_training/bin/python benchmarks/run_all.py
 ```
 
 By default, every approach in `benchmarks/config.yaml` is checked. Select a subset

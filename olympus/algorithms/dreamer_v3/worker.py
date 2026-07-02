@@ -172,6 +172,16 @@ def run():
 
     mgr = _connect_manager()
 
+    # Tag pushed experiences with their collection backend (emulation/simulation)
+    # so a mixed learner routes them into the matching replay buffer.
+    _exp_src = flow_backend.experience_source()
+
+    def _push_batch(exps):
+        getattr(mgr, 'push_exp_batch')(exps, _exp_src)
+
+    def _push_one(e):
+        getattr(mgr, 'push_exp')(e, _exp_src)
+
     stop_drain = threading.Event()
     if state_fd >= 0:
         threading.Thread(target=_drain_state_fd, args=(state_fd, stop_drain),
@@ -233,6 +243,9 @@ def run():
 
             try:
                 raw = flow_backend.get_tcp_deepcc_info(flow_fd)
+            except flow_backend.SimulationFinished:
+                print('[worker] RayNet simulation finished - exiting', flush=True)
+                break
             except Exception as e:
                 print(f'[worker] get_tcp_deepcc_info failed: {e} - exiting', flush=True)
                 break
@@ -271,11 +284,11 @@ def run():
                 step_in_traj += 1
                 if len(exp_buf) >= push_every:
                     try:
-                        mgr.push_exp_batch(list(exp_buf))
+                        _push_batch(list(exp_buf))
                     except Exception:
                         for e in exp_buf:
                             try:
-                                mgr.push_exp(e)
+                                _push_one(e)
                             except Exception:
                                 pass
                     exp_buf.clear()
@@ -360,17 +373,17 @@ def run():
     finally:
         if mgr and exp_buf:
             try:
-                mgr.push_exp_batch(list(exp_buf))
+                _push_batch(list(exp_buf))
             except Exception:
                 for e in exp_buf:
                     try:
-                        mgr.push_exp(e)
+                        _push_one(e)
                     except Exception:
                         pass
             exp_buf.clear()
         if prev_state is not None and mgr:
             try:
-                mgr.push_exp(model.Experience(
+                _push_one(model.Experience(
                     state=prev_state, action=prev_action, reward=0.0,
                     next_state=prev_state, done=True,
                     traj_id=traj_id, step_in_traj=step_in_traj,

@@ -167,6 +167,22 @@ def run():
 
     mgr = _connect_manager()
 
+    # Tag every pushed experience with its collection backend so a mixed
+    # emulation+simulation learner routes it into the matching replay buffer.
+    # For simulation, append the episode's BDP (bw*rtt, set by the orchestrator)
+    # so a BDP-stratified sim buffer can route the transition into its class.
+    _exp_src = flow_backend.experience_source()
+    if simulation_backend:
+        _sim_bdp = os.environ.get('SAO_SIM_BDP', '')
+        if _sim_bdp:
+            _exp_src = f'{_exp_src}|{_sim_bdp}'
+
+    def _push_batch(exps):
+        getattr(mgr, 'push_exp_batch')(exps, _exp_src)
+
+    def _push_one(e):
+        getattr(mgr, 'push_exp')(e, _exp_src)
+
     stop_drain = threading.Event()
     if state_fd >= 0:
         threading.Thread(target=_drain_state_fd, args=(state_fd, stop_drain),
@@ -261,6 +277,10 @@ def run():
             t_step_start = time.monotonic()
             try:
                 raw = flow_backend.get_tcp_deepcc_info(flow_fd)
+            except flow_backend.SimulationFinished:
+                print('[orca worker] RayNet simulation finished - exiting',
+                      flush=True)
+                break
             except Exception as e:
                 print(f'[orca worker] get_tcp_deepcc_info failed: {e} - exiting',
                       flush=True)
@@ -327,11 +347,11 @@ def run():
                 step_in_traj += 1
                 if len(exp_buf) >= push_every:
                     try:
-                        mgr.push_exp_batch(list(exp_buf))
+                        _push_batch(list(exp_buf))
                     except Exception:
                         for exp in exp_buf:
                             try:
-                                mgr.push_exp(exp)
+                                _push_one(exp)
                             except Exception:
                                 pass
                     exp_buf.clear()
@@ -407,17 +427,17 @@ def run():
     finally:
         if mgr and exp_buf:
             try:
-                mgr.push_exp_batch(list(exp_buf))
+                _push_batch(list(exp_buf))
             except Exception:
                 for exp in exp_buf:
                     try:
-                        mgr.push_exp(exp)
+                        _push_one(exp)
                     except Exception:
                         pass
             exp_buf.clear()
         if prev_state is not None and mgr:
             try:
-                mgr.push_exp(model.Experience(
+                _push_one(model.Experience(
                     state=prev_state,
                     action=prev_action,
                     reward=0.0,
