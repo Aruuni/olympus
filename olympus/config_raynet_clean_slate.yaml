@@ -1,0 +1,84 @@
+runtime:
+  algorithm: dreamer_v3
+  reward: tempest
+  state: astraea_deepcc
+  action: astraea
+
+actions:
+  astraea:
+    action_min: -1.0
+    action_max: 1.0
+    step: 0.025
+
+environment:
+  type: raynet
+  environment_setup: dynamic
+
+bbr_probe:
+  enabled: false
+
+paths:
+  py: ./venv_training/bin/python
+
+raynet:
+  raynet_path: ~/extra/raynet_olympus
+
+outputs:
+  root: olympus/models/clean_slate_astraea
+  plot_episodes: true
+  plot_every_n: 100
+
+n_parallel: 32
+synchronized_collection: false
+episodes: 160000
+
+algorithms:
+  dreamer_v3:
+    training:
+      resume_from: null
+      batch_size: 16
+      seq_len: 48
+      min_replay: 5000
+      replay_capacity: 400000
+      grad_clip: 1000.0
+      updates_per_step: 1
+      save_every: 500
+      save_every_episodes: 500
+      param_broadcast_every: 50
+      kl_weight: 1.0
+      kl_balance: 0.8
+      kl_free_bits: 1.0
+      recon_weight: 1.0
+      reward_weight: 1.0
+      continue_weight: 1.0
+      lr_world: 1.0e-4
+      lr_actor: 3.0e-5
+      lr_critic: 3.0e-5
+      horizon: 15
+      gamma: 0.99
+      lam: 0.95
+      entropy_coef: 3.0e-3
+      action_l2_coef: 2.0e-2
+      action_smooth_coef: 2.0e-2
+      actor_log_std_min: -2.0
+      actor_log_std_max: 0.0
+      target_tau: 0.02
+      actor_warmup_steps: 1000
+      value_bins: 255
+      value_low: -20.0
+      value_high: 20.0
+      reward_bins: 255
+    agent:
+      hidden: 256
+      embed_dim: 128
+      h_dim: 256
+      latent_groups: 8
+      latent_classes: 8
+      reward_bins: 255
+      interval_ms: 20
+      cwnd_min: 10
+      cwnd_max: 10000
+      dead_flow_ms: 500
+      noise_start: 0.2
+      noise_end: 0.05
+      noise_decay_episodes: 300

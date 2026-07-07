@@ -2,7 +2,7 @@
 
 import unittest
 
-from olympus.orchestrator import _auto_bdp_edges, _resolve_sim_strata
+from olympus.orchestrator import _auto_bdp_edges, _resolve_collection_strata
 
 
 class AutoBdpEdgesTest(unittest.TestCase):
@@ -36,13 +36,12 @@ class AutoBdpEdgesTest(unittest.TestCase):
         self.assertLessEqual(len(edges), 3)
 
 
-class ResolveSimStrataTest(unittest.TestCase):
+class ResolveCollectionStrataTest(unittest.TestCase):
     def _cfg(self, strata):
         return {
-            'mixed_collection': {
+            'experience_collection': {
                 'enabled': True,
-                'simulation': {
-                    'type': 'raynet',
+                'raynet': {
                     'environment_setup': 'orca_static',
                     'strata': strata,
                 },
@@ -51,28 +50,28 @@ class ResolveSimStrataTest(unittest.TestCase):
 
     def test_n_buckets_fills_bdp_edges_from_sweep(self):
         cfg = self._cfg({'n_buckets': 5})
-        _resolve_sim_strata(cfg)
-        edges = cfg['mixed_collection']['simulation']['strata']['bdp_edges']
+        _resolve_collection_strata(cfg)
+        edges = cfg['experience_collection']['raynet']['strata']['bdp_edges']
         self.assertEqual(len(edges), 4)
 
     def test_explicit_edges_are_not_overwritten(self):
         cfg = self._cfg({'n_buckets': 5, 'bdp_edges': [500, 1000]})
-        _resolve_sim_strata(cfg)
+        _resolve_collection_strata(cfg)
         self.assertEqual(
-            cfg['mixed_collection']['simulation']['strata']['bdp_edges'],
+            cfg['experience_collection']['raynet']['strata']['bdp_edges'],
             [500, 1000])
 
     def test_no_strata_block_is_noop(self):
-        cfg = {'mixed_collection': {'enabled': True, 'simulation': {}}}
-        _resolve_sim_strata(cfg)  # must not raise
-        self.assertNotIn('strata', cfg['mixed_collection']['simulation'])
+        cfg = {'experience_collection': {'enabled': True, 'raynet': {}}}
+        _resolve_collection_strata(cfg)  # must not raise
+        self.assertNotIn('strata', cfg['experience_collection']['raynet'])
 
-    def test_disabled_mixed_is_noop(self):
+    def test_disabled_collection_is_noop(self):
         cfg = self._cfg({'n_buckets': 5})
-        cfg['mixed_collection']['enabled'] = False
-        _resolve_sim_strata(cfg)
+        cfg['experience_collection']['enabled'] = False
+        _resolve_collection_strata(cfg)
         self.assertNotIn(
-            'bdp_edges', cfg['mixed_collection']['simulation']['strata'])
+            'bdp_edges', cfg['experience_collection']['raynet']['strata'])
 
 
 if __name__ == '__main__':

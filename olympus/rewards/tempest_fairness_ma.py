@@ -10,6 +10,7 @@ import json
 import os
 import time
 
+from olympus.common import link_context
 from olympus.rewards.tempest import (
     RewardCalc as TempestRewardCalc,
 )
@@ -118,13 +119,11 @@ class RewardCalc(TempestRewardCalc):
 
 def calc_kwargs_from_env() -> dict:
     """Worker-side construction arguments shared by the ma reward variants."""
-    bw_mbps = float(os.environ.get('OC_LINK_BW', '100'))
-    base_rtt_us = float(os.environ.get('OC_BASE_RTT_US', '20000'))
+    bw_mbps, base_rtt_us, link_schedule = link_context.context_values()
     episode_start = (
         float(os.environ.get('OC_EPISODE_START', '0'))
         or time.monotonic()
     )
-    link_schedule = json.loads(os.environ.get('OC_LINK_SCHEDULE', '[]'))
     interval_ms = float(os.environ.get('OC_INTERVAL_MS', '20'))
     flow_start_delays = _parse_json_list(
         os.environ.get('OC_FAIR_FLOW_START_DELAYS'), default=[0.0])

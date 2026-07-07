@@ -24,9 +24,11 @@ from olympus.common.action_plugins import (
     current_action_meta,
     load_action_module,
 )
+from olympus.common import runtime_config
 from olympus.common.state_plugins import assert_state_compatible
 
 _ACTION_PLUGIN = load_action_module()
+_RUNTIME_CFG = runtime_config.load_config()
 
 STATS_FILENAME = 'stats.json'
 
@@ -60,8 +62,9 @@ BASE_STATE_FEATURES = [
 
 RAW_DIM = 15
 BASE_STATE_DIM = 7
-REC_DIM = int(os.environ.get('SAO_ORCA_REC_DIM',
-                             os.environ.get('SAO_REC_DIM', '10')))
+REC_DIM = int(runtime_config.agent_value(
+    _RUNTIME_CFG, 'rec_dim', env='SAO_ORCA_REC_DIM',
+    default=os.environ.get('SAO_REC_DIM', '10')))
 STATE_DIM = BASE_STATE_DIM * REC_DIM
 ACTION_DIM = int(_ACTION_PLUGIN.ACTION_DIM)
 ACTION_MIN = float(_ACTION_PLUGIN.ACTION_MIN)

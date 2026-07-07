@@ -480,7 +480,7 @@ class RaynetEnv(NetworkEnv):
             raynet_path
             or extra.get('raynet_root')
             or environment_config.get('raynet_path')
-            or os.environ.get('RAYNET_PATH', '/home/james/raynet')
+            or os.environ.get('RAYNET_PATH', '~/extra/raynet_olympus')
         ).expanduser()
         self.section = RAYNET_DEFAULT_SECTION
         self.ini_path = self.raynet_path / RAYNET_BASE_ENVIRONMENT
@@ -516,6 +516,7 @@ class RaynetEnv(NetworkEnv):
         self.started = False
         self._service = None
         self._manager = None
+        self._server = None
         self._server_thread = None
         self.start_delays = None
         self.flow_durations = None
@@ -559,13 +560,27 @@ class RaynetEnv(NetworkEnv):
         self._service.wait()
 
     def stop(self) -> None:
+        global _FLOW_SERVICE
+        service = self._service
         if self._service is not None:
             self._service.close()
-        if self._manager is not None:
+            self._service = None
+        if self._server is not None:
             try:
-                self._manager.stop_event.set()
+                self._server.stop_event.set()
             except AttributeError:
                 pass
+            try:
+                self._server.listener.close()
+            except (AttributeError, OSError):
+                pass
+        if self._server_thread is not None:
+            self._server_thread.join(timeout=1)
+            self._server_thread = None
+        self._server = None
+        self._manager = None
+        if _FLOW_SERVICE is service:
+            _FLOW_SERVICE = None
         self.started = False
 
     def process_env(self):
@@ -684,11 +699,11 @@ class RaynetEnv(NetworkEnv):
             address=('127.0.0.1', 0),
             authkey=bytes.fromhex(self.flow_key),
         )
-        server = self._manager.get_server()
-        host, port = server.address
+        self._server = self._manager.get_server()
+        host, port = self._server.address
         self.flow_addr = f'{host}:{port}'
         self._server_thread = threading.Thread(
-            target=server.serve_forever,
+            target=self._server.serve_forever,
             daemon=True,
         )
         self._server_thread.start()

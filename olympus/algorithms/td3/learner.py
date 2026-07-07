@@ -51,7 +51,7 @@ from olympus.algorithms.td3.model import (
     actor_arch_from_checkpoint, actor_loss, actor_model_meta,
     assert_checkpoint_state_compatible, critic_loss, model_state_meta, soft_update,
 )
-from olympus.common.mixed_replay import MixedReplay, mixed_settings
+from olympus.common.mixed_replay import build_mixed_replay
 
 
 # ── Manager IPC ───────────────────────────────────────────────────────────────
@@ -322,16 +322,12 @@ class Learner:
         self.opt_actor  = optim.Adam(self.actor.parameters(),  lr=self.lr_actor)
         self.opt_critic = optim.Adam(self.critic.parameters(), lr=self.lr_critic)
 
-        self._mixed_enabled, self._mix_frac, _mix_cap = mixed_settings(cfg)
-        if self._mixed_enabled:
-            _cap = _mix_cap or self.replay_capacity
-            self.buf = MixedReplay(
-                lambda: ReplayBuffer(max_transitions=_cap), self._mix_frac)
-            print(f'[learner] mixed collection enabled '
-                  f'emulation_fraction={self._mix_frac} '
-                  f'buffer_capacity={_cap} (x2)', flush=True)
-        else:
-            self.buf   = ReplayBuffer(max_transitions=self.replay_capacity)
+        self.buf = build_mixed_replay(
+            cfg, lambda cap: ReplayBuffer(max_transitions=cap),
+            self.replay_capacity)
+        self._mixed_enabled = self.buf is not None
+        if not self._mixed_enabled:
+            self.buf = ReplayBuffer(max_transitions=self.replay_capacity)
         self.step      = 0
         self.ckpt_path = ckpt_path
         self._completed_episode_ids = set()
@@ -407,7 +403,7 @@ class Learner:
             if now - last_hb >= 5.0:
                 dt   = now - last_hb
                 rate = total_drained / max(dt, 1e-6)
-                mix  = (f' emu={self.buf.size_emu()} sim={self.buf.size_sim()}'
+                mix  = (''.join(f' {k}={v}' for k, v in self.buf.sizes().items())
                         if self._mixed_enabled else '')
                 print(f'[learner] hb buf={self.buf.size()}/{self.replay_capacity}{mix}  '
                       f'recv={total_drained} ({rate:.0f}/s)  trajs={self.buf.n_trajs()}',

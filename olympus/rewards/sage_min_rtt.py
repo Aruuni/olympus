@@ -7,8 +7,8 @@ Formula
         rtt_rate  = clip(min_rtt / avg_urtt, 0, 1)
 
 No drift term, no sparse coin. The bandwidth term still
-references the scheduled link bandwidth (the orchestrator already supplies
-it via OC_LINK_BW / OC_LINK_SCHEDULE), but the RTT reference is the
+references the scheduled link bandwidth (the orchestrator supplies it via the
+per-episode link-context file), but the RTT reference is the
 connection's observed minimum — tp->deepcc_api.min_urtt from tcp_deepcc.c
 in microseconds, never reset on getsockopt. This removes the scheduled-RTT
 oracle from the reward path: the agent is rewarded for keeping
@@ -21,9 +21,10 @@ are zero (no RTT samples yet), the RTT term is treated as 1.0, matching
 the original sage.py convention when avg_urtt == 0.
 """
 
-import json
 import os
 import time
+
+from olympus.common import link_context
 
 
 class RewardCalc:
@@ -38,16 +39,11 @@ class RewardCalc:
         self._last_min_rtt_us = 0.0
         self.last_components  = {}
 
-        self._bw_schedule = []
-        for entry in (link_schedule or []):
-            if 't' not in entry:
-                print(f'[reward] WARNING: schedule entry missing "t" key, skipped: {entry}',
-                      flush=True)
-                continue
-            t_abs = episode_start + float(entry['t'])
-            if 'bw' in entry:
-                self._bw_schedule.append((t_abs, float(entry['bw']) * 1e6 / 8.0))
-        self._bw_schedule.sort()
+        self._bw_trace = link_context.build_step_trace(
+            initial_bw_bytes_s, link_schedule, episode_start, 'bw',
+            transform=lambda value: float(value) * 1e6 / 8.0,
+            warn_prefix='reward',
+        )
 
     def _schedule_time(self, info: dict = None) -> float:
         if isinstance(info, dict) and 'time_s' in info:
@@ -58,14 +54,7 @@ class RewardCalc:
         return time.monotonic()
 
     def _current_link_bw(self, info: dict = None) -> float:
-        now = self._schedule_time(info)
-        val = self._initial_bw
-        for t_abs, bw_bs in self._bw_schedule:
-            if now >= t_abs:
-                val = bw_bs
-            else:
-                break
-        return val
+        return self._bw_trace.at(self._schedule_time(info))
 
     @staticmethod
     def _read_min_rtt_us(info: dict) -> float:
@@ -122,9 +111,8 @@ class RewardCalc:
 
 def make_reward_calc() -> RewardCalc:
     """Build from environment variables set by orchestrator."""
-    bw_mbps       = float(os.environ.get('OC_LINK_BW',       '100'))
+    bw_mbps, _base_rtt_us, link_schedule = link_context.context_values()
     episode_start = float(os.environ.get('OC_EPISODE_START', '0')) or time.monotonic()
-    link_schedule = json.loads(os.environ.get('OC_LINK_SCHEDULE', '[]'))
     return RewardCalc(
         initial_bw_bytes_s = bw_mbps * 1e6 / 8.0,
         link_schedule      = link_schedule,

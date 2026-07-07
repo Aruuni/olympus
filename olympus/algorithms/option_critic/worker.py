@@ -64,7 +64,7 @@ from olympus.algorithms.option_critic.model import (
     normalize_state,
     option_critic_meta_from_checkpoint,
 )
-from olympus.common import flow_backend
+from olympus.common import flow_backend, runtime_config
 from olympus.common.action_plugins import load_action_module
 from olympus.common.bbr_probe import BbrProbe
 from olympus.common.registry import reward_module
@@ -73,7 +73,9 @@ _ACTION_PLUGIN = load_action_module()
 
 
 def make_reward_calc():
-    reward_name = os.environ.get('SAO_REWARD', 'tempest')
+    cfg = runtime_config.load_config()
+    reward_name = str(runtime_config.runtime_value(
+        cfg, 'reward', env='SAO_REWARD', default='tempest'))
     return reward_module(reward_name).make_reward_calc()
 
 
@@ -129,6 +131,7 @@ def _drain_state_fd(fd: int, stop: threading.Event):
 # ── Main worker loop ──────────────────────────────────────────────────────────
 
 def run():
+    cfg = runtime_config.load_config()
     flow_fd   = int(os.environ['OC_FLOW_FD'])
     flow_id   = int(os.environ['OC_FLOW_ID'])
     cport     = int(os.environ.get('OC_CPORT', '0'))
@@ -139,22 +142,32 @@ def run():
     interval_ms = float(os.environ.get('OC_INTERVAL_MS', '20'))
     cwnd_min    = int(os.environ.get('OC_CWND_MIN', '2'))
     cwnd_max    = int(os.environ.get('OC_CWND_MAX', '1000'))
-    action_init = os.environ.get('OC_ACTION_INIT', 'small_spread')
-    action_init_scale = float(os.environ.get('OC_ACTION_INIT_SCALE', '0.05'))
-    q_value_clip = float(os.environ.get('OC_Q_VALUE_CLIP', '1500.0'))
-    action_logsig_min = float(os.environ.get('OC_ACTION_LOGSIG_MIN', '-1.0'))
-    arch        = normalize_oc_arch(os.environ.get('OC_ARCH', 'gru'))
-    beta_temperature = float(os.environ.get('OC_BETA_TEMPERATURE', '1.0'))
-    beta_floor  = float(os.environ.get('OC_BETA_FLOOR', '0.0'))
+    action_init = str(runtime_config.agent_value(
+        cfg, 'action_init', env='OC_ACTION_INIT', default='small_spread'))
+    action_init_scale = float(runtime_config.agent_value(
+        cfg, 'action_init_scale', env='OC_ACTION_INIT_SCALE', default=0.05))
+    q_value_clip = float(runtime_config.agent_value(
+        cfg, 'q_value_clip', env='OC_Q_VALUE_CLIP', default=1500.0))
+    action_logsig_min = float(runtime_config.agent_value(
+        cfg, 'action_logsig_min', env='OC_ACTION_LOGSIG_MIN', default=-1.0))
+    arch = normalize_oc_arch(runtime_config.agent_value(
+        cfg, 'arch', env='OC_ARCH', default='gru'))
+    beta_temperature = float(runtime_config.agent_value(
+        cfg, 'beta_temperature', env='OC_BETA_TEMPERATURE', default=1.0))
+    beta_floor = float(runtime_config.agent_value(
+        cfg, 'beta_floor', env='OC_BETA_FLOOR', default=0.0))
 
     eps_start      = float(os.environ.get('OC_EPS_START',       '0.20'))
     eps_end        = float(os.environ.get('OC_EPS_END',         '0.03'))
     eps_decay      = float(os.environ.get('OC_EPS_DECAY',       '30000'))
-    dwell_min_steps = max(1, int(os.environ.get('OC_DWELL_MIN_STEPS', '1')))
-    dwell_max_steps = int(os.environ.get('OC_DWELL_MAX_STEPS', '0'))
+    dwell_min_steps = max(1, int(runtime_config.agent_value(
+        cfg, 'dwell_min_steps', env='OC_DWELL_MIN_STEPS', default=1)))
+    dwell_max_steps = int(runtime_config.agent_value(
+        cfg, 'dwell_max_steps', env='OC_DWELL_MAX_STEPS', default=0))
     dwell_max_steps = max(dwell_max_steps, dwell_min_steps) if dwell_max_steps > 0 else 0
     deterministic  = os.environ.get('OC_DETERMINISTIC', '0') == '1'
-    term_threshold = float(os.environ.get('OC_TERM_THRESHOLD', '0.5'))
+    term_threshold = float(runtime_config.agent_value(
+        cfg, 'term_threshold', env='OC_TERM_THRESHOLD', default=0.5))
     mgr_addr_raw   = os.environ.get('OC_MANAGER_ADDR', '')
 
     state_log_path = os.environ.get('OC_STATE_LOG', '')
@@ -163,8 +176,10 @@ def run():
         state_log_path = f'{root}_flow{flow_id}{ext or ".csv"}'
 
     # ── Load model ────────────────────────────────────────────────────────────
-    n_options = int(os.environ.get('OC_N_OPTIONS', N_OPTIONS))
-    hidden    = int(os.environ.get('OC_HIDDEN', 256))
+    n_options = int(runtime_config.agent_value(
+        cfg, 'n_options', env='OC_N_OPTIONS', default=N_OPTIONS))
+    hidden = int(runtime_config.agent_value(
+        cfg, 'hidden', env='OC_HIDDEN', default=256))
     net  = OptionCriticNet(
         STATE_DIM, n_options, hidden,
         beta_temperature=beta_temperature, beta_floor=beta_floor, arch=arch,
@@ -264,7 +279,8 @@ def run():
     interval_s = interval_ms / 1000.0
     simulation_backend = flow_backend.is_simulation_backend()
     exp_buf    = []      # local buffer before pushing to learner
-    push_every = max(1, int(os.environ.get('OC_PUSH_EVERY', '16')))
+    push_every = max(1, int(runtime_config.training_value(
+        cfg, 'worker_push_every', env='OC_PUSH_EVERY', default=16)))
 
     # BBR3-style independent cwnd probe; reward- and algorithm-agnostic.
     probe = BbrProbe.from_env()
@@ -276,7 +292,8 @@ def run():
     # Stop sending experiences once flow has drained — avg_thr=0 for this many
     # consecutive steps means iperf3 has finished and the worker is just spinning
     # on a dead socket.  Sending zero-thr experiences corrupts Q-values.
-    dead_flow_ms      = float(os.environ.get('OC_DEAD_FLOW_MS', '1000'))
+    dead_flow_ms = float(runtime_config.agent_value(
+        cfg, 'dead_flow_ms', env='OC_DEAD_FLOW_MS', default=1000))
     _dead_steps       = 0
     _dead_steps_limit = int(dead_flow_ms / interval_ms)
 

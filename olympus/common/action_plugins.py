@@ -98,7 +98,11 @@ def current_action_meta() -> dict:
 def action_env(cfg: dict) -> dict:
     runtime = cfg.get('runtime', {}) or {}
     name = str(runtime.get('action', DEFAULT_ACTION))
-    options = dict(cfg.get('action', {}) or {})
+    action_options = cfg.get('actions', {}) or {}
+    if isinstance(action_options, dict) and name in action_options:
+        options = dict(action_options.get(name) or {})
+    else:
+        options = dict(cfg.get('action', {}) or {})
     return {
         'SAO_ACTION_NAME': name,
         'SAO_ACTION_CONFIG': json.dumps(

@@ -47,26 +47,17 @@ sys.path.insert(0, _ROOT)
 sys.path.insert(0, _HERE)
 
 from olympus.environments import make_env
-from olympus.plots.episode_plot import (
-    plot as _plot_episode,
-    episode_return as _episode_return,
-)
-from olympus.plots.multi_flow_episode_plot import (
-    plot as _plot_multi_episode,
-    episode_return as _multi_episode_return,
-)
-from olympus.plots.normalized_state_plot import (
-    plot as _plot_normalized_state,
-    _state_plot_path,
-)
-from olympus.plots.raw_state_plot import (
-    plot as _plot_raw_state,
-    raw_state_plot_path as _raw_state_plot_path,
+from olympus.common.episode_plotting import (
+    _multi_episode_return,  # legacy test/import compatibility
+    raw_state_base_path as _raw_state_base_path,
+    render_episode_plots,
 )
 from olympus.common.checkpoint_config import (
     apply_model_config_from_checkpoint,
 )
 from olympus.common.action_plugins import action_env
+from olympus.common.mixed_replay import collection_groups, validate_batch_fractions
+from olympus.common.link_context import write_link_context
 from olympus.common.registry import (
     action_module,
     is_multi_agent,
@@ -145,106 +136,14 @@ def _as_bool(value, default=False):
     return default
 
 
-def _should_plot_episode(outputs, episode):
-    if not _as_bool(outputs.get('plot_episodes'), default=True):
-        return False
-    every_n = int(outputs.get('plot_every_n', 1) or 1)
-    if every_n <= 1:
-        return True
-    return int(episode) % every_n == 0
-
-
-def _should_plot_observations(outputs, episode):
-    if not _should_plot_episode(outputs, episode):
-        return False
-    return _as_bool(outputs.get('plot_observations'), default=False)
-
-
-def _plot_raw_state_enabled(outputs, episode):
-    return (
-        _should_plot_episode(outputs, episode)
-        and _as_bool(outputs.get('plot_raw_state'), default=False)
-    )
-
-
-def _raw_state_base_path(episodes_dir, alg_name, episode):
+def _link_context_path(episodes_dir, episode, instance_id, flow_id=None,
+                       oracle=False):
+    flow = '' if flow_id is None else f'_flow{int(flow_id)}'
+    kind = 'oracle_link_context' if oracle else 'link_context'
     return os.path.join(
-        episodes_dir, f'{alg_name}_raw_state_ep{int(episode):06d}.jsonl')
-
-
-def _raw_state_logs(raw_state_base):
-    root, ext = os.path.splitext(raw_state_base)
-    ext = ext or '.jsonl'
-    return sorted(
-        glob.glob(f'{root}_flow*{ext}'),
-        key=lambda p: int(re.search(r'_flow(\d+)', p).group(1))
-        if re.search(r'_flow(\d+)', p) else 10 ** 9,
+        episodes_dir,
+        f'{kind}_ep{int(episode):06d}_slot{int(instance_id)}{flow}.json',
     )
-
-
-def _plot_raw_state_if_requested(outputs, episode, raw_state_base,
-                                 episode_plot_path, title):
-    if not _plot_raw_state_enabled(outputs, episode):
-        return
-    logs = _raw_state_logs(raw_state_base)
-    if not logs:
-        return
-    try:
-        out = _raw_state_plot_path(episode_plot_path)
-        if _plot_raw_state(logs, out, title=title):
-            print(f'[raw_state_plot] ep={episode} -> {out}', flush=True)
-    except Exception as exc:
-        print(f'[raw_state_plot] ep={episode} plot failed: {exc}', flush=True)
-
-
-def _plot_filename_env_part(outputs, env_name):
-    if not _as_bool(outputs.get('plot_filename_include_env'), default=False):
-        return ''
-    label = _slug(env_name or 'config')
-    return f'_{label}' if label else ''
-
-
-def _state_log_has_observations(path):
-    try:
-        if not path or not os.path.exists(path) or os.path.getsize(path) <= 0:
-            return False
-        with open(path, newline='') as f:
-            # Header + at least one observation row.
-            for line_no, _ in enumerate(f):
-                if line_no >= 1:
-                    return True
-        return False
-    except OSError:
-        return False
-
-
-def _ensure_state_logs_saved(outputs, episode, state_logs, expected_hint):
-    if not _as_bool(outputs.get('require_state_logs'), default=False):
-        return
-    logs = [p for p in (state_logs or []) if p]
-    missing = [p for p in logs if not _state_log_has_observations(p)]
-    if logs and not missing:
-        return
-    detail = ', '.join(missing) if missing else str(expected_hint)
-    raise RuntimeError(
-        f'episode {episode} did not save a non-empty state observation CSV '
-        f'(expected {detail})')
-
-
-def _plot_normalized_state_if_requested(outputs, episode, state_logs,
-                                        episode_plot_path, title,
-                                        trim_tail_s):
-    if not _should_plot_observations(outputs, episode):
-        return
-    try:
-        _plot_normalized_state(
-            state_logs=state_logs,
-            output=_state_plot_path(episode_plot_path),
-            title=title,
-            trim_tail_s=trim_tail_s,
-        )
-    except Exception as exc:
-        print(f'[state_plot] ep={episode} plot failed: {exc}', flush=True)
 
 
 def _final_runtime_cleanup(learner_port: int):
@@ -690,9 +589,10 @@ def _prepare_run(cfg: dict, config_path: str) -> str:
     with open(os.path.join(telemetry_dir, 'run_meta.json'), 'w') as f:
         json.dump(meta, f, indent=2)
 
-    # Auto-derive BDP strata edges from the simulation sweep when the config asks
-    # for a bucket count instead of explicit edges, so the learner reads them.
-    _resolve_sim_strata(cfg)
+    # Auto-derive BDP strata edges from each collection group's sweep when the
+    # config asks for a bucket count instead of explicit edges, so the learner
+    # reads them.
+    _resolve_collection_strata(cfg)
 
     resolved_config = os.path.join(telemetry_dir, 'config.resolved.yaml')
     with open(resolved_config, 'w') as f:
@@ -763,37 +663,39 @@ def _auto_bdp_edges(bws, delays, n_buckets):
     return edges
 
 
-def _resolve_sim_strata(cfg):
-    """Fill in ``mixed_collection.simulation.strata.bdp_edges`` from ``n_buckets``.
+def _resolve_collection_strata(cfg):
+    """Fill in ``experience_collection.<type>.strata.bdp_edges`` from ``n_buckets``.
 
-    When the simulation strata block specifies ``n_buckets`` (and no explicit
-    ``bdp_edges``), load the simulation environment's sweep and derive the BDP bin
-    edges automatically. Explicit ``bdp_edges`` always win. Mutates ``cfg`` in
-    place so the resolved config the learner receives carries the edges.
+    For every collection group whose strata block specifies ``n_buckets`` (and
+    no explicit ``bdp_edges``), load that group's environment sweep and derive
+    the BDP bin edges automatically. Explicit ``bdp_edges`` always win. Mutates
+    ``cfg`` in place so the resolved config the learner receives carries the
+    edges.
     """
-    mc = cfg.get('mixed_collection') or {}
-    if not mc.get('enabled'):
+    enabled, groups = collection_groups(cfg)
+    if not enabled:
         return
-    sim = mc.get('simulation') or {}
-    strata = sim.get('strata')
-    if not strata or strata.get('bdp_edges'):
-        return
-    n_buckets = int(strata.get('n_buckets', 0) or 0)
-    if n_buckets <= 1:
-        return
-    sub_env = {'type': sim.get('type')}
-    if sim.get('environment_setup'):
-        sub_env['environment_setup'] = sim['environment_setup']
-    elif sim.get('path'):
-        sub_env['path'] = sim['path']
-    env_cfg, _meta = _load_environment_definition({'environment': sub_env})
-    sw = env_cfg.get('sweep') or {}
-    bws = sw.get('bws', [sw.get('bw', 100.0)])
-    delays = sw.get('delays', [sw.get('delay', 20.0)])
-    edges = _auto_bdp_edges(bws, delays, n_buckets)
-    strata['bdp_edges'] = edges
-    print(f'[orch] auto BDP strata: n_buckets={n_buckets} bws={list(bws)} '
-          f'delays={list(delays)} -> bdp_edges={edges}', flush=True)
+    for env_type, block in groups.items():
+        strata = block.get('strata')
+        if not strata or strata.get('bdp_edges'):
+            continue
+        n_buckets = int(strata.get('n_buckets', 0) or 0)
+        if n_buckets <= 1:
+            continue
+        sub_env = {'type': env_type}
+        if block.get('environment_setup'):
+            sub_env['environment_setup'] = block['environment_setup']
+        elif block.get('path'):
+            sub_env['path'] = block['path']
+        env_cfg, _meta = _load_environment_definition({'environment': sub_env})
+        sw = env_cfg.get('sweep') or {}
+        bws = sw.get('bws', [sw.get('bw', 100.0)])
+        delays = sw.get('delays', [sw.get('delay', 20.0)])
+        edges = _auto_bdp_edges(bws, delays, n_buckets)
+        strata['bdp_edges'] = edges
+        print(f'[orch] auto BDP strata ({env_type}): n_buckets={n_buckets} '
+              f'bws={list(bws)} delays={list(delays)} -> bdp_edges={edges}',
+              flush=True)
 
 
 def _bbr_probe_env(cfg, agent_cfg):
@@ -868,21 +770,22 @@ def _build_pool(cfg):
     return list(envs), False
 
 
-def _build_mixed_subconfigs(cfg):
-    """Split a ``mixed_collection`` config into (emulation_cfg, simulation_cfg).
+def _build_collection_subconfigs(cfg):
+    """Split an ``experience_collection`` config into per-group sub-configs.
 
-    Each sub-config is a deep copy of ``cfg`` with its own ``environment``
-    selection and ``n_parallel``, so it flows through the normal backend / pool
-    resolution (``_env_backend_type`` / ``_build_pool``) unchanged. Both feed the
-    same learner; the learner reads the mix fraction from ``mixed_collection``.
+    Returns ``[(env_type, sub_cfg), ...]`` in declaration order. Each sub-config
+    is a deep copy of ``cfg`` with its own ``environment`` selection and
+    ``n_parallel``, so it flows through the normal backend / pool resolution
+    (``_env_backend_type`` / ``_build_pool``) unchanged. All groups feed the
+    same learner; the learner reads each group's ``batch_fraction`` from
+    ``experience_collection``.
     """
     import copy
-    mc = cfg.get('mixed_collection') or {}
+    _enabled, groups = collection_groups(cfg)
     subs = []
-    for side in ('emulation', 'simulation'):
-        block = mc.get(side) or {}
+    for env_type, block in groups.items():
         sub = copy.deepcopy(cfg)
-        env = {'type': block.get('type')}
+        env = {'type': env_type}
         if block.get('environment_setup'):
             env['environment_setup'] = block['environment_setup']
         elif block.get('path'):
@@ -890,8 +793,146 @@ def _build_mixed_subconfigs(cfg):
         sub['environment'] = env
         sub['n_parallel'] = max(1, int(block.get('n_parallel',
                                                  cfg.get('n_parallel', 1))))
-        subs.append(sub)
-    return subs[0], subs[1]
+        subs.append((env_type, sub))
+    return subs
+
+
+def _collection_environment_definitions(cfg):
+    enabled, groups = collection_groups(cfg)
+    if enabled and groups:
+        out = []
+        for env_type, block in groups.items():
+            selection = {'type': env_type}
+            if block.get('environment_setup'):
+                selection['environment_setup'] = block['environment_setup']
+            elif block.get('path'):
+                selection['path'] = block['path']
+            env_cfg, env_meta = _load_environment_definition(
+                {'environment': selection})
+            out.append((env_type, env_cfg, env_meta))
+        return out
+
+    env_cfg, env_meta = _load_environment_definition(cfg)
+    return [(_env_backend_type(cfg), env_cfg, env_meta)]
+
+
+def _environment_protocol(env_cfg: dict) -> str:
+    sweep = (env_cfg or {}).get('sweep') or {}
+    protocol = sweep.get('protocol')
+    if protocol is None and (env_cfg or {}).get('experiments'):
+        for item in env_cfg.get('experiments') or []:
+            if item.get('protocol'):
+                protocol = item.get('protocol')
+                break
+    return str(protocol or '').strip().lower()
+
+
+_ASTRAEA_DEEPCC_FIELDS = {
+    'avg_thr',
+    'avg_urtt',
+    'min_rtt',
+    'srtt_us',
+    'cwnd',
+    'pacing_rate',
+    'packets_out',
+    'retrans_out',
+}
+
+
+def _environment_observation_field_names(env_cfg: dict) -> set:
+    fields = ((env_cfg or {}).get('sweep') or {}).get('observation_fields') or []
+    names = set()
+    for field in fields:
+        if isinstance(field, str):
+            names.add(field)
+            continue
+        if not isinstance(field, dict):
+            continue
+        name = field.get('name')
+        if name:
+            names.add(str(name))
+        for alias in field.get('aliases') or []:
+            names.add(str(alias))
+    return names
+
+
+def _clean_slate_state_needs_deepcc(state_name: str) -> bool:
+    normalized = state_name.strip().lower()
+    return normalized in {'astraea_deepcc', 'clean_slate_astraea'}
+
+
+def _environment_has_deepcc_observations(env_cfg: dict) -> bool:
+    names = _environment_observation_field_names(env_cfg)
+    return bool(names) and _ASTRAEA_DEEPCC_FIELDS <= names
+
+
+def _validate_environment_runtime_compatibility(cfg):
+    runtime = cfg.get('runtime', {}) or {}
+    reward = str(runtime.get('reward', '')).strip()
+    state = str(runtime.get('state', '')).strip()
+    action = str(runtime.get('action', '')).strip()
+    env_defs = _collection_environment_definitions(cfg)
+    clean_slate_defs = [
+        (env_type, env_cfg, meta)
+        for env_type, env_cfg, meta in env_defs
+        if _environment_protocol(env_cfg) == 'cleanslate'
+    ]
+    clean_slate_envs = [
+        meta.get('name', env_type)
+        for env_type, _env_cfg, meta in clean_slate_defs
+    ]
+    normalized_clean_slate_envs = [
+        meta.get('name', env_type)
+        for env_type, env_cfg, meta in clean_slate_defs
+        if not _environment_has_deepcc_observations(env_cfg)
+    ]
+
+    if clean_slate_envs:
+        if normalized_clean_slate_envs and len(env_defs) > len(clean_slate_envs):
+            raise SystemExit(
+                '[orch] incompatible experience_collection: CleanSlate RayNet '
+                f'environment(s) {normalized_clean_slate_envs} cannot share one learner '
+                'with non-CleanSlate backends. Use olympus/config_raynet_clean_slate.yaml '
+                'for CleanSlate, or choose a RayNet Orca/Astraea environment for '
+                'Tempest/Orca-style mixed training.')
+        bad = []
+        if normalized_clean_slate_envs:
+            required = {
+                'reward': 'clean_slate',
+                'state': 'clean_slate',
+                'action': 'raynet_exponent',
+            }
+            actual = {'reward': reward, 'state': state, 'action': action}
+            bad.extend(
+                f'{key}={actual[key]!r} (expected {value!r})'
+                for key, value in required.items()
+                if actual[key] != value
+            )
+        else:
+            if reward == 'clean_slate' or state == 'clean_slate' or action == 'raynet_exponent':
+                bad.append(
+                    'CleanSlate is configured with Astraea/DeepCC raw '
+                    'observations; use a TCP-field reward/state/action '
+                    'such as reward=tempest, state=tempest or '
+                    'astraea_deepcc, and action=astraea/cwnd_multiplier')
+        for _, env_cfg, meta in clean_slate_defs:
+            names = _environment_observation_field_names(env_cfg)
+            if not names:
+                continue
+            missing = sorted(_ASTRAEA_DEEPCC_FIELDS - names)
+            if missing and _clean_slate_state_needs_deepcc(state):
+                bad.append(
+                    f"{meta.get('name', 'CleanSlate')} missing DeepCC "
+                    f"observation_fields: {', '.join(missing)}")
+        if bad:
+            raise SystemExit(
+                '[orch] CleanSlate RayNet runtime mismatch: '
+                + ', '.join(bad))
+    elif reward == 'clean_slate' or state == 'clean_slate' or action == 'raynet_exponent':
+        raise SystemExit(
+            '[orch] clean_slate state/reward/action require a CleanSlate RayNet '
+            'environment; the selected environment does not declare '
+            'protocol: CleanSlate')
 
 
 def _raynet_config_overrides(cfg):
@@ -955,12 +996,28 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
     oracle_base_rtt_us = float(ecfg.get('delay', 20.0)) * 1000
     oracle_link_schedule = link_schedule if oracle_state_active else []
 
-    plots_dir = os.path.abspath(outputs['plots_dir'])
     episodes_dir = os.path.abspath(outputs['episodes_dir'])
-    os.makedirs(plots_dir, exist_ok=True)
     os.makedirs(episodes_dir, exist_ok=True)
     state_log = os.path.join(episodes_dir, f'{alg_name}_state_ep{episode:06d}.csv')
     raw_state_log = _raw_state_base_path(episodes_dir, alg_name, episode)
+    link_context_path = write_link_context(
+        _link_context_path(episodes_dir, episode, instance_id),
+        bw_mbps=worker_link_bw,
+        base_rtt_us=worker_base_rtt_us,
+        link_schedule=worker_link_schedule,
+        episode=episode,
+        slot=instance_id,
+    )
+    oracle_link_context_path = ''
+    if oracle_state_active:
+        oracle_link_context_path = write_link_context(
+            _link_context_path(episodes_dir, episode, instance_id, oracle=True),
+            bw_mbps=oracle_link_bw,
+            base_rtt_us=oracle_base_rtt_us,
+            link_schedule=oracle_link_schedule,
+            episode=episode,
+            slot=instance_id,
+        )
 
     n_flows = int(ecfg.get('flows', 1))
     lagged_flow_ids = [
@@ -991,6 +1048,10 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
         'SAO_PYTHON':       python_bin,
         'SAO_LISTENER_CC':  str(cfg.get('listener_cc', 'astraea')),
         'OC_LISTENER_CC':   str(cfg.get('listener_cc', 'astraea')),
+        'SAO_CONFIG':       (os.path.abspath(outputs['resolved_config'])
+                             if outputs.get('resolved_config') else ''),
+        'OC_CONFIG':        (os.path.abspath(outputs['resolved_config'])
+                             if outputs.get('resolved_config') else ''),
         'SAO_ALGORITHM':    alg_name,
         'SAO_REWARD':       reward_name,
         'SAO_STATE':        state_name,
@@ -1003,12 +1064,11 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
         'SAO_MANAGER_KEY':  mgr_key,
         'SAO_LINK_BW':      str(worker_link_bw),
         'SAO_BASE_RTT_US':  str(worker_base_rtt_us),
+        'SAO_LINK_CONTEXT_PATH': link_context_path,
+        'OC_LINK_CONTEXT_PATH':  link_context_path,
         'SAO_INTERVAL_MS':  str(float(a_cfg.get('interval_ms', 20))),
         'SAO_CWND_MIN':     str(int(a_cfg.get('cwnd_min',   10))),
         'SAO_CWND_MAX':     str(int(a_cfg.get('cwnd_max', 10000))),
-        'SAO_HIDDEN':       str(int(a_cfg.get('hidden', 128))),
-        'SAO_HEAD_HIDDEN':  ('' if a_cfg.get('head_hidden') is None
-                             else str(int(a_cfg.get('head_hidden')))),
         'SAO_REC_DIM':      str(int(a_cfg.get('rec_dim', 10))),
         'SAO_ORCA_REC_DIM': str(int(a_cfg.get('rec_dim', 10))),
         'SAO_ORCA_USE_NORMALIZER': '1' if a_cfg.get('use_normalizer', False) else '0',
@@ -1018,18 +1078,6 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
         # Reads top-level cfg['bbr_probe'] first; falls back to per-algorithm
         # agent.bbr_probe so a single global block enables it across pipelines.
         **_bbr_probe_env(cfg, a_cfg),
-        # DreamerV3 worker reads these to build matching encoder/RSSM/actor.
-        'SAO_DREAMER_HIDDEN':       str(int(a_cfg.get('hidden',         256))),
-        'SAO_DREAMER_EMBED':        str(int(a_cfg.get('embed_dim',      128))),
-        'SAO_DREAMER_H_DIM':        str(int(a_cfg.get('h_dim',          256))),
-        'SAO_DREAMER_GROUPS':       str(int(a_cfg.get('latent_groups',  8))),
-        'SAO_DREAMER_CLASSES':      str(int(a_cfg.get('latent_classes', 8))),
-        'SAO_DREAMER_REWARD_BINS':  str(int(a_cfg.get('reward_bins',    255))),
-        'SAO_DREAMER_ACTOR_LOG_STD_MIN': str(float(t_cfg.get(
-            'actor_log_std_min', -2.0))),
-        'SAO_DREAMER_ACTOR_LOG_STD_MAX': str(float(t_cfg.get(
-            'actor_log_std_max', 0.0))),
-        'SAO_DEAD_FLOW_MS': str(int(a_cfg.get('dead_flow_ms', 1000))),
         'SAO_NOISE_STD':    str(float(_decayed_noise(cfg, episode))),
         'SAO_DETERMINISTIC': '1' if _eval_mode(cfg) else '0',
         'SAO_REQUIRE_CHECKPOINT': '1' if _eval_mode(cfg) else '0',
@@ -1037,7 +1085,7 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
         'OC_REQUIRE_CHECKPOINT': '1' if _eval_mode(cfg) else '0',
         'SAO_TRACE_LOG':    state_log,
         'SAO_RAW_STATE_LOG': raw_state_log,
-        'SAO_RAW_STATE_LOG_ENABLED': '1' if _plot_raw_state_enabled(outputs, episode) else '0',
+        'SAO_RAW_STATE_LOG_ENABLED': '0',
         'SAO_EPISODE':      str(int(episode)),
         # BDP proxy (bw_mbps * rtt_ms) from the TRUE episode link, independent of
         # oracle hiding. Simulation workers append it to their experience tag so a
@@ -1048,7 +1096,7 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
         # env vars. Empty when state != oracle so the data is structurally
         # unreachable from other state plugins.
         'SAO_ORACLE_BASE_RTT_US':   str(oracle_base_rtt_us) if oracle_state_active else '',
-        'SAO_ORACLE_LINK_SCHEDULE': json.dumps(oracle_link_schedule) if oracle_state_active else '',
+        'SAO_ORACLE_LINK_CONTEXT_PATH': oracle_link_context_path,
         # Option-Critic compatibility aliases. These let the option_critic
         # algorithm keep its richer worker/learner contract while the
         # orchestrator remains shared.
@@ -1061,28 +1109,13 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
         'OC_STATE_LOG_SUFFIX_BY_FLOW':  '1' if ecfg.get('per_flow_state_logs') else '0',
         'OC_CWND_MIN':       str(int(a_cfg.get('cwnd_min', 10))),
         'OC_CWND_MAX':       str(int(a_cfg.get('cwnd_max', 10000))),
-        'OC_N_OPTIONS':      str(int(a_cfg.get('n_options', 3))),
-        'OC_HIDDEN':         str(int(a_cfg.get('hidden', 128))),
-        'OC_ARCH':           str(a_cfg.get('arch', 'mlp')),
-        'OC_ACTION_INIT':    str(a_cfg.get('action_init', 'small_spread')),
-        'OC_ACTION_INIT_SCALE': str(float(a_cfg.get('action_init_scale', 0.05))),
-        'OC_ACTION_LOGSIG_MIN': str(float(a_cfg.get('action_logsig_min', -1.0))),
-        'OC_Q_VALUE_CLIP':   str(float(a_cfg.get('q_value_clip', 1500.0))),
-        'OC_BETA_TEMPERATURE': str(float(a_cfg.get('beta_temperature', 1.0))),
-        'OC_BETA_FLOOR':     str(float(a_cfg.get('beta_floor', 0.0))),
         'OC_EPS_START':      ('0.0' if _eval_mode(cfg) else str(float(a_cfg.get('epsilon_start', 0.20)))),
         'OC_EPS_END':        ('0.0' if _eval_mode(cfg) else str(float(a_cfg.get('epsilon_end', 0.03)))),
         'OC_EPS_DECAY':      str(float(a_cfg.get('epsilon_decay', 30000))),
-        'OC_DWELL_MIN_STEPS': str(int(a_cfg.get('dwell_min_steps', 1))),
-        'OC_DWELL_MAX_STEPS': str(int(a_cfg.get('dwell_max_steps', 0))),
-        'OC_TERM_THRESHOLD': str(float(a_cfg.get('term_threshold', 0.5))),
-        'OC_DEAD_FLOW_MS':   str(int(a_cfg.get('dead_flow_ms', 1000))),
-        'OC_PUSH_EVERY':     str(int(t_cfg.get('worker_push_every', 16))),
         # Compatibility aliases for the current Orca reward plugin.
         'OC_LINK_BW':          str(worker_link_bw),
         'OC_BASE_RTT_US':      str(worker_base_rtt_us),
         'OC_INTERVAL_MS':      str(float(a_cfg.get('interval_ms', 20))),
-        'OC_LINK_SCHEDULE':    json.dumps(worker_link_schedule),
         'OC_ORACLE_RTT':       '0' if hide_link_oracle else os.environ.get('OC_ORACLE_RTT', '0'),
         'OC_W_SRTT_DRIFT':     str(float(r_cfg.get('w_srtt_drift', 2.0))),
         'OC_SRTT_DRIFT_CAP':   str(float(r_cfg.get('srtt_drift_cap', 4.0))),
@@ -1143,6 +1176,7 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
         )
         raynet_ecfg['episode'] = int(episode)
         raynet_ecfg['slot'] = int(instance_id)
+        raynet_ecfg['link_context_path'] = link_context_path
         env_kwargs['environment_config'] = raynet_ecfg
     env = make_env(
         backend_type,
@@ -1183,8 +1217,20 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
             listener_env['OC_CPORT'] = str(cport + flow_id)
             if _per_flow_delays and flow_id < len(_per_flow_delays):
                 flow_rtt_us = str(float(_per_flow_delays[flow_id]) * 1000.0)
+                flow_context_path = write_link_context(
+                    _link_context_path(
+                        episodes_dir, episode, instance_id, flow_id=flow_id),
+                    bw_mbps=worker_link_bw,
+                    base_rtt_us=flow_rtt_us,
+                    link_schedule=worker_link_schedule,
+                    episode=episode,
+                    slot=instance_id,
+                    flow_id=flow_id,
+                )
                 listener_env['OC_BASE_RTT_US'] = flow_rtt_us
                 listener_env['SAO_BASE_RTT_US'] = flow_rtt_us
+                listener_env['OC_LINK_CONTEXT_PATH'] = flow_context_path
+                listener_env['SAO_LINK_CONTEXT_PATH'] = flow_context_path
             listener_procs.append(subprocess.Popen(
                 [python_bin, worker_script],
                 env=listener_env, start_new_session=True))
@@ -1236,122 +1282,20 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
             env.stop()
         time.sleep(1)
 
-    ep_return = None
-    plot_episodes = _should_plot_episode(outputs, episode)
-    root, ext = os.path.splitext(state_log)
-    ext = ext or '.csv'
-    env_part = _plot_filename_env_part(outputs, env_name or 'config')
-
-    # Per-agent traces: parameter-shared multi-agent models (and single-agent
-    # models, which still use the per-agent trace writer) write one trace per
-    # agent as `<root>_aK.csv` rather than to `state_log` directly. Render these
-    # with the combined multi-flow plot, which names the PDF `ep..._n{n}.pdf`
-    # — the path the benchmarks record as each run's individual plot.
-    agent_logs = sorted(
-        glob.glob(f'{root}_a*{ext}'),
-        key=lambda p: (int(re.search(r'_a(\d+)', p).group(1))
-                       if re.search(r'_a(\d+)', p) else 10 ** 9),
+    ep_return = render_episode_plots(
+        outputs=outputs,
+        episode=episode,
+        alg_name=alg_name,
+        state_log=state_log,
+        ecfg=ecfg,
+        backend_type=backend_type,
+        env_name=env_name,
+        link_schedule=link_schedule,
+        n_flows=n_flows,
+        trim_tail_s=plot_trim_tail_s,
+        mode='single',
+        slot_id=instance_id,
     )
-    if agent_logs:
-        _ensure_state_logs_saved(
-            outputs, episode, agent_logs, f'{root}_a*{ext}')
-        n_agents = len(agent_logs)
-        ep_return = _multi_episode_return(
-            state_log, n_agents=n_agents, trim_tail_s=plot_trim_tail_s)
-        if plot_episodes:
-            try:
-                pdf_path = os.path.join(
-                    plots_dir,
-                    f'ep{episode:06d}{env_part}_bw{bw_str}_d{delay_str}_n{n_agents}.pdf')
-                plot_title = (f'Episode {episode}  flows={n_agents}  '
-                              f'bw={bw_str}Mbps  delay={delay_str}ms  '
-                              f'env={env_name or "config"}  '
-                              f'({"scheduled" if link_schedule else "static"})')
-                plotted_return = _plot_multi_episode(
-                    state_log_path=state_log,
-                    output=pdf_path,
-                    bw=float(ecfg.get('bw', 100.0)),
-                    delay=float(ecfg.get('delay', 20.0)),
-                    title=plot_title,
-                    link_schedule=link_schedule,
-                    n_agents=n_agents,
-                    trim_tail_s=plot_trim_tail_s,
-                )
-                _plot_normalized_state_if_requested(
-                    outputs, episode, agent_logs, pdf_path, plot_title,
-                    plot_trim_tail_s)
-                _plot_raw_state_if_requested(
-                    outputs, episode, raw_state_log, pdf_path, plot_title)
-                if plotted_return is not None:
-                    ep_return = plotted_return
-                print(f'[ep_plot] ep={episode} -> {pdf_path}  '
-                      f'return={ep_return}', flush=True)
-            except Exception as e:
-                print(f'[slot={instance_id}] ep={episode} multi-flow plot '
-                      f'failed: {e}', flush=True)
-        return ep_return, ecfg, link_schedule
-
-    state_logs = []
-    if os.path.exists(state_log):
-        state_logs.append(state_log)
-    if ecfg.get('per_flow_state_logs'):
-        flow_logs = sorted(
-            glob.glob(f'{root}_flow*{ext}'),
-            key=lambda p: int(re.search(r'_flow(\d+)', p).group(1))
-            if re.search(r'_flow(\d+)', p) else 10**9,
-        )
-        if flow_logs:
-            state_logs = flow_logs
-
-    required_state_logs = (
-        [f'{root}_flow{flow_id}{ext}' for flow_id in range(n_flows)]
-        if ecfg.get('per_flow_state_logs') else [state_log]
-    )
-    _ensure_state_logs_saved(
-        outputs, episode, required_state_logs,
-        ', '.join(required_state_logs))
-
-    if state_logs:
-        primary_log = next(
-            (p for p in state_logs if re.search(r'_flow0(?:\.|$)', p)),
-            state_logs[0],
-        )
-        try:
-            for log_path in state_logs:
-                flow_match = re.search(r'_flow(\d+)', log_path)
-                flow_suffix = f'_flow{flow_match.group(1)}' if flow_match else ''
-                if plot_episodes:
-                    pdf_path = os.path.join(
-                        plots_dir,
-                        f'ep{episode:06d}{env_part}_bw{bw_str}_d{delay_str}{flow_suffix}.pdf')
-                    plot_title = (f'Episode {episode}{flow_suffix}  '
-                                  f'bw={bw_str}Mbps  delay={delay_str}ms  '
-                                  f'env={env_name or "config"}  '
-                                  f'({"scheduled" if link_schedule else "static"})')
-                    ret = _plot_episode(
-                        state_log_path = log_path,
-                        output         = pdf_path,
-                        bw             = float(ecfg.get('bw',   100.0)),
-                        delay          = float(ecfg.get('delay', 20.0)),
-                        title          = plot_title,
-                        link_schedule  = link_schedule,
-                        trim_tail_s    = plot_trim_tail_s,
-                    )
-                    _plot_normalized_state_if_requested(
-                        outputs, episode, [log_path], pdf_path, plot_title,
-                        plot_trim_tail_s)
-                    if log_path == primary_log:
-                        _plot_raw_state_if_requested(
-                            outputs, episode, raw_state_log, pdf_path,
-                            plot_title)
-                        ep_return = ret
-                    print(f'[ep_plot] ep={episode}{flow_suffix} -> {pdf_path}  '
-                          f'return={ret}', flush=True)
-                elif log_path == primary_log:
-                    ep_return = _episode_return(
-                        log_path, trim_tail_s=plot_trim_tail_s)
-        except Exception as e:
-            print(f'[slot={instance_id}] ep={episode} plot failed: {e}', flush=True)
 
     return ep_return, ecfg, link_schedule
 
@@ -1734,12 +1678,18 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
     if per_flow_delays is None:
         per_flow_delays = ecfg.get('per_flow_delays')
 
-    plots_dir    = os.path.abspath(outputs['plots_dir'])
     episodes_dir = os.path.abspath(outputs['episodes_dir'])
-    os.makedirs(plots_dir, exist_ok=True)
     os.makedirs(episodes_dir, exist_ok=True)
     state_log = os.path.join(episodes_dir, f'{alg_name}_state_ep{episode:06d}.csv')
     raw_state_log = _raw_state_base_path(episodes_dir, alg_name, episode)
+    link_context_path = write_link_context(
+        _link_context_path(episodes_dir, episode, instance_id),
+        bw_mbps=float(ecfg.get('bw', 100.0)),
+        base_rtt_us=float(ecfg.get('delay', 20.0)) * 1000.0,
+        link_schedule=link_schedule,
+        episode=episode,
+        slot=instance_id,
+    )
 
     worker_env = dict(os.environ)
     worker_env.update({
@@ -1747,6 +1697,10 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
         'SAO_PYTHON':        python_bin,
         'SAO_LISTENER_CC':   str(cfg.get('listener_cc', 'astraea')),
         'OC_LISTENER_CC':    str(cfg.get('listener_cc', 'astraea')),
+        'SAO_CONFIG':        (os.path.abspath(outputs['resolved_config'])
+                              if outputs.get('resolved_config') else ''),
+        'OC_CONFIG':         (os.path.abspath(outputs['resolved_config'])
+                              if outputs.get('resolved_config') else ''),
         'SAO_ALGORITHM':     alg_name,
         'SAO_REWARD':        reward_name,
         'SAO_STATE':         state_name,
@@ -1757,43 +1711,28 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
         'SAO_MANAGER_KEY':   mgr_key,
         'SAO_LINK_BW':       str(float(ecfg.get('bw',   100.0))),
         'SAO_BASE_RTT_US':   str(float(ecfg.get('delay', 20.0)) * 1000),
+        'SAO_LINK_CONTEXT_PATH': link_context_path,
+        'OC_LINK_CONTEXT_PATH':  link_context_path,
         'SAO_INTERVAL_MS':   str(float(a_cfg.get('interval_ms', 20))),
         'SAO_CWND_MIN':      str(int(a_cfg.get('cwnd_min',   10))),
         'SAO_CWND_MAX':      str(int(a_cfg.get('cwnd_max', 10000))),
-        'SAO_HIDDEN':        str(int(a_cfg.get('hidden', 128))),
-        'SAO_DEAD_FLOW_MS':  str(int(a_cfg.get('dead_flow_ms', 1000))),
         'SAO_NOISE_STD':     str(float(_decayed_noise(cfg, episode))),
         'SAO_DETERMINISTIC':  '1' if _eval_mode(cfg) else '0',
         'SAO_REQUIRE_CHECKPOINT': '1' if _eval_mode(cfg) else '0',
         'OC_DETERMINISTIC':   '1' if _eval_mode(cfg) else '0',
         'OC_REQUIRE_CHECKPOINT': '1' if _eval_mode(cfg) else '0',
-        'OC_PUSH_EVERY':      str(int(t_cfg.get('worker_push_every', 16))),
         'SAO_TRACE_LOG':     state_log,
         'SAO_RAW_STATE_LOG': raw_state_log,
-        'SAO_RAW_STATE_LOG_ENABLED': '1' if _plot_raw_state_enabled(outputs, episode) else '0',
+        'SAO_RAW_STATE_LOG_ENABLED': '0',
         'SAO_EPISODE':       str(int(episode)),
         # Multi-agent specifics
         'SAO_N_AGENTS':      str(n_flows),
         'SAO_INSTANCE_ID':   str(instance_id),
         'SAO_CPORT_BASE':    str(cport),
-        'SAO_MAT_LAYERS':    str(int(a_cfg.get('n_layers', 2))),
-        'SAO_MAT_HEADS':     str(int(a_cfg.get('n_heads',  4))),
-        'SAO_DREAMER_HIDDEN': str(int(a_cfg.get('hidden', 256))),
-        'SAO_DREAMER_EMBED': str(int(a_cfg.get('embed_dim', 128))),
-        'SAO_DREAMER_H_DIM': str(int(a_cfg.get('h_dim', 256))),
-        'SAO_DREAMER_GROUPS': str(int(a_cfg.get('latent_groups', 8))),
-        'SAO_DREAMER_CLASSES': str(int(a_cfg.get('latent_classes', 8))),
-        'SAO_DREAMER_REWARD_BINS': str(
-            int(t_cfg.get('reward_bins', a_cfg.get('reward_bins', 255)))),
-        'SAO_DREAMER_ACTOR_LOG_STD_MIN': str(
-            float(t_cfg.get('actor_log_std_min', -2.0))),
-        'SAO_DREAMER_ACTOR_LOG_STD_MAX': str(
-            float(t_cfg.get('actor_log_std_max', 0.0))),
         # Reward env vars used by Tempest and the legacy MAT reward.
         'OC_LINK_BW':          str(float(ecfg.get('bw',   100.0))),
         'OC_BASE_RTT_US':      str(float(ecfg.get('delay', 20.0)) * 1000),
         'OC_INTERVAL_MS':      str(float(a_cfg.get('interval_ms', 20))),
-        'OC_LINK_SCHEDULE':    json.dumps(link_schedule),
         'OC_FAIR_FLOW_START_DELAYS': json.dumps(start_delays),
         'OC_FAIR_FLOW_DURATIONS': json.dumps(flow_durations),
     })
@@ -1803,7 +1742,6 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
     bw_str    = f"{ecfg.get('bw', 100):.0f}"
     delay_str = f"{ecfg.get('delay', 20):.0f}"
     env_name  = str(ecfg.get('environment', ''))
-    env_part  = _plot_filename_env_part(outputs, env_name or 'config')
     delays_str = ('simul' if max(start_delays) == 0
                   else f'delays={[round(x,1) for x in start_delays]}')
     rtts_str = ('' if not per_flow_delays
@@ -1845,6 +1783,7 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
         )
         raynet_ecfg['episode'] = int(episode)
         raynet_ecfg['slot'] = int(instance_id)
+        raynet_ecfg['link_context_path'] = link_context_path
         env_kwargs['environment_config'] = raynet_ecfg
     env = make_env(backend_type, **env_kwargs)
     env.start()
@@ -1880,8 +1819,20 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
         # matching the existing OC_BASE_RTT_US = delay*1000 convention.
         if per_flow_delays and agent_id < len(per_flow_delays):
             flow_rtt_us = str(float(per_flow_delays[agent_id]) * 1000.0)
+            flow_context_path = write_link_context(
+                _link_context_path(
+                    episodes_dir, episode, instance_id, flow_id=agent_id),
+                bw_mbps=float(ecfg.get('bw', 100.0)),
+                base_rtt_us=flow_rtt_us,
+                link_schedule=link_schedule,
+                episode=episode,
+                slot=instance_id,
+                flow_id=agent_id,
+            )
             listener_env['OC_BASE_RTT_US'] = flow_rtt_us
             listener_env['SAO_BASE_RTT_US'] = flow_rtt_us
+            listener_env['OC_LINK_CONTEXT_PATH'] = flow_context_path
+            listener_env['SAO_LINK_CONTEXT_PATH'] = flow_context_path
         if is_raynet:
             listener_env['OC_FLOW_FD'] = str(agent_id)
             listener_env['OC_CPORT'] = str(listener_cport)
@@ -1929,55 +1880,20 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
             env.stop()
         time.sleep(1)
 
-    ep_return = _multi_episode_return(
-        state_log, n_agents=n_flows, trim_tail_s=plot_trim_tail_s)
-    plot_episodes = _should_plot_episode(outputs, episode)
-    root, ext = os.path.splitext(state_log)
-    ext = ext or '.csv'
-    expected_state_logs = [
-        f'{root}_a{agent_id}{ext}' for agent_id in range(int(n_flows))
-    ]
-    existing_state_logs = [
-        path for path in expected_state_logs if os.path.exists(path)
-    ]
-    if not existing_state_logs and os.path.exists(state_log):
-        existing_state_logs = [state_log]
-    required_state_logs = (
-        existing_state_logs if existing_state_logs == [state_log]
-        else expected_state_logs
+    ep_return = render_episode_plots(
+        outputs=outputs,
+        episode=episode,
+        alg_name=alg_name,
+        state_log=state_log,
+        ecfg=ecfg,
+        backend_type=backend_type,
+        env_name=env_name,
+        link_schedule=link_schedule,
+        n_flows=n_flows,
+        trim_tail_s=plot_trim_tail_s,
+        mode='multi',
+        slot_id=instance_id,
     )
-    _ensure_state_logs_saved(
-        outputs, episode, required_state_logs,
-        ', '.join(required_state_logs) if required_state_logs else state_log)
-    try:
-        if plot_episodes:
-            pdf_path = os.path.join(plots_dir,
-                                    f'ep{episode:06d}{env_part}_bw{bw_str}_d{delay_str}_n{n_flows}.pdf')
-            plot_title = (f'Episode {episode}  flows={n_flows}  '
-                          f'bw={bw_str}Mbps  delay={delay_str}ms  '
-                          f'env={env_name or "config"}  '
-                          f'({"scheduled" if link_schedule else "static"})')
-            plotted_return = _plot_multi_episode(
-                state_log_path = state_log,
-                output         = pdf_path,
-                bw             = float(ecfg.get('bw',   100.0)),
-                delay          = float(ecfg.get('delay', 20.0)),
-                title          = plot_title,
-                link_schedule  = link_schedule,
-                n_agents       = n_flows,
-                trim_tail_s    = plot_trim_tail_s,
-            )
-            _plot_normalized_state_if_requested(
-                outputs, episode, existing_state_logs, pdf_path, plot_title,
-                plot_trim_tail_s)
-            _plot_raw_state_if_requested(
-                outputs, episode, raw_state_log, pdf_path, plot_title)
-            if plotted_return is not None:
-                ep_return = plotted_return
-            print(f'[ep_plot] ep={episode} -> {pdf_path}  return={ep_return}', flush=True)
-    except Exception as e:
-        print(f'[slot={instance_id}] ep={episode} multi-flow plot failed: {e}',
-              flush=True)
 
     if ep_return is not None:
         print(f'[orch] ep={episode} sum-of-agents return={ep_return:.1f}', flush=True)
@@ -2072,6 +1988,21 @@ def _slot_process(instance_id, work_q, result_q,
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 
+def _apply_orchestrator_block(cfg: dict):
+    """Fold the optional `orchestrator:` config block into the flat top-level
+    keys the rest of this file (and train.py) reads: n_parallel, episodes,
+    save_every_episodes, learner_port, scan_ms, listener_*, cport_base, ...
+
+    Configs group these runner knobs under `orchestrator:` for readability;
+    older flat configs keep working unchanged. When both layouts are present,
+    the grouped value wins.
+    """
+    block = cfg.get('orchestrator')
+    if isinstance(block, dict):
+        for key, value in block.items():
+            cfg[key] = value
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--config',   required=True)
@@ -2089,6 +2020,7 @@ def main():
 
     with open(args.config) as f:
         cfg = yaml.safe_load(f)
+    _apply_orchestrator_block(cfg)
     if args.environment or args.env_type:
         existing = cfg.get('environment')
         env_type = args.env_type or (
@@ -2141,19 +2073,27 @@ def main():
         env_flows = (env_cfg.get('sweep') or {}).get('flows')
         if env_flows is not None:
             cfg['sweep'] = {'flows': env_flows}
+
+    _collection_enabled, _collection_grps = collection_groups(cfg)
+    mixed_cfg_enabled = _collection_enabled and bool(_collection_grps)
+    if mixed_cfg_enabled:
+        # Abort before any learner/worker starts on a bad minibatch blend.
+        try:
+            validate_batch_fractions(_collection_grps)
+        except ValueError as e:
+            raise SystemExit(f'[orch] {e}')
+    _validate_environment_runtime_compatibility(cfg)
+
     learner_config_path = _prepare_run(cfg, args.config)
 
     t_cfg = cfg.get('training', cfg)
     paths = cfg.get('paths', {}) or {}
     backend_type = _env_backend_type(cfg)
     # A run needs the Mininet listener + kernel CC whenever any collection pool
-    # uses a non-raynet (Mininet) backend — including the emulation side of a
-    # mixed run.
-    _mixed_cfg = cfg.get('mixed_collection') or {}
-    mixed_cfg_enabled = bool(_mixed_cfg.get('enabled'))
+    # uses a non-raynet (Mininet) backend — including any Mininet group of a
+    # multi-environment collection run.
     _mixed_uses_mininet = mixed_cfg_enabled and any(
-        (_mixed_cfg.get(side) or {}).get('type', 'mininet') != 'raynet'
-        for side in ('emulation', 'simulation'))
+        env_type != 'raynet' for env_type in _collection_grps)
     needs_emulation = (backend_type != 'raynet') or _mixed_uses_mininet
     if 'py' not in paths:
         raise SystemExit('[orch] config.yaml must define paths.py')
@@ -2163,9 +2103,13 @@ def main():
     python_bin   = os.path.abspath(paths['py'])
     n_episodes   = args.episodes or cfg.get('episodes', None)
     n_parallel   = max(1, int(cfg.get('n_parallel', 1)))
+    # Orchestrator-level `save_every_episodes` (usually set in the
+    # `orchestrator:` config block) is the canonical knob; per-algorithm
+    # training keys remain as a fallback for older configs.
     episode_ckpt_every = max(0, int(
-        t_cfg.get('checkpoint_every_episodes',
-                  t_cfg.get('save_every_episodes', 0)) or 0))
+        cfg.get('save_every_episodes',
+                t_cfg.get('checkpoint_every_episodes',
+                          t_cfg.get('save_every_episodes', 0))) or 0))
     if eval_mode:
         episode_ckpt_every = 0
 
@@ -2209,7 +2153,8 @@ def main():
               'completed episodes', flush=True)
 
     selected_learner_script = None if eval_mode else learner_script(alg_name)
-    learner_port   = int(cfg.get('learner', {}).get('port', 6301))
+    learner_port   = int(cfg.get('learner_port')
+                         or (cfg.get('learner', {}) or {}).get('port', 6301))
     shutdown_requested = {'seen': False}
 
     def _signal_shutdown(signum, _frame):
@@ -2312,13 +2257,13 @@ def main():
 
     # Each collection "group" owns a backend sub-config, a listener binary, a
     # parallel slot count, an episode pool, and its own work queue. Non-mixed
-    # runs use a single group (identical to the original behaviour); mixed runs
-    # use one emulation group and one simulation group feeding the same learner.
+    # runs use a single group (identical to the original behaviour); an
+    # experience-collection run uses one group per declared environment type,
+    # all feeding the same learner.
     groups = []
     if mixed_enabled:
-        emu_cfg, sim_cfg = _build_mixed_subconfigs(cfg)
-        for gname, gcfg, gbin in (('emulation', emu_cfg, listener_bin),
-                                  ('simulation', sim_cfg, '')):
+        for gname, gcfg in _build_collection_subconfigs(cfg):
+            gbin = '' if _env_backend_type(gcfg) == 'raynet' else listener_bin
             gpool, gshuf = _build_pool(gcfg)
             groups.append({
                 'name': gname, 'cfg': gcfg, 'listener_bin': gbin,
@@ -2327,14 +2272,14 @@ def main():
                 'work_q': multiprocessing.Queue(),
             })
         env_meta = {}
-        frac = float(((cfg.get('mixed_collection') or {}).get('mix') or {})
-                     .get('emulation_batch_fraction', 0.5))
         for g in groups:
-            print(f'[orch] mixed group={g["name"]} '
+            block = _collection_grps.get(g['name']) or {}
+            print(f'[orch] collection group={g["name"]} '
                   f'backend={_env_backend_type(g["cfg"])} '
-                  f'slots={g["n_parallel"]} pool={len(g["pool"])}', flush=True)
+                  f'slots={g["n_parallel"]} pool={len(g["pool"])} '
+                  f'batch_fraction={block.get("batch_fraction")}', flush=True)
         print(f'[orch] mode=mixed (single-agent)  '
-              f'emulation_batch_fraction={frac}', flush=True)
+              f'groups={list(_collection_grps)}', flush=True)
     else:
         if multi:
             pool, do_shuffle = _build_pool_marl(cfg)
@@ -2407,6 +2352,8 @@ def main():
     ]
     pending_episode_ckpts = set()
     missing_episode_ckpt_warned = set()
+    episode_ckpt_lock = threading.Lock()
+    episode_ckpt_worker = {'thread': None}
 
     def _ensure_returns_csv_header():
         if not os.path.exists(returns_csv):
@@ -2439,8 +2386,9 @@ def main():
 
     def _log_return(ep, ecfg, ep_return, link_sched, episode_wall_s):
         env_name = ecfg.get('environment') or env_meta.get('name', '')
-        # Collection source group ('emulation'/'simulation' for mixed runs,
-        # 'single' otherwise) so the plotter can compare returns per source.
+        # Collection source group (the environment type, e.g. 'mininet' /
+        # 'raynet', for experience-collection runs; 'single' otherwise) so the
+        # plotter can compare returns per source.
         group = ep_to_group.get(ep)
         source = group['name'] if group else 'single'
         backend = _env_backend_type(group['cfg'] if group else cfg)
@@ -2526,16 +2474,34 @@ def main():
         return True
 
     def _flush_episode_checkpoints():
-        for completed_count in sorted(list(pending_episode_ckpts)):
+        with episode_ckpt_lock:
+            pending = sorted(pending_episode_ckpts)
+        for completed_count in pending:
             if _copy_episode_checkpoint(completed_count):
-                pending_episode_ckpts.discard(completed_count)
+                with episode_ckpt_lock:
+                    pending_episode_ckpts.discard(completed_count)
+
+    def _flush_episode_checkpoints_async():
+        # The snapshot copy (stability probe + shutil.copy2 of a potentially
+        # large checkpoint) runs off the dispatch loop so it never delays
+        # episode hand-out or the learner's rolling checkpoint writes.
+        thread = episode_ckpt_worker['thread']
+        if thread is not None and thread.is_alive():
+            return
+        thread = threading.Thread(target=_flush_episode_checkpoints,
+                                  name='episode-ckpt-copy', daemon=True)
+        episode_ckpt_worker['thread'] = thread
+        thread.start()
 
     def _maybe_save_episode_checkpoint(completed_count: int):
         if episode_ckpt_every <= 0 or completed_count <= 0:
             return
-        if completed_count % episode_ckpt_every == 0:
-            pending_episode_ckpts.add(completed_count)
-        _flush_episode_checkpoints()
+        with episode_ckpt_lock:
+            if completed_count % episode_ckpt_every == 0:
+                pending_episode_ckpts.add(completed_count)
+            has_pending = bool(pending_episode_ckpts)
+        if has_pending:
+            _flush_episode_checkpoints_async()
 
     for g in groups:
         for _ in range(g['n_parallel']):
@@ -2594,6 +2560,9 @@ def main():
                 pass
         if os.path.exists(returns_csv):
             _generate_returns_plot()
+        ckpt_thread = episode_ckpt_worker['thread']
+        if ckpt_thread is not None and ckpt_thread.is_alive():
+            ckpt_thread.join(timeout=30)
         if pending_episode_ckpts:
             _flush_episode_checkpoints()
             if pending_episode_ckpts:

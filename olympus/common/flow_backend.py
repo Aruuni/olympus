@@ -42,13 +42,16 @@ def is_simulation_backend():
 
 
 def experience_source():
-    """Tag identifying which collection backend produced an experience.
+    """Tag identifying which collection environment produced an experience.
 
-    Used by mixed emulation+simulation training so the learner can route each
-    pushed transition into the matching replay buffer. ``'simulation'`` for the
-    RayNet backend, ``'emulation'`` otherwise (real-kernel / Mininet).
+    Used by multi-environment experience collection so the learner can route
+    each pushed transition into the replay buffer of the matching
+    ``experience_collection`` group. The tag is the environment type:
+    ``'raynet'`` for the RayNet backend, ``'mininet'`` otherwise (real-kernel /
+    Mininet, whose flow backend is ``'tcp'``).
     """
-    return 'simulation' if is_simulation_backend() else 'emulation'
+    name = _backend_name()
+    return 'mininet' if name == 'tcp' else name
 
 
 def observation_clock(raw, wall_now=None):
@@ -200,5 +203,5 @@ def set_cwnd(flow_fd, cwnd):
     """Apply an absolute CWND request through the selected flow backend."""
     if _backend_name() == 'raynet':
         flow_id = int(os.environ.get('OC_FLOW_ID', flow_fd))
-        return _raynet_service().set_cwnd(flow_id, int(cwnd))
+        return _raynet_service().set_cwnd(flow_id, float(cwnd))
     return _tcp_sockopt().set_cwnd(flow_fd, cwnd)

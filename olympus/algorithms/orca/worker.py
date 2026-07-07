@@ -30,7 +30,7 @@ sys.path.insert(0, _REPO)
 from olympus.algorithms.orca import model
 from olympus.common.action_plugins import load_action_module
 from olympus.common.bbr_probe import BbrProbe
-from olympus.common import flow_backend
+from olympus.common import flow_backend, runtime_config
 
 _ACTION_PLUGIN = load_action_module()
 
@@ -95,7 +95,9 @@ def _srtt_ms(raw: dict) -> float:
 
 
 def run():
-    reward_name = os.environ.get('SAO_REWARD', 'orca')
+    cfg = runtime_config.load_config()
+    reward_name = str(runtime_config.runtime_value(
+        cfg, 'reward', env='SAO_REWARD', default='orca'))
     flow_fd = int(os.environ['OC_FLOW_FD'])
     flow_id = int(os.environ['OC_FLOW_ID'])
     cport = int(os.environ.get('OC_CPORT', '0'))
@@ -106,14 +108,20 @@ def run():
     interval_ms = float(os.environ.get('SAO_INTERVAL_MS', '20'))
     cwnd_min = int(os.environ.get('SAO_CWND_MIN', '4'))
     cwnd_max = int(os.environ.get('SAO_CWND_MAX', '10000'))
-    hidden = int(os.environ.get('SAO_HIDDEN', '256'))
-    head_hidden = int(os.environ.get('SAO_HEAD_HIDDEN', hidden))
+    hidden = int(runtime_config.agent_value(
+        cfg, 'hidden', env='SAO_HIDDEN', default=256))
+    head_hidden = int(runtime_config.agent_value(
+        cfg, 'head_hidden', env='SAO_HEAD_HIDDEN', default=hidden))
     noise_std = float(os.environ.get('SAO_NOISE_STD', '0.2'))
     require_checkpoint = os.environ.get('SAO_REQUIRE_CHECKPOINT', '0') == '1'
-    delay_margin_coef = float(os.environ.get('OC_ORCA_DELAY_MARGIN_COEF', '1.25'))
-    target = float(os.environ.get('SAO_ORCA_TARGET_MS',
-                                  os.environ.get('OC_ORCA_TARGET_MS', '50.0')))
-    use_normalizer = _bool_env('SAO_ORCA_USE_NORMALIZER', False)
+    delay_margin_coef = float(runtime_config.reward_value(
+        cfg, 'delay_margin_coef', env='OC_ORCA_DELAY_MARGIN_COEF',
+        default=1.25))
+    target = float(runtime_config.state_option_value(
+        cfg, 'orca_target_ms', env='SAO_ORCA_TARGET_MS',
+        default=os.environ.get('OC_ORCA_TARGET_MS', '50.0')))
+    use_normalizer = runtime_config.bool_value(runtime_config.agent_value(
+        cfg, 'use_normalizer', env='SAO_ORCA_USE_NORMALIZER', default=False))
     simulation_backend = flow_backend.is_simulation_backend()
 
     deterministic = os.environ.get('SAO_DETERMINISTIC', '0') == '1'
@@ -216,11 +224,14 @@ def run():
     step_in_traj = 0
     ever_alive = False
     dead_steps = 0
-    dead_steps_limit = int(float(os.environ.get('SAO_DEAD_FLOW_MS', '1000')) / interval_ms)
+    dead_flow_ms = float(runtime_config.agent_value(
+        cfg, 'dead_flow_ms', env='SAO_DEAD_FLOW_MS', default=1000))
+    dead_steps_limit = int(dead_flow_ms / interval_ms)
 
     weight_pull_counter = 0
     weight_pull_every = int(os.environ.get('SAO_WEIGHT_PULL_EVERY', '50'))
-    push_every = max(1, int(os.environ.get('OC_PUSH_EVERY', '16')))
+    push_every = max(1, int(runtime_config.training_value(
+        cfg, 'worker_push_every', env='OC_PUSH_EVERY', default=16)))
     exp_buf = []
     log_flush_counter = 0
 
@@ -357,20 +368,28 @@ def run():
                     exp_buf.clear()
 
             a, mult = actor.act(norm_s, noise_std=noise_std)
-            desired_cwnd = _ACTION_PLUGIN.apply_cwnd(
-                cur_cwnd, a, cwnd_min, cwnd_max)
+            raw_raynet_action = (
+                flow_backend.is_simulation_backend()
+                and getattr(_ACTION_PLUGIN, 'ACTION_OUTPUT', '') == 'raynet_action')
+            if raw_raynet_action:
+                new_cwnd = float(_ACTION_PLUGIN.apply_cwnd(
+                    cur_cwnd, a, cwnd_min, cwnd_max))
+                agent_locked = False
+            else:
+                desired_cwnd = _ACTION_PLUGIN.apply_cwnd(
+                    cur_cwnd, a, cwnd_min, cwnd_max)
 
-            # Feed the BBR-style min-RTT filter with the kernel's persistent
-            # srtt (srtt_us is in usec<<3; divide by 8). Falls back to avg_urtt
-            # only if srtt isn't populated yet (pre-handshake).
-            srtt_raw_us = float(raw.get('srtt_us', 0) or 0)
-            filter_rtt_us = (srtt_raw_us / 8.0) if srtt_raw_us > 0 else float(raw.get('avg_urtt', 0) or 0)
-            clock_t = flow_backend.observation_clock(raw, wall_now=t_step_start)
-            probe.observe_rtt(clock_t, filter_rtt_us)
+                # Feed the BBR-style min-RTT filter with the kernel's persistent
+                # srtt (srtt_us is in usec<<3; divide by 8). Falls back to avg_urtt
+                # only if srtt isn't populated yet (pre-handshake).
+                srtt_raw_us = float(raw.get('srtt_us', 0) or 0)
+                filter_rtt_us = (srtt_raw_us / 8.0) if srtt_raw_us > 0 else float(raw.get('avg_urtt', 0) or 0)
+                clock_t = flow_backend.observation_clock(raw, wall_now=t_step_start)
+                probe.observe_rtt(clock_t, filter_rtt_us)
 
-            actual_cwnd, agent_locked, _probe_transition = probe.decide(
-                clock_t, cur_cwnd, desired_cwnd)
-            new_cwnd = int(np.clip(actual_cwnd, cwnd_min, cwnd_max))
+                actual_cwnd, agent_locked, _probe_transition = probe.decide(
+                    clock_t, cur_cwnd, desired_cwnd)
+                new_cwnd = int(np.clip(actual_cwnd, cwnd_min, cwnd_max))
             try:
                 flow_backend.set_cwnd(flow_fd, new_cwnd)
             except Exception as e:

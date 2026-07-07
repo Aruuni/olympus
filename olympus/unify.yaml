@@ -5,18 +5,18 @@
 # emulation+simulation Orca experiment from config_mixed_orca.yaml. The active
 # pipeline is chosen entirely by `runtime.algorithm`:
 #
-#   - orca (default here): mixed collection — a single learner fed by BOTH a
-#     Mininet (real-kernel) pool and a RayNet/OMNeT++ pool at once, with a
-#     BDP-stratified simulation replay buffer (see mixed_collection below).
+#   - orca (default here): multi-environment collection — a single learner fed
+#     by every environment declared under experience_collection at once (e.g. a
+#     Mininet real-kernel pool plus a RayNet/OMNeT++ pool), with a
+#     BDP-stratified simulation replay buffer (see experience_collection below).
 #   - td3 / mbpo_td3 / dreamer_v3: single-agent, single backend. Set
-#     mixed_collection.enabled: false and pick an `environment` below.
+#     experience_collection.enabled: false and pick an `environment` below.
 #   - ma_dreamer / mat: multi-agent (MULTI_AGENT = True), joint training over the
 #     `sweep` flow counts defined in the environment files.
 #
 # Run (mixed Orca needs root for the Mininet pool; RayNet tolerates it):
 #   sudo mn -c
-#   sudo -E env PATH="$PATH" HOME="$HOME" \
-#     ./venv_training/bin/python olympus/train.py --config olympus/unify.yaml
+#   sudo -E env PATH="$PATH" HOME="$HOME" ./venv_training/bin/python olympus/train.py --config olympus/unify.yaml
 
 runtime:
   algorithm: dreamer_v3
@@ -53,35 +53,43 @@ environment:
 # slots outrunning the Mininet ones is expected and handled on the learning side
 # by the per-source mix fraction plus the BDP-stratified sim buffer, not by
 # lock-stepping collection.
-synchronized_collection: false
+synchronized_collection: true
 
-# ── Mixed emulation + simulation collection (orca) ───────────────────────────
-# Only active when enabled AND the learner supports it (orca). A single learner
-# keeps a separate replay buffer per source and samples each minibatch as a blend.
-mixed_collection:
+# ── Experience collection ─────────────────────────────────────────────────────
+# Only active when enabled AND the learner supports it. Declare one block per
+# collection environment type (any number); each runs its own worker pool and
+# keeps its own replay buffer inside a single learner. Per block:
+#   environment_setup   scenario file under olympus/environments/<type>/
+#   n_parallel          collection slots for this environment
+#   buffer_capacity     total replay capacity (transitions) for this
+#                       environment's buffer; falls back to the algorithm's
+#                       replay_capacity
+#   batch_fraction      share of every training minibatch drawn from this
+#                       environment's buffer; independent of buffer sizes.
+#                       Required on every block, and the fractions must sum
+#                       to 1 or the run aborts at startup.
+experience_collection:
   enabled: true
-  emulation:
-    type: mininet
+
+  mininet:
     environment_setup: dynamic       # one flow under changing BW/RTT
     n_parallel: 20
-    # Total emulation replay capacity (transitions). Falls back to
-    # mix.buffer_capacity, then the algorithm's replay_capacity.
     buffer_capacity: 400000
-  
-  simulation:
-    type: raynet
-    environment_setup: orca_static    # RayNet Orca sweep (bws x delays)
-    n_parallel: 1
-    # Total simulation replay capacity (transitions), split evenly across the
-    # BDP classes below. Sized independently of the emulation buffer.
+    batch_fraction: 0.5
+
+  raynet:
+    environment_setup: dynamic    # RayNet Orca sweep (bws x delays)
+    n_parallel: 20
+    # Total capacity, split evenly across the BDP classes below.
     buffer_capacity: 400000
+    batch_fraction: 0.5
     # BDP-stratified simulation replay. RayNet finishes low-bandwidth episodes
     # far faster in wall-clock, so a single FIFO sim buffer fills with low-BDP /
     # low-cwnd transitions and evicts the rare high-BDP experience. Instead we
     # keep one reserved sub-buffer per bandwidth-delay-product class (bw*rtt in
     # Mbps*ms) and sample every class evenly, so all link regimes stay
-    # represented regardless of how quickly they are produced. Emulation is never
-    # stratified.
+    # represented regardless of how quickly they are produced. Emulation is
+    # never stratified.
     #
     # Set n_buckets: the orchestrator reads the simulation sweep and auto-derives
     # quantile edges (written into telemetry/config.resolved.yaml). Buckets
@@ -89,11 +97,6 @@ mixed_collection:
     # edges instead, set `bdp_edges: [...]` (that always overrides n_buckets).
     strata:
       n_buckets: 20
-  mix:
-    # Share of each training minibatch drawn from the EMULATION buffer; the rest
-    # comes from the SIMULATION buffer. Independent of buffer sizes above.
-    emulation_batch_fraction: 0.0
-    # buffer_capacity: 10240          # shared default if a side omits its own
 
 reward:
   delay_margin_coef: 1.25
@@ -131,19 +134,6 @@ paths:
   raynet_path: ~/extra/raynet_olympus
   omnet_path: ~/extra/omnetpp
 
-listener_cc: astraea
-
-learner:
-  port: 6301
-
-scan_ms: 20
-# When true, oc_bridge attaches the first matching worker and never connects
-# another during that listener lifetime.
-listener_single_flow: true
-# Workers read TCP state from tcp_sockopt directly; the listener need not emit.
-listener_state_pipe: false
-cport_base: 23000
-
 outputs:
   root: olympus/models/orca
   run_name: 
@@ -151,16 +141,35 @@ outputs:
   # and simulation episode into plots/.
   plot_episodes: true
   plot_every_n: 1
-  plot_observations: true
-  plot_raw_state: true
-  plot_filename_include_env: true
   require_state_logs: true
 
-# Fallback parallelism; per-side counts are set inside mixed_collection.
-n_parallel: 6
-
-# Hard cap on total dispatched episodes; omit / null to run until interrupted.
-episodes: 160000
+# ── Orchestrator ──────────────────────────────────────────────────────────────
+# Runner-level knobs: episode dispatch, checkpoint snapshots, the learner RPC
+# port, and the oc_bridge listener. (Older configs may keep these keys flat at
+# the top level; the orchestrator reads both layouts.)
+orchestrator:
+  # Fallback parallelism; per-environment counts are set inside
+  # experience_collection.
+  n_parallel: 6
+  # Hard cap on total dispatched episodes; omit / null to run until interrupted.
+  episodes: 4000
+  # Copy an immutable snapshot of the rolling checkpoint (e.g.
+  # checkpoints/<alg>_<N>_cwnd_model.pt) every N completed episodes, whatever
+  # the algorithm. The copy runs in a background thread so it never delays the
+  # rolling checkpoint or episode dispatch. 0 / null disables snapshots.
+  save_every_episodes: 500
+  # TCP port of the learner's parameter/replay manager.
+  learner_port: 6301
+  # oc_bridge listener: `ss` scan period.
+  scan_ms: 20
+  # When true, oc_bridge attaches the first matching worker and never connects
+  # another during that listener lifetime.
+  listener_single_flow: true
+  # Workers read TCP state from tcp_sockopt directly; the listener need not emit.
+  listener_state_pipe: false
+  # Congestion-control name that the local listener scans for.
+  listener_cc: astraea
+  cport_base: 23000
 
 algorithms:
 
@@ -180,7 +189,6 @@ algorithms:
       grad_clip: 0.0
       updates_per_step: 1
       save_every: 100000
-      save_every_episodes: 0
       param_broadcast_every: 1
       update_delay_ms: 20
       persist_replay_on_stop: false
@@ -214,7 +222,6 @@ algorithms:
       grad_clip: 5.0
       updates_per_step: 1
       save_every: 500
-      save_every_episodes: 500
       param_broadcast_every: 50
       use_reward_normalizer: true
     agent:
@@ -246,7 +253,6 @@ algorithms:
       grad_clip: 5.0
       updates_per_step: 1
       save_every: 500
-      save_every_episodes: 200
       param_broadcast_every: 50
       model_hidden: 200
       model_ensemble_size: 5
@@ -281,7 +287,6 @@ algorithms:
       grad_clip: 1000.0
       updates_per_step: 1
       save_every: 500
-      save_every_episodes: 500
       param_broadcast_every: 50
       kl_weight: 1.0
       kl_balance: 0.8

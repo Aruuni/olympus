@@ -36,7 +36,7 @@ sys.path.insert(0, _REPO)
 from olympus.algorithms.dreamer_v3 import model
 from olympus.common.action_plugins import load_action_module
 from olympus.common.bbr_probe import BbrProbe
-from olympus.common import flow_backend
+from olympus.common import flow_backend, runtime_config
 from olympus.common.registry import reward_module
 
 _ACTION_PLUGIN = load_action_module()
@@ -117,7 +117,9 @@ def _build_world_model_and_actor(cfg_kwargs):
 
 
 def run():
-    reward_name = os.environ.get('SAO_REWARD', 'tempest')
+    cfg = runtime_config.load_config()
+    reward_name = str(runtime_config.runtime_value(
+        cfg, 'reward', env='SAO_REWARD', default='tempest'))
     reward_plugin = reward_module(reward_name)
 
     flow_fd  = int(os.environ['OC_FLOW_FD'])
@@ -140,16 +142,24 @@ def run():
         state_log_path = f'{root}_flow{flow_id}{ext or ".csv"}'
 
     cfg_kwargs = dict(
-        hidden        = int(os.environ.get('SAO_DREAMER_HIDDEN',    '256')),
-        embed_dim     = int(os.environ.get('SAO_DREAMER_EMBED',     '128')),
-        h_dim         = int(os.environ.get('SAO_DREAMER_H_DIM',     '256')),
-        latent_groups = int(os.environ.get('SAO_DREAMER_GROUPS',    '8')),
-        latent_classes = int(os.environ.get('SAO_DREAMER_CLASSES',  '8')),
-        reward_bins   = int(os.environ.get('SAO_DREAMER_REWARD_BINS', '255')),
-        actor_log_std_min = float(os.environ.get(
-            'SAO_DREAMER_ACTOR_LOG_STD_MIN', str(model.Actor.LOG_STD_MIN))),
-        actor_log_std_max = float(os.environ.get(
-            'SAO_DREAMER_ACTOR_LOG_STD_MAX', str(model.Actor.LOG_STD_MAX))),
+        hidden=int(runtime_config.agent_value(
+            cfg, 'hidden', env='SAO_DREAMER_HIDDEN', default=256)),
+        embed_dim=int(runtime_config.agent_value(
+            cfg, 'embed_dim', env='SAO_DREAMER_EMBED', default=128)),
+        h_dim=int(runtime_config.agent_value(
+            cfg, 'h_dim', env='SAO_DREAMER_H_DIM', default=256)),
+        latent_groups=int(runtime_config.agent_value(
+            cfg, 'latent_groups', env='SAO_DREAMER_GROUPS', default=8)),
+        latent_classes=int(runtime_config.agent_value(
+            cfg, 'latent_classes', env='SAO_DREAMER_CLASSES', default=8)),
+        reward_bins=int(runtime_config.agent_value(
+            cfg, 'reward_bins', env='SAO_DREAMER_REWARD_BINS', default=255)),
+        actor_log_std_min=float(runtime_config.training_value(
+            cfg, 'actor_log_std_min', env='SAO_DREAMER_ACTOR_LOG_STD_MIN',
+            default=model.Actor.LOG_STD_MIN)),
+        actor_log_std_max=float(runtime_config.training_value(
+            cfg, 'actor_log_std_max', env='SAO_DREAMER_ACTOR_LOG_STD_MAX',
+            default=model.Actor.LOG_STD_MAX)),
     )
     wm, actor = _build_world_model_and_actor(cfg_kwargs)
 
@@ -215,11 +225,13 @@ def run():
     weight_pull_counter = 0
     weight_pull_every = int(os.environ.get('SAO_WEIGHT_PULL_EVERY', '50'))
 
-    push_every = max(1, int(os.environ.get('OC_PUSH_EVERY', '16')))
+    push_every = max(1, int(runtime_config.training_value(
+        cfg, 'worker_push_every', env='OC_PUSH_EVERY', default=16)))
     exp_buf = []
     log_flush_counter = 0
 
-    dead_flow_ms = float(os.environ.get('SAO_DEAD_FLOW_MS', '1000'))
+    dead_flow_ms = float(runtime_config.agent_value(
+        cfg, 'dead_flow_ms', env='SAO_DEAD_FLOW_MS', default=1000))
     dead_steps = 0
     dead_steps_limit = int(dead_flow_ms / interval_ms)
 
@@ -303,16 +315,24 @@ def run():
             mult = float(mult_t.item())
 
             cur_cwnd = int(raw.get('cwnd', 10))
-            desired_cwnd = _ACTION_PLUGIN.apply_cwnd(
-                cur_cwnd, a, cwnd_min, cwnd_max)
+            raw_raynet_action = (
+                flow_backend.is_simulation_backend()
+                and getattr(_ACTION_PLUGIN, 'ACTION_OUTPUT', '') == 'raynet_action')
+            if raw_raynet_action:
+                new_cwnd = float(_ACTION_PLUGIN.apply_cwnd(
+                    cur_cwnd, a, cwnd_min, cwnd_max))
+                agent_locked = False
+            else:
+                desired_cwnd = _ACTION_PLUGIN.apply_cwnd(
+                    cur_cwnd, a, cwnd_min, cwnd_max)
 
-            srtt_raw_us = float(raw.get('srtt_us', 0) or 0)
-            filter_rtt_us = (srtt_raw_us / 8.0) if srtt_raw_us > 0 else float(raw.get('avg_urtt', 0) or 0)
-            clock_t = flow_backend.observation_clock(raw, wall_now=t_step_start)
-            probe.observe_rtt(clock_t, filter_rtt_us)
-            actual_cwnd, agent_locked, _ = probe.decide(
-                clock_t, cur_cwnd, desired_cwnd)
-            new_cwnd = int(np.clip(actual_cwnd, cwnd_min, cwnd_max))
+                srtt_raw_us = float(raw.get('srtt_us', 0) or 0)
+                filter_rtt_us = (srtt_raw_us / 8.0) if srtt_raw_us > 0 else float(raw.get('avg_urtt', 0) or 0)
+                clock_t = flow_backend.observation_clock(raw, wall_now=t_step_start)
+                probe.observe_rtt(clock_t, filter_rtt_us)
+                actual_cwnd, agent_locked, _ = probe.decide(
+                    clock_t, cur_cwnd, desired_cwnd)
+                new_cwnd = int(np.clip(actual_cwnd, cwnd_min, cwnd_max))
             try:
                 flow_backend.set_cwnd(flow_fd, new_cwnd)
             except Exception as e:

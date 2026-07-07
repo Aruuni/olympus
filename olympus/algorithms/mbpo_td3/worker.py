@@ -35,7 +35,7 @@ from olympus.algorithms.mbpo_td3 import model
 from olympus.common.action_plugins import load_action_module
 from olympus.common.bbr_probe import BbrProbe
 from olympus.common.registry import reward_module
-from olympus.common import flow_backend
+from olympus.common import flow_backend, runtime_config
 
 _ACTION_PLUGIN = load_action_module()
 
@@ -109,7 +109,9 @@ def _parse_int_set(raw: str) -> set:
 
 
 def run():
-    reward_name = os.environ.get('SAO_REWARD', 'tempest')
+    cfg = runtime_config.load_config()
+    reward_name = str(runtime_config.runtime_value(
+        cfg, 'reward', env='SAO_REWARD', default='tempest'))
     reward_plugin = reward_module(reward_name)
 
     flow_fd = int(os.environ['OC_FLOW_FD'])
@@ -135,7 +137,8 @@ def run():
     interval_ms = float(os.environ.get('SAO_INTERVAL_MS', '20'))
     cwnd_min = int(os.environ.get('SAO_CWND_MIN', '10'))
     cwnd_max = int(os.environ.get('SAO_CWND_MAX', '10000'))
-    hidden = int(os.environ.get('SAO_HIDDEN', '128'))
+    hidden = int(runtime_config.agent_value(
+        cfg, 'hidden', env='SAO_HIDDEN', default=128))
     noise_std = float(os.environ.get('SAO_NOISE_STD', '0.2'))
     require_checkpoint = os.environ.get('SAO_REQUIRE_CHECKPOINT', '0') == '1'
 
@@ -219,11 +222,13 @@ def run():
     weight_pull_counter = 0
     weight_pull_every = int(os.environ.get('SAO_WEIGHT_PULL_EVERY', '50'))
 
-    push_every = max(1, int(os.environ.get('OC_PUSH_EVERY', '16')))
+    push_every = max(1, int(runtime_config.training_value(
+        cfg, 'worker_push_every', env='OC_PUSH_EVERY', default=16)))
     exp_buf = []
     log_flush_counter = 0
 
-    dead_flow_ms = float(os.environ.get('SAO_DEAD_FLOW_MS', '1000'))
+    dead_flow_ms = float(runtime_config.agent_value(
+        cfg, 'dead_flow_ms', env='SAO_DEAD_FLOW_MS', default=1000))
     dead_steps = 0
     dead_steps_limit = int(dead_flow_ms / interval_ms)
 

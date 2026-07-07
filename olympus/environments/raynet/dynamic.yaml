@@ -1,14 +1,27 @@
 name: dynamic
-description: Current training sweep with the existing BW/RTT link schedules.
+description: CleanSlate RayNet sweep with Astraea-compatible raw TCP observations.
 shuffle: true
 
 sweep:
+  # RayNet meta parameters
+  protocol: CleanSlate
+  ini_path: ~/extra/raynet_olympus/simlibs/CleanSlate/src/training/CleanSlateTraining.ini
+  section: General
 
   bws: [10, 20, 40, 60, 80, 100]
   delays: [10, 20, 40, 60, 80]
   bdp_mult: 4
   flows: 1
-  duration: 120
+  duration: 30
+  observation_fields:
+    - {name: avg_thr, index: 0, aliases: [throughput]}
+    - {name: avg_urtt, index: 1, aliases: [delay_us]}
+    - {name: min_rtt, index: 2, aliases: [min_rtt_us]}
+    - {name: srtt_us, index: 3}
+    - {name: cwnd, index: 4}
+    - {name: packets_out, index: 5}
+    - {name: pacing_rate, index: 6}
+    - {name: retrans_out, index: 7}
   link_schedules:
     # 7-change / 15s cadence: BW only
     - [{t: 15, bw_frac: 0.5},  {t: 30, bw_frac: 1.0}, {t: 45, bw_frac: 0.5},  {t: 60, bw_frac: 1.0}, {t: 75, bw_frac: 0.5},  {t: 90, bw_frac: 1.0}, {t: 105, bw_frac: 0.5}]

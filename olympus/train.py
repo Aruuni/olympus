@@ -44,8 +44,10 @@ _EPISODE_RE = re.compile(
     r'^\[orch\] ep=(\d+)\b.*?\benv=(\S*)\b.*?\breturn=(\S+)\s+elapsed=')
 _LEARNER_STEP_RE = re.compile(r'^step=\s*(\d+)\s+(.*)$')
 _LEARNER_HB_RE = re.compile(
-    r'\bhb\b.*?\b(?:buf|buffer)=(\d+)(?:/(\d+))?.*?\brecv=(\d+)'
-    r'(?:\s+\(([^)]*)\))?')
+    r'\bhb\b.*?\b(?:buf|buffer)=(\d+)(?:/(\d+))?(.*?)'
+    r'\brecv=(\d+)(?:\s+\(([^)]*)\))?(?:.*?\btrajs=(\d+))?')
+_ENV_KV_RE = re.compile(r'\b([a-zA-Z]\w*)=(\d+)')
+_EPISODE_SOURCE_RE = re.compile(r'\bsource=(\S+)')
 _CKPT_SAVE_RE = re.compile(r'\bsaved\b.*\bstep=(\d+)')
 _EPISODE_CKPT_RE = re.compile(
     r'^\[orch\] saved episode checkpoint completed=(\d+)\s+path=(\S+)')
@@ -127,6 +129,10 @@ class _Dashboard:
         self.last_ckpt_time = None
         self.episode_ckpts = 0
         self.n_parallel = None
+        self.trajs = None
+        self.env_buf_sizes: dict = {}
+        self.env_returns: dict = {}
+        self.env_episode_counts: dict = {}
         self.started = time.monotonic()
         self.active = C.enabled
         self._block_lines = 0
@@ -202,6 +208,8 @@ class _Dashboard:
             if self.transition_rate:
                 recv += f' ({self.transition_rate})'
             parts.append(recv)
+        if self.trajs is not None:
+            parts.append(f'trajs {self.trajs}')
         if self.replay_buffer is not None:
             buf = f'buf {self.replay_buffer}'
             if self.replay_capacity is not None:
@@ -226,6 +234,35 @@ class _Dashboard:
             f'learner  step={self.learner_step}') - 4)
         return f'{head}  {C.DIM}{tail}{C.RESET}'
 
+    def _env_line(self, width: int) -> str:
+        """Per-environment episode stats and buffer sizes (mixed collection)."""
+        ep_parts = []
+        for src in sorted(self.env_returns):
+            dq = self.env_returns[src]
+            n = self.env_episode_counts.get(src, len(dq))
+            avg = sum(dq) / len(dq) if dq else 0.0
+            ep_parts.append(f'{C.CYAN}{src}{C.RESET}  n={n}  avg={avg:.0f}')
+
+        buf_parts = []
+        for src in sorted(self.env_buf_sizes):
+            sz = self.env_buf_sizes[src]
+            cap = self.replay_capacity
+            if cap and len(self.env_buf_sizes) == 1:
+                buf_parts.append(f'{src}={sz:,}/{cap:,}')
+            else:
+                buf_parts.append(f'{src}={sz:,}')
+
+        if not ep_parts and not buf_parts:
+            return ''
+
+        parts = ep_parts
+        if buf_parts:
+            parts = parts + [f'{C.DIM}buf  {"  ".join(buf_parts)}{C.RESET}']
+
+        head = f'{C.BOLD}env{C.RESET}'
+        inner = f'  {C.GREY}·{C.RESET}  '.join(parts)
+        return f'{head}  {_clip(inner, width - 6)}'
+
     def render(self, force: bool = False) -> None:
         if not self.active:
             # Non-TTY: emit a plain status line once a minute instead.
@@ -233,9 +270,16 @@ class _Dashboard:
             if force or now - self._last_plain_status >= 60.0:
                 self._last_plain_status = now
                 total = f'/{self.total}' if self.total else ''
+                env_buf = ' '.join(f'{k}={v}' for k, v in sorted(self.env_buf_sizes.items()))
+                env_ep = ' '.join(
+                    f'{k}.n={self.env_episode_counts.get(k, len(dq))}'
+                    f' {k}.avg={sum(dq)/len(dq):.0f}' if dq else f'{k}.n=0'
+                    for k, dq in sorted(self.env_returns.items()))
                 _print(f'[train] episodes={self.completed}{total} '
                        f'learner_step={self.learner_step} '
                        f'transitions={self.transitions_received} '
+                       f'buf={self.replay_buffer}/{self.replay_capacity} '
+                       f'{env_buf} {env_ep} '
                        f'last_ckpt_step={self.last_ckpt_step} '
                        f'elapsed={_fmt_time(time.monotonic() - self.started)}')
             return
@@ -245,8 +289,11 @@ class _Dashboard:
         self._last_render = now
         width = _term_width()
         self._erase_block()
-        lines = (self._bar_line(width), self._stats_line(width),
-                 self._learner_line(width))
+        env_text = self._env_line(width)
+        lines = [self._bar_line(width), self._stats_line(width)]
+        if env_text:
+            lines.append(env_text)
+        lines.append(self._learner_line(width))
         for line in lines:
             sys.stdout.write('\r\033[K' + line + '\n')
         self._block_lines = len(lines)
@@ -266,9 +313,17 @@ def _handle_line(raw: str, dash: _Dashboard) -> None:
     match = _EPISODE_RE.match(raw)
     if match:
         dash.completed += 1
+        src_match = _EPISODE_SOURCE_RE.search(raw)
+        source = src_match.group(1) if src_match else ''
         try:
             dash.last_return = float(match.group(3))
             dash.returns.append(dash.last_return)
+            if source:
+                if source not in dash.env_returns:
+                    dash.env_returns[source] = collections.deque(maxlen=50)
+                    dash.env_episode_counts[source] = 0
+                dash.env_returns[source].append(dash.last_return)
+                dash.env_episode_counts[source] += 1
         except ValueError:
             pass
         dash.render()
@@ -280,8 +335,14 @@ def _handle_line(raw: str, dash: _Dashboard) -> None:
             dash.replay_buffer = int(match.group(1))
             dash.replay_capacity = (
                 int(match.group(2)) if match.group(2) is not None else None)
-            dash.transitions_received = int(match.group(3))
-            dash.transition_rate = match.group(4) or ''
+            mix_str = match.group(3) or ''
+            env_sizes = {k: int(v) for k, v in _ENV_KV_RE.findall(mix_str)}
+            if env_sizes:
+                dash.env_buf_sizes = env_sizes
+            dash.transitions_received = int(match.group(4))
+            dash.transition_rate = match.group(5) or ''
+            if match.group(6):
+                dash.trajs = int(match.group(6))
             dash.render(force=True)
             return
         match = _LEARNER_STEP_RE.match(stripped)
@@ -418,7 +479,10 @@ def main() -> int:
 
     python_bin = os.path.abspath(
         args.python or (cfg.get('paths', {}) or {}).get('py', sys.executable))
-    total_episodes = args.episodes or cfg.get('episodes')
+    orch_block = cfg.get('orchestrator') if isinstance(
+        cfg.get('orchestrator'), dict) else {}
+    total_episodes = (args.episodes or orch_block.get('episodes')
+                      or cfg.get('episodes'))
     runtime = cfg.get('runtime', {}) or {}
 
     command = [python_bin, str(_HERE / 'orchestrator.py'),

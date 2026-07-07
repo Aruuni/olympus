@@ -40,7 +40,7 @@ _REPO = os.path.dirname(_PKG)
 sys.path.insert(0, _REPO)
 
 from olympus.algorithms.template_single_agent import model   # TODO: your package
-from olympus.common import flow_backend
+from olympus.common import flow_backend, runtime_config
 from olympus.common.action_plugins import load_action_module
 from olympus.common.registry import reward_module
 
@@ -102,7 +102,9 @@ def _srtt_ms(raw: dict) -> float:
 
 def run():
     # ── Contract read off the environment (set in run_episode) ───────────────
-    reward_name = os.environ.get('SAO_REWARD', 'tempest')
+    cfg = runtime_config.load_config()
+    reward_name = str(runtime_config.runtime_value(
+        cfg, 'reward', env='SAO_REWARD', default='tempest'))
     reward_plugin = reward_module(reward_name)
 
     flow_fd = int(os.environ['OC_FLOW_FD'])
@@ -117,9 +119,11 @@ def run():
     simulation_backend = flow_backend.is_simulation_backend()
     cwnd_min = int(os.environ.get('SAO_CWND_MIN', '10'))
     cwnd_max = int(os.environ.get('SAO_CWND_MAX', '10000'))
-    hidden = int(os.environ.get('SAO_HIDDEN', '128'))
-    head_hidden_env = os.environ.get('SAO_HEAD_HIDDEN', '')
-    head_hidden = int(head_hidden_env) if head_hidden_env else None
+    hidden = int(runtime_config.agent_value(
+        cfg, 'hidden', env='SAO_HIDDEN', default=128))
+    head_hidden_raw = runtime_config.agent_value(
+        cfg, 'head_hidden', env='SAO_HEAD_HIDDEN', default=None)
+    head_hidden = int(head_hidden_raw) if head_hidden_raw not in (None, '') else None
     noise_std = float(os.environ.get('SAO_NOISE_STD', '0.2'))
     deterministic = os.environ.get('SAO_DETERMINISTIC', '0') == '1'
     if deterministic:
@@ -195,11 +199,13 @@ def run():
 
     weight_pull_counter = 0
     weight_pull_every = int(os.environ.get('SAO_WEIGHT_PULL_EVERY', '50'))
-    push_every = max(1, int(os.environ.get('OC_PUSH_EVERY', '16')))
+    push_every = max(1, int(runtime_config.training_value(
+        cfg, 'worker_push_every', env='OC_PUSH_EVERY', default=16)))
     exp_buf = []
     log_flush_counter = 0
 
-    dead_flow_ms = float(os.environ.get('SAO_DEAD_FLOW_MS', '1000'))
+    dead_flow_ms = float(runtime_config.agent_value(
+        cfg, 'dead_flow_ms', env='SAO_DEAD_FLOW_MS', default=1000))
     dead_steps = 0
     dead_steps_limit = int(dead_flow_ms / interval_ms)
 

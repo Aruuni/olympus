@@ -25,6 +25,7 @@ _STATE_ALIASES = {
     'default': 'default_orca',
     'no_bdp': 'kalman',
     'shared_no_bdp': 'kalman',
+    'clean_slate_astraea': 'astraea_deepcc',
 }
 
 _FEATURE_VERSION_ALIASES = {

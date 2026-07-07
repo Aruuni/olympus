@@ -232,7 +232,8 @@ def _collection_source_label(row: dict) -> str:
 
 
 def _source_sort_key(label: str):
-    order = {'emulation': 0, 'simulation': 1, 'single': 2}
+    order = {'emulation': 0, 'mininet': 0, 'simulation': 1, 'raynet': 1,
+             'single': 2}
     return (order.get(str(label), 50), str(label))
 
 

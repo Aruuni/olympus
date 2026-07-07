@@ -170,7 +170,10 @@ def main() -> int:
 
     python_bin = os.path.abspath(
         args.python or (cfg.get('paths', {}) or {}).get('py', sys.executable))
-    total_episodes = args.episodes or cfg.get('episodes')
+    orch_block = cfg.get('orchestrator') if isinstance(
+        cfg.get('orchestrator'), dict) else {}
+    total_episodes = (args.episodes or orch_block.get('episodes')
+                      or cfg.get('episodes'))
     runtime = cfg.get('runtime', {}) or {}
     temp_config = _write_temp_config(cfg)
 

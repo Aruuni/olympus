@@ -320,6 +320,10 @@ def plot(state_log_path: str, output: str, bw: float, delay: float,
                     color=colors[aid], alpha=0.9, label=f'{_agent_label(aid)} srtt')
         ax.plot(d['t_s'], d['min_rtt_ms'], linewidth=0.6,
                 color=colors[aid], alpha=0.35, linestyle='--')
+        if d['kalman_rtt_ms'].any():
+            ax.plot(d['t_s'], d['kalman_rtt_ms'], linewidth=1.0,
+                    color=colors[aid], alpha=0.8, linestyle='-.',
+                    label=f'{_agent_label(aid)} kalman')
     ax.plot(t_ref, delay_ref, color='red', linewidth=1.4, label='sched RTT')
     ax.set_ylabel('RTT (ms)', fontsize=9)
     ax.set_ylim(bottom=0)

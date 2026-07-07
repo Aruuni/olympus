@@ -8,7 +8,7 @@ Panels:
   4. RTT gradient — fractional change (rtt − prev_rtt) / prev_rtt, clipped ±1
   5. CWND multiplier + rolling mean
   6. Reward (raw + 5s rolling mean)
-  7. Option timeline + cumulative return
+  7. Cumulative return
 
 Columns in state log CSV:
   t_s, option, cwnd_mult, cwnd, avg_thr_mbps, avg_urtt_ms, srtt_ms,
@@ -17,6 +17,7 @@ Columns in state log CSV:
 
 import csv
 import glob
+import json
 import os
 import re
 
@@ -24,19 +25,12 @@ import matplotlib
 matplotlib.use('Agg')
 matplotlib.rcParams['font.family']        = 'DejaVu Sans'
 matplotlib.rcParams['axes.unicode_minus'] = False
-import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
-
-# ── Option colours (extend automatically for any n_options) ──────────────────
 
 _BASE_COLORS = ['#4878cf', '#f28e2c', '#59a14f', '#e15759',
                 '#b07aa1', '#76b7b2', '#ff9da7', '#9c755f',
                 '#bab0ac', '#edc948', '#d37295', '#59a14f']
-
-def _opt_colors(n):
-    import itertools
-    return list(itertools.islice(itertools.cycle(_BASE_COLORS), n))
 
 
 # ── Data loading ──────────────────────────────────────────────────────────────
@@ -80,6 +74,144 @@ def _load(path: str) -> dict:
     except FileNotFoundError:
         pass
     return {k: np.array(v) for k, v in cols.items()}
+
+
+def _has_signal(values: np.ndarray) -> bool:
+    if values is None or len(values) == 0:
+        return False
+    finite = values[np.isfinite(values)]
+    return finite.size > 0 and np.nanmax(np.abs(finite)) > 1e-12
+
+
+def _episode_id_from_path(path: str):
+    match = re.search(r'_ep(\d+)', os.path.basename(path))
+    return match.group(1) if match else None
+
+
+def _raynet_trace_paths(state_log_path: str) -> list:
+    episode_id = _episode_id_from_path(state_log_path)
+    if not episode_id:
+        return []
+    directory = os.path.dirname(os.path.abspath(state_log_path))
+    return sorted(glob.glob(os.path.join(
+        directory, f'raynet_trace_ep{episode_id}_slot*.jsonl')))
+
+
+def _extract_clean_slate_trace(message: dict):
+    observations = message.get('observations') or {}
+    if not observations:
+        return None
+    if len(observations) == 1:
+        return next(iter(observations.values()))
+    for key in ('CleanSlate', '0', 0):
+        if key in observations:
+            return observations[key]
+    return next(iter(observations.values()))
+
+
+def _load_raynet_trace(state_log_path: str, bw: float, delay: float,
+                       link_schedule: list = None):
+    rows = []
+    for path in _raynet_trace_paths(state_log_path):
+        try:
+            with open(path) as handle:
+                for line in handle:
+                    try:
+                        event = json.loads(line)
+                    except json.JSONDecodeError:
+                        continue
+                    message = event.get('message') or {}
+                    obs = _extract_clean_slate_trace(message)
+                    if not obs:
+                        continue
+                    info = message.get('info') or {}
+                    if 'time_s' not in info:
+                        continue
+                    try:
+                        t_s = float(info['time_s'])
+                    except (TypeError, ValueError):
+                        continue
+                    rewards = message.get('rewards') or {}
+                    reward = None
+                    if rewards:
+                        reward = rewards.get('CleanSlate')
+                        if reward is None and len(rewards) == 1:
+                            reward = next(iter(rewards.values()))
+                    rows.append((t_s, obs, reward))
+        except OSError:
+            continue
+    if not rows:
+        return None
+
+    rows.sort(key=lambda item: item[0])
+    t = np.asarray([item[0] for item in rows], dtype=float)
+
+    def _obs_float(obs, *keys, default=0.0):
+        for key in keys:
+            raw = obs.get(key)
+            if raw not in ('', None):
+                try:
+                    return float(raw)
+                except (TypeError, ValueError):
+                    pass
+        return float(default)
+
+    throughput_norm = np.asarray([
+        _obs_float(obs, 'throughput_norm', 'avg_thr')
+        for _, obs, _ in rows
+    ], dtype=float)
+    srtt_norm = np.asarray([
+        _obs_float(obs, 'srtt_norm', 'delay_metric')
+        for _, obs, _ in rows
+    ], dtype=float)
+    reward = np.asarray([
+        float(reward) if reward not in ('', None) else np.nan
+        for _, _, reward in rows
+    ], dtype=float)
+    loss = np.asarray([
+        _obs_float(obs, 'loss_norm', 'loss_rate')
+        for _, obs, _ in rows
+    ], dtype=float)
+
+    return {
+        't_s': t,
+        # CleanSlate exposes normalized observations, not physical Mbps/ms.
+        # Keep these values on their native scale and label the panels as such.
+        'avg_thr_mbps': np.clip(throughput_norm, 0.0, None),
+        'avg_urtt_ms': np.clip(srtt_norm, 0.0, None),
+        'srtt_ms': np.asarray([
+            _obs_float(obs, 'delay_metric')
+            for _, obs, _ in rows
+        ], dtype=float),
+        'min_rtt_ms': np.full(len(t), np.nan, dtype=float),
+        'loss_ratio': loss,
+        'reward': np.nan_to_num(reward, nan=0.0),
+    }
+
+
+def _apply_raynet_trace_fallback(d: dict, state_log_path: str, bw: float,
+                                 delay: float, link_schedule: list = None):
+    needs_trace = not (
+        _has_signal(d.get('avg_thr_mbps'))
+        or _has_signal(d.get('avg_urtt_ms'))
+        or _has_signal(d.get('srtt_ms'))
+        or _has_signal(d.get('reward'))
+    )
+    if not needs_trace:
+        return d, False
+    trace = _load_raynet_trace(
+        state_log_path, bw=bw, delay=delay, link_schedule=link_schedule)
+    if trace is None:
+        return d, False
+
+    t_src = trace['t_s']
+    if len(t_src) == 0:
+        return d, False
+    t_dst = d['t_s']
+    for key in ('avg_thr_mbps', 'avg_urtt_ms', 'srtt_ms',
+                'min_rtt_ms', 'loss_ratio', 'reward'):
+        d[key] = np.interp(t_dst, t_src, trace[key])
+    return d, True
 
 
 def _flow_id_from_path(path: str):
@@ -182,18 +314,6 @@ def episode_return(state_log_path: str, trim_tail_s: float = 5.0) -> float:
     return float(reward.sum())
 
 
-def _option_spans(t_s, options):
-    if len(t_s) == 0:
-        return []
-    spans, start = [], 0
-    for i in range(1, len(options)):
-        if options[i] != options[i - 1]:
-            spans.append((t_s[start], t_s[i], int(options[start])))
-            start = i
-    spans.append((t_s[start], t_s[-1], int(options[start])))
-    return spans
-
-
 def _step_series(t_s, base_val, schedule, key, scale=1.0):
     """Build a step-function aligned to t_s from a link schedule list."""
     if not schedule:
@@ -227,7 +347,7 @@ def plot(state_log_path: str, output: str,
       4 — RTT gradient (fractional change vs previous sample, ±1 clip)
       5 — CWND multiplier
       6 — Reward
-      7 — Option timeline + cumulative return
+      7 — Cumulative return
 
     Returns the episode return (sum of rewards), or None if no data.
     """
@@ -235,6 +355,8 @@ def plot(state_log_path: str, output: str,
     if len(d['t_s']) == 0:
         print(f'[ep_plot] state log empty or missing: {state_log_path}', flush=True)
         return None
+    d, used_raynet_trace = _apply_raynet_trace_fallback(
+        d, state_log_path, bw=bw, delay=delay, link_schedule=link_schedule)
     sibling_flows = _sibling_flow_throughputs(
         state_log_path, trim_tail_s=trim_tail_s)
 
@@ -252,11 +374,6 @@ def plot(state_log_path: str, output: str,
     if link_schedule:
         x_max = max(x_max, max(float(e.get('t', 0.0)) for e in link_schedule))
     ep_return = float(d['reward'].sum())
-    spans     = _option_spans(t, d['option'])
-
-    # Derive n_options from data so the plot works for any config value
-    n_options  = max(int(d['option'].max()) + 1, 1) if len(d['option']) else 4
-    opt_colors = _opt_colors(n_options)
 
     bw_ref    = _step_series(t, bw,    link_schedule or [], 'bw')
     delay_ref = _step_series(t, delay, link_schedule or [], 'delay')
@@ -283,16 +400,11 @@ def plot(state_log_path: str, output: str,
     dt   = np.diff(t).mean() if len(t) > 1 else 0.02
     win  = max(1, int(5.0 / max(dt, 0.001)))
 
-    fig, axes = plt.subplots(8, 1, figsize=(14, 22), sharex=True)
+    fig, axes = plt.subplots(8, 1, figsize=(14, 23), sharex=True)
     if title is None:
         title = f'OC-Clean  bw={bw} Mbps  delay={delay} ms'
     fig.suptitle(f'{title}   [return={ep_return:.1f}]',
-                 fontsize=13, fontweight='bold')
-
-    def _shade(ax):
-        for ts, te, opt in spans:
-            ax.axvspan(ts, te, color=opt_colors[opt % n_options],
-                       alpha=0.10, linewidth=0)
+                 fontsize=12, fontweight='bold', y=0.992)
 
     def _sched_lines(ax):
         if not link_schedule:
@@ -320,7 +432,6 @@ def plot(state_log_path: str, output: str,
     lines = ax_bw.get_lines() + ax_delay.get_lines()
     labels = [l.get_label() for l in lines]
     ax_bw.legend(lines, labels, fontsize=8, loc='upper right')
-    ax_bw.set_title('Scheduled network conditions', fontsize=9, loc='left')
     ax_bw.grid(True, alpha=0.3)
     _sched_lines(ax_bw)
 
@@ -331,8 +442,12 @@ def plot(state_log_path: str, output: str,
         f'flow {current_flow_id} thr'
         if current_flow_id is not None else 'avg_thr'
     )
-    ax.plot(t, d['avg_thr_mbps'], color='black', linewidth=0.8,
-            label=current_label)
+    if used_raynet_trace:
+        current_label = 'throughput_norm'
+    ax.plot(t, d['avg_thr_mbps'], color='0.35', linewidth=0.35,
+            alpha=0.28, label=current_label)
+    ax.plot(t, _rolling(d['avg_thr_mbps'], win), color='black',
+            linewidth=1.1, label='5s mean')
     for idx, flow in enumerate(sibling_flows):
         flow_id = flow['flow_id']
         label = f'flow {flow_id} thr' if flow_id is not None else 'other flow thr'
@@ -341,11 +456,14 @@ def plot(state_log_path: str, output: str,
             color=_BASE_COLORS[idx % len(_BASE_COLORS)],
             linewidth=0.8, alpha=0.55, label=label,
         )
-    ax.plot(t, bw_ref,                  color='red',   linewidth=1.5, label='link BW')
-    if fair_bw_mask:
+    if not used_raynet_trace:
+        ax.plot(t, bw_ref, color='red', linewidth=1.5, label='link BW')
+    if fair_bw_mask and not used_raynet_trace:
         ax.plot(t, fair_bw, color='#59a14f', linewidth=1.2,
                 linestyle='--', label='fair BW')
-    ax.set_ylabel('Throughput (Mbps)', fontsize=9)
+    ax.set_ylabel(
+        'Throughput obs (norm)' if used_raynet_trace else 'Throughput (Mbps)',
+        fontsize=9)
     ax.set_ylim(bottom=0)
     if active_flow_mask:
         ax_flow = ax.twinx()
@@ -360,7 +478,11 @@ def plot(state_log_path: str, output: str,
     else:
         ax.legend(fontsize=8, loc='upper right')
     ax.grid(True, alpha=0.3)
-    _shade(ax); _sched_lines(ax)
+    _sched_lines(ax)
+    if not _has_signal(d['avg_thr_mbps']):
+        ax.text(0.5, 0.5, 'throughput signal is all zero',
+                transform=ax.transAxes, ha='center', va='center',
+                fontsize=9, color='0.35')
 
     # ── 2. CWND ───────────────────────────────────────────────────────────────
     ax = axes[2]
@@ -368,26 +490,37 @@ def plot(state_log_path: str, output: str,
     ax.set_ylabel('CWND (pkts)', fontsize=9)
     ax.set_ylim(bottom=0)
     ax.grid(True, alpha=0.3)
-    _shade(ax); _sched_lines(ax)
+    _sched_lines(ax)
 
     # ── 3. RTT ────────────────────────────────────────────────────────────────
     ax = axes[3]
-    ax.plot(t, d['avg_urtt_ms'], color='black', linewidth=0.8, label='avg_urtt')
+    ax.plot(t, d['avg_urtt_ms'], color='0.35', linewidth=0.35,
+            alpha=0.28, label='srtt_norm' if used_raynet_trace else 'avg_urtt')
+    ax.plot(t, _rolling(d['avg_urtt_ms'], win), color='black',
+            linewidth=1.1,
+            label='srtt_norm 5s mean' if used_raynet_trace else 'avg_urtt 5s mean')
     srtt_mask = np.isfinite(d['srtt_ms']) & (d['srtt_ms'] > 0)
     if srtt_mask.any():
         ax.plot(t[srtt_mask], d['srtt_ms'][srtt_mask], color='#f28e2c',
-                linewidth=0.9, alpha=0.9, label='srtt')
-    ax.plot(t, d['min_rtt_ms'], color='green', linewidth=0.8,
-            linestyle='--', alpha=0.7, label='min_rtt')
-    ax.plot(t, delay_ref,       color='red',   linewidth=1.5, label='sched RTT')
-    if d['kalman_rtt_ms'].any():
+                linewidth=0.45, alpha=0.35,
+                label='delay_metric' if used_raynet_trace else 'srtt')
+    if not used_raynet_trace:
+        ax.plot(t, d['min_rtt_ms'], color='green', linewidth=0.8,
+                linestyle='--', alpha=0.7, label='min_rtt')
+        ax.plot(t, delay_ref, color='red', linewidth=1.5, label='sched RTT')
+    if d['kalman_rtt_ms'].any() and not used_raynet_trace:
         ax.plot(t, d['kalman_rtt_ms'], color='purple', linewidth=1.0,
                 linestyle='-.', alpha=0.8, label='kalman min')
-    ax.set_ylabel('RTT (ms)', fontsize=9)
+    ax.set_ylabel('RTT obs (norm)' if used_raynet_trace else 'RTT (ms)',
+                  fontsize=9)
     ax.set_ylim(bottom=0)
     ax.legend(fontsize=8, loc='upper right')
     ax.grid(True, alpha=0.3)
-    _shade(ax); _sched_lines(ax)
+    _sched_lines(ax)
+    if not (_has_signal(d['avg_urtt_ms']) or _has_signal(d['srtt_ms'])):
+        ax.text(0.5, 0.5, 'RTT signal is all zero',
+                transform=ax.transAxes, ha='center', va='center',
+                fontsize=9, color='0.35')
 
     # ── 4. RTT gradient (fractional change vs previous sample) ───────────────
     # Matches state dim 6 (delta_rtt): (rtt - prev_rtt) / prev_rtt, clipped to
@@ -397,12 +530,20 @@ def plot(state_log_path: str, output: str,
     if len(t) > 1:
         prev = np.maximum(d['avg_urtt_ms'][:-1], 1e-6)
         rtt_grad[1:] = np.clip((d['avg_urtt_ms'][1:] - prev) / prev, -1.0, 1.0)
-    ax.plot(t, rtt_grad, color='black', linewidth=0.8, label='Δrtt/prev')
+    ax.plot(t, rtt_grad, color='0.35', linewidth=0.35,
+            alpha=0.25, label='Δrtt/prev')
+    ax.plot(t, _rolling(rtt_grad, win), color='black',
+            linewidth=1.1, label='5s mean')
     ax.axhline(0, color='red', linewidth=0.6, linestyle='--', alpha=0.5)
-    ax.set_ylabel('RTT Δ\n(fraction)', fontsize=9)
+    ax.set_ylabel(('Obs Δ\n(fraction)' if used_raynet_trace
+                   else 'RTT Δ\n(fraction)'), fontsize=9)
     ax.legend(fontsize=8, loc='upper right')
     ax.grid(True, alpha=0.3)
-    _shade(ax); _sched_lines(ax)
+    _sched_lines(ax)
+    if not _has_signal(rtt_grad):
+        ax.text(0.5, 0.5, 'RTT fraction has no variation',
+                transform=ax.transAxes, ha='center', va='center',
+                fontsize=9, color='0.35')
 
     # ── 5. CWND multiplier ────────────────────────────────────────────────────
     ax = axes[5]
@@ -413,7 +554,14 @@ def plot(state_log_path: str, output: str,
     ax.set_ylabel('CWND mult', fontsize=9)
     ax.legend(fontsize=8, loc='upper right')
     ax.grid(True, alpha=0.3)
-    _shade(ax); _sched_lines(ax)
+    _sched_lines(ax)
+    if not _has_signal(d['reward']):
+        label = (
+            'reward signal is all zero'
+            if not used_raynet_trace else 'RayNet reward signal is all zero'
+        )
+        ax.text(0.5, 0.5, label, transform=ax.transAxes,
+                ha='center', va='center', fontsize=9, color='0.35')
 
     # ── 6. Reward ─────────────────────────────────────────────────────────────
     ax = axes[6]
@@ -428,38 +576,21 @@ def plot(state_log_path: str, output: str,
     ax.set_ylabel('Reward', fontsize=9)
     ax.legend(fontsize=8, loc='upper right')
     ax.grid(True, alpha=0.3)
-    _shade(ax); _sched_lines(ax)
-
-    # ── 7. Option timeline + cumulative return ────────────────────────────────
-    ax = axes[7]
-    for ts, te, opt in spans:
-        c = opt_colors[opt % n_options]
-        ax.barh(0, te - ts, left=ts, height=0.6, color=c, align='center')
-        if te - ts > 1.0:
-            ax.text((ts + te) / 2, 0, f'opt-{opt}',
-                    ha='center', va='center', fontsize=7,
-                    color='white', fontweight='bold', clip_on=True)
     _sched_lines(ax)
-    ax.set_ylabel('Option', fontsize=9)
-    ax.set_yticks([])
+
+    # ── 7. Cumulative return ─────────────────────────────────────────────────
+    ax = axes[7]
+    _sched_lines(ax)
     ax.set_xlabel('Time (s)', fontsize=9)
     if x_max > 0:
         ax.set_xlim(0, x_max)
 
     cum_r = np.cumsum(d['reward'])
-    ax_r  = ax.twinx()
-    ax_r.plot(t, cum_r, color='navy', linewidth=0.8, linestyle='--', alpha=0.7)
-    ax_r.set_ylabel('Cum. return', fontsize=7, color='navy')
-    ax_r.tick_params(axis='y', labelcolor='navy', labelsize=7)
+    ax.plot(t, cum_r, color='navy', linewidth=0.9, linestyle='--', alpha=0.8)
+    ax.set_ylabel('Cum. return', fontsize=9)
+    ax.grid(True, alpha=0.3)
 
-    # ── Legend ────────────────────────────────────────────────────────────────
-    patches = [mpatches.Patch(color=opt_colors[i], label=f'opt-{i}')
-               for i in range(n_options)]
-    fig.legend(handles=patches, loc='lower center', ncol=n_options,
-               fontsize=9, title='Option', framealpha=0.9,
-               bbox_to_anchor=(0.5, 0.01))
-
-    plt.tight_layout(rect=[0, 0.03, 1, 1])
+    plt.tight_layout(rect=[0, 0.02, 1, 0.965])
     os.makedirs(os.path.dirname(os.path.abspath(output)), exist_ok=True)
     plt.savefig(output, bbox_inches='tight')
     plt.close(fig)

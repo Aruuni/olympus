@@ -1,14 +1,18 @@
 """Unit tests for BDP-stratified simulation replay.
 
 Covers StratifiedReplay routing/sampling and its integration into MixedReplay
-(simulation side stratified by BDP, emulation left as a single buffer).
+(the raynet group stratified by BDP, the mininet group left as a single buffer).
 """
 
 import unittest
 
 import numpy as np
 
-from olympus.common.mixed_replay import MixedReplay, sim_strata_edges, split_source
+from olympus.common.mixed_replay import (
+    MixedReplay,
+    group_strata_edges,
+    split_source,
+)
 from olympus.common.stratified_replay import StratifiedReplay
 
 
@@ -42,32 +46,31 @@ class _FakeBuffer:
 
 
 class SplitSourceTest(unittest.TestCase):
-    def test_emulation(self):
-        self.assertEqual(split_source('emulation'), ('emulation', None))
+    def test_plain_type_tags(self):
+        self.assertEqual(split_source('mininet'), ('mininet', None))
+        self.assertEqual(split_source('raynet'), ('raynet', None))
 
-    def test_plain_simulation(self):
-        self.assertEqual(split_source('simulation'), ('simulation', None))
+    def test_tag_with_bdp(self):
+        self.assertEqual(split_source('raynet|1250.0'), ('raynet', 1250.0))
 
-    def test_simulation_with_bdp(self):
-        self.assertEqual(split_source('simulation|1250.0'), ('simulation', 1250.0))
-
-    def test_unknown_and_none_route_to_simulation(self):
-        self.assertEqual(split_source(None), ('simulation', None))
-        self.assertEqual(split_source('weird'), ('simulation', None))
+    def test_missing_tag(self):
+        self.assertEqual(split_source(None), (None, None))
+        self.assertEqual(split_source(''), (None, None))
 
     def test_malformed_bdp_is_ignored(self):
-        self.assertEqual(split_source('simulation|nan?'), ('simulation', None))
+        self.assertEqual(split_source('raynet|nan?'), ('raynet', None))
 
 
 class StrataConfigTest(unittest.TestCase):
     def test_absent_returns_none(self):
-        self.assertIsNone(sim_strata_edges({'mixed_collection': {}}))
-        self.assertIsNone(sim_strata_edges({}))
+        self.assertIsNone(group_strata_edges({}))
+        self.assertIsNone(group_strata_edges(None))
+        self.assertIsNone(group_strata_edges({'strata': {}}))
 
     def test_parsed_and_sorted(self):
-        cfg = {'mixed_collection': {'simulation': {'strata': {
-            'bdp_edges': [950, 350, 1500, 550]}}}}
-        self.assertEqual(sim_strata_edges(cfg), [350.0, 550.0, 950.0, 1500.0])
+        block = {'strata': {'bdp_edges': [950, 350, 1500, 550]}}
+        self.assertEqual(group_strata_edges(block),
+                         [350.0, 550.0, 950.0, 1500.0])
 
 
 class StratifiedReplayTest(unittest.TestCase):
@@ -142,46 +145,56 @@ class StratifiedReplayTest(unittest.TestCase):
 
 class MixedReplayStratifiedTest(unittest.TestCase):
     def _make(self, frac=0.5, emu_cap=100, sim_cap=20):
-        return MixedReplay(
-            lambda: _FakeBuffer(emu_cap), emulation_fraction=frac,
-            sim_strata=[350, 550, 950, 1500],
-            sim_factory=lambda: _FakeBuffer(sim_cap))
+        return MixedReplay({
+            'mininet': {'factory': (lambda: _FakeBuffer(emu_cap)),
+                        'fraction': frac},
+            'raynet': {'factory': (lambda: _FakeBuffer(sim_cap)),
+                       'fraction': 1.0 - frac,
+                       'strata': [350, 550, 950, 1500]},
+        })
 
-    def test_emulation_never_stratified(self):
+    def test_only_strata_group_is_stratified(self):
         m = self._make()
-        self.assertIsInstance(m.sim, StratifiedReplay)
-        self.assertNotIsInstance(m.emu, StratifiedReplay)
-        self.assertEqual(m.emu.capacity, 100)
-        self.assertEqual(m.sim.bins[0].capacity, 20)
+        self.assertIsInstance(m.bufs['raynet'], StratifiedReplay)
+        self.assertNotIsInstance(m.bufs['mininet'], StratifiedReplay)
+        self.assertEqual(m.bufs['mininet'].capacity, 100)
+        self.assertEqual(m.bufs['raynet'].bins[0].capacity, 20)
 
     def test_push_routes_by_source_and_bdp(self):
         m = self._make()
-        m.push(1.0, source='emulation')
-        m.push(2.0, source='simulation|100')    # sim bin 0
-        m.push(3.0, source='simulation|2000')   # sim bin 4
-        self.assertEqual(m.size_emu(), 1)
-        self.assertEqual(m.size_sim(), 2)
-        self.assertEqual(m.sim.bin_sizes(), [1, 0, 0, 0, 1])
+        m.push(1.0, source='mininet')
+        m.push(2.0, source='raynet|100')    # raynet bin 0
+        m.push(3.0, source='raynet|2000')   # raynet bin 4
+        self.assertEqual(m.sizes(), {'mininet': 1, 'raynet': 2})
+        self.assertEqual(m.bufs['raynet'].bin_sizes(), [1, 0, 0, 0, 1])
 
-    def test_plain_simulation_tag_routes_to_class_zero(self):
+    def test_legacy_tags_route_into_type_groups(self):
         m = self._make()
-        m.push(5.0, source='simulation')   # no BDP -> class 0 fallback
-        self.assertEqual(m.sim.bin_sizes()[0], 1)
+        m.push(1.0, source='emulation')
+        m.push(2.0, source='simulation|2000')   # raynet bin 4 via alias
+        self.assertEqual(m.sizes(), {'mininet': 1, 'raynet': 1})
+        self.assertEqual(m.bufs['raynet'].bin_sizes(), [0, 0, 0, 0, 1])
+
+    def test_plain_tag_routes_to_class_zero(self):
+        m = self._make()
+        m.push(5.0, source='raynet')   # no BDP -> class 0 fallback
+        self.assertEqual(m.bufs['raynet'].bin_sizes()[0], 1)
 
     def test_ready_and_merged_sample(self):
         m = self._make(frac=0.5)
         for _ in range(30):
-            m.push(0.0, source='emulation')
-            m.push(100.0, source='simulation|100')
-            m.push(900.0, source='simulation|2000')
+            m.push(0.0, source='mininet')
+            m.push(100.0, source='raynet|100')
+            m.push(900.0, source='raynet|2000')
         self.assertTrue(m.ready(10))
         batch = m.sample(40)
         self.assertEqual(batch['value'].shape[0], 40)
 
     def test_default_construction_is_unstratified(self):
-        m = MixedReplay(lambda: _FakeBuffer(10), emulation_fraction=0.5)
-        self.assertFalse(m._sim_stratified)
-        self.assertNotIsInstance(m.sim, StratifiedReplay)
+        m = MixedReplay({'mininet': {'factory': lambda: _FakeBuffer(10),
+                                     'fraction': 0.5}})
+        self.assertEqual(m._stratified, set())
+        self.assertNotIsInstance(m.bufs['mininet'], StratifiedReplay)
 
 
 if __name__ == '__main__':

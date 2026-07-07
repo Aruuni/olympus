@@ -20,9 +20,9 @@
 #                                   via reward.per_agent_credit (team_alpha / over_weight).
 
 runtime:
-  algorithm: dreamer_v3
+  algorithm: ma_dreamer
   reward: tempest
-  state: tempest
+  state: tempest_ratio
   action: cwnd_multiplier
 
 
@@ -70,7 +70,7 @@ environment:
   #   static                one flow on a steady link (no schedule changes).
   #   lagged_fairness       one flow plus lagged-policy background flows (join only).
   type: mininet
-  environment_setup: dynamic
+  environment_setup: multiflow_interleave_rtt_memes
 
 reward:
   delay_margin_coef: 1.25
@@ -129,19 +129,37 @@ outputs:
   # Set false to skip per-episode PDFs in plots/ (episode_returns.csv and
   # telemetry/episode_returns.pdf are still generated).
   plot_episodes: true
-  # When true, also plot normalized state columns (s0, s1, ...) whenever an
-  # episode PDF is emitted.
-  plot_observations: false
-  # When true, also capture schema-free raw observations from workers
-  # and emit a sibling *_raw_state.pdf for plotted episodes.
-  plot_raw_state: false
 
-n_parallel: 20
-
-# Hard cap on total dispatched episodes. The orchestrator stops handing out new
-# work once this many have been launched and lets in-flight slots drain. Omit
-# (or set null) to run until interrupted.
-episodes: 2000
+# ── Orchestrator ──────────────────────────────────────────────────────────────
+# Runner-level knobs: episode dispatch, checkpoint snapshots, the learner RPC
+# port, and the oc_bridge listener. (Older configs may keep these keys flat at
+# the top level; the orchestrator reads both layouts.)
+orchestrator:
+  # Parallel episode slots.
+  n_parallel: 20
+  # Hard cap on total dispatched episodes. The orchestrator stops handing out
+  # new work once this many have been launched and lets in-flight slots drain.
+  # Omit (or set null) to run until interrupted.
+  episodes: 5000
+  # Copy an immutable snapshot of the rolling checkpoint (e.g.
+  # checkpoints/<alg>_<N>_cwnd_model.pt) every N completed episodes, whatever
+  # the algorithm. The copy runs in a background thread so it never delays the
+  # rolling checkpoint or episode dispatch. 0 / null disables snapshots.
+  save_every_episodes: 500
+  # TCP port of the learner's parameter/replay manager.
+  learner_port: 6301
+  # oc_bridge listener: `ss` scan period.
+  scan_ms: 20
+  # When true, oc_bridge attaches the first matching worker, stops scanning
+  # `ss`, and never connects another worker during that listener lifetime.
+  listener_single_flow: true
+  # Workers read TCP state from tcp_sockopt directly, so the listener does not
+  # need to emit and the workers do not need to drain OC_STATE_FD frames.
+  listener_state_pipe: false
+  # Congestion-control name that the local listener scans for. This is exported
+  # to the listener through the environment, not as a listener CLI argument.
+  listener_cc: astraea
+  cport_base: 23000
 
 algorithms:
 
@@ -171,9 +189,8 @@ algorithms:
       grad_clip: 5.0
       updates_per_step: 1
       save_every: 500
-      # In addition to the rolling checkpoint above, the orchestrator copies
-      # immutable episode snapshots like checkpoints/td3_500_cwnd_model.pt.
-      save_every_episodes: 500
+      # Immutable episode snapshots (checkpoints/td3_<N>_cwnd_model.pt) are
+      # governed by orchestrator.save_every_episodes above.
       param_broadcast_every: 50
       # Set false to train on raw reward magnitudes instead of dividing TD
       # targets by the running reward std.
@@ -209,9 +226,6 @@ algorithms:
       grad_clip: 5.0
       updates_per_step: 1
       save_every: 500
-      # In addition to the rolling checkpoint above, the orchestrator copies
-      # immutable episode snapshots like checkpoints/mbpo_td3_200_cwnd_model.pt.
-      save_every_episodes: 200
       param_broadcast_every: 50
       # ── MBPO knobs ────────────────────────────────────────────────────────
       # Forward-model ensemble that imagines short rollouts to refresh the
@@ -253,7 +267,6 @@ algorithms:
       grad_clip: 1000.0
       updates_per_step: 1
       save_every: 500
-      save_every_episodes: 500
       param_broadcast_every: 50
       # World model joint loss weights + KL settings (DreamerV3 defaults).
       kl_weight: 1.0
@@ -307,7 +320,7 @@ algorithms:
   # single-agent `reward:` block above.
   ma_dreamer:
     training:
-      resume_from: olympus/models/ma_dreamer_20260624-160040/checkpoints/ma_dreamer_cwnd_model.pt
+      resume_from: null
       batch_size: 128
       seq_len: 48
       min_replay: 50000
@@ -426,21 +439,6 @@ algorithms:
       fairness_metric: r_fair_avg_throughput
       fairness_weight: 25.0
       fairness_cap: 1.0
-
-learner:
-  port: 6301
-
-scan_ms: 20
-# When true, oc_bridge attaches the first matching worker, stops scanning
-# `ss`, and never connects another worker during that listener lifetime.
-listener_single_flow: true
-# Workers read TCP state from tcp_sockopt directly, so the listener does not
-# need to emit and the workers do not need to drain OC_STATE_FD frames.
-listener_state_pipe: false
-# Congestion-control name that the local listener scans for. This is exported
-# to the listener through the environment, not as a listener CLI argument.
-listener_cc: astraea
-cport_base: 23000
 
 # The episode pool — base bottleneck/RTT sweep, flow counts, join/leave churn, and
 # link schedules — now lives in olympus/environments/<type>/*.yaml and is chosen by

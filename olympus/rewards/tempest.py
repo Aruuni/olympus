@@ -1,9 +1,10 @@
 """Tempest reward plugin: throughput-utilization base + sparse RTT-match bonus."""
 
-import json
 import math
 import os
 import time
+
+from olympus.common import link_context
 
 
 SPARSE_BONUS_INTERVAL_MS = 3000.0
@@ -32,20 +33,16 @@ class RewardCalc:
         self._step_count = 0
         self._steps_per_bonus = max(1, int(round(SPARSE_BONUS_INTERVAL_MS / interval_ms)))
 
-        self._bw_schedule = []
-        self._rtt_schedule = []
-        for entry in (link_schedule or []):
-            if 't' not in entry:
-                print(f'[reward] WARNING: schedule entry missing "t" key, skipped: {entry}',
-                      flush=True)
-                continue
-            t_abs = episode_start + float(entry['t'])
-            if 'bw' in entry:
-                self._bw_schedule.append((t_abs, float(entry['bw']) * 1e6 / 8.0))
-            if 'delay' in entry:
-                self._rtt_schedule.append((t_abs, float(entry['delay']) * 1_000.0))
-        self._bw_schedule.sort()
-        self._rtt_schedule.sort()
+        self._bw_trace = link_context.build_step_trace(
+            initial_bw_bytes_s, link_schedule, episode_start, 'bw',
+            transform=lambda value: float(value) * 1e6 / 8.0,
+            warn_prefix='reward',
+        )
+        self._rtt_trace = link_context.build_step_trace(
+            initial_rtt_us, link_schedule, episode_start, 'delay',
+            transform=lambda value: float(value) * 1_000.0,
+            warn_prefix='reward',
+        )
 
     def _schedule_time(self, info: dict = None) -> float:
         if isinstance(info, dict) and 'time_s' in info:
@@ -56,24 +53,10 @@ class RewardCalc:
         return time.monotonic()
 
     def _current_link_bw(self, info: dict = None) -> float:
-        now = self._schedule_time(info)
-        val = self._initial_bw
-        for t_abs, bw_bs in self._bw_schedule:
-            if now >= t_abs:
-                val = bw_bs
-            else:
-                break
-        return val
+        return self._bw_trace.at(self._schedule_time(info))
 
     def _current_link_rtt_us(self, info: dict = None) -> float:
-        now = self._schedule_time(info)
-        val = self._initial_rtt
-        for t_abs, rtt_us in self._rtt_schedule:
-            if now >= t_abs:
-                val = rtt_us
-            else:
-                break
-        return val
+        return self._rtt_trace.at(self._schedule_time(info))
 
     def _srtt_us(self, info: dict, fallback_us: float = 0.0) -> float:
         try:
@@ -132,10 +115,8 @@ class RewardCalc:
 
 def make_reward_calc() -> RewardCalc:
     """Build from environment variables set by orchestrator."""
-    bw_mbps = float(os.environ.get('OC_LINK_BW', '100'))
-    base_rtt_us = float(os.environ.get('OC_BASE_RTT_US', '20000'))
+    bw_mbps, base_rtt_us, link_schedule = link_context.context_values()
     episode_start = float(os.environ.get('OC_EPISODE_START', '0')) or time.monotonic()
-    link_schedule = json.loads(os.environ.get('OC_LINK_SCHEDULE', '[]'))
     interval_ms = float(os.environ.get('OC_INTERVAL_MS', '20'))
 
     return RewardCalc(

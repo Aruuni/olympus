@@ -3,6 +3,10 @@ description: Steady-link sweep. Each episode samples one BW/RTT pair and has no 
 shuffle: true
 
 sweep:
+  # RayNet Meta parameters
+  protocol: Orca
+  ini_path: ~/extra/raynet_olympus/_environments/static/config_static.ini
+  section: General
 
   bws: [10]
   delays: [20]

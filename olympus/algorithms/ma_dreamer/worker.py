@@ -34,7 +34,7 @@ from olympus.algorithms.ma_dreamer import model
 from olympus.common.action_plugins import load_action_module
 from olympus.common.registry import reward_module
 from olympus.common.bbr_probe import BbrProbe
-from olympus.common import flow_backend
+from olympus.common import flow_backend, link_context, runtime_config
 
 _ACTION_PLUGIN = load_action_module()
 
@@ -126,7 +126,9 @@ def _build_models(config):
 
 
 def run():
-    reward_name = os.environ.get('SAO_REWARD', 'tempest_fairness_ma')
+    cfg = runtime_config.load_config()
+    reward_name = str(runtime_config.runtime_value(
+        cfg, 'reward', env='SAO_REWARD', default='tempest_fairness_ma'))
     reward_plugin = reward_module(reward_name)
 
     flow_fd = int(os.environ['OC_FLOW_FD'])
@@ -157,19 +159,24 @@ def run():
     group_id = f'slot{instance_id}_ep{episode}'
 
     config = {
-        'hidden': int(os.environ.get('SAO_DREAMER_HIDDEN', '256')),
-        'embed_dim': int(os.environ.get('SAO_DREAMER_EMBED', '128')),
-        'h_dim': int(os.environ.get('SAO_DREAMER_H_DIM', '256')),
-        'latent_groups': int(
-            os.environ.get('SAO_DREAMER_GROUPS', '8')),
-        'latent_classes': int(
-            os.environ.get('SAO_DREAMER_CLASSES', '8')),
-        'reward_bins': int(
-            os.environ.get('SAO_DREAMER_REWARD_BINS', '255')),
-        'actor_log_std_min': float(
-            os.environ.get('SAO_DREAMER_ACTOR_LOG_STD_MIN', '-2.0')),
-        'actor_log_std_max': float(
-            os.environ.get('SAO_DREAMER_ACTOR_LOG_STD_MAX', '0.0')),
+        'hidden': int(runtime_config.agent_value(
+            cfg, 'hidden', env='SAO_DREAMER_HIDDEN', default=256)),
+        'embed_dim': int(runtime_config.agent_value(
+            cfg, 'embed_dim', env='SAO_DREAMER_EMBED', default=128)),
+        'h_dim': int(runtime_config.agent_value(
+            cfg, 'h_dim', env='SAO_DREAMER_H_DIM', default=256)),
+        'latent_groups': int(runtime_config.agent_value(
+            cfg, 'latent_groups', env='SAO_DREAMER_GROUPS', default=8)),
+        'latent_classes': int(runtime_config.agent_value(
+            cfg, 'latent_classes', env='SAO_DREAMER_CLASSES', default=8)),
+        'reward_bins': int(runtime_config.agent_value(
+            cfg, 'reward_bins', env='SAO_DREAMER_REWARD_BINS', default=255)),
+        'actor_log_std_min': float(runtime_config.training_value(
+            cfg, 'actor_log_std_min', env='SAO_DREAMER_ACTOR_LOG_STD_MIN',
+            default=-2.0)),
+        'actor_log_std_max': float(runtime_config.training_value(
+            cfg, 'actor_log_std_max', env='SAO_DREAMER_ACTOR_LOG_STD_MAX',
+            default=0.0)),
     }
     local_world, actor = _build_models(config)
 
@@ -253,7 +260,7 @@ def run():
             'fair_bw_mbps', 'active_flows',
         ] + [f's{i}' for i in range(model.STATE_DIM)])
 
-    base_rtt_us = float(os.environ.get('OC_BASE_RTT_US', '20000'))
+    _bw_mbps, base_rtt_us, _link_schedule = link_context.context_values()
     model.reset_tempest_kalman(base_rtt_us)
     reward_calc = reward_plugin.make_reward_calc()
     episode_start = (
@@ -272,14 +279,16 @@ def run():
     last_group_step = 0
     ever_alive = False
 
-    push_every = max(1, int(os.environ.get('OC_PUSH_EVERY', '16')))
+    push_every = max(1, int(runtime_config.training_value(
+        cfg, 'worker_push_every', env='OC_PUSH_EVERY', default=16)))
     experience_buffer = []
     weight_pull_every = max(
         1, int(os.environ.get('SAO_WEIGHT_PULL_EVERY', '50')))
     weight_pull_counter = 0
     log_flush_counter = 0
 
-    dead_flow_ms = float(os.environ.get('SAO_DEAD_FLOW_MS', '1000'))
+    dead_flow_ms = float(runtime_config.agent_value(
+        cfg, 'dead_flow_ms', env='SAO_DEAD_FLOW_MS', default=1000))
     dead_steps = 0
     dead_steps_limit = max(1, int(dead_flow_ms / interval_ms))
     probe = BbrProbe.from_env()

@@ -4,9 +4,9 @@ scheduled RTT.
 Identical observation layout and bounds as kalman.py; the only behavioural
 difference is the final feature slot. Where kalman.py runs a 1-D asymmetric
 Kalman tracker over the noisy ``avg_urtt`` samples, this plugin reads the
-emulated link's scheduled RTT directly from dedicated env vars
-(``SAO_ORACLE_BASE_RTT_US`` + ``SAO_ORACLE_LINK_SCHEDULE`` +
-``SAO_ORACLE_EPISODE_START``) that the orchestrator only sets when
+emulated link's scheduled RTT directly from a dedicated link-context file
+(``SAO_ORACLE_LINK_CONTEXT_PATH`` + ``SAO_ORACLE_EPISODE_START``) that the
+orchestrator only sets when
 ``runtime.state == 'oracle'``. That is, the agent receives the *ground
 truth* propagation RTT for the current link phase, not an estimate — and
 no other state plugin can read these env vars because they aren't set
@@ -18,13 +18,14 @@ value, since by construction it is what a perfect Kalman tracker would
 report.
 """
 
-import json
 import math
 import os
 import time
 
 import numpy as np
 import torch
+
+from olympus.common import link_context
 
 
 STATE_FEATURE_VERSION = 'oracle_observation_v1'
@@ -55,70 +56,47 @@ STATE_HIGH_T = torch.from_numpy(STATE_HIGH)
 STATE_DIM = len(STATE_FEATURES)
 
 
-def _parse_schedule():
-    """Parse SAO_ORACLE_LINK_SCHEDULE into a sorted list of (t_abs, rtt_us)."""
-    raw = os.environ.get('SAO_ORACLE_LINK_SCHEDULE', '')
-    if not raw:
-        return []
-    try:
-        entries = json.loads(raw)
-    except (TypeError, ValueError):
-        return []
+def _build_rtt_trace():
+    """Build the scheduled RTT trace from SAO_ORACLE_LINK_CONTEXT_PATH."""
+    _bw_mbps, _base_rtt_us, entries = link_context.context_values(
+        os.environ.get('SAO_ORACLE_LINK_CONTEXT_PATH'), env_prefix='SAO_ORACLE')
     try:
         episode_start = float(os.environ.get('SAO_ORACLE_EPISODE_START', '0') or 0.0)
     except (TypeError, ValueError):
         episode_start = 0.0
-    out = []
-    for entry in entries or []:
-        if 't' not in entry or 'delay' not in entry:
-            continue
-        try:
-            t_abs = episode_start + float(entry['t'])
-            rtt_us = float(entry['delay']) * 1_000.0
-        except (TypeError, ValueError):
-            continue
-        out.append((t_abs, rtt_us))
-    out.sort()
-    return out
+    initial = globals().get('_INITIAL_RTT_US', _initial_rtt_us())
+    return link_context.build_step_trace(
+        initial, entries, episode_start, 'delay',
+        transform=lambda value: float(value) * 1_000.0,
+        warn_prefix='oracle',
+    )
 
 
 def _initial_rtt_us() -> float:
-    raw = os.environ.get('SAO_ORACLE_BASE_RTT_US')
-    try:
-        v = float(raw)
-    except (TypeError, ValueError):
-        return 20_000.0
+    _bw_mbps, v, _entries = link_context.context_values(
+        os.environ.get('SAO_ORACLE_LINK_CONTEXT_PATH'), env_prefix='SAO_ORACLE')
     return v if v > 0.0 and math.isfinite(v) else 20_000.0
 
 
 _INITIAL_RTT_US = _initial_rtt_us()
-_SCHEDULE = _parse_schedule()
+_RTT_TRACE = _build_rtt_trace()
 
 
 def reset_oracle(initial_rtt_us: float = None) -> None:
-    """Re-read OC_BASE_RTT_US / OC_LINK_SCHEDULE / OC_EPISODE_START.
+    """Re-read SAO_ORACLE_LINK_CONTEXT_PATH / SAO_ORACLE_EPISODE_START.
 
     Mirrors kalman.reset_kalman so callers that re-init the state pipeline
     between episodes get a fresh schedule snapshot.
     """
-    global _INITIAL_RTT_US, _SCHEDULE
+    global _INITIAL_RTT_US, _RTT_TRACE
     _INITIAL_RTT_US = (float(initial_rtt_us)
                        if initial_rtt_us is not None else _initial_rtt_us())
-    _SCHEDULE = _parse_schedule()
+    _RTT_TRACE = _build_rtt_trace()
 
 
 def scheduled_rtt_us() -> float:
     """Current scheduled RTT in microseconds, honouring link-schedule changes."""
-    if not _SCHEDULE:
-        return _INITIAL_RTT_US
-    now = time.monotonic()
-    val = _INITIAL_RTT_US
-    for t_abs, rtt_us in _SCHEDULE:
-        if now >= t_abs:
-            val = rtt_us
-        else:
-            break
-    return val
+    return _RTT_TRACE.at(time.monotonic())
 
 
 def normalize_state(info: dict) -> np.ndarray:
