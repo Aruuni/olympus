@@ -1,0 +1,15 @@
+[submodule "olympus/environments/raynet/sim/cubic"]
+	path = olympus/environments/raynet/sim/cubic
+	url = https://github.com/Avian688/cubic.git
+[submodule "olympus/environments/raynet/sim/inet4.5"]
+	path = olympus/environments/raynet/sim/inet4.5
+	url = https://github.com/Avian688/inet4.5.git
+[submodule "olympus/environments/raynet/sim/tcpPaced"]
+	path = olympus/environments/raynet/sim/tcpPaced
+	url = https://github.com/CJUKnowles/tcpPaced.git
+[submodule "olympus/environments/raynet/sim/omnetpp"]
+	path = olympus/environments/raynet/sim/omnetpp
+	url = https://github.com/omnetpp/omnetpp.git
+[submodule "olympus/environments/raynet/sim/raynet"]
+	path = olympus/environments/raynet/sim/raynet
+	url = https://github.com/CJUKnowles/raynet.git
