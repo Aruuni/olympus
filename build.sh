@@ -14,6 +14,64 @@ cd "$ROOT"
 
 ASTRAEA_VENV="$ROOT/astraea/venv_astraea"
 TRAINING_VENV="$ROOT/venv_training"
+SIM_BUILD_ALL="$ROOT/olympus/environments/raynet/sim/build_all.sh"
+SIM_SUBMODULES=(
+    "$ROOT/olympus/environments/raynet/sim/omnetpp"
+    "$ROOT/olympus/environments/raynet/sim/inet4.5"
+    "$ROOT/olympus/environments/raynet/sim/tcpPaced"
+    "$ROOT/olympus/environments/raynet/sim/cubic"
+    "$ROOT/olympus/environments/raynet/sim/raynet"
+)
+
+ask_yes_no() {
+    local prompt="$1"
+    local default="${2:-y}"
+    local suffix
+    local reply
+
+    if [[ "$default" == "y" ]]; then
+        suffix="[Y/n]"
+    else
+        suffix="[y/N]"
+    fi
+
+    if [[ ! -t 0 ]]; then
+        [[ "$default" == "y" ]]
+        return
+    fi
+
+    while true; do
+        read -r -p "$prompt $suffix " reply
+        reply="${reply:-$default}"
+        case "$reply" in
+            [Yy]|[Yy][Ee][Ss]) return 0 ;;
+            [Nn]|[Nn][Oo]) return 1 ;;
+            *) echo "Please answer yes or no." ;;
+        esac
+    done
+}
+
+sim_submodules_missing() {
+    local dir
+    for dir in "${SIM_SUBMODULES[@]}"; do
+        [[ -e "$dir/.git" ]] || return 0
+    done
+    return 1
+}
+
+ensure_sim_submodules() {
+    if ! sim_submodules_missing; then
+        return 0
+    fi
+
+    echo "=== simulation submodules ==="
+    if ask_yes_no "Some RayNet simulation submodules are missing. Initialize them now?" "y"; then
+        git submodule update --init --recursive -- "${SIM_SUBMODULES[@]#$ROOT/}"
+    else
+        echo "Skipping RayNet simulation stack because required submodules are missing."
+        return 1
+    fi
+}
 
 echo "=== astraea venv (python3.11 + TensorFlow) ==="
 rm -rf "$ASTRAEA_VENV"
@@ -38,3 +96,8 @@ cc -O2 -Wall -Wextra         -o "$ROOT/astraea_listener"  "$ROOT/astraea_listene
 echo "=== done ==="
 echo "astraea venv : $ASTRAEA_VENV"
 echo "training venv: $TRAINING_VENV"
+
+echo "=== RayNet simulation stack ==="
+if ensure_sim_submodules; then
+    "$SIM_BUILD_ALL"
+fi

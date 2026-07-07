@@ -40,7 +40,7 @@ sweep:
   flow_lifetime_min_frac: 0.25
   flow_lifetime_max_frac: 0.9
   flow_lifetime_keep_one: true
-  duration: 120
+  duration: 20
   # NOTE: schedules vary BW ONLY. Each flow's RTT is fixed for the episode by
   # its per-flow router-to-server access-link delay; the shared bottleneck carries no delay, so a
   # delay_frac schedule would be a no-op on the wire AND would overwrite each

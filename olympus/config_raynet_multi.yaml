@@ -122,7 +122,7 @@ outputs:
   plot_episodes: true
   plot_every_n: 1
 
-n_parallel: 4
+n_parallel: 1
 
 # RayNet-only: block worker experience pushes until every parallel simulation
 # has reached the same collection step. This intentionally lets the slowest

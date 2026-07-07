@@ -290,13 +290,9 @@ def run():
                     exp_buf.clear()
 
             # Once a flow leaves the episode schedule (flow_present == 0) it is
-            # no longer part of the experiment. Stop running the actor and stop
-            # driving its cwnd; otherwise the departed flow keeps inferring and
-            # ramps cwnd to the ceiling, polluting the link for the flows that
-            # remain. We still fall through to the logging block below with the
-            # current (frozen) cwnd so the trace stays full-length: ending it
-            # early would truncate the aggregate sum-throughput / fairness
-            # curves (they align to the shortest trace) for the flows that stay.
+            # no longer part of the learning problem. In RayNet, keep sending a
+            # frozen cwnd until the simulator stops exposing that flow; otherwise
+            # the shared episode waits forever for an action from this worker.
             if not flow_active:
                 prev_state = None
                 new_cwnd = int(raw.get('cwnd', prev_cwnd))
@@ -306,6 +302,8 @@ def run():
                         flow_backend.set_cwnd(flow_fd, new_cwnd)
                     except Exception as e:
                         print(f'[worker] set_cwnd failed: {e} - exiting', flush=True)
+                        break
+                else:
                     break
             else:
                 # TODO: decentralized action with N=1 (own observation only).
