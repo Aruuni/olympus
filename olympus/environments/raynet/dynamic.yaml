@@ -3,10 +3,6 @@ description: Current training sweep with the existing BW/RTT link schedules.
 shuffle: true
 
 sweep:
-  # RayNet meta parameters
-  protocol: Astraea
-  ini_path: /home/james/raynet/_environments/dynamic/config_dynamic.ini
-  section: General
 
   bws: [10, 20, 40, 60, 80, 100]
   delays: [10, 20, 40, 60, 80]

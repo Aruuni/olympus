@@ -243,7 +243,6 @@ class RayNetObservationAdapterTest(unittest.TestCase):
 
     def test_episode_config_omits_empty_observation_fields(self):
         env = raynet_env.RaynetEnv(
-            ini_path='/tmp/OrcaTraining.ini',
             raynet_path='/tmp',
             raynet_runner='/tmp/olympus_runner.sh',
         )
@@ -252,10 +251,7 @@ class RayNetObservationAdapterTest(unittest.TestCase):
 
     def test_raynet_paths_default_inside_environment(self):
         with mock.patch.dict(os.environ, {'RAYNET_PATH': '/opt/raynet-test'}, clear=False):
-            env = raynet_env.RaynetEnv(
-                ini_path='/tmp/OrcaTraining.ini',
-                environment_config={'protocol': 'orca'},
-            )
+            env = raynet_env.RaynetEnv()
 
         self.assertEqual(str(env.raynet_path), '/opt/raynet-test')
         self.assertEqual(
@@ -322,12 +318,10 @@ class RayNetFlowServiceTest(unittest.TestCase):
             n=1,
             bw=100,
             delay=20,
+            cc_algo='orca',
             raynet_path='/tmp',
             raynet_runner='/tmp/olympus_runner.sh',
             environment_config={
-                'protocol': 'orca',
-                'ini_path': '/tmp/OrcaTraining.ini',
-                'section': 'General',
                 'observation_fields': ORCA_FIELDS,
                 'runner_log_path': '/tmp/raynet-runner.log',
                 'control_trace_path': '/tmp/raynet-trace.jsonl',
@@ -344,8 +338,12 @@ class RayNetFlowServiceTest(unittest.TestCase):
         fake = FakeRayNetClient.instances[-1]
         self.assertEqual(fake.log_path, '/tmp/raynet-runner.log')
         self.assertEqual(fake.trace_path, '/tmp/raynet-trace.jsonl')
-        self.assertEqual(fake.started_episode['ini_path'], '/tmp/OrcaTraining.ini')
+        self.assertEqual(
+            fake.started_episode['ini_path'],
+            '/tmp/_environments/base_environment.ini')
         self.assertEqual(fake.started_episode['section'], 'General')
+        self.assertEqual(
+            fake.started_episode['replacements']['cc_algo'], 'TcpCubic')
         self.assertTrue(fake.terminated)
         self.assertEqual(raw['avg_thr'], 1_250_000)
         self.assertEqual(raw['time_s'], 0.25)
@@ -364,9 +362,6 @@ class RayNetFlowServiceTest(unittest.TestCase):
                 raynet_path='/tmp',
                 raynet_runner='/tmp/olympus_runner.sh',
                 environment_config={
-                    'protocol': 'astraea',
-                    'ini_path': '/tmp/AstraeaTraining.ini',
-                    'section': 'General',
                     'observation_fields': ASTRAEA_FIELDS,
                 },
             )
@@ -383,10 +378,12 @@ class RayNetFlowServiceTest(unittest.TestCase):
             service.close()
 
         fake = FakeAstraeaRayNetClient.instances[-1]
-        self.assertEqual(fake.started_episode['protocol'], 'astraea')
         self.assertEqual(fake.started_episode['observation_fields'], ASTRAEA_FIELDS)
+        self.assertEqual(
+            fake.started_episode['replacements']['cc_algo'], 'TcpPacedNoCC')
         self.assertEqual(fake.started_episode['overrides']['**.numberOfFlows'], '2')
         self.assertEqual(fake.started_episode['overrides']['**.fixedIntervalDuration'], '0.03')
+        self.assertEqual(fake.started_episode['overrides']['**.step_duration'], '0.03s')
         self.assertTrue(fake.terminated)
         self.assertEqual(raw0['avg_thr'], 1_250_000.0)
         self.assertEqual(raw1['avg_thr'], 1_250_000.0)
@@ -397,29 +394,56 @@ class RayNetFlowServiceTest(unittest.TestCase):
         for action in fake.step_actions[0].values():
             self.assertEqual(action, 64.0)
 
-    def test_raynet_env_reads_ini_from_environment_config(self):
+    def test_raynet_env_owns_base_ini_path(self):
         with tempfile.TemporaryDirectory() as directory:
             build_dir = os.path.join(directory, 'build')
+            base_dir = os.path.join(directory, '_environments')
             runner = os.path.join(directory, 'olympus_runner.sh')
-            ini = os.path.join(directory, 'AstraeaTraining.ini')
             os.mkdir(build_dir)
+            os.mkdir(base_dir)
+            base_ini = os.path.join(base_dir, 'base_environment.ini')
             open(runner, 'w').close()
-            open(ini, 'w').close()
+            open(base_ini, 'w').close()
             env = raynet_env.RaynetEnv(
                 n=2,
                 raynet_path=directory,
                 raynet_runner=runner,
-                environment_config={
-                    'protocol': 'astraea',
-                    'ini_path': ini,
-                    'section': 'General',
-                },
             )
             with mock.patch.object(env, '_start_flow_service'):
                 env.start()
 
-        self.assertEqual(env.ini_path, ini)
-        self.assertEqual(env.protocol, 'astraea')
+        self.assertEqual(str(env.ini_path), base_ini)
+        self.assertEqual(env.section, 'General')
+
+    def test_listener_cc_maps_to_raynet_child_cc_algorithm(self):
+        env = raynet_env.RaynetEnv(
+            raynet_path='/tmp',
+            raynet_runner='/tmp/olympus_runner.sh',
+            cc_algo='orca',
+        )
+        self.assertEqual(env.episode_config()['replacements']['cc_algo'], 'TcpCubic')
+
+        env = raynet_env.RaynetEnv(
+            raynet_path='/tmp',
+            raynet_runner='/tmp/olympus_runner.sh',
+            cc_algo='astraea',
+        )
+        self.assertEqual(
+            env.episode_config()['replacements']['cc_algo'], 'TcpPacedNoCC')
+
+        env = raynet_env.RaynetEnv(
+            raynet_path='/tmp',
+            raynet_runner='/tmp/olympus_runner.sh',
+            environment_config={'listener_cc': 'orca'},
+        )
+        self.assertEqual(env.episode_config()['replacements']['cc_algo'], 'TcpCubic')
+
+        env = raynet_env.RaynetEnv(
+            raynet_path='/tmp',
+            raynet_runner='/tmp/olympus_runner.sh',
+            environment_config={'cc_listener': 'TcpBic'},
+        )
+        self.assertEqual(env.episode_config()['replacements']['cc_algo'], 'TcpBic')
 
     def test_raynet_env_process_env_uses_configured_paths(self):
         env = raynet_env.RaynetEnv(
@@ -436,9 +460,6 @@ class RayNetFlowServiceTest(unittest.TestCase):
     def test_run_episode_marl_passes_opaque_environment_config_to_backend(self):
         with tempfile.TemporaryDirectory() as directory:
             ecfg = {
-                'protocol': 'astraea',
-                'ini_path': os.path.join(directory, 'AstraeaTraining.ini'),
-                'section': 'General',
                 'flows': 2,
                 'bw': 20,
                 'delay': 20,
@@ -447,6 +468,7 @@ class RayNetFlowServiceTest(unittest.TestCase):
             cfg = {
                 'environment': {'type': 'raynet', 'environment_setup': 'astraea_static'},
                 'runtime': {'algorithm': 'ma_dreamer'},
+                'listener_cc': 'orca',
                 'paths': {
                     'raynet_path': '/tmp/raynet-from-config',
                     'omnet_path': '/tmp/omnet-from-config',
@@ -491,15 +513,13 @@ class RayNetFlowServiceTest(unittest.TestCase):
         self.assertTrue(
             environment_config['control_trace_path'].endswith(
                 'raynet_trace_ep000000_slot0.jsonl'))
+        self.assertEqual(kwargs['cc_algo'], 'orca')
         self.assertNotIn('ini_path', kwargs)
         self.assertNotIn('section', kwargs)
 
     def test_run_episode_raynet_single_agent_launches_worker_per_flow(self):
         with tempfile.TemporaryDirectory() as directory:
             ecfg = {
-                'protocol': 'astraea',
-                'ini_path': os.path.join(directory, 'AstraeaTraining.ini'),
-                'section': 'General',
                 'flows': 2,
                 'bw': 20,
                 'delay': 20,
@@ -510,6 +530,7 @@ class RayNetFlowServiceTest(unittest.TestCase):
             cfg = {
                 'environment': {'type': 'raynet', 'environment_setup': 'lagged_fairness'},
                 'runtime': {'algorithm': 'td3', 'reward': 'tempest', 'state': 'tempest'},
+                'listener_cc': 'orca',
                 'training': {'checkpoint': os.path.join(directory, 'model.pt')},
                 'agent': {},
                 'outputs': {
