@@ -816,15 +816,11 @@ def _collection_environment_definitions(cfg):
     return [(_env_backend_type(cfg), env_cfg, env_meta)]
 
 
-def _environment_protocol(env_cfg: dict) -> str:
-    sweep = (env_cfg or {}).get('sweep') or {}
-    protocol = sweep.get('protocol')
-    if protocol is None and (env_cfg or {}).get('experiments'):
-        for item in env_cfg.get('experiments') or []:
-            if item.get('protocol'):
-                protocol = item.get('protocol')
-                break
-    return str(protocol or '').strip().lower()
+def _listener_protocol(cfg: dict) -> str:
+    listener_cc = str((cfg or {}).get('listener_cc', 'astraea')).strip().lower()
+    if listener_cc in {'clean_slate', 'cleanslate'}:
+        return 'cleanslate'
+    return listener_cc
 
 
 _ASTRAEA_DEEPCC_FIELDS = {
@@ -872,10 +868,11 @@ def _validate_environment_runtime_compatibility(cfg):
     state = str(runtime.get('state', '')).strip()
     action = str(runtime.get('action', '')).strip()
     env_defs = _collection_environment_definitions(cfg)
+    listener_protocol = _listener_protocol(cfg)
     clean_slate_defs = [
         (env_type, env_cfg, meta)
         for env_type, env_cfg, meta in env_defs
-        if _environment_protocol(env_cfg) == 'cleanslate'
+        if env_type == 'raynet' and listener_protocol == 'cleanslate'
     ]
     clean_slate_envs = [
         meta.get('name', env_type)
@@ -931,8 +928,7 @@ def _validate_environment_runtime_compatibility(cfg):
     elif reward == 'clean_slate' or state == 'clean_slate' or action == 'raynet_exponent':
         raise SystemExit(
             '[orch] clean_slate state/reward/action require a CleanSlate RayNet '
-            'environment; the selected environment does not declare '
-            'protocol: CleanSlate')
+            'listener_cc; set listener_cc: clean_slate')
 
 
 def _raynet_config_overrides(cfg):

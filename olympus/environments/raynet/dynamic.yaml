@@ -3,16 +3,11 @@ description: CleanSlate RayNet sweep with Astraea-compatible raw TCP observation
 shuffle: true
 
 sweep:
-  ini_path: _environments/base_environment.ini   # DeepCC unified env (relative to raynet_path)
-  # RayNet meta parameters
-  protocol: CleanSlate
-  section: General
-
-  bws: [10, 20, 40, 60, 80, 100]
-  delays: [10, 20, 40, 60, 80]
+  bws: [10, 20]
+  delays: [10, 20]
   bdp_mult: 4
   flows: 1
-  duration: 30
+  duration: 15
   observation_fields:
     - {name: avg_thr, index: 0, aliases: [throughput]}
     - {name: avg_urtt, index: 1, aliases: [delay_us]}

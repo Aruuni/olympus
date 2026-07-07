@@ -14,9 +14,6 @@ description: >
 shuffle: true
 
 sweep:
-  ini_path: _environments/base_environment.ini   # DeepCC unified env (relative to raynet_path)
-  protocol: Astraea
-  section: General
   bw_range:    [10, 20]
   bw_step:     10
   delay_range: [10, 20]

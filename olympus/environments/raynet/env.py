@@ -26,7 +26,7 @@ RAYNET_CC_ALGO_BY_LISTENER = {
     #   pure-RL cwnd (CleanSlate-style) -> TcpPacedNoCC ;  Orca-style -> TcpCubic.
     'astraea': 'TcpPacedNoCC',
     'orca': 'TcpCubic',
-    'deepcc': 'TcpPacedNoCC',
+    'cubic': 'TcpCubic',
     'cleanslate': 'TcpPacedNoCC',
 }
 
@@ -483,8 +483,8 @@ class RaynetEnv(NetworkEnv):
         self.instance_id = instance_id
         self.unique_cports = unique_cports
         self.per_flow_delays = per_flow_delays
-        self.protocol = str(protocol or cc_algo or 'raynet')
         self.listener_cc = self._listener_cc_name(environment_config, cc_algo)
+        self.protocol = 'DeepCC'
         self.raynet_cc_algo = self._raynet_cc_algo(self.listener_cc)
         self.raynet_path = Path(
             raynet_path
@@ -494,15 +494,7 @@ class RaynetEnv(NetworkEnv):
             or RAYNET_DEFAULT_PATH
         ).expanduser()
         self.section = RAYNET_DEFAULT_SECTION
-        # The per-scenario ini comes from the sweep/environment config (relative
-        # to the RayNet checkout); absolute paths are honoured as-is.
-        ini_value = Path(str(
-            ini_path
-            or environment_config.get('ini_path')
-            or RAYNET_BASE_ENVIRONMENT
-        )).expanduser()
-        self.ini_path = (
-            ini_value if ini_value.is_absolute() else self.raynet_path / ini_value)
+        self.ini_path = self.raynet_path / RAYNET_BASE_ENVIRONMENT
         self.raynet_runner = Path(
             raynet_runner
             or extra.get('runner')
