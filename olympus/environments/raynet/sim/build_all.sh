@@ -163,12 +163,19 @@ build_raynet() {
     ensure_symlinks
     log "RayNet: simlibs + omnetbind via build.sh"
     cd "$RAYNET_PATH"
+    # A relocated checkout leaves a stale CMakeCache pointing at the old path,
+    # which makes cmake refuse to reconfigure. Drop it so omnetbind rebuilds cleanly.
+    if [[ -f build/CMakeCache.txt ]] && ! grep -q "$RAYNET_PATH/build" build/CMakeCache.txt; then
+        log "removing stale build/ (CMakeCache from a different path)"
+        rm -rf build
+    fi
     local flags=""
     [[ -d "$RAYNET_VENV_PATH" ]] || flags+=" -i"   # create venv if missing
     [[ "$REBUILD" == "true" || "$CLEAN_ALL" == "true" ]] && flags+=" -r"
     [[ "$CLEAN_ALL" == "true" ]] && flags+=" -c"
-    # build.sh prompts if the venv python != 3.12; auto-confirm.
-    yes y | ./build.sh $flags
+    # build.sh prompts if the venv python != 3.12; auto-confirm via process
+    # substitution (a plain `yes |` pipe trips pipefail with SIGPIPE 141).
+    ./build.sh $flags < <(yes y)
     find "$RAYNET_PATH/build" -name '*.so' | grep -q . || die "omnetbind .so not produced"
 }
 
@@ -179,7 +186,9 @@ run_all() {
     build_omnet
     build_inet
     build_ext
-    [[ -d "$RAYNET_VENV_PATH" && "$CLEAN_ALL" != "true" ]] || build_venv
+    # Always (re)create the venv on a full build: a relocated venv has stale
+    # absolute paths baked in and cannot be reused.
+    build_venv
     build_raynet
 }
 
