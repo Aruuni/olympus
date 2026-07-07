@@ -13,6 +13,14 @@ from pathlib import Path
 from olympus.environments.base import NetworkEnv
 
 
+RAYNET_BASE_ENVIRONMENT = Path('_environments') / 'base_environment.ini'
+RAYNET_DEFAULT_SECTION = 'General'
+RAYNET_CC_ALGO_BY_LISTENER = {
+    'astraea': 'TcpPacedNoCC',
+    'orca': 'TcpCubic',
+}
+
+
 class RayNetEpisodeClient:
     """JSON-lines client for one RayNet-owned simulation process."""
 
@@ -386,19 +394,17 @@ class RaynetEnv(NetworkEnv):
         self.instance_id = instance_id
         self.unique_cports = unique_cports
         self.per_flow_delays = per_flow_delays
-        self.protocol = str(
-            environment_config.get('protocol', protocol) or cc_algo or 'raynet')
-        self.section = str(
-            environment_config.get('section',
-                                   environment_config.get('config_section', section))
-            or 'General')
-        self.ini_path = environment_config.get('ini_path', ini_path)
+        self.protocol = str(protocol or cc_algo or 'raynet')
+        self.listener_cc = self._listener_cc_name(environment_config, cc_algo)
+        self.raynet_cc_algo = self._raynet_cc_algo(self.listener_cc)
         self.raynet_path = Path(
             raynet_path
             or extra.get('raynet_root')
             or environment_config.get('raynet_path')
             or os.environ.get('RAYNET_PATH', '/home/james/raynet')
         ).expanduser()
+        self.section = RAYNET_DEFAULT_SECTION
+        self.ini_path = self.raynet_path / RAYNET_BASE_ENVIRONMENT
         self.raynet_runner = Path(
             raynet_runner
             or extra.get('runner')
@@ -428,9 +434,7 @@ class RaynetEnv(NetworkEnv):
                 f'RayNet build directory not found: {build_dir}. Build RayNet with ./build.sh.')
         if not self.raynet_runner.exists():
             raise FileNotFoundError(f'RayNet Olympus runner not found: {self.raynet_runner}')
-        if self.ini_path is None:
-            raise ValueError('RayNet environment config must define ini_path')
-        if self.ini_path is not None and not Path(self.ini_path).expanduser().exists():
+        if not Path(self.ini_path).expanduser().exists():
             raise FileNotFoundError(f'RayNet ini_path not found: {self.ini_path}')
         self._start_flow_service()
         self.started = True
@@ -475,8 +479,12 @@ class RaynetEnv(NetworkEnv):
         interval_s = interval_ms / 1000.0
         replacements = {
             'home': os.environ.get('HOME', str(Path.home())),
+            'inet': os.environ.get(
+                'INET_PATH',
+                str(Path.home() / 'omnetpp' / 'samples' / 'inet4.5')),
             'raynet_path': str(self.raynet_path),
             'protocol': self.protocol,
+            'cc_algo': self.raynet_cc_algo,
             'bw': f'{self.bw:.12g}Mbps',
             'delay': f'{self.delay / 2.0:.12g}ms',
             'qsize': self._qsize_bits(),
@@ -489,6 +497,7 @@ class RaynetEnv(NetworkEnv):
         overrides = {
             '**.numberOfFlows': str(int(self.n)),
             '**.fixedIntervalDuration': f'{interval_s:.12g}',
+            '**.step_duration': f'{interval_s:.12g}s',
         }
         config = {
             'protocol': self.protocol,
@@ -503,8 +512,7 @@ class RaynetEnv(NetworkEnv):
             'replacements': replacements,
             'overrides': overrides,
         }
-        if 'link_schedule' in self.environment_config:
-            config['link_schedule'] = self.environment_config.get('link_schedule') or []
+        config['link_schedule'] = self.environment_config.get('link_schedule') or []
         if self.start_delays is not None:
             config['start_delays'] = self.start_delays
         if self.flow_durations is not None:
@@ -518,6 +526,23 @@ class RaynetEnv(NetworkEnv):
         if self.observation_fields:
             config['observation_fields'] = self.observation_fields
         return config
+
+    def _listener_cc_name(self, environment_config, cc_algo):
+        configured = (
+            environment_config.get('cc_listener')
+            or environment_config.get('listener_cc')
+        )
+        if configured:
+            return str(configured)
+
+        cc_name = str(cc_algo or '').strip()
+        if cc_name and cc_name.lower() != 'raynet':
+            return cc_name
+        return 'astraea'
+
+    def _raynet_cc_algo(self, listener_cc):
+        key = str(listener_cc or '').strip().lower()
+        return RAYNET_CC_ALGO_BY_LISTENER.get(key, str(listener_cc))
 
     def observation_to_raw(self, observation):
         if isinstance(observation, dict):

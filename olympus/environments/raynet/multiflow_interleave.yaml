@@ -8,9 +8,6 @@ description: >
 shuffle: true
 
 sweep:
-  protocol: Astraea
-  ini_path: /home/james/raynet/_environments/multiflow_interleave/config_multiflow_interleave.ini
-  section: General
   bw_range:    [20, 21]
   bw_step:     10
   delay_range: [20, 21]

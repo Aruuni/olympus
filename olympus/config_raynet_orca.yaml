@@ -133,7 +133,7 @@ n_parallel: 32
 # RayNet-only: block worker experience pushes until every parallel simulation
 # has reached the same collection step. This intentionally lets the slowest
 # simulation set the pace so fast low-cwnd runs cannot dominate replay.
-synchronized_collection: false
+synchronized_collection: true
 
 # Hard cap on total dispatched episodes. The orchestrator stops handing out new
 # work once this many have been launched and lets in-flight slots drain. Omit
@@ -474,7 +474,7 @@ listener_single_flow: true
 listener_state_pipe: false
 # Congestion-control name that the local listener scans for. This is exported
 # to the listener through the environment, not as a listener CLI argument.
-listener_cc: astraea
+listener_cc: orca
 cport_base: 23000
 
 # The episode pool — base bottleneck/RTT sweep, flow counts, join/leave churn, and

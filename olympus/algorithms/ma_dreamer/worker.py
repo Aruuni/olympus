@@ -335,7 +335,8 @@ def run():
             urtt = float(raw.get('avg_urtt', 0.0) or 0.0)
             if urtt > 0.0:
                 previous_urtt = urtt
-            previous_cwnd = int(raw.get('cwnd', previous_cwnd) or previous_cwnd)
+            observed_cwnd = float(raw.get('cwnd', previous_cwnd) or previous_cwnd)
+            previous_cwnd = int(observed_cwnd)
 
             t_s = flow_backend.episode_seconds(
                 raw, episode_start, wall_now=tick_start)
@@ -463,7 +464,7 @@ def run():
                     f'{t_s:.3f}',
                     0,
                     f'{multiplier:.3f}',
-                    new_cwnd,
+                    f'{observed_cwnd:.6g}',
                     f'{avg_throughput * 8.0 / 1e6:.3f}',
                     f'{float(raw.get("avg_urtt", 0.0)) / 1e3:.3f}',
                     f'{_srtt_ms(raw):.3f}',
