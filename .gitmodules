@@ -1,15 +1,3 @@
-[submodule "olympus/environments/raynet/sim/cubic"]
-	path = olympus/environments/raynet/sim/cubic
-	url = https://github.com/Avian688/cubic.git
-	ignore = dirty
-[submodule "olympus/environments/raynet/sim/inet4.5"]
-	path = olympus/environments/raynet/sim/inet4.5
-	url = https://github.com/Avian688/inet4.5.git
-	ignore = dirty
-[submodule "olympus/environments/raynet/sim/tcpPaced"]
-	path = olympus/environments/raynet/sim/tcpPaced
-	url = https://github.com/CJUKnowles/tcpPaced.git
-	ignore = dirty
 [submodule "olympus/environments/raynet/sim/omnetpp"]
 	path = olympus/environments/raynet/sim/omnetpp
 	url = https://github.com/omnetpp/omnetpp.git

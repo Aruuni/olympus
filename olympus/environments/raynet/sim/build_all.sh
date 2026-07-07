@@ -4,7 +4,8 @@
 # under this directory as git submodules:
 #
 #   sim/omnetpp    OMNeT++ 6.x        (headless: Cmdenv only)
-#   sim/inet4.5    INET 4.5 fork      -> available in omnetpp/samples/inet4.5
+#   omnetpp/samples/inet4.5
+#                  INET 4.5 fork
 #   omnetpp/samples/{tcpPaced,cubic,...}
 #                  INET extension repos used by the congestion-control sims
 #   sim/raynet     RayNet simlibs + omnetbind pybind module + Python venv
@@ -38,6 +39,8 @@ export CUBIC_PATH="$OMNET_PATH/samples/cubic"
 export RAYNET_VENV_PATH=$RAYNET_PATH/.venv
 export CCACHE_DIR="${CCACHE_DIR:-/tmp/olympus-ccache}"
 mkdir -p "$CCACHE_DIR"
+
+INET_REPO="https://github.com/Avian688/inet4.5.git"
 
 INET_EXTENSION_REPOS=(
     "tcpPaced:https://github.com/CJUKnowles/tcpPaced.git"
@@ -93,14 +96,36 @@ done
 [[ -d "$RAYNET_PATH" ]] || die "RayNet submodule missing: $RAYNET_PATH  (run: git submodule update --init)"
 command -v python3.12 >/dev/null 2>&1 || die "python3.12 not found (RayNet requires it)"
 
-# Ensure INET is visible under omnetpp/samples. The repo still vendors INET as a
-# flat submodule, while OMNeT++ projects expect to discover it from samples/.
+# Ensure INET is checked out under omnetpp/samples, where OMNeT++ projects
+# expect to discover it.
 ensure_inet_sample() {
-    local link="$INET_PATH"
-    if [[ ! -e "$link" ]]; then
-        log "restoring missing symlink samples/inet4.5 -> ../../inet4.5"
-        ln -s "../../inet4.5" "$link"
+    local dir="$INET_PATH"
+    local actual_repo
+
+    if [[ -L "$dir" ]]; then
+        log "replacing samples/inet4.5 symlink with an in-place checkout"
+        rm "$dir"
+    elif [[ -e "$dir/.git" ]]; then
+        actual_repo="$(git -C "$dir" remote get-url origin 2>/dev/null || true)"
+        if [[ "$actual_repo" != "$INET_REPO" ]]; then
+            if [[ "$CLEAN_ALL" == "true" ]]; then
+                log "replacing samples/inet4.5 checkout: origin is $actual_repo, expected $INET_REPO"
+                rm -rf "$dir"
+            else
+                die "$dir has origin $actual_repo, expected $INET_REPO (rerun with --clean-all to replace it)"
+            fi
+        else
+            return 0
+        fi
+    elif [[ -e "$dir" && "$CLEAN_ALL" == "true" ]]; then
+        log "removing non-git samples/inet4.5 before clean clone"
+        rm -rf "$dir"
+    elif [[ -e "$dir" ]]; then
+        die "$dir already exists but is not a git checkout"
     fi
+
+    log "cloning INET into $dir"
+    git clone "$INET_REPO" "$dir"
 }
 
 extension_dir() {
@@ -275,7 +300,7 @@ write_raynet_build_paths() {
 # ! SET YOUR ENVIRONMENT VARIABLES HERE ! #
 export RAYNET_PATH=$HOME/olympus/olympus/environments/raynet/sim/raynet
 export OMNET_PATH=$HOME/olympus/olympus/environments/raynet/sim/omnetpp
-export INET_PATH=$HOME/olympus/olympus/environments/raynet/sim/inet4.5
+export INET_PATH=$HOME/olympus/olympus/environments/raynet/sim/omnetpp/samples/inet4.5
 
 export RAYNET_VENV_PATH=$RAYNET_PATH/.venv
 # ! BUILD WILL FAIL IF THESE ARE INCORRECT ! #
