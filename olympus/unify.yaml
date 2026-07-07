@@ -130,9 +130,8 @@ state_options:
 paths:
   listener: olympus/oc_bridge
   py: ./venv_training/bin/python
-  # RayNet/OMNeT++ install paths (needed for the simulation pool).
-  raynet_path: ~/extra/raynet_olympus
-  omnet_path: ~/extra/omnetpp
+  # RayNet/OMNeT++ paths auto-resolve to the vendored submodules under
+  # olympus/environments/raynet/sim/ ; set raynet_path/omnet_path here to override.
 
 outputs:
   root: olympus/models/orca

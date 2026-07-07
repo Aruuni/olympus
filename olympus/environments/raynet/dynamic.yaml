@@ -5,7 +5,6 @@ shuffle: true
 sweep:
   # RayNet meta parameters
   protocol: CleanSlate
-  ini_path: ~/extra/raynet_olympus/simlibs/CleanSlate/src/training/CleanSlateTraining.ini
   section: General
 
   bws: [10, 20, 40, 60, 80, 100]

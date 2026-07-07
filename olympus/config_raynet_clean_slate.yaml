@@ -20,8 +20,8 @@ bbr_probe:
 paths:
   py: ./venv_training/bin/python
 
-raynet:
-  raynet_path: ~/extra/raynet_olympus
+# RayNet paths auto-resolve to the vendored submodule at
+# olympus/environments/raynet/sim/raynet (override via a raynet: raynet_path: entry).
 
 outputs:
   root: olympus/models/clean_slate_astraea

@@ -4,7 +4,6 @@ shuffle: true
 
 sweep:
   protocol: CleanSlate
-  ini_path: ~/extra/raynet_olympus/simlibs/CleanSlate/src/training/CleanSlateTraining.ini
   section: General
   flows: 1
   bws: [10, 20, 30, 40, 50]

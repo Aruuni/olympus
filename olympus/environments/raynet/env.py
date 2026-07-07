@@ -15,6 +15,11 @@ from olympus.environments.base import NetworkEnv
 
 RAYNET_BASE_ENVIRONMENT = Path('_environments') / 'base_environment.ini'
 RAYNET_DEFAULT_SECTION = 'General'
+# RayNet/OMNeT++ are vendored as git submodules under this file's sibling sim/
+# directory, so the defaults resolve correctly wherever the repo is checked out.
+RAYNET_SIM_DIR = Path(__file__).resolve().parent / 'sim'
+RAYNET_DEFAULT_PATH = RAYNET_SIM_DIR / 'raynet'
+OMNET_DEFAULT_PATH = RAYNET_SIM_DIR / 'omnetpp'
 RAYNET_CC_ALGO_BY_LISTENER = {
     'astraea': 'TcpPacedNoCC',
     'orca': 'TcpCubic',
@@ -480,7 +485,8 @@ class RaynetEnv(NetworkEnv):
             raynet_path
             or extra.get('raynet_root')
             or environment_config.get('raynet_path')
-            or os.environ.get('RAYNET_PATH', '~/extra/raynet_olympus')
+            or os.environ.get('RAYNET_PATH')
+            or RAYNET_DEFAULT_PATH
         ).expanduser()
         self.section = RAYNET_DEFAULT_SECTION
         self.ini_path = self.raynet_path / RAYNET_BASE_ENVIRONMENT
@@ -495,7 +501,8 @@ class RaynetEnv(NetworkEnv):
             or extra.get('omnet_root')
             or environment_config.get('omnet_path')
             or environment_config.get('omnetpp_path')
-            or os.environ.get('OMNET_PATH', '')
+            or os.environ.get('OMNET_PATH')
+            or OMNET_DEFAULT_PATH
         )
         self.omnet_path = Path(str(omnet_value)).expanduser() if omnet_value else None
         self.runner_log_path = (

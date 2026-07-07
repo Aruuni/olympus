@@ -9,7 +9,6 @@ shuffle: true
 
 sweep:
   protocol: Astraea
-  ini_path: ~/extra/raynet_olympus/_environments/multiflow_interleave/config_multiflow_interleave.ini
   section: General
   bw_range:    [20, 21]
   bw_step:     10

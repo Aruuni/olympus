@@ -5,7 +5,6 @@ shuffle: true
 sweep:
   # RayNet Meta parameters
   protocol: Astraea
-  ini_path: ~/extra/raynet_olympus/simlibs/Astraea/src/training/AstraeaTraining.ini
   section: General
 
   flows: [2]
