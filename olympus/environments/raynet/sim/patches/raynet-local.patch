@@ -44,6 +44,63 @@ index 9e737b1..004d173 100644
  
  set(TCPPACED_PATH $ENV{OMNET_PATH}/samples/tcpPaced/src) # tcpPaced, has pacing mechanisms for CC schemes, also has an auto network configurator that needs to be linked early
  list(APPEND LIB_PATHS ${TCPPACED_PATH})
+diff --git a/_environments/dynamic/config_dynamic.ini b/_environments/dynamic/config_dynamic.ini
+index c8574d6..fad7cfc 100644
+--- a/_environments/dynamic/config_dynamic.ini
++++ b/_environments/dynamic/config_dynamic.ini
+@@ -1,5 +1,5 @@
+ [General]
+-ned-path = !HOME!/raynet/_topologies:!HOME!/inet4.5/examples:!HOME!/inet4.5/showcases:!HOME!/inet4.5/src:!HOME!/inet4.5/tests/validation:!HOME!/inet4.5/tests/networks:!HOME!/inet4.5/tutorials:!HOME!/omnetpp/samples/tcpPaced/src:!HOME!/omnetpp/samples/tcpGoodputApplications/src:!HOME!/omnetpp/samples/cubic/src:!HOME!/raynet/simlibs/RLComponents/src:!HOME!/raynet/simlibs/Orca/src:!HOME!/raynet/simlibs/Astraea/src:!HOME!/raynet/simlibs/CleanSlate/src:
++ned-path = !RAYNET_PATH!/_topologies:!INET!/examples:!INET!/showcases:!INET!/src:!INET!/tests/validation:!INET!/tests/networks:!INET!/tutorials:!OMNET_PATH!/samples/tcpPaced/src:!OMNET_PATH!/samples/tcpGoodputApplications/src:!OMNET_PATH!/samples/cubic/src:!RAYNET_PATH!/simlibs/RLComponents/src:!RAYNET_PATH!/simlibs/Orca/src:!RAYNET_PATH!/simlibs/Astraea/src:!RAYNET_PATH!/simlibs/CleanSlate/src:
+ 
+ **.scenarioManager.script = xmldoc("!SCENARIO!") # used to modify the bottleneck link over time.
+ 
+diff --git a/_environments/lagged_fairness/config_lagged_fairness.ini b/_environments/lagged_fairness/config_lagged_fairness.ini
+index c8574d6..fad7cfc 100644
+--- a/_environments/lagged_fairness/config_lagged_fairness.ini
++++ b/_environments/lagged_fairness/config_lagged_fairness.ini
+@@ -1,5 +1,5 @@
+ [General]
+-ned-path = !HOME!/raynet/_topologies:!HOME!/inet4.5/examples:!HOME!/inet4.5/showcases:!HOME!/inet4.5/src:!HOME!/inet4.5/tests/validation:!HOME!/inet4.5/tests/networks:!HOME!/inet4.5/tutorials:!HOME!/omnetpp/samples/tcpPaced/src:!HOME!/omnetpp/samples/tcpGoodputApplications/src:!HOME!/omnetpp/samples/cubic/src:!HOME!/raynet/simlibs/RLComponents/src:!HOME!/raynet/simlibs/Orca/src:!HOME!/raynet/simlibs/Astraea/src:!HOME!/raynet/simlibs/CleanSlate/src:
++ned-path = !RAYNET_PATH!/_topologies:!INET!/examples:!INET!/showcases:!INET!/src:!INET!/tests/validation:!INET!/tests/networks:!INET!/tutorials:!OMNET_PATH!/samples/tcpPaced/src:!OMNET_PATH!/samples/tcpGoodputApplications/src:!OMNET_PATH!/samples/cubic/src:!RAYNET_PATH!/simlibs/RLComponents/src:!RAYNET_PATH!/simlibs/Orca/src:!RAYNET_PATH!/simlibs/Astraea/src:!RAYNET_PATH!/simlibs/CleanSlate/src:
+ 
+ **.scenarioManager.script = xmldoc("!SCENARIO!") # used to modify the bottleneck link over time.
+ 
+diff --git a/_environments/multiflow_interleave/config_multiflow_interleave.ini b/_environments/multiflow_interleave/config_multiflow_interleave.ini
+index 7ca27a6..dc4cb64 100644
+--- a/_environments/multiflow_interleave/config_multiflow_interleave.ini
++++ b/_environments/multiflow_interleave/config_multiflow_interleave.ini
+@@ -1,5 +1,5 @@
+ [General]
+-ned-path = !HOME!/raynet/_topologies:!HOME!/inet4.5/examples:!HOME!/inet4.5/showcases:!HOME!/inet4.5/src:!HOME!/inet4.5/tests/validation:!HOME!/inet4.5/tests/networks:!HOME!/inet4.5/tutorials:!HOME!/omnetpp/samples/tcpPaced/src:!HOME!/omnetpp/samples/tcpGoodputApplications/src:!HOME!/omnetpp/samples/cubic/src:!HOME!/raynet/simlibs/RLComponents/src:!HOME!/raynet/simlibs/Orca/src:!HOME!/raynet/simlibs/Astraea/src:!HOME!/raynet/simlibs/CleanSlate/src:
++ned-path = !RAYNET_PATH!/_topologies:!INET!/examples:!INET!/showcases:!INET!/src:!INET!/tests/validation:!INET!/tests/networks:!INET!/tutorials:!OMNET_PATH!/samples/tcpPaced/src:!OMNET_PATH!/samples/tcpGoodputApplications/src:!OMNET_PATH!/samples/cubic/src:!RAYNET_PATH!/simlibs/RLComponents/src:!RAYNET_PATH!/simlibs/Orca/src:!RAYNET_PATH!/simlibs/Astraea/src:!RAYNET_PATH!/simlibs/CleanSlate/src:
+ 
+ **.scenarioManager.script = xmldoc("!SCENARIO!") # used to modify the bottleneck link over time.
+ 
+diff --git a/_environments/multiflow_interleave_rtt/config_multiflow_interleave_rtt.ini b/_environments/multiflow_interleave_rtt/config_multiflow_interleave_rtt.ini
+index 7ca27a6..dc4cb64 100644
+--- a/_environments/multiflow_interleave_rtt/config_multiflow_interleave_rtt.ini
++++ b/_environments/multiflow_interleave_rtt/config_multiflow_interleave_rtt.ini
+@@ -1,5 +1,5 @@
+ [General]
+-ned-path = !HOME!/raynet/_topologies:!HOME!/inet4.5/examples:!HOME!/inet4.5/showcases:!HOME!/inet4.5/src:!HOME!/inet4.5/tests/validation:!HOME!/inet4.5/tests/networks:!HOME!/inet4.5/tutorials:!HOME!/omnetpp/samples/tcpPaced/src:!HOME!/omnetpp/samples/tcpGoodputApplications/src:!HOME!/omnetpp/samples/cubic/src:!HOME!/raynet/simlibs/RLComponents/src:!HOME!/raynet/simlibs/Orca/src:!HOME!/raynet/simlibs/Astraea/src:!HOME!/raynet/simlibs/CleanSlate/src:
++ned-path = !RAYNET_PATH!/_topologies:!INET!/examples:!INET!/showcases:!INET!/src:!INET!/tests/validation:!INET!/tests/networks:!INET!/tutorials:!OMNET_PATH!/samples/tcpPaced/src:!OMNET_PATH!/samples/tcpGoodputApplications/src:!OMNET_PATH!/samples/cubic/src:!RAYNET_PATH!/simlibs/RLComponents/src:!RAYNET_PATH!/simlibs/Orca/src:!RAYNET_PATH!/simlibs/Astraea/src:!RAYNET_PATH!/simlibs/CleanSlate/src:
+ 
+ **.scenarioManager.script = xmldoc("!SCENARIO!") # used to modify the bottleneck link over time.
+ 
+diff --git a/_environments/static/config_static.ini b/_environments/static/config_static.ini
+index 35c8db5..2b4d6b9 100644
+--- a/_environments/static/config_static.ini
++++ b/_environments/static/config_static.ini
+@@ -1,7 +1,7 @@
+ # Two-minute run, a single isolated flow sending data to a server.
+ 
+ [General]
+-ned-path = !HOME!/raynet/_topologies:!HOME!/inet4.5/examples:!HOME!/inet4.5/showcases:!HOME!/inet4.5/src:!HOME!/inet4.5/tests/validation:!HOME!/inet4.5/tests/networks:!HOME!/inet4.5/tutorials:!HOME!/omnetpp/samples/tcpPaced/src:!HOME!/omnetpp/samples/tcpGoodputApplications/src:!HOME!/omnetpp/samples/cubic/src:!HOME!/raynet/simlibs/RLComponents/src:!HOME!/raynet/simlibs/Orca/src:!HOME!/raynet/simlibs/Astraea/src:!HOME!/raynet/simlibs/CleanSlate/src:
++ned-path = !RAYNET_PATH!/_topologies:!INET!/examples:!INET!/showcases:!INET!/src:!INET!/tests/validation:!INET!/tests/networks:!INET!/tutorials:!OMNET_PATH!/samples/tcpPaced/src:!OMNET_PATH!/samples/tcpGoodputApplications/src:!OMNET_PATH!/samples/cubic/src:!RAYNET_PATH!/simlibs/RLComponents/src:!RAYNET_PATH!/simlibs/Orca/src:!RAYNET_PATH!/simlibs/Astraea/src:!RAYNET_PATH!/simlibs/CleanSlate/src:
+ # General
+ sim-time-limit = !DURATION!s
+ 
 diff --git a/build_paths.sh b/build_paths.sh
 index f90c90c..2463c54 100644
 --- a/build_paths.sh
@@ -81,6 +138,17 @@ index 9f265d8..26ce83b 100644
  
  checkmakefiles:
  	@if [ ! -f src/Makefile ]; then \
+diff --git a/simlibs/Astraea/src/training/AstraeaTraining.ini b/simlibs/Astraea/src/training/AstraeaTraining.ini
+index f214652..ebf27c7 100644
+--- a/simlibs/Astraea/src/training/AstraeaTraining.ini
++++ b/simlibs/Astraea/src/training/AstraeaTraining.ini
+@@ -1,5 +1,5 @@
+ [General]
+-ned-path = !HOME!/raynet/_topologies:!HOME!/inet4.5/examples:!HOME!/inet4.5/showcases:!HOME!/inet4.5/src:!HOME!/inet4.5/tests/validation:!HOME!/inet4.5/tests/networks:!HOME!/inet4.5/tutorials:!HOME!/omnetpp/samples/tcpPaced/src:!HOME!/omnetpp/samples/tcpGoodputApplications/src:!HOME!/omnetpp/samples/cubic/src:!HOME!/raynet/simlibs/RLComponents/src:!HOME!/raynet/simlibs/Astraea/src:
++ned-path = !RAYNET_PATH!/_topologies:!INET!/examples:!INET!/showcases:!INET!/src:!INET!/tests/validation:!INET!/tests/networks:!INET!/tutorials:!OMNET_PATH!/samples/tcpPaced/src:!OMNET_PATH!/samples/tcpGoodputApplications/src:!OMNET_PATH!/samples/cubic/src:!RAYNET_PATH!/simlibs/RLComponents/src:!RAYNET_PATH!/simlibs/Astraea/src:
+ 
+ 
+ # Outputs/verbosity
 diff --git a/simlibs/CleanSlate/Makefile b/simlibs/CleanSlate/Makefile
 index 3d989e8..2186db1 100644
 --- a/simlibs/CleanSlate/Makefile
@@ -310,3 +378,25 @@ index cc40c23..fd608b0 100644
          cout << "-" << endl;
      }
  }
+diff --git a/simlibs/CleanSlate/src/training/CleanSlateTraining.ini b/simlibs/CleanSlate/src/training/CleanSlateTraining.ini
+index 97e863f..65b2016 100644
+--- a/simlibs/CleanSlate/src/training/CleanSlateTraining.ini
++++ b/simlibs/CleanSlate/src/training/CleanSlateTraining.ini
+@@ -1,5 +1,5 @@
+ [General]
+-ned-path = !HOME!/raynet/_topologies:!HOME!/inet4.5/examples:!HOME!/inet4.5/showcases:!HOME!/inet4.5/src:!HOME!/inet4.5/tests/validation:!HOME!/inet4.5/tests/networks:!HOME!/inet4.5/tutorials:!HOME!/omnetpp/samples/tcpPaced/src:!HOME!/omnetpp/samples/tcpGoodputApplications/src:!HOME!/omnetpp/samples/cubic/src:!HOME!/raynet/simlibs/RLComponents/src:!HOME!/raynet/simlibs/CleanSlate/src:
++ned-path = !RAYNET_PATH!/_topologies:!INET!/examples:!INET!/showcases:!INET!/src:!INET!/tests/validation:!INET!/tests/networks:!INET!/tutorials:!OMNET_PATH!/samples/tcpPaced/src:!OMNET_PATH!/samples/tcpGoodputApplications/src:!OMNET_PATH!/samples/cubic/src:!RAYNET_PATH!/simlibs/RLComponents/src:!RAYNET_PATH!/simlibs/CleanSlate/src:
+ 
+ 
+ # Outputs/verbosity
+diff --git a/simlibs/Orca/src/training/OrcaTraining.ini b/simlibs/Orca/src/training/OrcaTraining.ini
+index 42d9216..bc8a7f0 100644
+--- a/simlibs/Orca/src/training/OrcaTraining.ini
++++ b/simlibs/Orca/src/training/OrcaTraining.ini
+@@ -1,5 +1,5 @@
+ [General]
+-ned-path = !HOME!/raynet/_topologies:!HOME!/inet4.5/examples:!HOME!/inet4.5/showcases:!HOME!/inet4.5/src:!HOME!/inet4.5/tests/validation:!HOME!/inet4.5/tests/networks:!HOME!/inet4.5/tutorials:!HOME!/omnetpp/samples/tcpPaced/src:!HOME!/omnetpp/samples/tcpGoodputApplications/src:!HOME!/omnetpp/samples/cubic/src:!HOME!/raynet/simlibs/RLComponents/src:!HOME!/raynet/simlibs/Orca/src:
++ned-path = !RAYNET_PATH!/_topologies:!INET!/examples:!INET!/showcases:!INET!/src:!INET!/tests/validation:!INET!/tests/networks:!INET!/tutorials:!OMNET_PATH!/samples/tcpPaced/src:!OMNET_PATH!/samples/tcpGoodputApplications/src:!OMNET_PATH!/samples/cubic/src:!RAYNET_PATH!/simlibs/RLComponents/src:!RAYNET_PATH!/simlibs/Orca/src:
+ 
+ 
+ # Outputs/verbosity

@@ -3,6 +3,7 @@ description: RayNet CleanSlate steady-link episodes with Astraea-compatible raw 
 shuffle: true
 
 sweep:
+  ini_path: simlibs/CleanSlate/src/training/CleanSlateTraining.ini   # relative to raynet_path
   protocol: CleanSlate
   section: General
   flows: 1

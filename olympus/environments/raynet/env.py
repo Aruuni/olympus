@@ -489,7 +489,15 @@ class RaynetEnv(NetworkEnv):
             or RAYNET_DEFAULT_PATH
         ).expanduser()
         self.section = RAYNET_DEFAULT_SECTION
-        self.ini_path = self.raynet_path / RAYNET_BASE_ENVIRONMENT
+        # The per-scenario ini comes from the sweep/environment config (relative
+        # to the RayNet checkout); absolute paths are honoured as-is.
+        ini_value = Path(str(
+            ini_path
+            or environment_config.get('ini_path')
+            or RAYNET_BASE_ENVIRONMENT
+        )).expanduser()
+        self.ini_path = (
+            ini_value if ini_value.is_absolute() else self.raynet_path / ini_value)
         self.raynet_runner = Path(
             raynet_runner
             or extra.get('runner')
@@ -602,9 +610,11 @@ class RaynetEnv(NetworkEnv):
         interval_s = interval_ms / 1000.0
         replacements = {
             'home': os.environ.get('HOME', str(Path.home())),
-            'inet': os.environ.get(
-                'INET_PATH',
-                str(Path.home() / 'omnetpp' / 'samples' / 'inet4.5')),
+            'inet': (
+                os.environ.get('INET_PATH')
+                or (str(self.omnet_path / 'samples' / 'inet4.5')
+                    if self.omnet_path is not None
+                    else str(Path.home() / 'omnetpp' / 'samples' / 'inet4.5'))),
             'raynet_path': str(self.raynet_path),
             'protocol': self.protocol,
             'cc_algo': self.raynet_cc_algo,

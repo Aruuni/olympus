@@ -3,6 +3,7 @@ description: RayNet Orca simulation episodes from explicit OMNeT++ INI sections.
 shuffle: true
 
 sweep:
+  ini_path: simlibs/Astraea/src/training/AstraeaTraining.ini   # relative to raynet_path
   protocol: Astraea
   section: General
   flows: [2]

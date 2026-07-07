@@ -3,6 +3,7 @@ description: CleanSlate RayNet sweep with Astraea-compatible raw TCP observation
 shuffle: true
 
 sweep:
+  ini_path: simlibs/CleanSlate/src/training/CleanSlateTraining.ini   # relative to raynet_path
   # RayNet meta parameters
   protocol: CleanSlate
   section: General
