@@ -729,7 +729,7 @@ def _stop_astraea_listener(handle) -> None:
 _ORCA_DEFAULTS = {
     # Where the original Orca repo is installed (must contain sender.sh,
     # receiver.sh and rl-module/{orca-server-mahimahi,clientThr}).
-    'install_dir': '/its/home/mm2350/Desktop/mininettestbed/CC/Orca',
+    'install_dir': os.environ.get('ORCA_INSTALL_DIR', '~/mininettestbed/CC/Orca'),
     # Base TCP port; each (slot, flow) gets port_base + slot*100 + flow.
     'port_base': 47000,
     # Extra wall-clock seconds added on top of the episode duration so the

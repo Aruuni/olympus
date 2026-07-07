@@ -1,8 +1,0 @@
-[responsive_fairness] output_root=/its/home/mm2350/extra/Olympusv2/benchmarks/benchmark_responsive_fairness/data
-[responsive_fairness] duration=345s score_window=(45,345] cadence=15s flow_counts=[2, 4, 5, 7] trials/approach=200
-[responsive_fairness] 2_flow_starts=0,45
-[responsive_fairness] 4_flow_starts=0,15,30,45
-[responsive_fairness] 5_flow_starts=0,11.25,22.5,33.75,45
-[responsive_fairness] 7_flow_starts=0,7.5,15,22.5,30,37.5,45
-[responsive_fairness] approaches_to_run=ma_dreamer_20260611-175726
-[responsive_fairness] dry-run would run ma_dreamer_20260611-175726: 200/200 missing trials by_flow=2:50, 4:50, 5:50, 7:50 config=/its/home/mm2350/extra/Olympusv2/olympus/models/ma_dreamer_20260611-175726/telemetry/config.resolved.yaml

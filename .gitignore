@@ -70,3 +70,11 @@ kernel/**/*.cmd
 kernel/**/.*.cmd
 kernel/**/Module.symvers
 kernel/**/modules.order
+
+# kernel module build artifacts
+*.o.d
+*.mod
+*.ko
+*.cmd
+modules.order
+Module.symvers

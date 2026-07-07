@@ -19,4 +19,4 @@
 
 === Build & Run ===
 
-gcc -O2 -Wall -o astraea_listener astraea_listener.c && sudo -E env ASTRAEA_PYTHON="$(pwd)/venv_astraea/bin/python" ./astraea_listener --mode mininet --cc-name astraea --script /its/home/mm2350/Desktop/Olympusv2/astraea_service.py --config /its/home/mm2350/Desktop/Olympusv2/astraea/astraea.json --model /its/home/mm2350/Desktop/Olympusv2/astraea/models/py --scan-ms 10
+gcc -O2 -Wall -o astraea_listener astraea_listener.c && sudo -E env ASTRAEA_PYTHON="$(pwd)/venv_astraea/bin/python" ./astraea_listener --mode mininet --cc-name astraea --script "$(pwd)/astraea_service.py" --config "$(pwd)/astraea/astraea.json" --model "$(pwd)/astraea/models/py" --scan-ms 10
