@@ -3,7 +3,7 @@ description: Dynamic 120s episodes where 1-5 lagged-policy background flows join
 shuffle: true
 
 sweep:
-  ini_path: _environments/lagged_fairness/config_lagged_fairness.ini   # relative to raynet_path
+  ini_path: _environments/base_environment.ini   # DeepCC unified env (relative to raynet_path)
   protocol: Astraea
   section: General
   bws: [10, 20, 40, 60, 80, 100, 120]

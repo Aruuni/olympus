@@ -21,8 +21,13 @@ RAYNET_SIM_DIR = Path(__file__).resolve().parent / 'sim'
 RAYNET_DEFAULT_PATH = RAYNET_SIM_DIR / 'raynet'
 OMNET_DEFAULT_PATH = RAYNET_SIM_DIR / 'omnetpp'
 RAYNET_CC_ALGO_BY_LISTENER = {
+    # base_environment.ini runs the DeepCC RL wrapper (tcp.typename=DeepCC); the
+    # listener selects the *underlying* CC algo via tcpAlgorithmClass (!CC_ALGO!):
+    #   pure-RL cwnd (CleanSlate-style) -> TcpPacedNoCC ;  Orca-style -> TcpCubic.
     'astraea': 'TcpPacedNoCC',
     'orca': 'TcpCubic',
+    'deepcc': 'TcpPacedNoCC',
+    'cleanslate': 'TcpPacedNoCC',
 }
 
 
