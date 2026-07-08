@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# Usage: ./build.sh   (no sudo needed; this only builds, it does not load
-#                      kernel modules — see setup.sh for that)
+# Usage: sudo ./build.sh
 #
 # Recreates both Python environments from scratch and builds the native bits:
 #   astraea/venv_astraea  python3.11 + TensorFlow   (requirements.txt)
@@ -12,6 +11,14 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT"
 
+INSTALL_USER="${SUDO_USER:-$(id -un)}"
+INSTALL_HOME="$(getent passwd "$INSTALL_USER" | cut -d: -f6)"
+[[ -n "$INSTALL_HOME" ]] || INSTALL_HOME="$HOME"
+
+APT_PACKAGES=(
+    mininet
+)
+
 ASTRAEA_VENV="$ROOT/astraea/venv_astraea"
 TRAINING_VENV="$ROOT/venv_training"
 SIM_BUILD_ALL="$ROOT/olympus/environments/raynet/sim/build_all.sh"
@@ -22,6 +29,14 @@ SIM_SUBMODULES=(
     "$ROOT/olympus/environments/raynet/sim/cubic"
     "$ROOT/olympus/environments/raynet/sim/raynet"
 )
+
+run_as_install_user() {
+    if [[ "$(id -un)" == "$INSTALL_USER" ]]; then
+        "$@"
+    else
+        sudo -H -u "$INSTALL_USER" env HOME="$INSTALL_HOME" "$@"
+    fi
+}
 
 ask_yes_no() {
     local prompt="$1"
@@ -51,6 +66,39 @@ ask_yes_no() {
     done
 }
 
+install_system_packages_if_needed() {
+    local missing=()
+    local package
+    local sudo_cmd=()
+
+    command -v apt-get >/dev/null 2>&1 || return 0
+    command -v dpkg-query >/dev/null 2>&1 || return 0
+
+    for package in "${APT_PACKAGES[@]}"; do
+        if ! dpkg-query -W -f='${Status}' "$package" 2>/dev/null | grep -q 'install ok installed'; then
+            missing+=("$package")
+        fi
+    done
+
+    ((${#missing[@]} == 0)) && return 0
+
+    if ((EUID != 0)); then
+        command -v sudo >/dev/null 2>&1 || {
+            echo "ERROR: Missing packages: ${missing[*]}; sudo is required to install them" >&2
+            exit 1
+        }
+        sudo_cmd=(sudo)
+    fi
+
+    echo "=== system packages: ${missing[*]} ==="
+    "${sudo_cmd[@]}" apt-get update
+    "${sudo_cmd[@]}" apt-get install -y "${missing[@]}"
+}
+
+clean_python_build_artifacts() {
+    rm -rf "$ROOT/build" "$ROOT/tcp_sockopt.egg-info"
+}
+
 sim_submodules_missing() {
     local dir
     for dir in "${SIM_SUBMODULES[@]}"; do
@@ -66,32 +114,37 @@ ensure_sim_submodules() {
 
     echo "=== simulation submodules ==="
     if ask_yes_no "Some RayNet simulation submodules are missing. Initialize them now?" "y"; then
-        git submodule update --init --recursive -- "${SIM_SUBMODULES[@]#$ROOT/}"
+        run_as_install_user git submodule update --init --recursive -- "${SIM_SUBMODULES[@]#$ROOT/}"
     else
         echo "Skipping RayNet simulation stack because required submodules are missing."
         return 1
     fi
 }
 
+install_system_packages_if_needed
+
 echo "=== astraea venv (python3.11 + TensorFlow) ==="
 rm -rf "$ASTRAEA_VENV"
-python3.11 -m venv "$ASTRAEA_VENV"
-"$ASTRAEA_VENV/bin/pip" install --upgrade pip setuptools wheel
-"$ASTRAEA_VENV/bin/pip" install -r "$ROOT/requirements.txt"
+run_as_install_user python3.11 -m venv "$ASTRAEA_VENV"
+run_as_install_user "$ASTRAEA_VENV/bin/pip" install --upgrade pip setuptools wheel
+run_as_install_user "$ASTRAEA_VENV/bin/pip" install -r "$ROOT/requirements.txt"
 echo "--- building tcp_sockopt into astraea venv ---"
-"$ASTRAEA_VENV/bin/pip" install "$ROOT"
+clean_python_build_artifacts
+run_as_install_user "$ASTRAEA_VENV/bin/pip" install "$ROOT"
 
 echo "=== training venv (python3.8 + PyTorch) ==="
 rm -rf "$TRAINING_VENV"
-python3.8 -m venv "$TRAINING_VENV"
-"$TRAINING_VENV/bin/pip" install --upgrade pip setuptools wheel
-"$TRAINING_VENV/bin/pip" install -r "$ROOT/olympus/requirements.txt"
+run_as_install_user python3.8 -m venv "$TRAINING_VENV"
+run_as_install_user "$TRAINING_VENV/bin/pip" install --upgrade pip setuptools wheel
+run_as_install_user "$TRAINING_VENV/bin/pip" install -r "$ROOT/olympus/requirements.txt"
+run_as_install_user "$TRAINING_VENV/bin/pip" install mininet
 echo "--- building tcp_sockopt into training venv ---"
-"$TRAINING_VENV/bin/pip" install "$ROOT"
+clean_python_build_artifacts
+run_as_install_user "$TRAINING_VENV/bin/pip" install "$ROOT"
 
 echo "=== C binaries ==="
-cc -O2 -Wall -Wextra -pthread -o "$ROOT/oc_listener"      "$ROOT/oc_listener.c"
-cc -O2 -Wall -Wextra         -o "$ROOT/astraea_listener"  "$ROOT/astraea_listener.c"
+run_as_install_user cc -O2 -Wall -Wextra -pthread -o "$ROOT/oc_listener"      "$ROOT/oc_listener.c"
+run_as_install_user cc -O2 -Wall -Wextra         -o "$ROOT/astraea_listener"  "$ROOT/astraea_listener.c"
 
 echo "=== done ==="
 echo "astraea venv : $ASTRAEA_VENV"
@@ -99,5 +152,5 @@ echo "training venv: $TRAINING_VENV"
 
 echo "=== RayNet simulation stack ==="
 if ensure_sim_submodules; then
-    "$SIM_BUILD_ALL"
+    run_as_install_user "$SIM_BUILD_ALL"
 fi
