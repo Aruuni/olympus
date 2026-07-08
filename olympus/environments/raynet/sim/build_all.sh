@@ -53,6 +53,20 @@ INET_EXTENSION_REPOS=(
     "orbtcpExperiments:https://github.com/Avian688/orbtcpExperiments.git"
 )
 
+OS3_APT_PACKAGES=(
+    pkg-config
+    libcurl4-openssl-dev
+)
+
+LEOSATELLITES_APT_PACKAGES=(
+    pkg-config
+    libigraph-dev
+)
+
+BBR_APT_PACKAGES=(
+    libboost-dev
+)
+
 JOBS="$(nproc)"
 STAGE=""
 REBUILD="false"
@@ -179,6 +193,34 @@ ensure_inet_extensions() {
     done
 }
 
+install_apt_packages_if_needed() {
+    local label="$1"
+    shift
+    local missing=()
+    local package
+    local sudo_cmd=()
+
+    command -v apt-get >/dev/null 2>&1 || return 0
+    command -v dpkg-query >/dev/null 2>&1 || return 0
+
+    for package in "$@"; do
+        if ! dpkg-query -W -f='${Status}' "$package" 2>/dev/null | grep -q 'install ok installed'; then
+            missing+=("$package")
+        fi
+    done
+
+    ((${#missing[@]} == 0)) && return 0
+
+    if ((EUID != 0)); then
+        command -v sudo >/dev/null 2>&1 || die "Missing packages for $label: ${missing[*]}; sudo is required to install them"
+        sudo_cmd=(sudo)
+    fi
+
+    log "installing Ubuntu packages required by $label: ${missing[*]}"
+    "${sudo_cmd[@]}" apt-get update
+    "${sudo_cmd[@]}" apt-get install -y "${missing[@]}"
+}
+
 project_is_built() {
     local name="$1"
     local dir="$2"
@@ -195,6 +237,10 @@ build_extension_project() {
         log "extension: $name has no top-level Makefile; skipping build"
         return 0
     }
+
+    [[ "$name" == "os3" ]] && install_apt_packages_if_needed os3 "${OS3_APT_PACKAGES[@]}"
+    [[ "$name" == "leosatellites" ]] && install_apt_packages_if_needed leosatellites "${LEOSATELLITES_APT_PACKAGES[@]}"
+    [[ "$name" == "bbr" ]] && install_apt_packages_if_needed bbr "${BBR_APT_PACKAGES[@]}"
 
     if [[ "$CLEAN_ALL" != "true" ]] && project_is_built "$name" "$dir"; then
         log "extension: $name already appears to be built"
@@ -296,13 +342,13 @@ build_extension_project() {
 
 write_raynet_build_paths() {
     log "RayNet: writing build_paths.sh for this checkout"
-    cat > "$RAYNET_PATH/build_paths.sh" <<'EOF'
+    cat > "$RAYNET_PATH/build_paths.sh" <<EOF
 # ! SET YOUR ENVIRONMENT VARIABLES HERE ! #
-export RAYNET_PATH=$HOME/olympus/olympus/environments/raynet/sim/raynet
-export OMNET_PATH=$HOME/olympus/olympus/environments/raynet/sim/omnetpp
-export INET_PATH=$HOME/olympus/olympus/environments/raynet/sim/omnetpp/samples/inet4.5
+export RAYNET_PATH="$RAYNET_PATH"
+export OMNET_PATH="$OMNET_PATH"
+export INET_PATH="$INET_PATH"
 
-export RAYNET_VENV_PATH=$RAYNET_PATH/.venv
+export RAYNET_VENV_PATH="$RAYNET_VENV_PATH"
 # ! BUILD WILL FAIL IF THESE ARE INCORRECT ! #
 EOF
 }
@@ -311,6 +357,11 @@ EOF
 # Stage: OMNeT++ (headless configure + make)
 # --------------------------------------------------------------------------- #
 build_omnet() {
+    if [[ "$CLEAN_ALL" != "true" && -f "$OMNET_PATH/.venv/bin/activate" && -x "$OMNET_PATH/bin/opp_makemake" ]]; then
+        log "OMNeT++: already appears to be built"
+        return 0
+    fi
+
     log "OMNeT++: configure + make -j$JOBS"
     cd "$OMNET_PATH"
     [[ -f configure.user ]] || cp configure.user.dist configure.user
@@ -340,8 +391,17 @@ build_omnet() {
 # --------------------------------------------------------------------------- #
 # Stage: INET
 # --------------------------------------------------------------------------- #
+inet_is_built() {
+    [[ -f "$INET_PATH/src/libINET.so" ]] || find "$INET_PATH" -name 'libINET*.so' -print -quit | grep -q .
+}
+
 build_inet() {
     ensure_inet_sample
+    if [[ "$CLEAN_ALL" != "true" ]] && inet_is_built; then
+        log "INET: already appears to be built"
+        return 0
+    fi
+
     log "INET: install Python requirements + make makefiles + make -j$JOBS MODE=release"
     set +u; source "$OMNET_PATH/setenv"; set -u
     cd "$INET_PATH"
@@ -370,11 +430,16 @@ build_ext() {
 }
 
 # --------------------------------------------------------------------------- #
-# Stage: Python venv (recreate cleanly; the moved venv had stale absolute paths)
+# Stage: Python venv
 # --------------------------------------------------------------------------- #
 build_venv() {
-    log "RayNet venv: (re)creating $RAYNET_VENV_PATH with python3.12"
-    rm -rf "$RAYNET_VENV_PATH"
+    if [[ "$CLEAN_ALL" != "true" && -x "$RAYNET_VENV_PATH/bin/python" ]]; then
+        log "RayNet venv: already exists"
+        return 0
+    fi
+
+    log "RayNet venv: creating $RAYNET_VENV_PATH with python3.12"
+    [[ "$CLEAN_ALL" == "true" ]] && rm -rf "$RAYNET_VENV_PATH"
     python3.12 -m venv "$RAYNET_VENV_PATH"
     # shellcheck disable=SC1091
     source "$RAYNET_VENV_PATH/bin/activate"
@@ -414,8 +479,6 @@ run_all() {
     build_omnet
     build_inet
     build_ext
-    # Always (re)create the venv on a full build: a relocated venv has stale
-    # absolute paths baked in and cannot be reused.
     build_venv
     build_raynet
 }
