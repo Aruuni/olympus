@@ -124,9 +124,11 @@ class MininetEnv(NetworkEnv):
                       applied as netem on each sender's access link
                       (c_i -> s1). When set, the shared s1-s2 link carries NO
                       propagation delay, so flow i's RTT ~= per_flow_delays[i-1]
-                      alone (inter-RTT fairness); `delay` is then used only to
-                      size the bottleneck BDP buffer. None leaves the topology
-                      identical to legacy behaviour (delay on s1-s2).
+                      alone (inter-RTT fairness); `delay` then sizes the
+                      bottleneck BDP buffer and serves as the reference for
+                      live delay changes: set_link(delay=X) scales every
+                      flow's own access-link delay by X/delay. None leaves the
+                      topology identical to legacy behaviour (delay on s1-s2).
     """
 
     def __init__(self, n=1, bw=10, delay=20, qsize=None, bdp_mult=1.0,
@@ -145,6 +147,10 @@ class MininetEnv(NetworkEnv):
         self.unique_cports = unique_cports
         self.per_flow_delays = (
             [float(d) for d in per_flow_delays] if per_flow_delays else None)
+        # Episode base delay, kept immutable so scheduled delay changes can
+        # scale per-flow delays as a fraction of it (set_link mutates
+        # self.delay for BDP sizing).
+        self._base_delay = float(delay)
         self.net      = None
 
         # Parallel-instance isolation
@@ -227,11 +233,27 @@ class MininetEnv(NetworkEnv):
             _change_bw(s2, s2_intf, self.bw, self.qsize)
             _change_bw(s3, s3_intf, self.bw, self.qsize)
 
-        # No shared s1-s2 netem exists when per-flow delays are in use, so a
-        # live delay change there would have nothing to modify.
-        if delay is not None and not self.per_flow_delays:
-            s1, s1_intf, s2, s2_intf = self._s1s2_intfs()
-            _change_delay(s1, s1_intf, self.delay, self.loss)
+        if delay is not None:
+            if self.per_flow_delays:
+                # No shared s1-s2 netem exists in per-flow-RTT mode: each
+                # flow's delay lives on its own access link. Scale every
+                # flow's delay by the same fraction of the episode base so a
+                # scheduled change moves all RTTs while preserving the
+                # inter-flow heterogeneity this mode exists to create.
+                frac = (float(delay) / self._base_delay
+                        if self._base_delay > 0 else 1.0)
+                for i in range(1, self.n + 1):
+                    base_extra = (self.per_flow_delays[i - 1]
+                                  if i - 1 < len(self.per_flow_delays) else 0.0)
+                    if not base_extra or base_extra <= 0.0:
+                        continue
+                    c, intf_name = self._ci_s1_intf(i)
+                    if c is None:
+                        continue
+                    _change_delay(c, intf_name, round(base_extra * frac, 3))
+            else:
+                s1, s1_intf, s2, s2_intf = self._s1s2_intfs()
+                _change_delay(s1, s1_intf, self.delay, self.loss)
 
     def _ci_s1_intf(self, i):
         """Return (host, intf_name) for sender c{i}'s link toward s1."""

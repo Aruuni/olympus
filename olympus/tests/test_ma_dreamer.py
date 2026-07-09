@@ -24,6 +24,7 @@ from olympus.plots.multi_flow_episode_plot import (
     _r_fair_matrix,
     plot as plot_multi_flow_episode,
 )
+from olympus.common import link_context
 from olympus.rewards.tempest_fairness_ma import (
     RewardCalc as FairShareTempestReward,
 )
@@ -397,7 +398,10 @@ class JointReplayTest(unittest.TestCase):
 
         with mock.patch(
                 'olympus.algorithms.ma_dreamer.learner.random.choice',
-                side_effect=lambda values: values[0]):
+                side_effect=lambda values: values[0]), \
+             mock.patch(
+                'olympus.algorithms.ma_dreamer.learner.random.randrange',
+                return_value=0):
             batch = replay.sample_chunks(
                 batch_size=1, seq_len=4, max_agents=2)
 
@@ -504,6 +508,162 @@ class LearnerUpdateTest(unittest.TestCase):
             self.assertTrue(learner.per_agent_credit)
             self.assertEqual(
                 learner.global_world.reward_dim, learner.max_agents)
+
+
+class PerFlowDelayChangeTest(unittest.TestCase):
+    """set_link(delay=X) in per-flow-RTT mode scales each flow's own delay."""
+
+    def _env(self):
+        from olympus.environments.mininet.env import MininetEnv
+        return MininetEnv(
+            n=3, bw=50, delay=50.0, duration=10,
+            per_flow_delays=[10.0, 0.0, 200.0])
+
+    def test_scales_each_flow_from_its_own_base(self):
+        env = self._env()
+        changes = []
+        with mock.patch(
+                'olympus.environments.mininet.env._change_delay',
+                side_effect=lambda node, intf, d, loss=None:
+                changes.append((intf, d))), \
+             mock.patch.object(
+                env, '_ci_s1_intf',
+                side_effect=lambda i: (object(), f'c{i}-eth0')), \
+             mock.patch.object(
+                env, '_s2s3_intfs',
+                return_value=(object(), 's2-eth', object(), 's3-eth')), \
+             mock.patch('olympus.environments.mininet.env._change_bw'):
+            env.set_link(delay=100.0)  # 2x the 50ms episode base
+            env.set_link(delay=25.0)   # then 0.5x of base, not compounded
+        self.assertEqual(changes, [
+            ('c1-eth0', 20.0), ('c3-eth0', 400.0),   # zero-delay flow skipped
+            ('c1-eth0', 5.0), ('c3-eth0', 100.0),
+        ])
+
+    def test_legacy_shared_link_path_unchanged(self):
+        from olympus.environments.mininet.env import MininetEnv
+        env = MininetEnv(n=2, bw=50, delay=50.0, duration=10)
+        with mock.patch(
+                'olympus.environments.mininet.env._change_delay') as chg, \
+             mock.patch.object(
+                env, '_s1s2_intfs',
+                return_value=(object(), 's1-eth', object(), 's2-eth')), \
+             mock.patch.object(
+                env, '_s2s3_intfs',
+                return_value=(object(), 's2-eth', object(), 's3-eth')), \
+             mock.patch('olympus.environments.mininet.env._change_bw'):
+            env.set_link(delay=100.0)
+        chg.assert_called_once_with(mock.ANY, 's1-eth', 100.0, None)
+
+
+class PerFlowRttDelaysTest(unittest.TestCase):
+    def test_min_mult_one_keeps_every_flow_at_or_above_base(self):
+        ecfg = {'per_flow_rtt_mult': True,
+                'per_flow_rtt_mult_min': 1.0,
+                'per_flow_rtt_mult_max': 4.0}
+        delays = orchestrator._per_flow_rtt_delays(
+            50, 50.0, ecfg, {}, random.Random(7))
+        self.assertEqual(len(delays), 50)
+        for d in delays:
+            self.assertGreaterEqual(d, 50.0)
+            self.assertLessEqual(d, 200.0)
+        self.assertGreater(max(delays) - min(delays), 1.0)
+
+    def test_fixed_mult(self):
+        ecfg = {'per_flow_rtt_mult': True,
+                'per_flow_rtt_mult_min': 2.0,
+                'per_flow_rtt_mult_max': 2.0}
+        delays = orchestrator._per_flow_rtt_delays(
+            2, 50.0, ecfg, {}, random.Random(7))
+        self.assertEqual(delays, [100.0, 100.0])
+
+    def test_anchor_first_pins_flow0_to_base(self):
+        ecfg = {'per_flow_rtt_mult': True,
+                'per_flow_rtt_mult_min': 1.0,
+                'per_flow_rtt_mult_max': 4.0,
+                'per_flow_rtt_anchor_first': True}
+        for seed in range(20):
+            delays = orchestrator._per_flow_rtt_delays(
+                4, 50.0, ecfg, {}, random.Random(seed))
+            self.assertEqual(delays[0], 50.0)
+            for d in delays[1:]:
+                self.assertGreaterEqual(d, 50.0)
+                self.assertLessEqual(d, 200.0)
+
+    def test_anchor_first_single_flow(self):
+        ecfg = {'per_flow_rtt_mult': True,
+                'per_flow_rtt_anchor_first': True}
+        self.assertEqual(orchestrator._per_flow_rtt_delays(
+            1, 50.0, ecfg, {}, random.Random(7)), [50.0])
+
+    def test_disabled_returns_none(self):
+        self.assertIsNone(orchestrator._per_flow_rtt_delays(
+            4, 50.0, {}, {}, random.Random(7)))
+
+
+class PerFlowRewardReferenceTest(unittest.TestCase):
+    """End to end: sampled per-flow RTT -> flow link context -> reward rtt_ref.
+
+    Mirrors the orchestrator MA path: each flow's context is written with its
+    own base RTT and a _flow_link_schedule-rescaled event list, and the reward
+    plugin built from that context must reference the flow's own RTT before
+    AND after a scheduled delay change."""
+
+    def test_rtt_ref_tracks_each_flows_own_scheduled_rtt(self):
+        from olympus.rewards.tempest import make_reward_calc
+        base_delay = 50.0
+        shared_schedule = [{'t': 15, 'delay': 100.0}]  # delay_frac 2.0
+        episode_start = 1000.0
+        cases = [
+            # (flow's own delay ms, rtt_ref before t=15, rtt_ref after)
+            (50.0, 50_000.0, 100_000.0),
+            (200.0, 200_000.0, 400_000.0),
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            for flow_delay, ref_before_us, ref_after_us in cases:
+                path = os.path.join(directory, f'ctx_{int(flow_delay)}.json')
+                link_context.write_link_context(
+                    path,
+                    bw_mbps=50.0,
+                    base_rtt_us=flow_delay * 1000.0,
+                    link_schedule=orchestrator._flow_link_schedule(
+                        shared_schedule, base_delay, flow_delay),
+                    episode=0, slot=0, flow_id=0,
+                )
+                with mock.patch.dict(os.environ, {
+                        'OC_LINK_CONTEXT_PATH': path,
+                        'OC_EPISODE_START': str(episode_start)}):
+                    calc = make_reward_calc()
+                self.assertEqual(
+                    calc._current_link_rtt_us({'time_s': 10.0}), ref_before_us)
+                self.assertEqual(
+                    calc._current_link_rtt_us({'time_s': 20.0}), ref_after_us)
+
+
+class FlowLinkScheduleTest(unittest.TestCase):
+    def test_delay_events_rescale_to_flow_base(self):
+        shared = [
+            {'t': 15, 'delay': 25.0},
+            {'t': 30, 'delay': 100.0, 'bw': 40.0},
+            {'t': 45, 'bw': 80.0},
+        ]
+        scaled = orchestrator._flow_link_schedule(shared, 50.0, 200.0)
+        self.assertEqual(scaled[0], {'t': 15, 'delay': 100.0})
+        self.assertEqual(scaled[1], {'t': 30, 'delay': 400.0, 'bw': 40.0})
+        self.assertEqual(scaled[2], {'t': 45, 'bw': 80.0})
+        # Input entries must not be mutated (schedule is shared across flows).
+        self.assertEqual(shared[0]['delay'], 25.0)
+
+    def test_invalid_base_returns_schedule_unchanged(self):
+        shared = [{'t': 15, 'delay': 25.0}]
+        for base, flow in ((0.0, 200.0), (50.0, 0.0), (None, 200.0)):
+            self.assertEqual(
+                orchestrator._flow_link_schedule(shared, base, flow), shared)
+
+    def test_empty_schedule(self):
+        self.assertEqual(orchestrator._flow_link_schedule([], 50.0, 200.0), [])
+        self.assertEqual(
+            orchestrator._flow_link_schedule(None, 50.0, 200.0), [])
 
 
 if __name__ == '__main__':

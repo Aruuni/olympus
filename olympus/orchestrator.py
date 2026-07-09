@@ -235,6 +235,34 @@ def _run_link_schedule(env, schedule, episode_start, stop):
             print(f'[orch] link change failed: {e}', flush=True)
 
 
+def _flow_link_schedule(link_schedule, base_delay_ms, flow_delay_ms):
+    """Rescale shared-schedule delay events to one flow's own base delay.
+
+    Heterogeneous-RTT envs resolve delay_frac against the shared episode base
+    delay, but each flow propagates at its own base RTT and the env scales
+    scheduled delay changes per flow (see MininetEnv.set_link). The flow's
+    reward/state reference must move by the same fraction of ITS OWN base
+    delay, so delay events become flow_delay * (event_delay / base_delay).
+    BW events are shared and pass through unchanged."""
+    try:
+        base = float(base_delay_ms)
+        flow = float(flow_delay_ms)
+    except (TypeError, ValueError):
+        return list(link_schedule or [])
+    if base <= 0 or flow <= 0:
+        return list(link_schedule or [])
+    scaled = []
+    for entry in (link_schedule or []):
+        e = dict(entry)
+        if 'delay' in e:
+            try:
+                e['delay'] = round(float(e['delay']) / base * flow, 3)
+            except (TypeError, ValueError):
+                pass
+        scaled.append(e)
+    return scaled
+
+
 def _eval_mode(cfg: dict) -> bool:
     raw = cfg.get('eval', {}) or {}
     if isinstance(raw, dict):
@@ -980,6 +1008,13 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
     if _per_flow_delays and not hide_link_oracle:
         worker_base_rtt_us = float(_per_flow_delays[0]) * 1000.0
     worker_link_schedule = [] if hide_link_oracle else link_schedule
+    # Mininet applies scheduled delay changes per flow (scaled from each
+    # flow's own base delay), so flow 1's reference schedule must be rescaled
+    # the same way. Raynet handles its schedule internally: leave it shared.
+    if _per_flow_delays and worker_link_schedule and not is_raynet:
+        worker_link_schedule = _flow_link_schedule(
+            worker_link_schedule, ecfg.get('delay', 20.0),
+            _per_flow_delays[0])
 
     # Oracle state plugin: feed the REAL scheduled link via dedicated env
     # vars that other state plugins do not read. Only set when state==oracle
@@ -1573,7 +1608,10 @@ def _per_flow_rtt_delays(n_flows: int, base_delay: float, ecfg: dict,
     When the environment sets ``per_flow_rtt_mult: true`` each flow propagates
     at its own base RTT: the one-way delay of flow i is
     ``base_delay * U(min_mult, max_mult)``, sampled once per flow per episode
-    (default range 0.20x .. 5.0x). The Mininet backend applies these on each
+    (default range 0.20x .. 5.0x; a min of 1.0 means no flow ever sits below
+    the shared episode base). With ``per_flow_rtt_anchor_first: true`` flow 0
+    is pinned at exactly the base delay and only the remaining flows draw the
+    random multiplier. The Mininet backend applies these on each
     sender's access link (see ``per_flow_delays`` in
     environments/mininet/env.py), so every flow shares the one bottleneck but
     propagates at its own RTT. Returns ``None`` when disabled, leaving the
@@ -1591,7 +1629,15 @@ def _per_flow_rtt_delays(n_flows: int, base_delay: float, ecfg: dict,
                         sweep_cfg.get('per_flow_rtt_mult_max', 5.0)))
     lo, hi = sorted((max(0.0, lo), max(0.0, hi)))
     base = max(0.0, float(base_delay))
-    return [round(base * rng.uniform(lo, hi), 3) for _ in range(n_flows)]
+    delays = [round(base * rng.uniform(lo, hi), 3) for _ in range(n_flows)]
+    anchor_first = _as_bool(
+        ecfg.get('per_flow_rtt_anchor_first',
+                 sweep_cfg.get('per_flow_rtt_anchor_first', False)),
+        default=False,
+    )
+    if anchor_first:
+        delays[0] = round(base, 3)
+    return delays
 
 
 def _estimate_collection_rate(cfg: dict, n_parallel: int) -> tuple:
@@ -1860,14 +1906,22 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
         # its reward/state reference must be its own delay, not the shared
         # episode base. per_flow_delays[i] is flow i's one-way delay in ms,
         # matching the existing OC_BASE_RTT_US = delay*1000 convention.
+        # Scheduled delay events are likewise rescaled to the flow's own base
+        # (mininet applies them per access link; raynet handles its schedule
+        # internally, so its context keeps the shared events).
         if per_flow_delays and agent_id < len(per_flow_delays):
-            flow_rtt_us = str(float(per_flow_delays[agent_id]) * 1000.0)
+            flow_delay_ms = float(per_flow_delays[agent_id])
+            flow_rtt_us = str(flow_delay_ms * 1000.0)
             flow_context_path = write_link_context(
                 _link_context_path(
                     episodes_dir, episode, instance_id, flow_id=agent_id),
                 bw_mbps=float(ecfg.get('bw', 100.0)),
                 base_rtt_us=flow_rtt_us,
-                link_schedule=link_schedule,
+                link_schedule=(link_schedule if is_raynet
+                               else _flow_link_schedule(
+                                   link_schedule,
+                                   ecfg.get('delay', 20.0),
+                                   flow_delay_ms)),
                 episode=episode,
                 slot=instance_id,
                 flow_id=agent_id,

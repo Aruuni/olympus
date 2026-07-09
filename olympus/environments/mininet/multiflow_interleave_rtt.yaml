@@ -37,12 +37,11 @@ sweep:
   flow_lifetime_max_frac: 0.9
   flow_lifetime_keep_one: true
   duration: 120
-  # NOTE: schedules vary BW ONLY. Each flow's RTT is fixed for the episode by
-  # its per-flow access-link delay; the shared s1-s2 link carries no netem, so a
-  # delay_frac schedule would be a no-op on the wire AND would overwrite each
-  # flow's per-flow reward reference (rtt_ref) with the shared episode delay —
-  # re-introducing the very RTT unfairness this env exists to remove. Keep RTT
-  # heterogeneity in per_flow_rtt_mult, keep schedules to bandwidth.
+  # NOTE: delay_frac schedules scale each flow's OWN access-link delay (and its
+  # reward reference rtt_ref) by the given fraction of the episode base — see
+  # MininetEnv.set_link and orchestrator._flow_link_schedule. Inter-flow RTT
+  # heterogeneity (per_flow_rtt_mult) is preserved through changes: every
+  # flow's RTT moves by the same fraction of its own base.
   link_schedules:
     # ── 7-change / 15s cadence: BW only ──────────────────────────────────────
     - [{t: 15, bw_frac: 0.5},  {t: 30, bw_frac: 1.0}, {t: 45, bw_frac: 0.5},  {t: 60, bw_frac: 1.0}, {t: 75, bw_frac: 0.5},  {t: 90, bw_frac: 1.0}, {t: 105, bw_frac: 0.5}]

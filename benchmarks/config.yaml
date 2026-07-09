@@ -1,6 +1,17 @@
 
 
 approaches:
+  - data_folder: ma_dreamer_general
+    name: ma_dreamer_general
+    kind: model
+    algorithm: ma_dreamer
+    state: tempest_ratio
+    reward: tempest_fairness_ma
+    environment: multiflow_interleave_rtt_memes
+    plot_label: MA-Dreamer General
+    config: olympus/models/ma_dreamer_20260707-205849/telemetry/config.resolved.yaml
+    checkpoint: olympus/models/ma_dreamer_20260707-205849/checkpoints/ma_dreamer_cwnd_model.pt
+
   - data_folder: ma_dreamer_inter_rtt
     name: ma_dreamer_inter_rtt
     kind: model
@@ -126,6 +137,7 @@ approaches:
 # baselines, Astraea, and the 0.995-gamma credit MA-Dreamer. Drop the list (or
 # leave it empty) to disable the extra plots.
 specific_plots:
+  - ma_dreamer_general
   - ma_dreamer_20260615-022803
   - cubic
   - bbr

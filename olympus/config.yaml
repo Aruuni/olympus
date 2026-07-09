@@ -92,7 +92,7 @@ reward:
 # while the probe is active. Maintains a windowed min-RTT filter internally
 # — NOT exposed to the agent's observation.
 bbr_probe:
-  enabled: false
+  enabled: true
   interval_s: 5.0
   duration_s: 0.2
   factor: 0.5

@@ -1,10 +1,12 @@
-name: multiflow_interleave_rtt
+name: multiflow_interleave_rtt_memes
 description: >
   Like multiflow_interleave (up to N flows join/leave on one shared bottleneck),
-  but every flow propagates at its OWN base RTT: each flow's one-way delay is a
-  random multiple of the selected environment's base RTT, drawn uniformly in
-  [per_flow_rtt_mult_min, per_flow_rtt_mult_max] (default 0.20x .. 5.0x) per
-  flow, per episode. The shared s1-s2 link then carries no propagation delay and
+  but flows propagate at their OWN RTT: flow 0 is anchored at exactly the
+  episode base RTT, and each extra flow's one-way delay is a random multiple
+  of the base, drawn uniformly in [per_flow_rtt_mult_min,
+  per_flow_rtt_mult_max] (here 1x .. 4x, so extras span 50 .. 200ms on a
+  50ms base) per flow, per episode.
+  The shared s1-s2 link then carries no propagation delay and
   each flow's RTT lives on its own sender access link (see `per_flow_delays` in
   environments/mininet/env.py), so flows with very different RTTs contend on the
   same bottleneck — an inter-RTT-fairness stress test on top of the interleave
@@ -13,9 +15,9 @@ description: >
 shuffle: true
 
 sweep:
-  bw_range:    [50, 50]
+  bw_range:    [10, 100]
   bw_step:     10
-  delay_range: [50, 50]
+  delay_range: [10, 100]
   delay_step:  10
   bdp_mult: 4
   # Concurrent flows (agents) per slot. A list sweeps all listed counts, padding
@@ -23,11 +25,13 @@ sweep:
   #   [1, 2, 3, 4]  up to 4 (default)   |   [1, 2]  up to 2   |   [4]  exactly 4.
   flows:    [1, 2, 3, 4]
   # ── Per-flow base-RTT diversity ──────────────────────────────────────────
-  # When on, each flow's one-way delay = base delay * U(min, max), sampled once
-  # per flow per episode. Set min/max to widen or narrow the RTT spread.
+  # Flow 0 is pinned at exactly the base RTT; each EXTRA flow's one-way delay
+  # = base delay * U(min, max), sampled once per flow per episode. With base
+  # 50ms and [1, 4], flow 0 sits at 50ms and the others span 50 .. 200ms.
   per_flow_rtt_mult: true
-  per_flow_rtt_mult_min: 0.20
-  per_flow_rtt_mult_max: 5.0
+  per_flow_rtt_mult_min: 1.0
+  per_flow_rtt_mult_max: 4.0
+  per_flow_rtt_anchor_first: true
   # Flow start stagger: 'simul' | 'half_late' | 'random'.
   agent_join_pattern: random
   agent_join_max_frac: 0.2
@@ -37,12 +41,11 @@ sweep:
   flow_lifetime_max_frac: 0.9
   flow_lifetime_keep_one: true
   duration: 120
-  # NOTE: schedules vary BW ONLY. Each flow's RTT is fixed for the episode by
-  # its per-flow access-link delay; the shared s1-s2 link carries no netem, so a
-  # delay_frac schedule would be a no-op on the wire AND would overwrite each
-  # flow's per-flow reward reference (rtt_ref) with the shared episode delay —
-  # re-introducing the very RTT unfairness this env exists to remove. Keep RTT
-  # heterogeneity in per_flow_rtt_mult, keep schedules to bandwidth.
+  # NOTE: delay_frac schedules scale each flow's OWN access-link delay (and its
+  # reward reference rtt_ref) by the given fraction of the episode base — see
+  # MininetEnv.set_link and orchestrator._flow_link_schedule. Inter-flow RTT
+  # heterogeneity (per_flow_rtt_mult) is preserved through changes: every
+  # flow's RTT moves by the same fraction of its own base.
   link_schedules:
     # ── 7-change / 15s cadence: BW only ──────────────────────────────────────
     - [{t: 15, bw_frac: 0.5},  {t: 30, bw_frac: 1.0}, {t: 45, bw_frac: 0.5},  {t: 60, bw_frac: 1.0}, {t: 75, bw_frac: 0.5},  {t: 90, bw_frac: 1.0}, {t: 105, bw_frac: 0.5}]

@@ -101,24 +101,19 @@ sudo -E env PATH="$PATH" HOME="$HOME" \
 
 Responsive-fairness raw runs remain under
 `benchmark_responsive_fairness/data/<model>/`. Experiment execution does not
-create plots. Generate the cross-learner fairness report separately with:
+create plots. Generate the figures separately with:
 
 ```bash
 ./venv_training/bin/python \
   benchmarks/benchmark_responsive_fairness/plot.py
 ```
 
-All generated tables and reports are written under
-`benchmark_responsive_fairness/aggregate/`. This includes
-`fairness_runs.csv`, `fairness_by_flow_count.csv`, the standalone summary
-PDFs, one per-approach PDF, and `all.pdf`.
-`all.pdf` has one page per flow count with every approach overlaid for
-aggregate responsiveness, SRTT, Jain fairness, R_fair, and min/max goodput.
-`fairness_cdfs.pdf` contains one page per learner with Jain, R_fair
-(Astraea CoV), and minimum/maximum-goodput curves for every flow count.
-Each aggregate report is a responsiveness-summary-style page: per-run
-goodput and SRTT CDFs with one curve per flow count (plus Scheduled BW /
-Base RTT references), and a stacked column of Jain / R_fair / min-max
-fairness CDFs from the scored per-second samples.
-`srtt_by_flow_count.pdf` shows per-run average SRTT against the number of
-flows for every approach.
+`plot.py` is the single plot script and `figures.yaml` its single config: it
+renders exactly the figures declared there and nothing else. Each figure entry
+names a list of `data_folders` and produces one 3-panel PDF under
+`benchmark_responsive_fairness/data/figures/<name>.pdf`: aggregate Goodput CDF |
+SRTT CDF | Jain fairness CDF (7 flows), pooled across every flow count, with
+Scheduled BW / Base RTT references. Plot labels are pulled from the shared
+`benchmarks/config.yaml` approaches, so a folder is drawn with the same label
+used everywhere else. Add or remove a `data_folder` in `figures.yaml` to change
+what a figure shows.
