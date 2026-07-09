@@ -128,7 +128,7 @@ outputs:
   # run_name: debug_run
   # Set false to skip per-episode PDFs in plots/ (episode_returns.csv and
   # telemetry/episode_returns.pdf are still generated).
-  plot_episodes: true
+  plot_episodes: false
 
 # ── Orchestrator ──────────────────────────────────────────────────────────────
 # Runner-level knobs: episode dispatch, checkpoint snapshots, the learner RPC

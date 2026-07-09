@@ -26,6 +26,11 @@
 #
 set -Eeuo pipefail
 
+if (( EUID == 0 )); then
+    echo "ERROR: do not run build_all.sh with sudo. Run it as your normal user; the script uses sudo only for apt installs." >&2
+    exit 1
+fi
+
 # --------------------------------------------------------------------------- #
 # Self-locating paths
 # --------------------------------------------------------------------------- #
