@@ -1221,6 +1221,7 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
         raynet_ecfg = dict(ecfg)
         for key, value in _raynet_config_overrides(cfg).items():
             raynet_ecfg.setdefault(key, value)
+        raynet_ecfg.setdefault('interval_ms', float(a_cfg.get('interval_ms', 20)))
         raynet_ecfg.setdefault(
             'runner_log_path',
             os.path.join(
@@ -1856,6 +1857,7 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
         raynet_ecfg = dict(ecfg)
         for key, value in _raynet_config_overrides(cfg).items():
             raynet_ecfg.setdefault(key, value)
+        raynet_ecfg.setdefault('interval_ms', float(a_cfg.get('interval_ms', 20)))
         raynet_ecfg.setdefault(
             'runner_log_path',
             os.path.join(

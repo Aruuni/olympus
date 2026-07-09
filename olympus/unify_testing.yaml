@@ -46,7 +46,7 @@ actions:
 # THE collection environment: pick a type + environment_setup here.
 environment:
   type: mininet
-  environment_setup: dynamic
+  environment_setup: static
 
 # Unsynchronised collection: emulation and simulation slots each run at their own
 # pace (no cross-slot step barrier). Default, pinned explicitly. The fast RayNet
@@ -72,14 +72,14 @@ experience_collection:
   enabled: true
 
   mininet:
-    environment_setup: dynamic       # one flow under changing BW/RTT
-    n_parallel: 20
+    environment_setup: static       # one flow under changing BW/RTT
+    n_parallel: 1
     buffer_capacity: 400000
     batch_fraction: 0.5
 
   raynet:
-    environment_setup: dynamic    # RayNet Orca sweep (bws x delays)
-    n_parallel: 20
+    environment_setup: static    # RayNet Orca sweep (bws x delays)
+    n_parallel: 1
     # Total capacity, split evenly across the BDP classes below.
     buffer_capacity: 400000
     batch_fraction: 0.5
@@ -134,7 +134,7 @@ paths:
   # olympus/environments/raynet/sim/ ; set raynet_path/omnet_path here to override.
 
 outputs:
-  root: olympus/models/orca
+  root: olympus/models/unify_testing
   run_name: 
   # Worker CSV traces always go to episodes/. Render every completed emulation
   # and simulation episode into plots/.

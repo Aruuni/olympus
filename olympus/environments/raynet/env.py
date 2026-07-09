@@ -603,7 +603,15 @@ class RaynetEnv(NetworkEnv):
         return env
 
     def episode_config(self):
-        interval_ms = float(os.environ.get('SAO_INTERVAL_MS', '20.0'))
+        interval_value = (
+            self.environment_config.get('interval_ms')
+            or self.environment_config.get('step_interval_ms')
+            or self.environment_config.get('agent_interval_ms')
+            or os.environ.get('SAO_INTERVAL_MS')
+            or os.environ.get('OC_INTERVAL_MS')
+            or '20.0'
+        )
+        interval_ms = float(interval_value)
         interval_s = interval_ms / 1000.0
         replacements = {
             'home': os.environ.get('HOME', str(Path.home())),
@@ -640,6 +648,7 @@ class RaynetEnv(NetworkEnv):
             'flows': int(self.n),
             'bdp_mult': self.bdp_mult,
             'duration': duration,
+            'interval_ms': interval_ms,
             'quiet': True,
             'replacements': replacements,
             'overrides': overrides,
