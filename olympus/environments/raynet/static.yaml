@@ -3,10 +3,10 @@ description: Steady-link sweep. Each episode samples one BW/RTT pair and has no 
 shuffle: true
 
 sweep:
-  bws: [20]
-  delays: [20]
-  bdp_mult: 1
+  bws: [6, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72, 78, 84, 90, 96, 102, 108, 114, 120, 126, 132, 138, 144, 150, 156, 162, 168, 174, 180, 186, 192]
+  delays: [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150, 155, 160, 165, 170, 175, 180, 185, 190, 195, 200]
+  bdp_mult: 4
   flows: 1
-  duration: 40
+  duration: 120
   link_schedules:
     - []
