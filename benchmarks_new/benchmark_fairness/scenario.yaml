@@ -1,0 +1,14 @@
+name: fairness_two_flow_join20_final20
+description: Two flows; the second joins after 20 seconds.
+shuffle: false
+sweep:
+  bws: [20, 40, 60, 80, 100]
+  delays: [20, 30, 40, 50, 60, 70]
+  flows: [2]
+  duration: 60
+  bdp_mult: 4
+  measure_interval_s: 1.0
+  flow_schedule:
+    arrival: {start_delays: [0, 20]}
+    duration: {until_episode_end: true}
+  link_schedules: [[]]

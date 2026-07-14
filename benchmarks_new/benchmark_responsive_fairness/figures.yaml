@@ -1,0 +1,3 @@
+figures:
+  - name: benchmark_summary
+    metrics: [throughput, rtt, jain_fairness, return]

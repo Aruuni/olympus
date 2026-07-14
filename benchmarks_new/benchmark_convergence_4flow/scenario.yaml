@@ -1,0 +1,13 @@
+name: convergence_4flow_join25_stay100_175s
+description: Four flows join every 25 seconds and each remains for 100 seconds.
+shuffle: false
+sweep:
+  bws: [50, 100]
+  delays: [20, 50]
+  flows: [4]
+  duration: 175
+  bdp_mult: 4
+  flow_schedule:
+    arrival: {start_delays: [0, 25, 50, 75]}
+    duration: {fixed_s: 100}
+  link_schedules: [[]]

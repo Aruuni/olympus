@@ -73,15 +73,15 @@ experience_collection:
 
   mininet:
     environment_setup: dynamic       # one flow under changing BW/RTT
-    n_parallel: 20
-    buffer_capacity: 400000
+    n_parallel: 2
+    buffer_capacity: 4000
     batch_fraction: 0.5
 
   raynet:
     environment_setup: dynamic    # RayNet Orca sweep (bws x delays)
-    n_parallel: 20
+    n_parallel: 2
     # Total capacity, split evenly across the BDP classes below.
-    buffer_capacity: 400000
+    buffer_capacity: 4000
     batch_fraction: 0.5
     # BDP-stratified simulation replay. RayNet finishes low-bandwidth episodes
     # far faster in wall-clock, so a single FIFO sim buffer fills with low-BDP /
@@ -134,7 +134,7 @@ paths:
   # olympus/environments/raynet/sim/ ; set raynet_path/omnet_path here to override.
 
 outputs:
-  root: olympus/models/orca
+  root: olympus/models/test-model
   run_name: 
   # Worker CSV traces always go to episodes/. Render every completed emulation
   # and simulation episode into plots/.
@@ -281,8 +281,8 @@ algorithms:
       resume_from: null
       batch_size: 16
       seq_len: 48
-      min_replay: 5000
-      replay_capacity: 400000
+      min_replay: 1
+      replay_capacity: 8000
       grad_clip: 1000.0
       updates_per_step: 1
       save_every: 500

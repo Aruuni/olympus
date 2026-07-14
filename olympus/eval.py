@@ -201,6 +201,9 @@ def _manifest_runs(args):
                     'telemetry_dir', 'traces_dir', 'resolved_config'):
             outputs.pop(key, None)
         output_root = args.output_root or spec.get('output_root', 'olympus/evaluations')
+        if not os.path.isabs(str(output_root)):
+            output_root = os.path.abspath(os.path.join(
+                os.path.dirname(os.path.abspath(args.config)), str(output_root)))
         outputs.update({'root': output_root, 'run_name': spec['name']})
         if spec['logging'] != 'standard':
             outputs.update({'plot_episodes': False, 'require_state_logs': False})

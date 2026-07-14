@@ -1472,7 +1472,91 @@ def _sample_range(spec, step=None, rng=None, digits=3) -> float:
     return round(float(rng.uniform(lo, hi)), int(digits))
 
 
-def materialize_episode_config(ecfg: dict, rng=None) -> dict:
+def _materialize_scenario_generators(ecfg: dict, episode: int = 0,
+                                     rng=None) -> dict:
+    """Resolve backend-neutral schedule generators to concrete episode lists."""
+    out = dict(ecfg)
+    rng = rng or random.Random(_episode_rng_seed(out, episode))
+    duration = float(out.get('duration', 60.0))
+    n_flows = int(out.get('flows', 1))
+
+    refs = {
+        '$bw': float(out.get('bw', 100.0)),
+        '$delay': float(out.get('delay', 20.0)),
+        '$half_delay': float(out.get('delay', 20.0)) / 2.0,
+    }
+    def resolve_refs(value):
+        if isinstance(value, str) and value in refs:
+            return refs[value]
+        if isinstance(value, list):
+            return [resolve_refs(item) for item in value]
+        if isinstance(value, dict):
+            return {key: resolve_refs(item) for key, item in value.items()}
+        return value
+    out = resolve_refs(out)
+
+    flow_spec = out.pop('flow_schedule', None)
+    if isinstance(flow_spec, dict):
+        arrival = flow_spec.get('arrival', flow_spec)
+        if isinstance(arrival, dict) and 'evenly_spaced_over_s' in arrival:
+            window = float(arrival['evenly_spaced_over_s'])
+            starts = ([0.0] if n_flows <= 1 else
+                      [window * i / (n_flows - 1) for i in range(n_flows)])
+        elif isinstance(arrival, dict) and 'start_delays' in arrival:
+            starts = [float(v) for v in arrival['start_delays']]
+        else:
+            starts = [0.0] * n_flows
+        starts = (starts + [0.0] * n_flows)[:n_flows]
+        duration_spec = flow_spec.get('duration', {})
+        if isinstance(duration_spec, dict) and duration_spec.get('until_episode_end'):
+            lengths = [max(1.0, duration - start) for start in starts]
+        elif isinstance(duration_spec, dict) and 'fixed_s' in duration_spec:
+            lengths = [float(duration_spec['fixed_s'])] * n_flows
+        else:
+            lengths = [max(1.0, duration - start) for start in starts]
+        out['start_delays'] = starts
+        out['flow_durations'] = lengths
+
+    link_spec = out.get('link_schedule_generator')
+    if link_spec is None and isinstance(out.get('link_schedule'), dict):
+        link_spec = out['link_schedule']
+    if isinstance(link_spec, dict):
+        interval = float(link_spec.get('interval_s', 0))
+        if interval <= 0:
+            raise ValueError('link schedule generator interval_s must be > 0')
+        start = float(link_spec.get('start_s', interval))
+
+        def sampled(field, current):
+            spec = link_spec.get(field)
+            if spec is None:
+                return current
+            if isinstance(spec, dict) and 'uniform' in spec:
+                return _sample_range(spec['uniform'], step=spec.get('step'), rng=rng)
+            if isinstance(spec, (list, tuple)):
+                return float(rng.choice(list(spec)))
+            return float(spec)
+
+        schedule = []
+        current_bw = float(out.get('bw', 100.0))
+        current_delay = float(out.get('delay', 20.0))
+        if _as_bool(link_spec.get('sample_initial'), False):
+            current_bw = sampled('bw', current_bw)
+            current_delay = sampled('delay', current_delay)
+            out['bw'] = current_bw
+            out['delay'] = current_delay
+        t = start
+        while t < duration:
+            current_bw = sampled('bw', current_bw)
+            current_delay = sampled('delay', current_delay)
+            schedule.append({'t': round(t, 6), 'bw': current_bw,
+                             'delay': current_delay})
+            t += interval
+        out['link_schedule'] = schedule
+        out.pop('link_schedule_generator', None)
+    return out
+
+
+def materialize_episode_config(ecfg: dict, rng=None, episode: int = 0) -> dict:
     """Resolve sampled base BW/RTT and schedule fractions for one MARL episode."""
     rng = rng or random
     out = {k: v for k, v in dict(ecfg).items()
@@ -1508,7 +1592,7 @@ def materialize_episode_config(ecfg: dict, rng=None) -> dict:
             e['delay'] = round(float(out['delay']) * e.pop('delay_frac'), 3)
         resolved.append(e)
     out['link_schedule'] = resolved
-    return out
+    return _materialize_scenario_generators(out, episode=episode, rng=rng)
 
 
 def _parsed_flow_values(spec, default=2):
@@ -1739,8 +1823,13 @@ def _build_pool_marl(cfg):
                 ep['_link_schedule_template'] = list(sched or [])
                 ep['environment'] = env_meta.get('name', 'config')
                 ep['environment_path'] = env_meta.get('path', '')
+                has_generators = bool(
+                    ep.get('flow_schedule')
+                    or ep.get('link_schedule_generator')
+                    or isinstance(ep.get('link_schedule'), dict))
                 pool.append(materialize_episode_config(ep) if (
-                    bw_range is None and delay_range is None) else ep)
+                    bw_range is None and delay_range is None
+                    and not has_generators) else ep)
         return pool, bool(env_cfg.get('shuffle', True))
     envs = env_cfg.get('experiments', [{}])
     out = []
@@ -2058,6 +2147,7 @@ def _materialize_single_episode(ecfg: dict, episode: int) -> dict:
     with an explicit lagged_policy block pass straight through to the
     lagged-policy materializer.
     """
+    ecfg = _materialize_scenario_generators(ecfg, episode=episode)
     has_lag = isinstance(
         ecfg.get('lagged_policy') or ecfg.get('lagged_policy_join'), dict)
     if not has_lag:
@@ -2466,7 +2556,10 @@ def main():
                 random.shuffle(g['pending'])
         ep = episode_counter
         if multi:
-            ecfg = materialize_episode_config(g['pending'].pop(0))
+            raw_ecfg = g['pending'].pop(0)
+            seeded_rng = random.Random(_episode_rng_seed(raw_ecfg, ep))
+            ecfg = materialize_episode_config(
+                raw_ecfg, rng=seeded_rng, episode=ep)
         else:
             ecfg = _materialize_single_episode(g['pending'].pop(0), ep)
         episode_counter += 1

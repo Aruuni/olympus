@@ -1,0 +1,14 @@
+name: minimal
+description: One flow with reproducible random BW/RTT changes every 15 seconds.
+shuffle: false
+sweep:
+  bws: [50]
+  delays: [50]
+  flows: [1]
+  duration: 40
+  bdp_mult: 1
+  link_schedule_generator:
+    interval_s: 10
+    sample_initial: true
+    bw: {uniform: [10, 100]}
+    delay: {uniform: [10, 100]}

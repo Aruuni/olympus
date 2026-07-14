@@ -5,7 +5,9 @@ from pathlib import Path
 import yaml
 
 from olympus.common.eval_manifest import expand_manifest, scenario_episode_count
-from olympus.orchestrator import _build_sweep_pool
+from olympus.orchestrator import (
+    _build_sweep_pool, _materialize_scenario_generators,
+)
 
 
 class EvalManifestTests(unittest.TestCase):
@@ -68,6 +70,33 @@ class EvalManifestTests(unittest.TestCase):
         )
         self.assertEqual(len(pool), 4)
         self.assertEqual({item['flows'] for item in pool}, {1, 2})
+
+    def test_generic_flow_and_link_schedules_materialize(self):
+        episode = {
+            'bw': 50, 'delay': 50, 'flows': 4, 'duration': 100, 'seed': 9,
+            'flow_schedule': {
+                'arrival': {'evenly_spaced_over_s': 30},
+                'duration': {'until_episode_end': True},
+            },
+            'link_schedule_generator': {
+                'interval_s': 20, 'sample_initial': True,
+                'bw': {'uniform': [10, 100]},
+                'delay': {'uniform': [10, 100]},
+            },
+        }
+        first = _materialize_scenario_generators(episode, episode=3)
+        second = _materialize_scenario_generators(episode, episode=3)
+        self.assertEqual(first, second)
+        self.assertEqual(first['start_delays'], [0, 10, 20, 30])
+        self.assertEqual(first['flow_durations'], [100, 90, 80, 70])
+        self.assertEqual([row['t'] for row in first['link_schedule']], [20, 40, 60, 80])
+
+    def test_scenario_references_resolve_after_sweep(self):
+        out = _materialize_scenario_generators({
+            'bw': 40, 'delay': 80, 'flows': 2, 'duration': 10,
+            'per_flow_delays': [10, '$half_delay'],
+        })
+        self.assertEqual(out['per_flow_delays'], [10, 40])
 
     def test_rejects_unknown_matrix_name(self):
         manifest = {

@@ -1,0 +1,12 @@
+kind: olympus-eval
+version: 1
+defaults:
+  n_parallel: 20
+  repetitions: 4
+  seed: 0
+  logging: standard
+  output_root: data
+matrix:
+  checkpoints: [tempest_static]
+  scenarios: [scenario.yaml]
+  environments: [mininet, raynet]

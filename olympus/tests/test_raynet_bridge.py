@@ -241,6 +241,21 @@ class RayNetObservationAdapterTest(unittest.TestCase):
         raw = {'avg_thr': 123.0, 'cwnd': 42.0}
         self.assertEqual(env.observation_to_raw(raw), raw)
 
+    def test_qsize_bits_is_integer_for_fractional_bdp(self):
+        env = raynet_env.RaynetEnv(
+            bw=12.3456,
+            delay=17.403,
+            bdp_mult=10,
+        )
+        qsize = env._qsize_bits()
+
+        self.assertRegex(qsize, r'^\d+b$')
+        self.assertEqual(qsize, '2148505b')
+
+    def test_explicit_qsize_is_converted_to_integer_bits(self):
+        env = raynet_env.RaynetEnv(qsize=1000.25)
+        self.assertEqual(env._qsize_bits(), '8002b')
+
     def test_episode_config_omits_empty_observation_fields(self):
         env = raynet_env.RaynetEnv(
             raynet_path='/tmp',

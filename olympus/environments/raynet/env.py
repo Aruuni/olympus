@@ -709,9 +709,10 @@ class RaynetEnv(NetworkEnv):
 
     def _qsize_bits(self):
         if self.qsize is not None:
-            return f'{float(self.qsize) * 8.0:.12g}b'
+            bits = float(self.qsize) * 8.0
+            return f'{max(1, round(bits))}b'
         bits = max(1.0, self.bw * self.delay * 1000.0 * float(self.bdp_mult))
-        return f'{bits:.12g}b'
+        return f'{max(1, round(bits))}b'
 
     def _start_flow_service(self):
         global _FLOW_SERVICE

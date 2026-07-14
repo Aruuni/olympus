@@ -1,0 +1,17 @@
+name: responsive_fairness_join45_score300
+description: Swept flow counts join over 45s on a changing bottleneck.
+shuffle: false
+sweep:
+  bws: [50]
+  delays: [50]
+  flows: [2, 4, 5, 7]
+  duration: 345
+  bdp_mult: 4
+  flow_schedule:
+    arrival: {evenly_spaced_over_s: 45}
+    duration: {until_episode_end: true}
+  link_schedule_generator:
+    interval_s: 15
+    sample_initial: true
+    bw: {uniform: [10, 100]}
+    delay: {uniform: [10, 100]}
