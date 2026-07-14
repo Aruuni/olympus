@@ -12,7 +12,30 @@ from olympus.environments.base import NetworkEnv
 
 _DEFAULT_ENV_TYPE = 'mininet'
 
-__all__ = ['NetworkEnv', 'make_env']
+__all__ = ['NetworkEnv', 'make_env', 'validate_scenario']
+
+
+def _backend_module(env_type):
+    env_type = (str(env_type).strip() if env_type else '') or _DEFAULT_ENV_TYPE
+    try:
+        return importlib.import_module(f'olympus.environments.{env_type}.env')
+    except ImportError as exc:
+        raise ValueError(
+            f'unknown environment backend {env_type!r}: '
+            f'expected olympus/environments/{env_type}/env.py') from exc
+
+
+def validate_scenario(env_type, scenario):
+    """Ask a backend to preflight a backend-neutral scenario, when supported."""
+    if not isinstance(scenario, dict):
+        raise ValueError('environment scenario must be a mapping')
+    if not isinstance(scenario.get('sweep'), dict) and not isinstance(
+            scenario.get('experiments'), list):
+        raise ValueError('environment scenario must define sweep or experiments')
+    module = _backend_module(env_type)
+    validator = getattr(module, 'validate_scenario', None)
+    if validator is not None:
+        validator(scenario)
 
 
 def make_env(env_type=None, **kwargs):
@@ -23,12 +46,7 @@ def make_env(env_type=None, **kwargs):
     Mininet backend so existing single-backend callers are unaffected.
     """
     env_type = (str(env_type).strip() if env_type else '') or _DEFAULT_ENV_TYPE
-    try:
-        module = importlib.import_module(f'olympus.environments.{env_type}.env')
-    except ImportError as exc:
-        raise ValueError(
-            f'unknown environment backend {env_type!r}: '
-            f'expected olympus/environments/{env_type}/env.py') from exc
+    module = _backend_module(env_type)
     try:
         env_cls = module.ENV_CLASS
     except AttributeError as exc:

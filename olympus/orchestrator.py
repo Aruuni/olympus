@@ -270,6 +270,23 @@ def _eval_mode(cfg: dict) -> bool:
     return _as_bool(raw, default=False)
 
 
+def _eval_logging_profile(cfg: dict) -> str:
+    if not _eval_mode(cfg):
+        return 'standard'
+    raw = cfg.get('eval', {}) or {}
+    return str(raw.get('logging', 'standard')).strip().lower()
+
+
+def _remove_episode_traces(state_log: str) -> None:
+    """Remove worker CSVs after metrics are derived for minimal eval runs."""
+    root, ext = os.path.splitext(state_log)
+    for path in glob.glob(f'{root}*{ext or ".csv"}'):
+        try:
+            os.unlink(path)
+        except OSError:
+            pass
+
+
 def _decayed_noise(cfg: dict, episode: int) -> float:
     """
     Linear decay of exploration σ (pre-tanh Gaussian) from noise_start →
@@ -588,6 +605,7 @@ def _prepare_run(cfg: dict, config_path: str) -> str:
         # Backward-compatible alias used by older code paths.
         'traces_dir': episodes_dir,
     })
+    eval_mode = _eval_mode(cfg)
     training['checkpoint'] = os.path.join(checkpoints_dir, f'{_slug(alg_name)}_cwnd_model.pt')
     training['log_path'] = os.path.join(telemetry_dir, 'learner_metrics.csv')
 
@@ -597,10 +615,15 @@ def _prepare_run(cfg: dict, config_path: str) -> str:
         if not os.path.exists(resume_from):
             raise SystemExit(f'[orch] resume checkpoint not found: {resume_from}')
         training['resume_from'] = resume_from
-        shutil.copy2(resume_from, training['checkpoint'])
-        resume_env = resume_from + '.envelope.json'
-        if os.path.exists(resume_env):
-            shutil.copy2(resume_env, training['checkpoint'] + '.envelope.json')
+        if eval_mode:
+            # Evaluation workers read the immutable source checkpoint directly.
+            # Avoid duplicating large models into every matrix-entry run.
+            training['checkpoint'] = resume_from
+        else:
+            shutil.copy2(resume_from, training['checkpoint'])
+            resume_env = resume_from + '.envelope.json'
+            if os.path.exists(resume_env):
+                shutil.copy2(resume_env, training['checkpoint'] + '.envelope.json')
 
     meta = {
         'run_name': run_name,
@@ -614,6 +637,8 @@ def _prepare_run(cfg: dict, config_path: str) -> str:
         'run_dir': run_dir,
         'resume_from': training.get('resume_from', ''),
     }
+    if cfg.get('eval_metadata'):
+        meta['evaluation'] = cfg['eval_metadata']
     with open(os.path.join(telemetry_dir, 'run_meta.json'), 'w') as f:
         json.dump(meta, f, indent=2)
 
@@ -632,12 +657,17 @@ def _prepare_run(cfg: dict, config_path: str) -> str:
 def _build_sweep_pool(sw: dict, env_meta: dict):
     bws       = sw.get('bws',    [sw.get('bw',    100.0)])
     delays    = sw.get('delays', [sw.get('delay',  20.0)])
+    flows     = sw.get('flows', [sw.get('flow', 1)])
+    if not isinstance(flows, (list, tuple)):
+        flows = [flows]
     schedules = sw.get('link_schedules', [[]])
     base      = {k: v for k, v in sw.items()
-                 if k not in ('bws', 'delays', 'link_schedules', 'bw', 'delay')}
+                 if k not in ('bws', 'delays', 'flows', 'link_schedules',
+                              'bw', 'delay', 'flow')}
     pool = []
-    for bw, delay, sched in itertools.product(bws, delays, schedules):
-        ep = dict(base, bw=float(bw), delay=float(delay))
+    for bw, delay, n_flows, sched in itertools.product(
+            bws, delays, flows, schedules):
+        ep = dict(base, bw=float(bw), delay=float(delay), flows=int(n_flows))
         resolved = []
         for entry in sched:
             e = dict(entry)
@@ -773,8 +803,11 @@ def _build_pool(cfg):
     has_selected_environment = bool(cfg.get('environment'))
 
     if 'sweep' in env_cfg:
-        return (_build_sweep_pool(env_cfg['sweep'], env_meta),
-                bool(env_cfg.get('shuffle', True)))
+        pool = _build_sweep_pool(env_cfg['sweep'], env_meta)
+        if cfg.get('seed') is not None:
+            for item in pool:
+                item.setdefault('seed', int(cfg['seed']))
+        return pool, bool(env_cfg.get('shuffle', True))
 
     if 'experiments' in env_cfg:
         envs = []
@@ -782,6 +815,8 @@ def _build_pool(cfg):
             item = dict(ep)
             item.setdefault('environment', env_meta.get('name', 'config'))
             item.setdefault('environment_path', env_meta.get('path', ''))
+            if cfg.get('seed') is not None:
+                item.setdefault('seed', int(cfg['seed']))
             envs.append(item)
         return envs, bool(env_cfg.get('shuffle', False))
 
@@ -1222,20 +1257,15 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
         for key, value in _raynet_config_overrides(cfg).items():
             raynet_ecfg.setdefault(key, value)
         raynet_ecfg.setdefault('interval_ms', float(a_cfg.get('interval_ms', 20)))
-        raynet_ecfg.setdefault(
-            'runner_log_path',
-            os.path.join(
-                episodes_dir,
-                f'raynet_runner_ep{episode:06d}_slot{instance_id}.log',
-            ),
-        )
-        raynet_ecfg.setdefault(
-            'control_trace_path',
-            os.path.join(
-                episodes_dir,
-                f'raynet_trace_ep{episode:06d}_slot{instance_id}.jsonl',
-            ),
-        )
+        if _eval_logging_profile(cfg) == 'standard':
+            raynet_ecfg.setdefault(
+                'runner_log_path',
+                os.path.join(episodes_dir,
+                             f'raynet_runner_ep{episode:06d}_slot{instance_id}.log'))
+            raynet_ecfg.setdefault(
+                'control_trace_path',
+                os.path.join(episodes_dir,
+                             f'raynet_trace_ep{episode:06d}_slot{instance_id}.jsonl'))
         raynet_ecfg['episode'] = int(episode)
         raynet_ecfg['slot'] = int(instance_id)
         raynet_ecfg['link_context_path'] = link_context_path
@@ -1358,6 +1388,8 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
         mode='single',
         slot_id=instance_id,
     )
+    if _eval_logging_profile(cfg) in ('minimal', 'none'):
+        _remove_episode_traces(state_log)
 
     return ep_return, ecfg, link_schedule
 
@@ -1858,20 +1890,15 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
         for key, value in _raynet_config_overrides(cfg).items():
             raynet_ecfg.setdefault(key, value)
         raynet_ecfg.setdefault('interval_ms', float(a_cfg.get('interval_ms', 20)))
-        raynet_ecfg.setdefault(
-            'runner_log_path',
-            os.path.join(
-                episodes_dir,
-                f'raynet_runner_ep{episode:06d}_slot{instance_id}.log',
-            ),
-        )
-        raynet_ecfg.setdefault(
-            'control_trace_path',
-            os.path.join(
-                episodes_dir,
-                f'raynet_trace_ep{episode:06d}_slot{instance_id}.jsonl',
-            ),
-        )
+        if _eval_logging_profile(cfg) == 'standard':
+            raynet_ecfg.setdefault(
+                'runner_log_path',
+                os.path.join(episodes_dir,
+                             f'raynet_runner_ep{episode:06d}_slot{instance_id}.log'))
+            raynet_ecfg.setdefault(
+                'control_trace_path',
+                os.path.join(episodes_dir,
+                             f'raynet_trace_ep{episode:06d}_slot{instance_id}.jsonl'))
         raynet_ecfg['episode'] = int(episode)
         raynet_ecfg['slot'] = int(instance_id)
         raynet_ecfg['link_context_path'] = link_context_path
@@ -1996,6 +2023,8 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
 
     if ep_return is not None:
         print(f'[orch] ep={episode} sum-of-agents return={ep_return:.1f}', flush=True)
+    if _eval_logging_profile(cfg) in ('minimal', 'none'):
+        _remove_episode_traces(state_log)
 
     return ep_return, ecfg, link_schedule
 
@@ -2445,7 +2474,8 @@ def main():
         return ep, ecfg
 
     returns_fields = [
-        'episode', 'environment', 'source', 'backend', 'bw', 'delay', 'scheduled',
+        'episode', 'checkpoint', 'checkpoint_label', 'scenario', 'environment',
+        'source', 'backend', 'repetition', 'seed', 'bw', 'delay', 'scheduled',
         'schedule_changes', 'episode_type', 'flows', 'return',
         'elapsed_s', 'episode_wall_s', 'completed_at',
     ]
@@ -2491,6 +2521,8 @@ def main():
         group = ep_to_group.get(ep)
         source = group['name'] if group else 'single'
         backend = _env_backend_type(group['cfg'] if group else cfg)
+        eval_meta = cfg.get('eval_metadata') or {}
+        group_pool_size = max(1, len(group['pool']) if group else 1)
         schedule_changes = len(link_sched or [])
         episode_type = f'{schedule_changes}_change' if schedule_changes == 1 else f'{schedule_changes}_changes'
         elapsed_s = time.monotonic() - training_start
@@ -2499,9 +2531,14 @@ def main():
             w = csv.DictWriter(f, fieldnames=active_returns_fields)
             w.writerow({
                 'episode': ep,
+                'checkpoint': eval_meta.get('checkpoint_name', ''),
+                'checkpoint_label': eval_meta.get('checkpoint_label', ''),
+                'scenario': eval_meta.get('scenario', ''),
                 'environment': env_name,
                 'source': source,
                 'backend': backend,
+                'repetition': int(ep) // group_pool_size,
+                'seed': ecfg.get('seed', cfg.get('seed', '')),
                 'bw': ecfg.get('bw', 100),
                 'delay': ecfg.get('delay', 20),
                 'scheduled': int(bool(link_sched)),
@@ -2522,6 +2559,8 @@ def main():
             _generate_returns_plot()
 
     def _generate_returns_plot():
+        if _eval_logging_profile(cfg) != 'standard':
+            return
         try:
             from olympus.plots.plot_returns_watcher import generate_plot
             generate_plot(

@@ -53,7 +53,7 @@ environment:
 # slots outrunning the Mininet ones is expected and handled on the learning side
 # by the per-source mix fraction plus the BDP-stratified sim buffer, not by
 # lock-stepping collection.
-synchronized_collection: true
+synchronized_collection: false
 
 # ── Experience collection ─────────────────────────────────────────────────────
 # Only active when enabled AND the learner supports it. Declare one block per
