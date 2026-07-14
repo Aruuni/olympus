@@ -7,6 +7,7 @@ import yaml
 from olympus.common.eval_manifest import expand_manifest, scenario_episode_count
 from olympus.orchestrator import (
     _build_sweep_pool, _materialize_scenario_generators,
+    _materialize_single_episode,
 )
 
 
@@ -90,7 +91,15 @@ class EvalManifestTests(unittest.TestCase):
         self.assertEqual(first['start_delays'], [0, 10, 20, 30])
         self.assertEqual(first['flow_durations'], [100, 90, 80, 70])
         self.assertTrue(first['per_flow_state_logs'])
+        self.assertTrue(first['unique_cports'])
+        self.assertTrue(first['listener_single_flow'])
+        self.assertTrue(first['independent_policy_flows'])
         self.assertEqual([row['t'] for row in first['link_schedule']], [20, 40, 60, 80])
+
+        single = _materialize_single_episode(episode, episode=3)
+        self.assertNotIn('lagged_policy', single)
+        self.assertEqual(single['start_delays'], [0, 10, 20, 30])
+        self.assertTrue(single['unique_cports'])
 
     def test_scenario_references_resolve_after_sweep(self):
         out = _materialize_scenario_generators({

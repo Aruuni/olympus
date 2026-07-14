@@ -9,4 +9,4 @@ defaults:
 matrix:
   checkpoints: [test-protocol]
   scenarios: [scenario.yaml]
-  environments: [mininet, raynet]
+  environments: [raynet]

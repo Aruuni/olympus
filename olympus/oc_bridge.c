@@ -385,7 +385,7 @@ static void usage(const char *prog) {
     fprintf(stderr,
         "Usage: %s --cport PORT --worker SCRIPT\n"
         "          [--mode normal|mininet] [--scan-ms 100]\n"
-        "          [--single-flow 0] [--no-state-pipe 0]\n"
+        "          [--single-flow 0] [--no-state-pipe 0] [--flow-id N]\n"
         "          [--ipv4-only 1] [--verbose 0]\n"
         "\n"
         "Env:  OC_PYTHON        path to Python interpreter (default /usr/bin/python3)\n"
@@ -420,6 +420,8 @@ int main(int argc, char **argv) {
             snprintf(g_cfg.mode, sizeof(g_cfg.mode), "%s", argv[++i]);
         } else if (!strcmp(argv[i], "--scan-ms") && i + 1 < argc) {
             g_cfg.scan_ms = atoi(argv[++i]);
+        } else if (!strcmp(argv[i], "--flow-id") && i + 1 < argc) {
+            g_next_flow_id = atol(argv[++i]);
         } else if (!strcmp(argv[i], "--single-flow") && i + 1 < argc) {
             /* Accepted for compatibility; exec-into-worker is always
              * single-flow because exec() ends the scan loop. */

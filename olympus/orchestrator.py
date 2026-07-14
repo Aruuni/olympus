@@ -1327,21 +1327,43 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
                 [python_bin, worker_script],
                 env=listener_env, start_new_session=True))
     else:
-        listener_cmd = [
-            listener_bin, '--cport', str(cport), '--worker', worker_script,
-            '--mode', 'mininet', '--scan-ms', str(cfg.get('scan_ms', 20)),
-        ]
-        listener_single_flow = _as_bool(
-            ecfg.get('listener_single_flow', cfg.get('listener_single_flow', True)),
-            default=True,
-        )
-        if listener_single_flow:
-            listener_cmd += ['--single-flow', '1']
-        if not _as_bool(cfg.get('listener_state_pipe'), default=False):
-            listener_cmd += ['--no-state-pipe', '1']
-        listener_procs.append(subprocess.Popen(
-            listener_cmd,
-            env=worker_env, start_new_session=True))
+        listener_count = n_flows if ecfg.get('per_flow_state_logs') else 1
+        for flow_id in range(listener_count):
+            listener_env = dict(worker_env)
+            listener_cport = cport + flow_id if listener_count > 1 else cport
+            listener_cmd = [
+                listener_bin, '--cport', str(listener_cport),
+                '--worker', worker_script, '--mode', 'mininet',
+                '--scan-ms', str(cfg.get('scan_ms', 20)),
+                '--flow-id', str(flow_id),
+            ]
+            listener_single_flow = _as_bool(
+                ecfg.get('listener_single_flow',
+                         cfg.get('listener_single_flow', True)),
+                default=True,
+            )
+            if listener_single_flow:
+                listener_cmd += ['--single-flow', '1']
+            if not _as_bool(cfg.get('listener_state_pipe'), default=False):
+                listener_cmd += ['--no-state-pipe', '1']
+            if _per_flow_delays and flow_id < len(_per_flow_delays):
+                flow_rtt_us = str(float(_per_flow_delays[flow_id]) * 1000.0)
+                flow_context_path = write_link_context(
+                    _link_context_path(
+                        episodes_dir, episode, instance_id, flow_id=flow_id),
+                    bw_mbps=worker_link_bw,
+                    base_rtt_us=flow_rtt_us,
+                    link_schedule=worker_link_schedule,
+                    episode=episode,
+                    slot=instance_id,
+                    flow_id=flow_id,
+                )
+                listener_env['OC_BASE_RTT_US'] = flow_rtt_us
+                listener_env['SAO_BASE_RTT_US'] = flow_rtt_us
+                listener_env['OC_LINK_CONTEXT_PATH'] = flow_context_path
+                listener_env['SAO_LINK_CONTEXT_PATH'] = flow_context_path
+            listener_procs.append(subprocess.Popen(
+                listener_cmd, env=listener_env, start_new_session=True))
 
     sched_stop   = threading.Event()
     sched_thread = None
@@ -1522,6 +1544,12 @@ def _materialize_scenario_generators(ecfg: dict, episode: int = 0,
             # multiflow scenarios already enable this; generic eval schedules
             # need the same data for fairness and convergence analysis.
             out['per_flow_state_logs'] = True
+            out['unique_cports'] = True
+            out['listener_single_flow'] = True
+            # A generic flow schedule describes peer policy flows directly.
+            # Do not subsequently rewrite it into the legacy one-live-flow +
+            # lagged-background self-play layout.
+            out['independent_policy_flows'] = True
 
     link_spec = out.get('link_schedule_generator')
     if link_spec is None and isinstance(out.get('link_schedule'), dict):
@@ -2154,6 +2182,8 @@ def _materialize_single_episode(ecfg: dict, episode: int) -> dict:
     lagged-policy materializer.
     """
     ecfg = _materialize_scenario_generators(ecfg, episode=episode)
+    if ecfg.get('independent_policy_flows'):
+        return ecfg
     has_lag = isinstance(
         ecfg.get('lagged_policy') or ecfg.get('lagged_policy_join'), dict)
     if not has_lag:

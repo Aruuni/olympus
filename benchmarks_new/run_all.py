@@ -8,8 +8,8 @@ HERE = Path(__file__).resolve().parent
 SUITES = [
     ('benchmark_responsiveness', 'responsiveness.py'),
     ('benchmark_responsive_fairness', 'responsive_fairness.py'),
-    ('benchmark_fairness', 'fairness.py'),
     ('benchmark_inter_rtt_fairness', 'inter_rtt_fairness.py'),
+    ('benchmark_fairness', 'fairness.py'),
     ('benchmark_convergence_4flow', 'convergence_4flow.py'),
 ]
 
