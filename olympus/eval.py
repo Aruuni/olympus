@@ -32,6 +32,7 @@ from olympus.common.eval_manifest import (
     is_eval_manifest, load_manifest, scenario_episode_count,
 )
 from olympus.environments import validate_scenario
+from olympus.orchestrator import _restore_sudo_user_ownership
 from olympus.train import (
     C, _Dashboard, _EPISODE_RE, _fmt_time, _handle_line, _print, _reader,
     _term_width,
@@ -184,6 +185,10 @@ def _manifest_runs(args):
         # facing blocks stay intact for the existing checkpoint compatibility path.
         cfg.pop('experience_collection', None)
         cfg['environment'] = {'type': env_spec['type'], 'path': scenario_path}
+        # Keep the fully resolved scenario in telemetry. This is especially
+        # important for benchmark debug overlays whose temporary scenario file
+        # is removed after the run.
+        cfg['eval_scenario'] = copy.deepcopy(scenario)
         for key, value in (env_spec.get('options') or {}).items():
             cfg[key] = copy.deepcopy(value)
             if key in (cfg.get('orchestrator') or {}):
@@ -311,7 +316,7 @@ def _run_one(run, args, matrix_position, matrix_total):
     ok = returncode == 0 and not interrupts
     _print(f'{C.GREEN if ok else C.RED}{"✓" if ok else "✗"}{C.RESET} '
            f'{run["name"]}: {dash.completed} episode(s) in {_fmt_time(elapsed)}'
-           + (f' · log={log_path}' if log_path else ''))
+           + (f' · log: {log_path}' if log_path else ''))
     return (returncode or (130 if interrupts else 0)), dash.completed, elapsed
 
 
@@ -332,10 +337,22 @@ def main() -> int:
 
     started = time.monotonic()
     results = []
-    for index, run in enumerate(runs, 1):
-        code, completed, elapsed = _run_one(run, args, index, len(runs))
-        results.append({'name': run.get('name', f'run-{index}'), 'code': code,
-                        'completed': completed, 'elapsed_s': elapsed})
+    try:
+        for index, run in enumerate(runs, 1):
+            code, completed, elapsed = _run_one(run, args, index, len(runs))
+            results.append({'name': run.get('name', f'run-{index}'), 'code': code,
+                            'completed': completed, 'elapsed_s': elapsed})
+    finally:
+        # The orchestrator restores each run directory, but eval.py creates the
+        # shared output root. Restore that parent too so the invoking user can
+        # write aggregate plots after a sudo Mininet evaluation.
+        roots = {
+            os.path.abspath(str((run.get('cfg', {}).get('outputs') or {}).get('root')))
+            for run in runs
+            if (run.get('cfg', {}).get('outputs') or {}).get('root')
+        }
+        for root in roots:
+            _restore_sudo_user_ownership(root)
     failed = [result for result in results if result['code'] != 0]
     _print(C.GREY + '─' * min(_term_width(), 78) + C.RESET)
     _print(f'{C.BOLD}evaluation summary{C.RESET}  runs={len(results)} '

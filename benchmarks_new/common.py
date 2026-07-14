@@ -2,7 +2,7 @@
 """Shared eval launcher and state-log plotter for benchmarks_new."""
 
 import argparse
-import csv
+import copy
 import os
 from pathlib import Path
 import shutil
@@ -12,19 +12,69 @@ import tempfile
 
 import yaml
 
-os.environ.setdefault('MPLCONFIGDIR', f'/tmp/matplotlib-{os.getuid()}')
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-import numpy as np
-
 ROOT = Path(__file__).resolve().parents[1]
+APPROACHES_CONFIG = ROOT / 'benchmarks_new' / 'config.yaml'
 
-# Checkpoints available to every benchmark. Benchmark YAMLs only select these
-# names; inference configuration is discovered beside the checkpoint by eval.py.
-CHECKPOINTS = {
-    'test-protocol': ROOT / 'olympus/models/test-model/dreamer_v3_20260714-134022/checkpoints/dreamer_v3_cwnd_model.pt',
-}
+
+def load_approaches(path=APPROACHES_CONFIG):
+    """Load the shared model registry using the legacy benchmark schema."""
+    path = Path(path).resolve()
+    with path.open() as handle:
+        config = yaml.safe_load(handle) or {}
+    raw = config.get('approaches') or []
+    if not isinstance(raw, list):
+        raise ValueError(f'{path}: approaches must be a list')
+    approaches = {}
+    for index, item in enumerate(raw):
+        if not isinstance(item, dict):
+            raise ValueError(f'{path}: approaches[{index}] must be a mapping')
+        name = str(item.get('name') or item.get('data_folder') or '').strip()
+        if not name:
+            raise ValueError(f'{path}: approaches[{index}] needs name or data_folder')
+        if name in approaches:
+            raise ValueError(f'{path}: duplicate approach name {name!r}')
+        if item.get('kind', 'model') != 'model':
+            raise ValueError(f'{path}: {name!r} is not an Olympus model approach')
+        if not item.get('checkpoint'):
+            raise ValueError(f'{path}: {name!r} is missing checkpoint')
+        resolved = copy.deepcopy(item)
+        checkpoint = Path(str(resolved['checkpoint'])).expanduser()
+        resolved['checkpoint'] = str(
+            checkpoint.resolve() if checkpoint.is_absolute() else (ROOT / checkpoint).resolve())
+        approaches[name] = resolved
+    return approaches
+
+
+def deep_merge(base, overlay):
+    """Recursively merge mappings; lists and scalar values replace wholesale."""
+    if not isinstance(base, dict) or not isinstance(overlay, dict):
+        return copy.deepcopy(overlay)
+    result = copy.deepcopy(base)
+    for key, value in overlay.items():
+        result[key] = deep_merge(result[key], value) if key in result else copy.deepcopy(value)
+    return result
+
+
+def load_benchmark(config: Path, debug=False):
+    config = Path(config).resolve()
+    with config.open() as handle:
+        manifest = yaml.safe_load(handle) or {}
+    overlay = {}
+    if debug:
+        debug_path = config.with_name('debug.yaml')
+        if not debug_path.exists():
+            raise ValueError(f'--debug requested but {debug_path} does not exist')
+        with debug_path.open() as handle:
+            overlay = yaml.safe_load(handle) or {}
+        manifest = deep_merge(manifest, overlay.get('config') or {})
+    return manifest, overlay
+
+
+def load_scenario(path: Path, overlay: dict):
+    path = Path(path).resolve()
+    with path.open() as handle:
+        value = yaml.safe_load(handle) or {}
+    return deep_merge(value, overlay.get('scenario') or {})
 
 
 def _manifest(path):
@@ -32,9 +82,9 @@ def _manifest(path):
         return yaml.safe_load(handle) or {}
 
 
-def _canonical_manifest(config: Path) -> dict:
+def _canonical_manifest(config: Path, debug=False):
     """Expand the concise benchmark format into an Olympus eval manifest."""
-    source = _manifest(config)
+    source, overlay = load_benchmark(config, debug=debug)
     matrix = dict(source.get('matrix') or {})
     checkpoint_names = list(matrix.get('checkpoints') or [])
     scenario_paths = list(matrix.get('scenarios') or [])
@@ -42,20 +92,30 @@ def _canonical_manifest(config: Path) -> dict:
     if not checkpoint_names or not scenario_paths or not environment_types:
         raise ValueError('matrix checkpoints, scenarios, and environments must be non-empty')
 
-    unknown = [name for name in checkpoint_names if name not in CHECKPOINTS]
+    approaches = load_approaches()
+    unknown = [name for name in checkpoint_names if name not in approaches]
     if unknown:
         raise ValueError(
-            f'unknown benchmark checkpoints {unknown}; add them to benchmarks_new.common.CHECKPOINTS')
+            f'unknown benchmark approaches {unknown}; add them to {APPROACHES_CONFIG}')
 
     scenarios = {}
     scenario_names = []
+    temporary_paths = []
     for index, value in enumerate(scenario_paths):
         path = Path(value)
         path = path if path.is_absolute() else (config.parent / path)
         name = path.stem
         if name in scenarios:
             name = f'{name}_{index + 1}'
-        scenarios[name] = {'path': str(path.resolve())}
+        resolved_path = path.resolve()
+        if debug:
+            handle = tempfile.NamedTemporaryFile(
+                mode='w', prefix=f'olympus_{name}_debug_', suffix='.yaml', delete=False)
+            with handle:
+                yaml.safe_dump(load_scenario(resolved_path, overlay), handle, sort_keys=False)
+            resolved_path = Path(handle.name)
+            temporary_paths.append(resolved_path)
+        scenarios[name] = {'path': str(resolved_path)}
         scenario_names.append(name)
 
     environments = {}
@@ -85,14 +145,22 @@ def _canonical_manifest(config: Path) -> dict:
         'version': 1,
         'defaults': defaults,
         'checkpoints': {
-            name: {'path': str(Path(CHECKPOINTS[name]).resolve())}
+            name: {
+                'path': approaches[name]['checkpoint'],
+                'label': approaches[name].get('plot_label') or name,
+                'metadata': {
+                    key: copy.deepcopy(value)
+                    for key, value in approaches[name].items()
+                    if key not in {'checkpoint', 'config', 'plot_label'}
+                },
+            }
             for name in checkpoint_names
         },
         'scenarios': scenarios,
         'environments': environments,
         'matrix': canonical_matrix,
         'runs': source.get('runs') or [],
-    }
+    }, temporary_paths
 
 
 def _requires_mininet_privileges(manifest: dict) -> bool:
@@ -101,12 +169,31 @@ def _requires_mininet_privileges(manifest: dict) -> bool:
     return any(str(environment).lower() != 'raynet' for environment in selected)
 
 
-def run_eval(config: Path, extra=None):
+def run_eval(config: Path, extra=None, debug=False):
+    temporary_paths = []
     try:
-        manifest = _canonical_manifest(config)
+        manifest, temporary_paths = _canonical_manifest(config, debug=debug)
     except (OSError, ValueError, yaml.YAMLError) as exc:
         print(f'[benchmarks_new] invalid benchmark config: {exc}', file=sys.stderr)
         return 2
+
+    # Create the shared root before sudo so aggregate plots remain writable by
+    # the invoking user. The elevated eval process only creates run children.
+    output_root = (manifest.get('defaults') or {}).get('output_root')
+    if output_root:
+        try:
+            output_path = Path(output_root)
+            output_path.mkdir(parents=True, exist_ok=True)
+            if not os.access(output_path, os.W_OK):
+                raise PermissionError(
+                    f'{output_path} is not writable; restore it with '
+                    f'`sudo chown -R {os.getuid()}:{os.getgid()} {output_path}`')
+        except OSError as exc:
+            print(f'[benchmarks_new] cannot create output root {output_root}: {exc}',
+                  file=sys.stderr)
+            for path in temporary_paths:
+                path.unlink(missing_ok=True)
+            return 2
 
     handle = tempfile.NamedTemporaryFile(
         mode='w', prefix='olympus_benchmark_', suffix='.yaml', delete=False)
@@ -127,6 +214,8 @@ def run_eval(config: Path, extra=None):
             print('[benchmarks_new] Mininet evaluation requires sudo -E, but sudo was not found',
                   file=sys.stderr)
             manifest_path.unlink(missing_ok=True)
+            for path in temporary_paths:
+                path.unlink(missing_ok=True)
             return 2
         print('[benchmarks_new] Mininet selected; launching evaluation with sudo -E')
         command = [sudo, '-E', *command]
@@ -134,87 +223,10 @@ def run_eval(config: Path, extra=None):
         return subprocess.run(command, cwd=str(ROOT)).returncode
     finally:
         manifest_path.unlink(missing_ok=True)
+        for path in temporary_paths:
+            path.unlink(missing_ok=True)
 
 
-def _float(row, key):
-    try:
-        return float(row.get(key, ''))
-    except (TypeError, ValueError):
-        return np.nan
-
-
-def _state_rows(output_root: Path):
-    records = []
-    for path in output_root.glob('*/episodes/*_state_ep*.csv'):
-        with path.open(newline='') as handle:
-            rows = list(csv.DictReader(handle))
-        if not rows:
-            continue
-        throughput = np.asarray([_float(r, 'avg_thr_mbps') for r in rows])
-        rtt = np.asarray([_float(r, 'avg_urtt_ms') for r in rows])
-        reward = np.asarray([_float(r, 'reward') for r in rows])
-        records.append({
-            'run': path.parents[1].name,
-            'flow': path.stem,
-            'throughput': float(np.nanmean(throughput)),
-            'rtt': float(np.nanmean(rtt)),
-            'return': float(np.nansum(reward)),
-        })
-    return records
-
-
-def _returns_rows(output_root: Path):
-    rows = []
-    for path in output_root.glob('*/episodes/episode_returns.csv'):
-        with path.open(newline='') as handle:
-            rows.extend(dict(row, run_dir=path.parents[1].name)
-                        for row in csv.DictReader(handle))
-    return rows
-
-
-def plot_results(config: Path, output=None):
-    manifest = _manifest(config)
-    root_value = (manifest.get('defaults') or {}).get('output_root', 'data')
-    output_root = Path(root_value)
-    if not output_root.is_absolute():
-        output_root = (config.parent / output_root).resolve()
-    output = Path(output) if output else output_root / 'benchmark_summary.pdf'
-    output.parent.mkdir(parents=True, exist_ok=True)
-    states = _state_rows(output_root)
-    returns = _returns_rows(output_root)
-    if not states and not returns:
-        print(f'[benchmarks_new] no completed results beneath {output_root}')
-        return 1
-
-    groups = sorted({r['run'] for r in states} | {r['run_dir'] for r in returns})
-    fig, axes = plt.subplots(2, 2, figsize=(12, 8), constrained_layout=True)
-    for name in groups:
-        data = [r for r in states if r['run'] == name]
-        if data:
-            axes[0, 0].scatter([name] * len(data), [r['throughput'] for r in data], s=15)
-            axes[0, 1].scatter([name] * len(data), [r['rtt'] for r in data], s=15)
-            # Jain fairness across simultaneously exported flow traces.
-            vals = np.asarray([r['throughput'] for r in data], dtype=float)
-            finite = vals[np.isfinite(vals) & (vals >= 0)]
-            if finite.size:
-                jain = float(finite.sum() ** 2 /
-                             max(finite.size * np.square(finite).sum(), 1e-9))
-                axes[1, 0].scatter([name], [jain], s=28)
-        ret = [_float(r, 'return') for r in returns if r['run_dir'] == name]
-        if ret:
-            axes[1, 1].scatter([name] * len(ret), ret, s=15)
-    axes[0, 0].set_title('Mean per-flow throughput'); axes[0, 0].set_ylabel('Mbps')
-    axes[0, 1].set_title('Mean per-flow RTT'); axes[0, 1].set_ylabel('ms')
-    axes[1, 0].set_title('Jain fairness across exported flows'); axes[1, 0].set_ylim(0, 1.02)
-    axes[1, 1].set_title('Episode return')
-    for ax in axes.flat:
-        ax.grid(alpha=.25)
-        ax.tick_params(axis='x', rotation=25)
-    fig.suptitle(config.parent.name.replace('_', ' ').title())
-    fig.savefig(output)
-    plt.close(fig)
-    print(f'[benchmarks_new] wrote {output}')
-    return 0
 
 
 def suite_main(suite_file, argv=None):
@@ -223,18 +235,18 @@ def suite_main(suite_file, argv=None):
     parser.add_argument('--plot-only', action='store_true')
     parser.add_argument('--no-plot', action='store_true')
     parser.add_argument('-v', '--verbose', action='store_true')
+    parser.add_argument('--debug', action='store_true')
     args = parser.parse_args(argv)
     config = Path(args.config).resolve()
     if not args.plot_only:
-        code = run_eval(config, ['--verbose'] if args.verbose else [])
+        code = run_eval(config, ['--verbose'] if args.verbose else [], debug=args.debug)
         if code:
             return code
-    return 0 if args.no_plot else plot_results(config)
-
-
-def plot_main(suite_file, argv=None):
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--config', default=str(Path(suite_file).with_name('config.yaml')))
-    parser.add_argument('--output')
-    args = parser.parse_args(argv)
-    return plot_results(Path(args.config).resolve(), args.output)
+    if args.no_plot:
+        return 0
+    plotter = Path(suite_file).with_name('plot.py')
+    return subprocess.run(
+        [sys.executable, str(plotter), '--config', str(config)]
+        + (['--debug'] if args.debug else []),
+        cwd=str(ROOT),
+    ).returncode

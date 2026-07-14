@@ -1,0 +1,18 @@
+config:
+  defaults:
+    n_parallel: 1
+    repetitions: 1
+    output_root: data_debug
+
+scenario:
+  name: convergence_4flow_debug
+  sweep:
+    bws: [20]
+    delays: [20]
+    flows: [3]
+    duration: 50
+    bdp_mult: 1
+    flow_schedule:
+      arrival: {start_delays: [0, 10, 20]}
+      duration: {fixed_s: 30}
+    link_schedules: [[]]

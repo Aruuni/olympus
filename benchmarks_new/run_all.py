@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import argparse
 import subprocess
 import sys
 from pathlib import Path
@@ -12,10 +13,16 @@ SUITES = [
     ('benchmark_convergence_4flow', 'convergence_4flow.py'),
 ]
 
-def main():
+def main(argv=None):
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--debug', action='store_true')
+    args = parser.parse_args(argv)
     for suite, filename in SUITES:
         runner = HERE / suite / filename
-        if subprocess.run([sys.executable, str(runner)], cwd=HERE.parent).returncode:
+        command = [sys.executable, str(runner)]
+        if args.debug:
+            command.append('--debug')
+        if subprocess.run(command, cwd=HERE.parent).returncode:
             return 1
     return 0
 

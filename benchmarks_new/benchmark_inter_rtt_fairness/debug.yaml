@@ -1,0 +1,16 @@
+config:
+  defaults:
+    n_parallel: 9
+    repetitions: 1
+    output_root: data_debug
+
+scenario:
+  name: inter_rtt_fairness_debug
+  sweep:
+    bws: [20, 30, 40]
+    delays: [20, 30, 40]
+    bdp_mult: 1
+    duration: 20
+    flow_schedule:
+      arrival:
+        start_delays: [0, 10]

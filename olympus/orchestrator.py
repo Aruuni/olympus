@@ -1516,6 +1516,12 @@ def _materialize_scenario_generators(ecfg: dict, episode: int = 0,
             lengths = [max(1.0, duration - start) for start in starts]
         out['start_delays'] = starts
         out['flow_durations'] = lengths
+        if n_flows > 1:
+            # Use the established Olympus multiflow trace convention
+            # (<algorithm>_state_epXXXXXX_flowN.csv). Training's specialised
+            # multiflow scenarios already enable this; generic eval schedules
+            # need the same data for fairness and convergence analysis.
+            out['per_flow_state_logs'] = True
 
     link_spec = out.get('link_schedule_generator')
     if link_spec is None and isinstance(out.get('link_schedule'), dict):

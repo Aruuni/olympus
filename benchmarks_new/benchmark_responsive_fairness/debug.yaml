@@ -1,0 +1,19 @@
+config:
+  defaults:
+    n_parallel: 9
+    repetitions: 9
+    output_root: data_debug
+
+scenario:
+  name: responsive_fairness_debug
+  sweep:
+    flows: [2]
+    duration: 30
+    flow_schedule:
+      arrival:
+        evenly_spaced_over_s: 15
+    link_schedule_generator:
+      interval_s: 10
+      sample_initial: true
+      bw: {uniform: [10, 50]}
+      delay: {uniform: [10, 50]}

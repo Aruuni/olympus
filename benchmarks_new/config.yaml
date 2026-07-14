@@ -1,0 +1,20 @@
+approaches:
+  - name: test-protocol
+    data_folder: test-protocol
+    kind: model
+    algorithm: dreamer_v3
+    state: tempest
+    reward: tempest
+    environment: static
+    plot_label: Test protocol
+    checkpoint: olympus/models/test-model/dreamer_v3_20260714-134022/checkpoints/dreamer_v3_cwnd_model.pt
+
+  - name: tempest_static
+    data_folder: tempest_static
+    kind: model
+    algorithm: dreamer_v3
+    state: tempest
+    reward: tempest
+    environment: static
+    plot_label: Tempest static
+    checkpoint: olympus/models/unify_testing/tempest_static/checkpoints/dreamer_v3_cwnd_model.pt

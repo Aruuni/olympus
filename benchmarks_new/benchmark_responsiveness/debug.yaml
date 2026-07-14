@@ -1,0 +1,14 @@
+config:
+  defaults:
+    n_parallel: 4
+    repetitions: 1
+    output_root: data_debug
+
+scenario:
+  name: random_bw_rtt_debug
+  sweep:
+    bws: [20, 40]
+    delays: [25, 50]
+    duration: 20
+    link_schedule_generator:
+      interval_s: 10

@@ -89,6 +89,7 @@ class EvalManifestTests(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertEqual(first['start_delays'], [0, 10, 20, 30])
         self.assertEqual(first['flow_durations'], [100, 90, 80, 70])
+        self.assertTrue(first['per_flow_state_logs'])
         self.assertEqual([row['t'] for row in first['link_schedule']], [20, 40, 60, 80])
 
     def test_scenario_references_resolve_after_sweep(self):

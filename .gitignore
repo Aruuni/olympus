@@ -46,6 +46,8 @@ olympus/logs/
 # Run and log artifacts
 *.log
 benchmarks/logs/
+benchmarks_new/*/data/
+benchmarks_new/*/data_debug/
 
 # LaTeX build artifacts (.tex sources stay tracked; .pdf already ignored above)
 *.aux
