@@ -80,3 +80,6 @@ kernel/**/modules.order
 *.cmd
 modules.order
 Module.symvers
+
+# naughty naughty 
+auth.json

@@ -213,34 +213,12 @@ def _run_reset_script() -> bool:
         return False
 
 
-def _run_link_schedule(env, schedule, episode_start, stop):
-    for entry in schedule:
-        t_target = episode_start + float(entry['t'])
-        while not stop.is_set():
-            rem = t_target - time.monotonic()
-            if rem <= 0:
-                break
-            stop.wait(timeout=min(rem, 0.05))
-        if stop.is_set():
-            return
-        try:
-            env.set_link(
-                bw    = entry.get('bw',    None),
-                delay = entry.get('delay', None),
-                loss  = entry.get('loss',  None),
-            )
-            print(f'[orch] link change t={time.monotonic()-episode_start:.1f}s '
-                  f'bw={entry.get("bw")} delay={entry.get("delay")}', flush=True)
-        except Exception as e:
-            print(f'[orch] link change failed: {e}', flush=True)
-
-
 def _flow_link_schedule(link_schedule, base_delay_ms, flow_delay_ms):
     """Rescale shared-schedule delay events to one flow's own base delay.
 
     Heterogeneous-RTT envs resolve delay_frac against the shared episode base
     delay, but each flow propagates at its own base RTT and the env scales
-    scheduled delay changes per flow (see MininetEnv.set_link). The flow's
+    scheduled delay changes per flow (see MininetEnv.change_link). The flow's
     reward/state reference must move by the same fraction of ITS OWN base
     delay, so delay events become flow_delay * (event_delay / base_delay).
     BW events are shared and pass through unchanged."""
@@ -1275,6 +1253,7 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
         **env_kwargs,
     )
     env.start()
+    env.setup_environment(link_schedule=link_schedule)
 
     episode_start = time.monotonic()
     worker_env['SAO_EPISODE_START'] = str(episode_start)
@@ -1365,27 +1344,15 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
             listener_procs.append(subprocess.Popen(
                 listener_cmd, env=listener_env, start_new_session=True))
 
-    sched_stop   = threading.Event()
-    sched_thread = None
-
     try:
-        env.run_iperf(
+        env.start_episode(
             monitor_interval=float(ecfg.get('measure_interval_s', cfg.get('measure_interval_s', 0.1))),
             start_delays=ecfg.get('start_delays'),
             flow_durations=ecfg.get('flow_durations'),
+            episode_start=episode_start,
         )
-        if link_schedule and not is_raynet:
-            sched_thread = threading.Thread(
-                target=_run_link_schedule,
-                args=(env, link_schedule, episode_start, sched_stop),
-                daemon=True)
-            sched_thread.start()
-        if not is_raynet:
-            time.sleep(duration + 3)
+        env.wait()
     finally:
-        sched_stop.set()
-        if sched_thread:
-            sched_thread.join(timeout=2)
         if is_raynet:
             env.stop()
             for listener_proc in listener_procs:
@@ -1825,20 +1792,27 @@ def _build_pool_marl(cfg):
         delays    = [None] if delay_range is not None else sw.get('delays', [sw.get('delay', 20.0)])
         schedules = sw.get('link_schedules', [[]])
         flow_vals = _flow_values(sw.get('flows', 2), default=2)
+        # bdp_mult may be a single factor or a list to sweep queue depths
+        # (e.g. Astraea's 0.1-16 BDP buffer factors) across pool entries.
+        bdp_spec = sw.get('bdp_mult', 4.0)
+        bdp_vals = ([float(v) for v in bdp_spec]
+                    if isinstance(bdp_spec, (list, tuple)) else [float(bdp_spec)])
         base      = {k: v for k, v in sw.items()
                      if k not in (
                          'bws', 'delays', 'link_schedules', 'bw', 'delay',
                          'bw_range', 'delay_range', 'rtt_range',
                          'bw_step', 'delay_step', 'rtt_step',
                          'sample_round_digits', 'samples_per_schedule',
-                         'flows',
+                         'flows', 'bdp_mult',
                      )}
         pool = []
         repeats = max(1, int(sw.get('samples_per_schedule', 1)))
-        for flows, bw, delay, sched in itertools.product(flow_vals, bws, delays, schedules):
+        for flows, bdp_mult, bw, delay, sched in itertools.product(
+                flow_vals, bdp_vals, bws, delays, schedules):
             for _ in range(repeats):
                 ep = dict(base)
                 ep['flows'] = int(flows)
+                ep['bdp_mult'] = float(bdp_mult)
                 if bw_range is not None:
                     ep['_sample_bw_range'] = list(bw_range)
                     if sw.get('bw_step') is not None:
@@ -1873,6 +1847,22 @@ def _build_pool_marl(cfg):
         item.setdefault('environment_path', env_meta.get('path', ''))
         out.append(materialize_episode_config(item))
     return out, bool(env_cfg.get('shuffle', False))
+
+
+def _episode_buffer_bytes(ecfg: dict) -> int:
+    """Bottleneck queue size in bytes for one episode.
+
+    Mirrors MininetEnv.__init__ exactly: qsize override wins, else
+    bdp_mult * BDP with a one-MTU floor.
+    """
+    qsize = ecfg.get('qsize')
+    if qsize is not None:
+        return int(qsize)
+    bw = float(ecfg.get('bw', 100.0))
+    delay = float(ecfg.get('delay', 20.0))
+    bdp_mult = float(ecfg.get('bdp_mult', 4.0))
+    bdp = bw * (2 ** 20) * delay * 1e-3 / 8
+    return max(int(bdp_mult * bdp), 1500)
 
 
 def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
@@ -1939,6 +1929,10 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
         'SAO_MANAGER_KEY':   mgr_key,
         'SAO_LINK_BW':       str(float(ecfg.get('bw',   100.0))),
         'SAO_BASE_RTT_US':   str(float(ecfg.get('delay', 20.0)) * 1000),
+        # Bottleneck queue size in bytes, mirroring MininetEnv's qsize
+        # sizing (bdp_mult * BDP, floored at one MTU). Consumed by the
+        # astraea worker for the Table 2 `buf` global-state entry.
+        'SAO_LINK_BUFFER_BYTES': str(_episode_buffer_bytes(ecfg)),
         'SAO_LINK_CONTEXT_PATH': link_context_path,
         'OC_LINK_CONTEXT_PATH':  link_context_path,
         'SAO_INTERVAL_MS':   str(float(a_cfg.get('interval_ms', 20))),
@@ -2028,6 +2022,7 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
         env_kwargs['environment_config'] = raynet_ecfg
     env = make_env(backend_type, **env_kwargs)
     env.start()
+    env.setup_environment(link_schedule=link_schedule)
 
     episode_start = time.monotonic()
     worker_env['SAO_EPISODE_START'] = str(episode_start)
@@ -2098,27 +2093,16 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
         listener_procs.append(subprocess.Popen(
             listener_cmd, env=listener_env, start_new_session=True))
 
-    sched_stop   = threading.Event()
-    sched_thread = None
     try:
-        env.run_iperf(
+        env.start_episode(
             monitor_interval=float(ecfg.get(
                 'measure_interval_s', cfg.get('measure_interval_s', 0.1))),
             start_delays=start_delays,
             flow_durations=flow_durations,
+            episode_start=episode_start,
         )
-        if link_schedule and not is_raynet:
-            sched_thread = threading.Thread(
-                target=_run_link_schedule,
-                args=(env, link_schedule, episode_start, sched_stop),
-                daemon=True)
-            sched_thread.start()
-        if not is_raynet:
-            time.sleep(duration + 3)
+        env.wait()
     finally:
-        sched_stop.set()
-        if sched_thread:
-            sched_thread.join(timeout=2)
         if is_raynet:
             env.stop()
             for listener_proc in listener_procs:

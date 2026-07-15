@@ -288,25 +288,31 @@ class RSSM(nn.Module):
         z = torch.zeros(batch_size, self.latent_dim, device=device)
         return h, z
 
-    def _sample_z(self, logits: torch.Tensor):
-        """Straight-through one-hot sampling of the per-group categorical."""
+    def _sample_z(self, logits: torch.Tensor, sample: bool = True):
+        """Return a categorical latent, optionally using its deterministic mode."""
         shape   = logits.shape[:-1] + (self.latent_groups, self.latent_classes)
         logits  = logits.reshape(*shape)
         probs   = torch.softmax(logits, dim=-1)
         # Avoid an exact 0 in any class (paper "unimix").
         probs   = 0.99 * probs + 0.01 / self.latent_classes
-        sample  = torch.distributions.OneHotCategorical(probs=probs).sample()
-        z_st    = sample + probs - probs.detach()
+        if sample:
+            one_hot = torch.distributions.OneHotCategorical(probs=probs).sample()
+            z_st = one_hot + probs - probs.detach()
+        else:
+            z_st = F.one_hot(
+                probs.argmax(dim=-1), num_classes=self.latent_classes
+            ).to(dtype=probs.dtype)
         return z_st.reshape(*z_st.shape[:-2], self.latent_dim), logits
 
-    def step(self, h_prev, z_prev, a_prev, embed):
+    def step(self, h_prev, z_prev, a_prev, embed, sample: bool = True):
         """One observed step: returns (h, z, prior_logits, post_logits)."""
         x  = self.gru_input(torch.cat([z_prev, a_prev], dim=-1))
         h  = self.gru(x, h_prev)
         prior_raw = self.prior_net(h)
         post_raw  = self.post_net(torch.cat([h, embed], dim=-1))
-        z, post_logits  = self._sample_z(post_raw)
-        _, prior_logits = self._sample_z(prior_raw)  # logits-only path
+        z, post_logits  = self._sample_z(post_raw, sample=sample)
+        # Only logits are consumed for the prior here; never waste an RNG draw.
+        _, prior_logits = self._sample_z(prior_raw, sample=False)
         return h, z, prior_logits, post_logits
 
     def imagine_step(self, h_prev, z_prev, a_prev):

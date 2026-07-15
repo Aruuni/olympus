@@ -1,0 +1,8 @@
+PING speedtest.ip-projects.de (185.245.99.75) 56(84) bytes of data.
+64 bytes from speedtest.ip-projects.de (185.245.99.75): icmp_seq=1 ttl=47 time=18.0 ms
+64 bytes from speedtest.ip-projects.de (185.245.99.75): icmp_seq=2 ttl=47 time=18.0 ms
+64 bytes from speedtest.ip-projects.de (185.245.99.75): icmp_seq=3 ttl=47 time=18.1 ms
+
+--- speedtest.ip-projects.de ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 2002ms
+rtt min/avg/max/mdev = 17.956/17.994/18.057/0.044 ms

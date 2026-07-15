@@ -1,0 +1,10 @@
+PING iperf.astra.in.ua (193.93.216.113) 56(84) bytes of data.
+64 bytes from 193.93.216.113 (193.93.216.113): icmp_seq=1 ttl=52 time=38.7 ms
+64 bytes from 193.93.216.113 (193.93.216.113): icmp_seq=2 ttl=52 time=38.5 ms
+64 bytes from 193.93.216.113 (193.93.216.113): icmp_seq=3 ttl=52 time=38.5 ms
+64 bytes from 193.93.216.113 (193.93.216.113): icmp_seq=4 ttl=52 time=38.5 ms
+64 bytes from 193.93.216.113 (193.93.216.113): icmp_seq=5 ttl=52 time=38.5 ms
+
+--- iperf.astra.in.ua ping statistics ---
+5 packets transmitted, 5 received, 0% packet loss, time 4004ms
+rtt min/avg/max/mdev = 38.454/38.531/38.745/0.108 ms

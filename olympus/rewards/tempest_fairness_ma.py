@@ -96,18 +96,10 @@ class RewardCalc(TempestRewardCalc):
         self._last_srtt_us = srtt_us
 
         self._step_count += 1
-        sparse_bonus = 0.0
-        if self._step_count % self._steps_per_bonus == 0:
-            if srtt_us > 0 and abs(srtt_us - rtt_ref) <= self._bonus_tol_us:
-                rtt_scale = max(
-                    rtt_ref / max(self._initial_rtt, 1.0), 1.0)
-                sparse_bonus = self._bonus_val * rtt_scale
-
-        reward = max(0.0, base_reward + sparse_bonus)
+        reward = max(0.0, base_reward)
         self.last_components = {
             'base': base_reward,
-            'sparse': sparse_bonus,
-            'unclipped': base_reward + sparse_bonus,
+            'unclipped': base_reward,
             'fair_bw_mbps': fair_bw * 8.0 / 1e6,
             'link_bw_mbps': link_bw * 8.0 / 1e6,
             'active_flows': float(active_flows),

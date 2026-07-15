@@ -1,0 +1,30 @@
+runtime:
+  algorithm: td3
+  state: kalman
+  action: cwnd_multiplier
+
+training:
+  resume_from: /absolute/path/to/td3_cwnd_model.pt
+
+agent:
+  hidden: 128
+
+deployment:
+  socket_path: /tmp/olympus-inference.sock
+  device: cpu
+  deterministic: true
+  discovery:
+    listener: ./astraea_listener
+    mode: mininet
+    cc_algorithm: astraea
+    scan_ms: 10
+    ipv4_only: true
+  batching:
+    max_batch_size: 64
+    max_wait_us: 1000
+  workers:
+    interval_ms: 20
+    request_timeout_ms: 250
+    connect_timeout_ms: 5000
+    cwnd_min: 10
+    cwnd_max: 10000

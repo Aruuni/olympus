@@ -66,6 +66,8 @@ from olympus.algorithms.option_critic.model import (
 )
 from olympus.common import flow_backend, runtime_config
 from olympus.common.action_plugins import load_action_module
+from olympus.common.async_pusher import AsyncPusher
+from olympus.common.pace import sleep_to_grid
 from olympus.common.bbr_probe import BbrProbe
 from olympus.common.registry import reward_module
 
@@ -230,6 +232,14 @@ def run():
     # ── Connect to learner ────────────────────────────────────────────────────
     mgr = _connect_manager()
 
+    # Push batches off-thread so the blocking manager RPC never stalls the
+    # fixed-cadence control loop (was gapping the emitted signal every
+    # `push_every` steps).
+    pusher = AsyncPusher(
+        lambda exps: mgr.push_exp_batch(exps),
+        lambda e: mgr.push_exp(e),
+    ) if mgr else None
+
     # ── Drain state pipe ──────────────────────────────────────────────────────
     stop_drain = threading.Event()
     if state_fd >= 0:
@@ -255,6 +265,9 @@ def run():
     reward_calc = make_reward_calc()
     # Use episode_start from orchestrator so t_s aligns with link schedule timestamps
     t0 = float(os.environ.get('OC_EPISODE_START', '0')) or time.monotonic()
+    # Pace against the shared episode-start grid (t0 + k*interval) so co-active
+    # flows sample in phase; see common/pace.sleep_to_grid.
+    next_tick = t0
 
     # Unique trajectory ID: include episode so back-to-back episodes in the
     # same slot (same cport, flow_id typically resets to 0) don't collide and
@@ -393,15 +406,8 @@ def run():
                     traj_id    = traj_id,
                 )
                 exp_buf.append(exp)
-                if mgr and len(exp_buf) >= push_every:
-                    try:
-                        mgr.push_exp_batch(list(exp_buf))
-                    except Exception:
-                        for e in exp_buf:
-                            try:
-                                mgr.push_exp(e)
-                            except Exception:
-                                pass
+                if pusher and len(exp_buf) >= push_every:
+                    pusher.submit(exp_buf)
                     exp_buf.clear()
 
             if agent_locked:
@@ -481,22 +487,17 @@ def run():
                     log_file.flush()
 
             # ── Sleep for rest of interval ────────────────────────────────────
-            elapsed = time.monotonic() - t_step_start
-            sleep_t = interval_s - elapsed
-            if sleep_t > 0 and not simulation_backend:
-                time.sleep(sleep_t)
+            if not simulation_backend:
+                next_tick = sleep_to_grid(next_tick, interval_s)
 
     finally:
-        if mgr and exp_buf:
-            try:
-                mgr.push_exp_batch(list(exp_buf))
-            except Exception:
-                for e in exp_buf:
-                    try:
-                        mgr.push_exp(e)
-                    except Exception:
-                        pass
-            exp_buf.clear()
+        if pusher:
+            if exp_buf:
+                pusher.submit(exp_buf)
+                exp_buf.clear()
+            # Drain queued batches before the terminal done-marker below so
+            # ordering to the learner is preserved.
+            pusher.close()
         # Mark last experience as done so TD bootstrap terminates correctly
         if prev_state is not None and mgr:
             try:

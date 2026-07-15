@@ -21,7 +21,7 @@
 
 runtime:
   algorithm: ma_dreamer
-  reward: tempest
+  reward: tempest_fairness_ma
   state: tempest_ratio
   action: cwnd_multiplier
 
@@ -41,8 +41,10 @@ actions:
   cwnd_multiplier:
     action_min: -1.0
     action_max: 1.0
-    multiplier_min: 0.5
-    multiplier_max: 2.0
+    #multiplier_min: 0.5
+    #multiplier_max: 2.0
+    multiplier_min: 0.8
+    multiplier_max: 1.2
     min_cwnd_change: 1
 
   # Original Astraea-style small relative adjustment. At step=0.025,
@@ -51,6 +53,16 @@ actions:
     action_min: -1.0
     action_max: 1.0
     step: 0.025
+
+  # Additive flat step: delta = step * action (independent of current cwnd).
+  # step=20 -> +1 gives +20, -1 gives -20, 0 holds. Set discrete: true for
+  # bang-bang +/- step by the action's sign (deadzone holds near 0).
+  cwnd_delta:
+    action_min: -1.0
+    action_max: 1.0
+    step: 20
+    discrete: false
+    deadzone: 0.0
 
 environment:
   # `type` selects the emulator backend; its definitions live in
@@ -92,7 +104,7 @@ reward:
 # while the probe is active. Maintains a windowed min-RTT filter internally
 # — NOT exposed to the agent's observation.
 bbr_probe:
-  enabled: true
+  enabled: false
   interval_s: 5.0
   duration_s: 0.2
   factor: 0.5
@@ -345,7 +357,7 @@ algorithms:
       lr_actor: 3.0e-5
       lr_critic: 3.0e-5
       horizon: 15
-      gamma: 0.995
+      gamma: 0.99
       lam: 0.95
       entropy_coef: 3.0e-3
       action_l2_coef: 2.0e-2
@@ -383,7 +395,7 @@ algorithms:
       # sqrt(sum_i (avg_thr_i - mean(avg_thr))^2 / (n * sum_i(avg_thr_i)^2)).
       # A cost (zero is perfectly fair) subtracted from the mean Tempest reward.
       fairness_metric: r_fair_avg_throughput
-      fairness_weight: 25.0
+      fairness_weight: 8.0
       fairness_cap: 1.0
       # Optional per-agent credit assignment (off by default; the learner
       # uses the Astraea-style shared team scalar). When true, each agent

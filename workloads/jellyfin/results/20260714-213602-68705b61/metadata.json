@@ -1,0 +1,10 @@
+{
+  "run_id": "20260714-213602-68705b61",
+  "label": "smoke-two-stream-stream-2-20260714-213602",
+  "url": "https://jellyfin.phoenixremoteaccess.uk/web/#/details?id=762277cc91effea4c30f648c3c106797&serverId=676fc56ba97448b3a598c30f8be4a1ce",
+  "target_media_s": 30.0,
+  "sample_interval_ms": 250,
+  "browser": "chromium",
+  "headless": true,
+  "created_epoch_ns": 1784061362333377981
+}

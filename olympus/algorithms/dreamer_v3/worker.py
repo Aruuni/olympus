@@ -35,6 +35,8 @@ sys.path.insert(0, _REPO)
 
 from olympus.algorithms.dreamer_v3 import model
 from olympus.common.action_plugins import load_action_module
+from olympus.common.async_pusher import AsyncPusher
+from olympus.common.pace import sleep_to_grid
 from olympus.common.bbr_probe import BbrProbe
 from olympus.common import flow_backend, runtime_config
 from olympus.common.registry import reward_module
@@ -192,6 +194,11 @@ def run():
     def _push_one(e):
         getattr(mgr, 'push_exp')(e, _exp_src)
 
+    # Send experience batches on a background thread so the blocking manager RPC
+    # never stalls the fixed-cadence control loop (was leaving regular gaps in
+    # the emitted CWND signal every `push_every` steps).
+    pusher = AsyncPusher(_push_batch, _push_one) if mgr else None
+
     stop_drain = threading.Event()
     if state_fd >= 0:
         threading.Thread(target=_drain_state_fd, args=(state_fd, stop_drain),
@@ -211,6 +218,9 @@ def run():
 
     reward_calc = reward_plugin.make_reward_calc()
     t0 = float(os.environ.get('SAO_EPISODE_START', '0')) or time.monotonic()
+    # Pace against the shared episode-start grid (t0 + k*interval) so co-active
+    # flows sample in phase; see common/pace.sleep_to_grid.
+    next_tick = t0
     traj_id = f'dreamer_v3_{cport}_{episode}_{flow_id}'
 
     prev_state = None
@@ -295,14 +305,7 @@ def run():
                 ))
                 step_in_traj += 1
                 if len(exp_buf) >= push_every:
-                    try:
-                        _push_batch(list(exp_buf))
-                    except Exception:
-                        for e in exp_buf:
-                            try:
-                                _push_one(e)
-                            except Exception:
-                                pass
+                    pusher.submit(exp_buf)
                     exp_buf.clear()
 
             # ── Inference: encoder → RSSM → actor ─────────────────────────────
@@ -385,22 +388,17 @@ def run():
                 if log_flush_counter % _LOG_FLUSH_EVERY == 0:
                     log_file.flush()
 
-            elapsed = time.monotonic() - t_step_start
-            sleep_t = interval_s - elapsed
-            if not simulation_backend and sleep_t > 0:
-                time.sleep(sleep_t)
+            if not simulation_backend:
+                next_tick = sleep_to_grid(next_tick, interval_s)
 
     finally:
-        if mgr and exp_buf:
-            try:
-                _push_batch(list(exp_buf))
-            except Exception:
-                for e in exp_buf:
-                    try:
-                        _push_one(e)
-                    except Exception:
-                        pass
-            exp_buf.clear()
+        if pusher:
+            if exp_buf:
+                pusher.submit(exp_buf)
+                exp_buf.clear()
+            # Drain queued batches (incl. the flush above) before the terminal
+            # done-marker so ordering to the learner is preserved.
+            pusher.close()
         if prev_state is not None and mgr:
             try:
                 _push_one(model.Experience(

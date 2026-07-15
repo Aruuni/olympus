@@ -511,7 +511,7 @@ class LearnerUpdateTest(unittest.TestCase):
 
 
 class PerFlowDelayChangeTest(unittest.TestCase):
-    """set_link(delay=X) in per-flow-RTT mode scales each flow's own delay."""
+    """change_link(delay=X) in per-flow-RTT mode scales each flow's own delay."""
 
     def _env(self):
         from olympus.environments.mininet.env import MininetEnv
@@ -533,8 +533,8 @@ class PerFlowDelayChangeTest(unittest.TestCase):
                 env, '_s2s3_intfs',
                 return_value=(object(), 's2-eth', object(), 's3-eth')), \
              mock.patch('olympus.environments.mininet.env._change_bw'):
-            env.set_link(delay=100.0)  # 2x the 50ms episode base
-            env.set_link(delay=25.0)   # then 0.5x of base, not compounded
+            env.change_link(delay=100.0)  # 2x the 50ms episode base
+            env.change_link(delay=25.0)   # then 0.5x of base, not compounded
         self.assertEqual(changes, [
             ('c1-eth0', 20.0), ('c3-eth0', 400.0),   # zero-delay flow skipped
             ('c1-eth0', 5.0), ('c3-eth0', 100.0),
@@ -552,7 +552,7 @@ class PerFlowDelayChangeTest(unittest.TestCase):
                 env, '_s2s3_intfs',
                 return_value=(object(), 's2-eth', object(), 's3-eth')), \
              mock.patch('olympus.environments.mininet.env._change_bw'):
-            env.set_link(delay=100.0)
+            env.change_link(delay=100.0)
         chg.assert_called_once_with(mock.ANY, 's1-eth', 100.0, None)
 
 

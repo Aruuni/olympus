@@ -126,7 +126,7 @@ class MininetEnv(NetworkEnv):
                       propagation delay, so flow i's RTT ~= per_flow_delays[i-1]
                       alone (inter-RTT fairness); `delay` then sizes the
                       bottleneck BDP buffer and serves as the reference for
-                      live delay changes: set_link(delay=X) scales every
+                      live delay changes: change_link(delay=X) scales every
                       flow's own access-link delay by X/delay. None leaves the
                       topology identical to legacy behaviour (delay on s1-s2).
     """
@@ -148,7 +148,7 @@ class MininetEnv(NetworkEnv):
         self.per_flow_delays = (
             [float(d) for d in per_flow_delays] if per_flow_delays else None)
         # Episode base delay, kept immutable so scheduled delay changes can
-        # scale per-flow delays as a fraction of it (set_link mutates
+        # scale per-flow delays as a fraction of it (change_link mutates
         # self.delay for BDP sizing).
         self._base_delay = float(delay)
         self.net      = None
@@ -193,6 +193,14 @@ class MininetEnv(NetworkEnv):
         self.net = Mininet(topo=topo, link=TCLink, switch=LinuxBridgeSwitch,
                            controller=None, autoSetMacs=True, autoStaticArp=True)
         self.net.start()
+
+    def setup_environment(self, link_schedule=None):
+        """Apply bw/delay/loss and the BDP-sized queue to the running topology.
+
+        The mid-episode schedule is replayed live: the base-class thread
+        (started at the end of start_episode) applies each entry via
+        change_link."""
+        super().setup_environment(link_schedule)
         self._configure_links()
 
     def _s1s2_intfs(self):
@@ -215,7 +223,7 @@ class MininetEnv(NetworkEnv):
                     return (s2, intf.name, s3, peer.name)
         raise RuntimeError(f'{p}s2-{p}s3 link not found')
 
-    def set_link(self, bw=None, delay=None, loss=None):
+    def change_link(self, bw=None, delay=None, loss=None):
         """
         Live-update bottleneck bandwidth and/or propagation delay.
         Thread-safe: can be called from a background scheduler thread.
@@ -292,7 +300,7 @@ class MininetEnv(NetworkEnv):
         # With per-flow delays, every flow's full propagation delay lives on
         # its own sender access link (c_i -> s1), so the shared s1-s2 link
         # carries no netem. self.delay is then used only to size the
-        # bottleneck BDP buffer (qsize, computed in __init__/set_link).
+        # bottleneck BDP buffer (qsize, computed in __init__/change_link).
         if not self.per_flow_delays:
             for intf in s1.intfList():
                 if intf.link:
@@ -311,8 +319,8 @@ class MininetEnv(NetworkEnv):
 
         self._configure_per_flow_delays()
 
-    def run_iperf(self, monitor_interval=0.1, start_delays=None,
-                  flow_durations=None):
+    def start_episode(self, monitor_interval=0.1, start_delays=None,
+                      flow_durations=None, episode_start=None):
         """Launch iperf3 server on every receiver, then iperf3 client on every
         sender. `start_delays` is an optional list of N seconds (one per flow).
         `flow_durations`, when supplied, gives each flow an exact iperf runtime.
@@ -358,7 +366,14 @@ class MininetEnv(NetworkEnv):
             else:
                 c.cmd(f'{iperf_cmd} &')
 
+        self._begin_link_schedule(episode_start)
+
+    def wait(self):
+        """Block until every iperf3 flow has finished (duration + grace)."""
+        time.sleep(float(self.duration) + 3)
+
     def stop(self):
+        self._stop_link_schedule()
         if not self.net:
             return
         self.net.stop()
@@ -389,8 +404,9 @@ if __name__ == '__main__':
 
     try:
         env.start()
-        env.run_iperf()
-        time.sleep(args.duration + 2)
+        env.setup_environment()
+        env.start_episode()
+        env.wait()
     except KeyboardInterrupt:
         pass
     finally:

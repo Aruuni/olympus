@@ -32,6 +32,8 @@ sys.path.insert(0, _ROOT)
 
 from olympus.algorithms.ma_dreamer import model
 from olympus.common.action_plugins import load_action_module
+from olympus.common.async_pusher import AsyncPusher
+from olympus.common.pace import sleep_to_grid
 from olympus.common.registry import reward_module
 from olympus.common.bbr_probe import BbrProbe
 from olympus.common import flow_backend, link_context, runtime_config
@@ -48,17 +50,14 @@ _Mgr.register('service')
 _LOG_FLUSH_EVERY = 50
 
 
-def _push_experience_batch(manager, buffer):
-    if not buffer:
-        return
-    try:
-        manager.push_exp_batch(list(buffer))
-    except Exception:
-        for experience in buffer:
-            try:
-                manager.push_exp(experience)
-            except Exception:
-                pass
+def _make_pusher(manager):
+    """Off-thread experience sender; None when there is no learner attached."""
+    if not manager:
+        return None
+    return AsyncPusher(
+        lambda exps: manager.push_exp_batch(exps),
+        lambda e: manager.push_exp(e),
+    )
     buffer.clear()
 
 
@@ -235,6 +234,11 @@ def run():
                 flush=True,
             )
 
+    # Push batches off-thread so the blocking manager RPC never stalls the
+    # fixed-cadence control loop (was gapping the emitted signal every
+    # `push_every` steps).
+    pusher = _make_pusher(manager)
+
     stop_drain = threading.Event()
     if state_fd >= 0:
         threading.Thread(
@@ -267,6 +271,9 @@ def run():
         float(os.environ.get('SAO_EPISODE_START', '0'))
         or time.monotonic()
     )
+    # Pace against the shared episode-start grid (t0 + k*interval) so co-active
+    # flows sample in phase; see common/pace.sleep_to_grid.
+    next_tick = episode_start
     traj_id = f'ma_dreamer_{group_id}_a{agent_id}_f{flow_id}'
 
     previous_state = None
@@ -372,7 +379,8 @@ def run():
                 ))
                 step_in_traj += 1
                 if len(experience_buffer) >= push_every:
-                    _push_experience_batch(manager, experience_buffer)
+                    pusher.submit(experience_buffer)
+                    experience_buffer.clear()
 
             # Once a flow leaves the episode schedule (flow_present == 0) it is
             # no longer part of the learning problem. In RayNet, keep sending a
@@ -491,20 +499,16 @@ def run():
                 if log_flush_counter % _LOG_FLUSH_EVERY == 0:
                     log_file.flush()
 
-            elapsed = time.monotonic() - tick_start
-            if not simulation_backend and elapsed < interval_s:
-                time.sleep(interval_s - elapsed)
+            if not simulation_backend:
+                next_tick = sleep_to_grid(next_tick, interval_s)
     finally:
-        if manager and experience_buffer:
-            try:
-                manager.push_exp_batch(list(experience_buffer))
-            except Exception:
-                for experience in experience_buffer:
-                    try:
-                        manager.push_exp(experience)
-                    except Exception:
-                        pass
-            experience_buffer.clear()
+        if pusher:
+            if experience_buffer:
+                pusher.submit(experience_buffer)
+                experience_buffer.clear()
+            # Drain queued batches before the terminal done-marker below so
+            # ordering to the learner is preserved.
+            pusher.close()
 
         if previous_state is not None and manager:
             try:

@@ -1,0 +1,42 @@
+name: astraea
+description: >
+  Astraea multi-flow training environment (EuroSys '24, section 3.2 / Table 3).
+  Multiple concurrent flows share one emulated bottleneck; each episode samples
+  the bandwidth in [40, 160] Mbps and the base RTT in [10, 140] ms (the paper's
+  training characteristics). Flow count is sampled per episode from the
+  paper's 2-5 range, and flows join at randomized
+  times with randomized lifetimes, approximating the paper's Poisson flow
+  arrivals ("randomization in flow starting points and running time"). Per-flow
+  base-RTT multipliers add the paper's RTT heterogeneity between competing
+  flows. The bottleneck queue sweeps the paper's buffer size factors (Table 3:
+  0.1-16 BDP) via the bdp_mult list — one queue depth per pool entry.
+  Links are static within an episode — Astraea randomizes across episodes, not
+  within them.
+shuffle: true
+
+sweep:
+  bw_range:    [40, 160]
+  bw_step:     10
+  delay_range: [10, 140]
+  delay_step:  10
+  # Paper Table 3 buffer size factor [0.1, 16] x BDP, discretized. A list
+  # sweeps one queue depth per pool entry; a scalar keeps a single depth.
+  bdp_mult: [0.1, 0.5, 1, 2, 4, 8, 16]
+  # Concurrent flows (agents) per slot; paper trains 2-5.
+  flows:    [2, 3, 4, 5]
+  # Per-flow base-RTT diversity ("flows with different RTTs to include
+  # heterogeneity", section 4).
+  per_flow_rtt_mult: true
+  per_flow_rtt_mult_min: 0.5
+  per_flow_rtt_mult_max: 2.0
+  # Randomized flow arrivals and lifetimes (one flow survives to episode end).
+  agent_join_pattern: random
+  agent_join_max_frac: 0.3
+  flow_lifetime_pattern: random
+  flow_lifetime_min_frac: 0.25
+  flow_lifetime_max_frac: 0.9
+  flow_lifetime_keep_one: true
+  duration: 120
+  # Static link within an episode; randomization happens across episodes.
+  link_schedules:
+    - []

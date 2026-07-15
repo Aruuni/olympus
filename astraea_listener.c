@@ -107,9 +107,15 @@ typedef struct flow_worker {
     struct flow_worker* next;
 } flow_worker_t;
 
+typedef struct seen_flow {
+    char key[512];
+    struct seen_flow *next;
+} seen_flow_t;
+
 static volatile sig_atomic_t g_stop = 0;
 static pthread_mutex_t g_workers_mu = PTHREAD_MUTEX_INITIALIZER;
 static flow_worker_t* g_workers = NULL;
+static seen_flow_t* g_seen = NULL;
 static long g_next_flow_id = 1;
 
 static void on_sig(int sig) { (void)sig; g_stop = 1; }
@@ -215,12 +221,36 @@ static int get_cc_name(int fd, char* out, socklen_t outlen) {
     return 0;
 }
 
+/* True only while the application still owns the exact source descriptor we
+ * duplicated. The listener/child duplicates keep the kernel socket alive, so
+ * TCP state alone cannot tell us that iperf closed it. Comparing socket inodes
+ * also protects against the application reusing the same fd number. */
+/* 1=same socket, 0=definitively gone/reused, -1=probe error (do not kill). */
+static int source_socket_status(const flow_worker_t *w) {
+    char proc_path[128], target[128], expected[64];
+    struct stat duplicate_st;
+    if (!w || w->pid <= 0 || w->src_fd < 0 || w->fd < 0) return -1;
+    if (fstat(w->fd, &duplicate_st) != 0) return -1;
+    snprintf(proc_path, sizeof(proc_path), "/proc/%d/fd/%d", w->pid, w->src_fd);
+    ssize_t n = readlink(proc_path, target, sizeof(target) - 1);
+    if (n < 0) {
+        if (errno == ENOENT || errno == ESRCH) return 0;
+        return -1;
+    }
+    target[n] = '\0';
+    snprintf(expected, sizeof(expected), "socket:[%llu]",
+             (unsigned long long)duplicate_st.st_ino);
+    return strcmp(target, expected) == 0 ? 1 : 0;
+}
+
 static int enable_deepcc_fd(int fd, int val) {
     return setsockopt(fd, IPPROTO_TCP, TCP_DEEPCC_ENABLE, &val, sizeof(val));
 }
 
-static void make_flow_key(char* key, size_t key_sz, const ss_record_t* rec) {
-    snprintf(key, key_sz, "%s->%s", rec->local, rec->peer);
+static void make_flow_key(char* key, size_t key_sz,
+                          unsigned long long ns_ino,
+                          unsigned long long socket_ino) {
+    snprintf(key, key_sz, "netns:%llu/socket:%llu", ns_ino, socket_ino);
 }
 
 static flow_worker_t* find_worker_locked(const char* key) {
@@ -230,13 +260,19 @@ static flow_worker_t* find_worker_locked(const char* key) {
     return NULL;
 }
 
-static int worker_is_active(const char* key) {
-    int ret = 0;
-    pthread_mutex_lock(&g_workers_mu);
-    flow_worker_t* w = find_worker_locked(key);
-    ret = (w && w->active);
-    pthread_mutex_unlock(&g_workers_mu);
-    return ret;
+static int flow_was_seen_locked(const char *key) {
+    for (seen_flow_t *p = g_seen; p; p = p->next)
+        if (strcmp(p->key, key) == 0) return 1;
+    return 0;
+}
+
+static int remember_flow_locked(const char *key) {
+    seen_flow_t *item = calloc(1, sizeof(*item));
+    if (!item) return -1;
+    snprintf(item->key, sizeof(item->key), "%s", key);
+    item->next = g_seen;
+    g_seen = item;
+    return 0;
 }
 
 static void add_worker_locked(flow_worker_t* w) {
@@ -272,6 +308,12 @@ static pid_t spawn_python_child(const config_t* cfg, flow_worker_t* w) {
         setenv("ASTRAEA_MODEL", cfg->py_model, 1);
         setenv("ASTRAEA_CONTROL_FD", ctrl_s, 1);
         setenv("ASTRAEA_IDLE_EXIT_MS", idle_s, 1);
+
+        /* The listener keeps duplicated sockets CLOEXEC so its recurring
+         * `ss` helper processes cannot inherit and masquerade as owners. Only
+         * this flow's Python child is allowed to retain this descriptor. */
+        int fd_flags = fcntl(w->fd, F_GETFD);
+        if (fd_flags >= 0) fcntl(w->fd, F_SETFD, fd_flags & ~FD_CLOEXEC);
 
         close(w->ctrl_pipe_wr);
 
@@ -310,8 +352,11 @@ static void* flow_thread(void* arg) {
     }
 
 
-    fprintf(stderr, "[attach] %s ns_pid=%d flow_id=%ld child=%d cc=%s\n",
-            w->key, w->ns_pid, w->flow_id, (int)w->child_pid, g_cfg.cc_name);
+    fprintf(stderr,
+            "[attach] %s ns_pid=%d source_pid=%d source_fd=%d "
+            "flow_id=%ld child=%d cc=%s\n",
+            w->key, w->ns_pid, w->pid, w->src_fd,
+            w->flow_id, (int)w->child_pid, g_cfg.cc_name);
     fflush(stderr);
     int nl_fd = -1;
 
@@ -332,15 +377,32 @@ static void* flow_thread(void* arg) {
         fflush(stderr);
     }
 
+    int source_misses = 0;
     while (!g_stop && !w->stop_requested) {
         int st = 0;
         pid_t rc = waitpid(w->child_pid, &st, WNOHANG);
         if (rc == w->child_pid) {
-            if (g_cfg.verbose) {
-                fprintf(stderr, "[flow %ld] child exited pid=%d\n",
-                        w->flow_id, (int)w->child_pid);
-                fflush(stderr);
-            }
+            fprintf(stderr, "[flow %ld] child exited pid=%d status=%d\n",
+                    w->flow_id, (int)w->child_pid, st);
+            fflush(stderr);
+            break;
+        }
+
+        int source_status = source_socket_status(w);
+        if (source_status > 0) {
+            source_misses = 0;
+        } else if (source_status == 0) {
+            source_misses++;
+        }
+        /* Probe errors are inconclusive; never destroy a live flow because
+         * procfs was briefly inaccessible. */
+        /* Tolerate short /proc visibility races during fork/exec and fd-table
+         * updates. Ten 100-ms misses still closes within about one second. */
+        if (source_misses >= 10) {
+            fprintf(stderr,
+                    "[flow %ld] application source gone/reused pid=%d fd=%d\n",
+                    w->flow_id, w->pid, w->src_fd);
+            fflush(stderr);
             break;
         }
 
@@ -475,6 +537,25 @@ static void* flow_thread(void* arg) {
 
 
 
+static int is_our_descendant(int pid) {
+    int self = (int)getpid();
+    for (int depth = 0; pid > 1 && depth < 32; depth++) {
+        if (pid == self) return 1;
+        char path[64], buf[512];
+        snprintf(path, sizeof(path), "/proc/%d/status", pid);
+        FILE *f = fopen(path, "r");
+        if (!f) return 0;
+        int ppid = 0;
+        while (fgets(buf, sizeof(buf), f)) {
+            if (sscanf(buf, "PPid:%d", &ppid) == 1) break;
+        }
+        fclose(f);
+        if (ppid <= 0 || ppid == pid) return 0;
+        pid = ppid;
+    }
+    return 0;
+}
+
 static int parse_users_blob(const char* line, char* proc, size_t proc_sz, int* pid, int* fd) {
     const char* p = strstr(line, "users:((");
     if (!p) return -1;
@@ -482,12 +563,26 @@ static int parse_users_blob(const char* line, char* proc, size_t proc_sz, int* p
     const char* q2 = strchr(q1 + 1, '"'); if (!q2) return -1;
     size_t n = (size_t)(q2 - q1 - 1); if (n >= proc_sz) n = proc_sz - 1;
     memcpy(proc, q1 + 1, n); proc[n] = '\0';
-    const char* pidp = strstr(q2, "pid=");
-    const char* fdp  = strstr(q2, "fd=");
-    if (!pidp || !fdp) return -1;
-    *pid = atoi(pidp + 4);
-    *fd  = atoi(fdp + 3);
-    return 0;
+    /* A duplicated socket can have several `users:` entries. Never select
+     * this listener, its Python workers, or its short-lived scanner children
+     * as the application owner; doing so creates a re-attachment loop. */
+    const char *cursor = q2;
+    while ((cursor = strstr(cursor, "pid=")) != NULL) {
+        int candidate_pid = atoi(cursor + 4);
+        const char *next_pid = strstr(cursor + 4, "pid=");
+        const char *fdp = strstr(cursor + 4, "fd=");
+        if (fdp && (!next_pid || fdp < next_pid)) {
+            int candidate_fd = atoi(fdp + 3);
+            if (candidate_pid > 0 && candidate_fd >= 0
+                    && !is_our_descendant(candidate_pid)) {
+                *pid = candidate_pid;
+                *fd = candidate_fd;
+                return 0;
+            }
+        }
+        cursor += 4;
+    }
+    return -1;
 }
 
 static int is_state_token(const char* tok) {
@@ -524,7 +619,11 @@ static int scan_ss_text(const char* text, unsigned long long ns_ino, int ns_pid,
         } else if (have_cur) {
             if (!strstr(line, "skmem:")) {
                 sscanf(line, "%63s", cur.cc);
-                if (count < max_out) out[count++] = cur;
+                /* pidfd_getfd requires a real application owner. `ss` without
+                 * -p, insufficient privileges, or a kernel-owned socket has no
+                 * usable PID/FD and must never become a flow candidate. */
+                if (cur.pid > 0 && cur.fd >= 0 && count < max_out)
+                    out[count++] = cur;
             }
             have_cur = 0;
         }
@@ -614,12 +713,17 @@ static int discover_netns(int* pids, unsigned long long* inos, int max_out) {
 config_t g_cfg;
 
 static void spawn_worker(const config_t* cfg, const ss_record_t* rec) {
-    char key[512];
-    make_flow_key(key, sizeof(key), rec);
-    if (worker_is_active(key)) return;
-
     int fd = dup_fd_from_pid(rec->pid, rec->fd);
     if (fd < 0) return;
+
+    struct stat socket_st;
+    if (fstat(fd, &socket_st) != 0) {
+        close(fd);
+        return;
+    }
+    char key[512];
+    make_flow_key(key, sizeof(key), rec->ns_ino,
+                  (unsigned long long)socket_st.st_ino);
 
     char cc[64];
     if (get_cc_name(fd, cc, sizeof(cc)) != 0 || strcmp(cc, cfg->cc_name) != 0) {
@@ -632,8 +736,11 @@ static void spawn_worker(const config_t* cfg, const ss_record_t* rec) {
         return;
     }
 
+    /* Prevent every later fork/exec (especially the `ss` scanner) from
+     * inheriting this socket. spawn_python_child clears CLOEXEC in the one
+     * child that owns the flow worker. */
     int flags = fcntl(fd, F_GETFD);
-    if (flags >= 0) fcntl(fd, F_SETFD, flags & ~FD_CLOEXEC);
+    if (flags >= 0) fcntl(fd, F_SETFD, flags | FD_CLOEXEC);
 
     int pfd[2];
     if (pipe(pfd) != 0) {
@@ -670,7 +777,12 @@ static void spawn_worker(const config_t* cfg, const ss_record_t* rec) {
     w->ctrl_pipe_wr = pfd[1];
 
     pthread_mutex_lock(&g_workers_mu);
-    if (find_worker_locked(key) != NULL) {
+    /* One socket inode gets at most one worker for the daemon lifetime. If a
+     * worker fails, do not reset recurrent state and attach again to the same
+     * live flow; surface the failure instead. New TCP sockets have new inodes
+     * and receive fresh workers even when endpoint ports are reused. */
+    if (find_worker_locked(key) != NULL || flow_was_seen_locked(key)
+            || remember_flow_locked(key) != 0) {
         pthread_mutex_unlock(&g_workers_mu);
         close(w->ctrl_pipe_rd);
         close(w->ctrl_pipe_wr);

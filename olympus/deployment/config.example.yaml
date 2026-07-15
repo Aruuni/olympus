@@ -1,0 +1,20 @@
+runtime:
+  algorithm: ma_dreamer
+  state: tempest_ratio
+  action: cwnd_multiplier
+
+deployment:
+  checkpoint: /absolute/path/to/ma_dreamer_cwnd_model.pt
+  device: cpu
+  deterministic: true
+  discovery:
+    listener: ./astraea_listener
+    mode: mininet
+    cc_algorithm: astraea
+    scan_ms: 10
+    ipv4_only: true
+  workers:
+    interval_ms: 20
+    cwnd_min: 4
+    cwnd_max: 10000
+

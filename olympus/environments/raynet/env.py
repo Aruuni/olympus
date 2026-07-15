@@ -551,24 +551,33 @@ class RaynetEnv(NetworkEnv):
         self._start_flow_service()
         self.started = True
 
-    def set_link(self, bw=None, delay=None, loss=None) -> None:
-        if bw is not None:
-            self.bw = float(bw)
-        if delay is not None:
-            self.delay = float(delay)
-        if loss is not None:
-            self.loss = loss
-        print('[raynet-env] set_link ignored; RayNet scenarios are fixed by INI/scenario files',
-              flush=True)
+    def setup_environment(self, link_schedule=None) -> None:
+        """Consume the schedule declaratively: the initial scenario and the
+        mid-episode changes are both baked into the episode config sent to the
+        RayNet runner at start_episode, and the simulator executes them
+        internally. change_link is not overridden: the base accept-and-
+        ignore default applies, since a running simulation cannot be retuned
+        in place."""
+        super().setup_environment(link_schedule)
+        if link_schedule is not None:
+            self.environment_config['link_schedule'] = [
+                dict(e) for e in link_schedule]
 
-    def run_iperf(self, monitor_interval=0.1, start_delays=None,
-                  flow_durations=None) -> None:
+    def start_episode(self, monitor_interval=0.1, start_delays=None,
+                      flow_durations=None, episode_start=None) -> None:
+        # episode_start is unused: the simulator runs on its own clock and
+        # executes the schedule internally, so there is no live replay to
+        # anchor.
         if self._service is None:
             raise RuntimeError('RayNet environment not started')
         self.start_delays = start_delays
         self.flow_durations = flow_durations
         self._service.set_flow_schedule(start_delays)
         self._service.start_episode()
+
+    def wait(self) -> None:
+        if self._service is None:
+            raise RuntimeError('RayNet environment not started')
         self._service.wait()
 
     def stop(self) -> None:

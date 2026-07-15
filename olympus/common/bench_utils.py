@@ -821,9 +821,9 @@ def _run_orca_on_env(env, settings: dict, flow_plan: list, instance_id: int,
     on an already-started MininetEnv, honour per-flow start delays, then
     block until the episode (plus actor-warmup slack) has elapsed.
 
-    This is the `kind: orca` analogue of env.run_iperf(): the caller builds
-    and starts the env exactly like a kernel trial, calls this, then stops
-    the env and parses run_dir/orca_x{f}.log via _orca_receiver_to_csvs().
+    This is the `kind: orca` analogue of env.start_episode(): the caller
+    builds and starts the env exactly like a kernel trial, calls this, then
+    stops the env and parses run_dir/orca_x{f}.log via _orca_receiver_to_csvs().
     """
     install, sender_sh, receiver_sh, server_bin, client_bin = _orca_paths(settings)
     missing = [p for p in (sender_sh, receiver_sh, server_bin, client_bin)

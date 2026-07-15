@@ -343,12 +343,13 @@ def _run_kernel_trial(instance_id: int, approach: dict, bench: dict,
         )
         try:
             env.start()
-            env.run_iperf(
+            env.setup_environment()
+            env.start_episode(
                 monitor_interval=float(bench.get('measure_interval_s', 1.0)),
                 start_delays=[p['start'] for p in flow_plan],
                 flow_durations=[p['duration'] for p in flow_plan],
             )
-            time.sleep(float(bench['duration_s']) + 3.0)
+            env.wait()
         finally:
             env.stop()
             time.sleep(0.5)
@@ -411,6 +412,7 @@ def _run_orca_trial(instance_id: int, approach: dict, bench: dict,
         )
         try:
             env.start()
+            env.setup_environment()
             _run_orca_on_env(env, settings, flow_plan, instance_id,
                              run_dir, int(bench['duration_s']))
         finally:

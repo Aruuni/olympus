@@ -1,0 +1,5 @@
+PING iperf3.phoenixremoteaccess.uk (86.175.129.230) 56(84) bytes of data.
+
+--- iperf3.phoenixremoteaccess.uk ping statistics ---
+3 packets transmitted, 0 received, 100% packet loss, time 2086ms
+

@@ -1,0 +1,5086 @@
+{
+  "intervals": [
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 6.004044055938721,
+          "end": 6.10412005593872,
+          "seconds": 0.10007599741220474,
+          "bytes": 106560,
+          "bits_per_second": 8518326.29245458,
+          "omitted": true,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 6.10412005593872,
+          "end": 6.204125055938721,
+          "seconds": 0.10000500082969666,
+          "bytes": 120960,
+          "bits_per_second": 9676316.103910733,
+          "omitted": true,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 6.204125055938721,
+          "end": 6.304142055938721,
+          "seconds": 0.1000170037150383,
+          "bytes": 144000,
+          "bits_per_second": 11518041.505044488,
+          "omitted": true,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 6.304142055938721,
+          "end": 6.404117055938721,
+          "seconds": 0.09997499734163284,
+          "bytes": 132480,
+          "bits_per_second": 10601050.54445096,
+          "omitted": true,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 6.404117055938721,
+          "end": 6.504129055938721,
+          "seconds": 0.10001199692487717,
+          "bytes": 129600,
+          "bits_per_second": 10366756.308033526,
+          "omitted": true,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 6.504129055938721,
+          "end": 6.604126055938721,
+          "seconds": 0.09999699890613556,
+          "bytes": 129600,
+          "bits_per_second": 10368311.162750151,
+          "omitted": true,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 6.604126055938721,
+          "end": 6.704114055938721,
+          "seconds": 0.09998799860477448,
+          "bytes": 129600,
+          "bits_per_second": 10369244.454008827,
+          "omitted": true,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 6.704114055938721,
+          "end": 6.804123055938721,
+          "seconds": 0.1000090017914772,
+          "bytes": 126720,
+          "bits_per_second": 10136687.516527066,
+          "omitted": true,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 6.804123055938721,
+          "end": 6.904120055938721,
+          "seconds": 0.09999699890613556,
+          "bytes": 146880,
+          "bits_per_second": 11750752.651116839,
+          "omitted": true,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 6.904120055938721,
+          "end": 7.004117055938721,
+          "seconds": 0.09999699890613556,
+          "bytes": 149760,
+          "bits_per_second": 11981159.56584462,
+          "omitted": true,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 7.004117055938721,
+          "end": 7.104119055938721,
+          "seconds": 0.1000019982457161,
+          "bytes": 188640,
+          "bits_per_second": 15090898.446768267,
+          "omitted": true,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 7.104119055938721,
+          "end": 7.20412305593872,
+          "seconds": 0.10000400245189667,
+          "bytes": 181440,
+          "bits_per_second": 14514619.059354166,
+          "omitted": true,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 7.20412305593872,
+          "end": 7.304116055938721,
+          "seconds": 0.099992997944355,
+          "bytes": 151200,
+          "bits_per_second": 12096847.027960187,
+          "omitted": true,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 7.304116055938721,
+          "end": 7.404124055938721,
+          "seconds": 0.10000800341367722,
+          "bytes": 97920,
+          "bits_per_second": 7832973.094760002,
+          "omitted": true,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 7.404124055938721,
+          "end": 7.50408505593872,
+          "seconds": 0.09996099770069122,
+          "bytes": 149760,
+          "bits_per_second": 11985474.610681236,
+          "omitted": true,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 7.50408505593872,
+          "end": 7.604125055938721,
+          "seconds": 0.100040003657341,
+          "bytes": 187200,
+          "bits_per_second": 14970011.447916467,
+          "omitted": true,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 7.604125055938721,
+          "end": 7.704126055938721,
+          "seconds": 0.10000099986791611,
+          "bytes": 236160,
+          "bits_per_second": 18892611.09884311,
+          "omitted": true,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 7.704126055938721,
+          "end": 7.804121055938721,
+          "seconds": 0.0999950021505356,
+          "bytes": 227520,
+          "bits_per_second": 18202509.734035254,
+          "omitted": true,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 7.804121055938721,
+          "end": 7.90412105593872,
+          "seconds": 0.10000000149011612,
+          "bytes": 253440,
+          "bits_per_second": 20275199.69787598,
+          "omitted": true,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 7.90412105593872,
+          "end": 8.00411805593872,
+          "seconds": 0.09999699890613556,
+          "bytes": 285120,
+          "bits_per_second": 22810284.558050334,
+          "omitted": true,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 6.004066055938721,
+          "end": 6.104093055938721,
+          "seconds": 0.1000709980726242,
+          "bytes": 315360,
+          "bits_per_second": 25210900.74637887,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 6.104093055938721,
+          "end": 6.204095055938721,
+          "seconds": 0.1000019982457161,
+          "bytes": 334080,
+          "bits_per_second": 26725865.951528534,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 6.204095055938721,
+          "end": 6.304102055938721,
+          "seconds": 0.10000699758529663,
+          "bytes": 293760,
+          "bits_per_second": 23499155.626541045,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 6.304102055938721,
+          "end": 6.404132055938721,
+          "seconds": 0.10002999752759933,
+          "bytes": 288000,
+          "bits_per_second": 23033090.6422776,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 6.404132055938721,
+          "end": 6.504038055938721,
+          "seconds": 0.09990599751472473,
+          "bytes": 358560,
+          "bits_per_second": 28711789.795975227,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 6.504038055938721,
+          "end": 6.60409505593872,
+          "seconds": 0.10005699843168259,
+          "bytes": 224640,
+          "bits_per_second": 17960962.53304107,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 6.60409505593872,
+          "end": 6.70410405593872,
+          "seconds": 0.1000090017914772,
+          "bytes": 171360,
+          "bits_per_second": 13707566.073485466,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 6.70410405593872,
+          "end": 6.804098055938721,
+          "seconds": 0.099993996322155,
+          "bytes": 198720,
+          "bits_per_second": 15898554.49799407,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 6.804098055938721,
+          "end": 6.904107055938721,
+          "seconds": 0.1000090017914772,
+          "bytes": 227520,
+          "bits_per_second": 18199961.67740087,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 6.904107055938721,
+          "end": 7.004098055938721,
+          "seconds": 0.09999100118875504,
+          "bytes": 325440,
+          "bits_per_second": 26037543.069353636,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 7.004098055938721,
+          "end": 7.104091055938721,
+          "seconds": 0.099992997944355,
+          "bytes": 545760,
+          "bits_per_second": 43663857.36758963,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 7.104091055938721,
+          "end": 7.204093055938721,
+          "seconds": 0.1000019982457161,
+          "bytes": 637920,
+          "bits_per_second": 51032580.24365147,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 7.204093055938721,
+          "end": 7.30408605593872,
+          "seconds": 0.099992997944355,
+          "bytes": 642240,
+          "bits_per_second": 51382797.852097556,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 7.30408605593872,
+          "end": 7.40409505593872,
+          "seconds": 0.1000090017914772,
+          "bytes": 580320,
+          "bits_per_second": 46421421.24045918,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 7.40409505593872,
+          "end": 7.504096055938721,
+          "seconds": 0.10000099986791611,
+          "bytes": 583200,
+          "bits_per_second": 46655533.506289385,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 7.504096055938721,
+          "end": 7.60409505593872,
+          "seconds": 0.09999900311231613,
+          "bytes": 587520,
+          "bits_per_second": 47002068.55783261,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 7.60409505593872,
+          "end": 7.7041110559387205,
+          "seconds": 0.10001599788665771,
+          "bytes": 587520,
+          "bits_per_second": 46994081.9400354,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 7.7041110559387205,
+          "end": 7.8040880559387205,
+          "seconds": 0.0999770015478134,
+          "bytes": 586080,
+          "bits_per_second": 46897185.62681323,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 7.8040880559387205,
+          "end": 7.904099055938721,
+          "seconds": 0.10001099854707718,
+          "bytes": 581760,
+          "bits_per_second": 46535681.75113492,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 7.904099055938721,
+          "end": 8.00411305593872,
+          "seconds": 0.10001400113105774,
+          "bytes": 594720,
+          "bits_per_second": 47570939.53041095,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 8.00411305593872,
+          "end": 8.10406805593872,
+          "seconds": 0.0999549999833107,
+          "bytes": 591840,
+          "bits_per_second": 47368515.84003349,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 8.10406805593872,
+          "end": 8.20408905593872,
+          "seconds": 0.10002099722623825,
+          "bytes": 564480,
+          "bits_per_second": 45148919.979127854,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 8.20408905593872,
+          "end": 8.30408605593872,
+          "seconds": 0.09999699890613556,
+          "bytes": 570240,
+          "bits_per_second": 45620569.11610067,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 8.30408605593872,
+          "end": 8.40408605593872,
+          "seconds": 0.10000000149011612,
+          "bytes": 576000,
+          "bits_per_second": 46079999.3133545,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 8.40408605593872,
+          "end": 8.504086055938721,
+          "seconds": 0.10000000149011612,
+          "bytes": 552960,
+          "bits_per_second": 44236799.34082032,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 8.504086055938721,
+          "end": 8.604081055938721,
+          "seconds": 0.0999950021505356,
+          "bytes": 588960,
+          "bits_per_second": 47119154.944433026,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 8.604081055938721,
+          "end": 8.70409605593872,
+          "seconds": 0.10001499950885773,
+          "bytes": 563040,
+          "bits_per_second": 45036444.75447985,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 8.70409605593872,
+          "end": 8.80418105593872,
+          "seconds": 0.10008499771356583,
+          "bytes": 564480,
+          "bits_per_second": 45120048.98999872,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 8.80418105593872,
+          "end": 8.90411605593872,
+          "seconds": 0.09993500262498856,
+          "bytes": 571680,
+          "bits_per_second": 45764145.493267044,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 8.90411605593872,
+          "end": 9.00409405593872,
+          "seconds": 0.0999779999256134,
+          "bytes": 571680,
+          "bits_per_second": 45744463.816067286,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 9.00409405593872,
+          "end": 9.10409105593872,
+          "seconds": 0.09999699890613556,
+          "bytes": 521280,
+          "bits_per_second": 41703651.56572839,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 9.10409105593872,
+          "end": 9.20409105593872,
+          "seconds": 0.10000000149011612,
+          "bytes": 534240,
+          "bits_per_second": 42739199.3631363,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 9.20409105593872,
+          "end": 9.30409305593872,
+          "seconds": 0.1000019982457161,
+          "bytes": 492480,
+          "bits_per_second": 39397612.7388912,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 9.30409305593872,
+          "end": 9.40410005593872,
+          "seconds": 0.10000699758529663,
+          "bytes": 498240,
+          "bits_per_second": 39856411.013643146,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 9.40410005593872,
+          "end": 9.50409405593872,
+          "seconds": 0.099993996322155,
+          "bytes": 465120,
+          "bits_per_second": 37211834.0786383,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 9.50409405593872,
+          "end": 9.60409005593872,
+          "seconds": 0.09999600052833557,
+          "bytes": 450720,
+          "bits_per_second": 36059042.1711741,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 9.60409005593872,
+          "end": 9.70408905593872,
+          "seconds": 0.09999900311231613,
+          "bytes": 401760,
+          "bits_per_second": 32141120.41087083,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 9.70408905593872,
+          "end": 9.80408405593872,
+          "seconds": 0.0999950021505356,
+          "bytes": 404640,
+          "bits_per_second": 32372817.944708265,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 9.80408405593872,
+          "end": 9.90410005593872,
+          "seconds": 0.10001599788665771,
+          "bytes": 387360,
+          "bits_per_second": 30983843.23987628,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 9.90410005593872,
+          "end": 10.004117055938721,
+          "seconds": 0.1000170037150383,
+          "bytes": 383040,
+          "bits_per_second": 30637990.40341834,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 10.004117055938721,
+          "end": 10.10409705593872,
+          "seconds": 0.09997999668121338,
+          "bytes": 396000,
+          "bits_per_second": 31686338.31926581,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 10.10409705593872,
+          "end": 10.20410505593872,
+          "seconds": 0.10000800341367722,
+          "bytes": 385920,
+          "bits_per_second": 30871129.25581883,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 10.20410505593872,
+          "end": 10.30410005593872,
+          "seconds": 0.0999950021505356,
+          "bytes": 416160,
+          "bits_per_second": 33294464.007191062,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 10.30410005593872,
+          "end": 10.404101055938721,
+          "seconds": 0.10000099986791611,
+          "bytes": 391680,
+          "bits_per_second": 31334086.700520277,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 10.404101055938721,
+          "end": 10.504084055938721,
+          "seconds": 0.09998299926519394,
+          "bytes": 391680,
+          "bits_per_second": 31339727.98404351,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 10.504084055938721,
+          "end": 10.60409605593872,
+          "seconds": 0.10001199692487717,
+          "bytes": 381600,
+          "bits_per_second": 30524338.018098716,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 10.60409605593872,
+          "end": 10.704094055938722,
+          "seconds": 0.09999799728393555,
+          "bytes": 393120,
+          "bits_per_second": 31450229.85880569,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 10.704094055938722,
+          "end": 10.804099055938721,
+          "seconds": 0.10000500082969666,
+          "bytes": 385920,
+          "bits_per_second": 30872056.141048532,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 10.804099055938721,
+          "end": 10.90409705593872,
+          "seconds": 0.09999799728393555,
+          "bytes": 390240,
+          "bits_per_second": 31219825.244455464,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 10.90409705593872,
+          "end": 11.00408705593872,
+          "seconds": 0.09999000281095505,
+          "bytes": 396000,
+          "bits_per_second": 31683167.42614302,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 11.00408705593872,
+          "end": 11.10408705593872,
+          "seconds": 0.10000000149011612,
+          "bytes": 384480,
+          "bits_per_second": 30758399.54166413,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 11.10408705593872,
+          "end": 11.20408805593872,
+          "seconds": 0.10000099986791611,
+          "bytes": 400320,
+          "bits_per_second": 32025279.78950234,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 11.20408805593872,
+          "end": 11.30408705593872,
+          "seconds": 0.09999900311231613,
+          "bytes": 383040,
+          "bits_per_second": 30643505.48133205,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 11.30408705593872,
+          "end": 11.40408705593872,
+          "seconds": 0.10000000149011612,
+          "bytes": 403200,
+          "bits_per_second": 32255999.519348152,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 11.40408705593872,
+          "end": 11.504104055938722,
+          "seconds": 0.1000170037150383,
+          "bytes": 375840,
+          "bits_per_second": 30062088.328166116,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 11.504104055938722,
+          "end": 11.604095055938721,
+          "seconds": 0.09999100118875504,
+          "bytes": 390240,
+          "bits_per_second": 31222009.609711662,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 11.604095055938721,
+          "end": 11.70409605593872,
+          "seconds": 0.10000099986791611,
+          "bytes": 400320,
+          "bits_per_second": 32025279.78950234,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 11.70409605593872,
+          "end": 11.80408805593872,
+          "seconds": 0.09999199956655502,
+          "bytes": 390240,
+          "bits_per_second": 31221697.871158574,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 11.80408805593872,
+          "end": 11.90408705593872,
+          "seconds": 0.09999900311231613,
+          "bytes": 397440,
+          "bits_per_second": 31795516.965592653,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 11.90408705593872,
+          "end": 12.00409905593872,
+          "seconds": 0.10001199692487717,
+          "bytes": 384480,
+          "bits_per_second": 30754710.38049946,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 12.00409905593872,
+          "end": 12.10409105593872,
+          "seconds": 0.09999199956655502,
+          "bytes": 394560,
+          "bits_per_second": 31567325.522868816,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 12.10409105593872,
+          "end": 12.20408805593872,
+          "seconds": 0.09999699890613556,
+          "bytes": 384480,
+          "bits_per_second": 30759323.116158783,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 12.20408805593872,
+          "end": 12.30409705593872,
+          "seconds": 0.1000090017914772,
+          "bytes": 396000,
+          "bits_per_second": 31677148.489147082,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 12.30409705593872,
+          "end": 12.40408705593872,
+          "seconds": 0.09999000281095505,
+          "bytes": 381600,
+          "bits_per_second": 30531052.247010548,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 12.40408705593872,
+          "end": 12.504083055938722,
+          "seconds": 0.09999600052833557,
+          "bytes": 404640,
+          "bits_per_second": 32372494.728753746,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 12.504083055938722,
+          "end": 12.604092055938722,
+          "seconds": 0.1000090017914772,
+          "bytes": 390240,
+          "bits_per_second": 31216389.96566858,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 12.604092055938722,
+          "end": 12.704102055938721,
+          "seconds": 0.10001000016927719,
+          "bytes": 303840,
+          "bits_per_second": 24304769.48190938,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 12.704102055938721,
+          "end": 12.80410005593872,
+          "seconds": 0.09999799728393555,
+          "bytes": 434880,
+          "bits_per_second": 34791096.76688395,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 12.80410005593872,
+          "end": 12.904098055938722,
+          "seconds": 0.09999799728393555,
+          "bytes": 411840,
+          "bits_per_second": 32947859.852082152,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 12.904098055938722,
+          "end": 13.00410205593872,
+          "seconds": 0.10000400245189667,
+          "bytes": 397440,
+          "bits_per_second": 31793927.46334722,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 13.00410205593872,
+          "end": 13.10409405593872,
+          "seconds": 0.09999199956655502,
+          "bytes": 394560,
+          "bits_per_second": 31567325.522868816,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 13.10409405593872,
+          "end": 13.204104055938721,
+          "seconds": 0.10001000016927719,
+          "bytes": 394560,
+          "bits_per_second": 31561643.782195117,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 13.204104055938721,
+          "end": 13.30409705593872,
+          "seconds": 0.099992997944355,
+          "bytes": 387360,
+          "bits_per_second": 30990970.00496467,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 13.30409705593872,
+          "end": 13.40411405593872,
+          "seconds": 0.1000170037150383,
+          "bytes": 387360,
+          "bits_per_second": 30983531.648569677,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 13.40411405593872,
+          "end": 13.50408505593872,
+          "seconds": 0.0999709963798523,
+          "bytes": 406080,
+          "bits_per_second": 32495824.9656369,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 13.50408505593872,
+          "end": 13.604095055938721,
+          "seconds": 0.10001000016927719,
+          "bytes": 374400,
+          "bits_per_second": 29949005.048798285,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 13.604095055938721,
+          "end": 13.70410705593872,
+          "seconds": 0.10001199692487717,
+          "bytes": 408960,
+          "bits_per_second": 32712875.460905794,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 13.70410705593872,
+          "end": 13.80410705593872,
+          "seconds": 0.10000000149011612,
+          "bytes": 385920,
+          "bits_per_second": 30873599.539947517,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 13.80410705593872,
+          "end": 13.90408705593872,
+          "seconds": 0.09997999668121338,
+          "bytes": 388800,
+          "bits_per_second": 31110223.07709734,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 13.90408705593872,
+          "end": 14.004119055938721,
+          "seconds": 0.10003200173377991,
+          "bytes": 378720,
+          "bits_per_second": 30287907.3445241,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 14.004119055938721,
+          "end": 14.10412205593872,
+          "seconds": 0.10000299662351608,
+          "bytes": 388800,
+          "bits_per_second": 31103067.958151344,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 14.10412205593872,
+          "end": 14.20409605593872,
+          "seconds": 0.09997399896383286,
+          "bytes": 398880,
+          "bits_per_second": 31918699.19252113,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 14.20409605593872,
+          "end": 14.304134055938722,
+          "seconds": 0.10003799945116043,
+          "bytes": 387360,
+          "bits_per_second": 30977028.89903256,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 14.304134055938722,
+          "end": 14.40409505593872,
+          "seconds": 0.09996099770069122,
+          "bytes": 394560,
+          "bits_per_second": 31577115.80121787,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 14.40409505593872,
+          "end": 14.504091055938721,
+          "seconds": 0.09999600052833557,
+          "bytes": 404640,
+          "bits_per_second": 32372494.728753746,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 14.504091055938721,
+          "end": 14.604150055938721,
+          "seconds": 0.10005900263786316,
+          "bytes": 371520,
+          "bits_per_second": 29704073.81289757,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 14.604150055938721,
+          "end": 14.70409605593872,
+          "seconds": 0.0999459996819496,
+          "bytes": 383040,
+          "bits_per_second": 30659756.365951087,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 14.70409605593872,
+          "end": 14.80413805593872,
+          "seconds": 0.10004200041294098,
+          "bytes": 400320,
+          "bits_per_second": 32012154.762808315,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 14.80413805593872,
+          "end": 14.904122055938721,
+          "seconds": 0.09998399764299393,
+          "bytes": 396000,
+          "bits_per_second": 31685070.358076327,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 14.904122055938721,
+          "end": 15.004138055938721,
+          "seconds": 0.10001599788665771,
+          "bytes": 387360,
+          "bits_per_second": 30983843.23987628,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 15.004138055938721,
+          "end": 15.10414405593872,
+          "seconds": 0.10000599920749664,
+          "bytes": 400320,
+          "bits_per_second": 32023678.833058745,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 15.10414405593872,
+          "end": 15.204216055938721,
+          "seconds": 0.1000719964504242,
+          "bytes": 388800,
+          "bits_per_second": 31081622.335184414,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 15.204216055938721,
+          "end": 15.304172055938722,
+          "seconds": 0.0999559983611107,
+          "bytes": 372960,
+          "bits_per_second": 29849934.46036995,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 15.304172055938722,
+          "end": 15.40413705593872,
+          "seconds": 0.09996499866247177,
+          "bytes": 384480,
+          "bits_per_second": 30769169.62091365,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 15.40413705593872,
+          "end": 15.50409605593872,
+          "seconds": 0.09995900094509125,
+          "bytes": 416160,
+          "bits_per_second": 33306455.33190969,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 15.50409605593872,
+          "end": 15.604095055938721,
+          "seconds": 0.09999900311231613,
+          "bytes": 361440,
+          "bits_per_second": 28915488.254941143,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 15.604095055938721,
+          "end": 15.704102055938721,
+          "seconds": 0.10000699758529663,
+          "bytes": 383040,
+          "bits_per_second": 30641055.865979988,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 15.704102055938721,
+          "end": 15.80414005593872,
+          "seconds": 0.10003799945116043,
+          "bytes": 390240,
+          "bits_per_second": 31207341.381553248,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 15.80414005593872,
+          "end": 15.90415005593872,
+          "seconds": 0.10001000016927719,
+          "bytes": 413280,
+          "bits_per_second": 33059094.03463503,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 15.90415005593872,
+          "end": 16.00409305593872,
+          "seconds": 0.09994299709796906,
+          "bytes": 407520,
+          "bits_per_second": 32620194.457488906,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 16.00409305593872,
+          "end": 16.104128055938723,
+          "seconds": 0.10003499686717987,
+          "bytes": 383040,
+          "bits_per_second": 30632479.591803357,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 16.104128055938723,
+          "end": 16.20412805593872,
+          "seconds": 0.10000000149011612,
+          "bytes": 403200,
+          "bits_per_second": 32255999.519348152,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 16.20412805593872,
+          "end": 16.30415605593872,
+          "seconds": 0.10002800077199936,
+          "bytes": 375840,
+          "bits_per_second": 30058783.308619972,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 16.30415605593872,
+          "end": 16.40413405593872,
+          "seconds": 0.0999779999256134,
+          "bytes": 367200,
+          "bits_per_second": 29382464.16397269,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 16.40413405593872,
+          "end": 16.50416305593872,
+          "seconds": 0.10002899914979935,
+          "bytes": 414720,
+          "bits_per_second": 33167981.567339867,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 16.50416305593872,
+          "end": 16.60413605593872,
+          "seconds": 0.09997300058603287,
+          "bytes": 381600,
+          "bits_per_second": 30536244.607091486,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 16.60413605593872,
+          "end": 16.70409005593872,
+          "seconds": 0.0999540016055107,
+          "bytes": 393120,
+          "bits_per_second": 31464072.9684064,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 16.70409005593872,
+          "end": 16.80421705593872,
+          "seconds": 0.10012699663639069,
+          "bytes": 403200,
+          "bits_per_second": 32215087.92192885,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 16.80421705593872,
+          "end": 16.90415905593872,
+          "seconds": 0.09994199872016907,
+          "bytes": 393120,
+          "bits_per_second": 31467851.75675422,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 16.90415905593872,
+          "end": 17.004136055938723,
+          "seconds": 0.0999770015478134,
+          "bytes": 378720,
+          "bits_per_second": 30304569.581945654,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 17.004136055938723,
+          "end": 17.10420205593872,
+          "seconds": 0.10006599873304367,
+          "bytes": 410400,
+          "bits_per_second": 32810345.587604932,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 17.10420205593872,
+          "end": 17.204188055938722,
+          "seconds": 0.0999860018491745,
+          "bytes": 377280,
+          "bits_per_second": 30186625.56937633,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 17.204188055938722,
+          "end": 17.304056055938723,
+          "seconds": 0.0998679995536804,
+          "bytes": 406080,
+          "bits_per_second": 32529338.8724965,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 17.304056055938723,
+          "end": 17.40419305593872,
+          "seconds": 0.10013700276613235,
+          "bytes": 381600,
+          "bits_per_second": 30486233.0174765,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 17.40419305593872,
+          "end": 17.50420205593872,
+          "seconds": 0.1000090017914772,
+          "bytes": 397440,
+          "bits_per_second": 31792338.12001671,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 17.50420205593872,
+          "end": 17.60409905593872,
+          "seconds": 0.09989699721336365,
+          "bytes": 380160,
+          "bits_per_second": 30444158.331449375,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 17.60409905593872,
+          "end": 17.704115055938722,
+          "seconds": 0.10001599788665771,
+          "bytes": 403200,
+          "bits_per_second": 32250840.547083117,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 17.704115055938722,
+          "end": 17.804132055938723,
+          "seconds": 0.1000170037150383,
+          "bytes": 385920,
+          "bits_per_second": 30868351.23351923,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 17.804132055938723,
+          "end": 17.90409005593872,
+          "seconds": 0.09995800256729126,
+          "bytes": 360000,
+          "bits_per_second": 28812100.3424533,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 17.90409005593872,
+          "end": 18.00410005593872,
+          "seconds": 0.10001000016927719,
+          "bytes": 419040,
+          "bits_per_second": 33519847.9584627,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 18.00410005593872,
+          "end": 18.10408805593872,
+          "seconds": 0.09998799860477448,
+          "bytes": 383040,
+          "bits_per_second": 30646878.05295942,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 18.10408805593872,
+          "end": 18.20408805593872,
+          "seconds": 0.10000000149011612,
+          "bytes": 403200,
+          "bits_per_second": 32255999.519348152,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 18.20408805593872,
+          "end": 18.30408505593872,
+          "seconds": 0.09999699890613556,
+          "bytes": 390240,
+          "bits_per_second": 31220136.945614345,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 18.30408505593872,
+          "end": 18.404102055938722,
+          "seconds": 0.1000170037150383,
+          "bytes": 375840,
+          "bits_per_second": 30062088.328166116,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 18.404102055938722,
+          "end": 18.504105055938723,
+          "seconds": 0.10000299662351608,
+          "bytes": 388800,
+          "bits_per_second": 31103067.958151344,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 18.504105055938723,
+          "end": 18.60405905593872,
+          "seconds": 0.0999540016055107,
+          "bytes": 411840,
+          "bits_per_second": 32962362.157378137,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 18.60405905593872,
+          "end": 18.70409305593872,
+          "seconds": 0.10003399848937988,
+          "bytes": 310848,
+          "bits_per_second": 24859388.183548514,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 18.70409305593872,
+          "end": 18.80422105593872,
+          "seconds": 0.10012800246477127,
+          "bytes": 0,
+          "bits_per_second": 0,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 18.80422105593872,
+          "end": 18.90417605593872,
+          "seconds": 0.0999549999833107,
+          "bytes": 0,
+          "bits_per_second": 0,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 18.90417605593872,
+          "end": 19.00417105593872,
+          "seconds": 0.0999950021505356,
+          "bytes": 0,
+          "bits_per_second": 0,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 19.00417105593872,
+          "end": 19.10417005593872,
+          "seconds": 0.09999900311231613,
+          "bytes": 0,
+          "bits_per_second": 0,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 19.10417005593872,
+          "end": 19.204213055938723,
+          "seconds": 0.10004299879074097,
+          "bytes": 0,
+          "bits_per_second": 0,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 19.204213055938723,
+          "end": 19.30414005593872,
+          "seconds": 0.09992700070142746,
+          "bytes": 0,
+          "bits_per_second": 0,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 19.30414005593872,
+          "end": 19.40419605593872,
+          "seconds": 0.1000560000538826,
+          "bytes": 0,
+          "bits_per_second": 0,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 19.40419605593872,
+          "end": 19.50421905593872,
+          "seconds": 0.10002300143241882,
+          "bytes": 0,
+          "bits_per_second": 0,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 19.50421905593872,
+          "end": 19.60415205593872,
+          "seconds": 0.099932998418808,
+          "bytes": 0,
+          "bits_per_second": 0,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 19.60415205593872,
+          "end": 19.704219055938722,
+          "seconds": 0.10006699711084366,
+          "bytes": 0,
+          "bits_per_second": 0,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 19.704219055938722,
+          "end": 19.80417405593872,
+          "seconds": 0.0999549999833107,
+          "bytes": 0,
+          "bits_per_second": 0,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 19.80417405593872,
+          "end": 19.90421505593872,
+          "seconds": 0.100041002035141,
+          "bytes": 0,
+          "bits_per_second": 0,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 19.90421505593872,
+          "end": 20.00416805593872,
+          "seconds": 0.09995300322771072,
+          "bytes": 4320,
+          "bits_per_second": 345762.49721347715,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 20.00416805593872,
+          "end": 20.10414905593872,
+          "seconds": 0.09998100250959396,
+          "bytes": 0,
+          "bits_per_second": 0,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 20.10414905593872,
+          "end": 20.20421105593872,
+          "seconds": 0.10006199777126312,
+          "bytes": 0,
+          "bits_per_second": 0,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 20.20421105593872,
+          "end": 20.30418105593872,
+          "seconds": 0.0999699980020523,
+          "bytes": 0,
+          "bits_per_second": 0,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 20.30418105593872,
+          "end": 20.40415305593872,
+          "seconds": 0.0999720022082329,
+          "bytes": 0,
+          "bits_per_second": 0,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 20.40415305593872,
+          "end": 20.50417505593872,
+          "seconds": 0.10002200305461884,
+          "bytes": 2880,
+          "bits_per_second": 230349.31611416128,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 20.50417505593872,
+          "end": 20.60425305593872,
+          "seconds": 0.10007800161838531,
+          "bytes": 0,
+          "bits_per_second": 0,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 20.60425305593872,
+          "end": 20.70432505593872,
+          "seconds": 0.1000719964504242,
+          "bytes": 5760,
+          "bits_per_second": 460468.4790397691,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 20.70432505593872,
+          "end": 20.804087055938723,
+          "seconds": 0.099762000143528,
+          "bytes": 339840,
+          "bits_per_second": 27252059.863360465,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 20.804087055938723,
+          "end": 20.90409005593872,
+          "seconds": 0.10000299662351608,
+          "bytes": 406080,
+          "bits_per_second": 32485426.53406918,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 20.90409005593872,
+          "end": 21.00409605593872,
+          "seconds": 0.10000599920749664,
+          "bytes": 388800,
+          "bits_per_second": 31102134.118438352,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 21.00409605593872,
+          "end": 21.10408705593872,
+          "seconds": 0.09999100118875504,
+          "bytes": 372960,
+          "bits_per_second": 29839485.198949523,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 21.10408705593872,
+          "end": 21.20411405593872,
+          "seconds": 0.10002700239419937,
+          "bytes": 413280,
+          "bits_per_second": 33053474.7704459,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 21.20411405593872,
+          "end": 21.30409205593872,
+          "seconds": 0.0999779999256134,
+          "bytes": 374400,
+          "bits_per_second": 29958590.91228588,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 21.30409205593872,
+          "end": 21.40411905593872,
+          "seconds": 0.10002700239419937,
+          "bytes": 397440,
+          "bits_per_second": 31786616.85241487,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 21.40411905593872,
+          "end": 21.50414605593872,
+          "seconds": 0.10002700239419937,
+          "bytes": 375840,
+          "bits_per_second": 30059083.3278271,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 21.50414605593872,
+          "end": 21.60409605593872,
+          "seconds": 0.09995000064373016,
+          "bytes": 413280,
+          "bits_per_second": 33078939.256689236,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 21.60409605593872,
+          "end": 21.70413105593872,
+          "seconds": 0.10003499686717987,
+          "bytes": 380160,
+          "bits_per_second": 30402160.196376264,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 21.70413105593872,
+          "end": 21.80410505593872,
+          "seconds": 0.09997399896383286,
+          "bytes": 365760,
+          "bits_per_second": 29268410.08989302,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 21.80410505593872,
+          "end": 21.90417905593872,
+          "seconds": 0.10007400065660477,
+          "bytes": 349920,
+          "bits_per_second": 27972899.87042449,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 21.90417905593872,
+          "end": 22.004128055938722,
+          "seconds": 0.09994900226593018,
+          "bytes": 462240,
+          "bits_per_second": 36998068.176419586,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 22.004128055938722,
+          "end": 22.10409305593872,
+          "seconds": 0.09996499866247177,
+          "bytes": 396000,
+          "bits_per_second": 31691092.30618447,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 22.10409305593872,
+          "end": 22.20409205593872,
+          "seconds": 0.09999900311231613,
+          "bytes": 385920,
+          "bits_per_second": 30873907.778184168,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 22.20409205593872,
+          "end": 22.30413705593872,
+          "seconds": 0.10004500299692154,
+          "bytes": 384480,
+          "bits_per_second": 30744564.02479838,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 22.30413705593872,
+          "end": 22.40409805593872,
+          "seconds": 0.09996099770069122,
+          "bytes": 365760,
+          "bits_per_second": 29272216.837625325,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 22.40409805593872,
+          "end": 22.50416605593872,
+          "seconds": 0.10006800293922424,
+          "bytes": 383040,
+          "bits_per_second": 30622375.884338353,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 22.50416605593872,
+          "end": 22.60408505593872,
+          "seconds": 0.09991899877786636,
+          "bytes": 436320,
+          "bits_per_second": 34933896.88341447,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 22.60408505593872,
+          "end": 22.70409605593872,
+          "seconds": 0.10001099854707718,
+          "bytes": 390240,
+          "bits_per_second": 31215766.719201885,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 22.70409605593872,
+          "end": 22.80420205593872,
+          "seconds": 0.10010600090026855,
+          "bytes": 368640,
+          "bits_per_second": 29459972.16428699,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 22.80420205593872,
+          "end": 22.90410505593872,
+          "seconds": 0.09990300238132477,
+          "bytes": 413280,
+          "bits_per_second": 33094500.877763886,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 22.90410505593872,
+          "end": 23.00413105593872,
+          "seconds": 0.10002599656581879,
+          "bytes": 374400,
+          "bits_per_second": 29944215.532300226,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 23.00413105593872,
+          "end": 23.10409205593872,
+          "seconds": 0.09996099770069122,
+          "bytes": 407520,
+          "bits_per_second": 32614320.334834516,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 23.10409205593872,
+          "end": 23.20409605593872,
+          "seconds": 0.10000400245189667,
+          "bytes": 357120,
+          "bits_per_second": 28568456.561268516,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 23.20409605593872,
+          "end": 23.304107055938722,
+          "seconds": 0.10001099854707718,
+          "bytes": 398880,
+          "bits_per_second": 31906890.70560488,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 23.304107055938722,
+          "end": 23.40409705593872,
+          "seconds": 0.09999000281095505,
+          "bytes": 403200,
+          "bits_per_second": 32259225.01570926,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 23.40409705593872,
+          "end": 23.50408905593872,
+          "seconds": 0.09999199956655502,
+          "bytes": 404640,
+          "bits_per_second": 32373790.04352605,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 23.50408905593872,
+          "end": 23.60409005593872,
+          "seconds": 0.10000099986791611,
+          "bytes": 370080,
+          "bits_per_second": 29606103.978065114,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 23.60409005593872,
+          "end": 23.704098055938722,
+          "seconds": 0.10000800341367722,
+          "bytes": 408960,
+          "bits_per_second": 32714181.748703536,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 23.704098055938722,
+          "end": 23.80409405593872,
+          "seconds": 0.09999600052833557,
+          "bytes": 385920,
+          "bits_per_second": 30874834.830270477,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 23.80409405593872,
+          "end": 23.90413205593872,
+          "seconds": 0.10003799945116043,
+          "bytes": 387360,
+          "bits_per_second": 30977028.89903256,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 23.90413205593872,
+          "end": 24.00409205593872,
+          "seconds": 0.09995999932289124,
+          "bytes": 380160,
+          "bits_per_second": 30424970.194087774,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 24.00409205593872,
+          "end": 24.10409405593872,
+          "seconds": 0.1000019982457161,
+          "bytes": 398880,
+          "bits_per_second": 31909762.364540536,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 24.10409405593872,
+          "end": 24.20408905593872,
+          "seconds": 0.0999950021505356,
+          "bytes": 377280,
+          "bits_per_second": 30183908.54631162,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 24.20408905593872,
+          "end": 24.30417005593872,
+          "seconds": 0.10008099675178528,
+          "bytes": 414720,
+          "bits_per_second": 33150748.970141694,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 24.30417005593872,
+          "end": 24.404092055938722,
+          "seconds": 0.09992200136184692,
+          "bytes": 375840,
+          "bits_per_second": 30090670.313055314,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 24.404092055938722,
+          "end": 24.504097055938722,
+          "seconds": 0.10000500082969666,
+          "bytes": 400320,
+          "bits_per_second": 32023998.53437124,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 24.504097055938722,
+          "end": 24.604099055938722,
+          "seconds": 0.1000019982457161,
+          "bytes": 385920,
+          "bits_per_second": 30872983.081938133,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 24.604099055938722,
+          "end": 24.70408005593872,
+          "seconds": 0.09998100250959396,
+          "bytes": 407520,
+          "bits_per_second": 32607794.66266266,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 24.70408005593872,
+          "end": 24.80414605593872,
+          "seconds": 0.10006599873304367,
+          "bytes": 365760,
+          "bits_per_second": 29241500.97983036,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 24.80414605593872,
+          "end": 24.90412805593872,
+          "seconds": 0.09998200088739395,
+          "bytes": 404640,
+          "bits_per_second": 32377027.577652194,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 24.90412805593872,
+          "end": 25.00408505593872,
+          "seconds": 0.09995699673891068,
+          "bytes": 401760,
+          "bits_per_second": 32154627.538432654,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 25.00408505593872,
+          "end": 25.10410105593872,
+          "seconds": 0.10001599788665771,
+          "bytes": 372960,
+          "bits_per_second": 29832027.506051883,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 25.10410105593872,
+          "end": 25.20418605593872,
+          "seconds": 0.10008499771356583,
+          "bytes": 400320,
+          "bits_per_second": 31998402.08984603,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 25.20418605593872,
+          "end": 25.30409705593872,
+          "seconds": 0.09991099685430527,
+          "bytes": 388800,
+          "bits_per_second": 31131708.199606154,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 25.30409705593872,
+          "end": 25.40409605593872,
+          "seconds": 0.09999900311231613,
+          "bytes": 383040,
+          "bits_per_second": 30643505.48133205,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 25.40409605593872,
+          "end": 25.504187055938722,
+          "seconds": 0.10009100288152695,
+          "bytes": 384480,
+          "bits_per_second": 30730434.4191728,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 25.504187055938722,
+          "end": 25.60409105593872,
+          "seconds": 0.09990400075912476,
+          "bytes": 401760,
+          "bits_per_second": 32171684.572966825,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 25.60409105593872,
+          "end": 25.70414505593872,
+          "seconds": 0.10005400329828262,
+          "bytes": 380160,
+          "bits_per_second": 30396384.94956855,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 25.70414505593872,
+          "end": 25.80409905593872,
+          "seconds": 0.0999540016055107,
+          "bytes": 403200,
+          "bits_per_second": 32270844.070160415,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 25.80409905593872,
+          "end": 25.904092055938722,
+          "seconds": 0.099992997944355,
+          "bytes": 398880,
+          "bits_per_second": 31912634.5404283,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 25.904092055938722,
+          "end": 26.00409905593872,
+          "seconds": 0.10000699758529663,
+          "bytes": 378720,
+          "bits_per_second": 30295480.04794262,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 26.00409905593872,
+          "end": 26.10410505593872,
+          "seconds": 0.10000599920749664,
+          "bytes": 403392,
+          "bits_per_second": 32269424.090290852,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 26.10410505593872,
+          "end": 26.204146055938722,
+          "seconds": 0.100041002035141,
+          "bytes": 371520,
+          "bits_per_second": 29709418.5337726,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 26.204146055938722,
+          "end": 26.30410105593872,
+          "seconds": 0.0999549999833107,
+          "bytes": 408960,
+          "bits_per_second": 32731529.193599783,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 26.30410105593872,
+          "end": 26.40409105593872,
+          "seconds": 0.09999000281095505,
+          "bytes": 385920,
+          "bits_per_second": 30876686.80075029,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 26.40409105593872,
+          "end": 26.50414005593872,
+          "seconds": 0.10004899650812149,
+          "bytes": 383040,
+          "bits_per_second": 30628193.254804444,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 26.50414005593872,
+          "end": 26.60408805593872,
+          "seconds": 0.0999479964375496,
+          "bytes": 404640,
+          "bits_per_second": 32388042.93613476,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 26.60408805593872,
+          "end": 26.704091055938722,
+          "seconds": 0.10000299662351608,
+          "bytes": 387360,
+          "bits_per_second": 30987871.41015819,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 26.704091055938722,
+          "end": 26.80414605593872,
+          "seconds": 0.10005500167608261,
+          "bytes": 391680,
+          "bits_per_second": 31317175.028832417,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 26.80414605593872,
+          "end": 26.90409305593872,
+          "seconds": 0.0999469980597496,
+          "bytes": 393120,
+          "bits_per_second": 31466277.737725575,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 26.90409305593872,
+          "end": 27.00409205593872,
+          "seconds": 0.09999900311231613,
+          "bytes": 385920,
+          "bits_per_second": 30873907.778184168,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 27.00409205593872,
+          "end": 27.10413205593872,
+          "seconds": 0.100040003657341,
+          "bytes": 388800,
+          "bits_per_second": 31091562.237980355,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 27.10413205593872,
+          "end": 27.204122055938722,
+          "seconds": 0.09999000281095505,
+          "bytes": 391680,
+          "bits_per_second": 31337532.87240328,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 27.204122055938722,
+          "end": 27.30413705593872,
+          "seconds": 0.10001499950885773,
+          "bytes": 383040,
+          "bits_per_second": 30638604.359825164,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 27.30413705593872,
+          "end": 27.40412405593872,
+          "seconds": 0.0999870002269745,
+          "bytes": 397440,
+          "bits_per_second": 31799333.841222983,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 27.40412405593872,
+          "end": 27.504101055938722,
+          "seconds": 0.0999770015478134,
+          "bytes": 384480,
+          "bits_per_second": 30765475.583191976,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 27.504101055938722,
+          "end": 27.604058055938722,
+          "seconds": 0.09995699673891068,
+          "bytes": 377280,
+          "bits_per_second": 30195385.000248585,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 27.604058055938722,
+          "end": 27.70409705593872,
+          "seconds": 0.10003899782896042,
+          "bytes": 348480,
+          "bits_per_second": 27867532.267430857,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 27.70409705593872,
+          "end": 27.80410205593872,
+          "seconds": 0.10000500082969666,
+          "bytes": 432000,
+          "bits_per_second": 34558271.7996812,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 27.80410205593872,
+          "end": 27.904088055938722,
+          "seconds": 0.0999860018491745,
+          "bytes": 419040,
+          "bits_per_second": 33527893.285070658,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 27.904088055938722,
+          "end": 28.00408405593872,
+          "seconds": 0.09999600052833557,
+          "bytes": 388800,
+          "bits_per_second": 31105244.04542175,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 28.00408405593872,
+          "end": 28.104089055938722,
+          "seconds": 0.10000500082969666,
+          "bytes": 394560,
+          "bits_per_second": 31563221.577042155,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 28.104089055938722,
+          "end": 28.20408705593872,
+          "seconds": 0.09999799728393555,
+          "bytes": 384480,
+          "bits_per_second": 30759016.015755016,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 28.20408705593872,
+          "end": 28.304131055938722,
+          "seconds": 0.10004399716854095,
+          "bytes": 390240,
+          "bits_per_second": 31205470.47656043,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 28.304131055938722,
+          "end": 28.40410005593872,
+          "seconds": 0.0999689996242523,
+          "bytes": 370080,
+          "bits_per_second": 29615580.941371683,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 28.40410005593872,
+          "end": 28.504090055938722,
+          "seconds": 0.09999000281095505,
+          "bytes": 410400,
+          "bits_per_second": 32835282.605275493,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 28.504090055938722,
+          "end": 28.60409305593872,
+          "seconds": 0.10000299662351608,
+          "bytes": 393120,
+          "bits_per_second": 31448657.6021308,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 28.60409305593872,
+          "end": 28.70408505593872,
+          "seconds": 0.09999199956655502,
+          "bytes": 394560,
+          "bits_per_second": 31567325.522868816,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 28.70408505593872,
+          "end": 28.80409105593872,
+          "seconds": 0.10000599920749664,
+          "bytes": 387360,
+          "bits_per_second": 30986941.0291108,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 28.80409105593872,
+          "end": 28.90411405593872,
+          "seconds": 0.10002300143241882,
+          "bytes": 375840,
+          "bits_per_second": 30060285.70369896,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 28.90411405593872,
+          "end": 29.00410905593872,
+          "seconds": 0.0999950021505356,
+          "bytes": 411840,
+          "bits_per_second": 32948846.733760014,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 29.00410905593872,
+          "end": 29.10408705593872,
+          "seconds": 0.0999779999256134,
+          "bytes": 372960,
+          "bits_per_second": 29843365.56262324,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 29.10408705593872,
+          "end": 29.20413805593872,
+          "seconds": 0.10005100071430206,
+          "bytes": 401760,
+          "bits_per_second": 32124416.31821234,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 29.20413805593872,
+          "end": 29.30423705593872,
+          "seconds": 0.10009899735450745,
+          "bytes": 391680,
+          "bits_per_second": 31303410.45178213,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 29.30423705593872,
+          "end": 29.40408905593872,
+          "seconds": 0.09985200315713882,
+          "bytes": 378720,
+          "bits_per_second": 30342505.950852226,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 29.40408905593872,
+          "end": 29.50408205593872,
+          "seconds": 0.099992997944355,
+          "bytes": 408960,
+          "bits_per_second": 32719091.00895898,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 29.50408205593872,
+          "end": 29.60409205593872,
+          "seconds": 0.10001000016927719,
+          "bytes": 374400,
+          "bits_per_second": 29949005.048798285,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 29.60409205593872,
+          "end": 29.70412105593872,
+          "seconds": 0.10002899914979935,
+          "bytes": 384480,
+          "bits_per_second": 30749482.911388,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 29.70412105593872,
+          "end": 29.80409605593872,
+          "seconds": 0.09997499734163284,
+          "bytes": 394560,
+          "bits_per_second": 31572694.012821335,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 29.80409605593872,
+          "end": 29.90409305593872,
+          "seconds": 0.09999699890613556,
+          "bytes": 403200,
+          "bits_per_second": 32256968.06188936,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 29.90409305593872,
+          "end": 30.00410705593872,
+          "seconds": 0.10001400113105774,
+          "bytes": 387360,
+          "bits_per_second": 30984461.82489236,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 30.00410705593872,
+          "end": 30.10408505593872,
+          "seconds": 0.0999779999256134,
+          "bytes": 391680,
+          "bits_per_second": 31341295.108237535,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 30.10408505593872,
+          "end": 30.204108055938722,
+          "seconds": 0.10002300143241882,
+          "bytes": 370080,
+          "bits_per_second": 29599591.669925794,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 30.204108055938722,
+          "end": 30.30409905593872,
+          "seconds": 0.09999100118875504,
+          "bytes": 416160,
+          "bits_per_second": 33295796.225854874,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 30.30409905593872,
+          "end": 30.40408905593872,
+          "seconds": 0.09999000281095505,
+          "bytes": 380160,
+          "bits_per_second": 30415840.7290973,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 30.40408905593872,
+          "end": 30.504094055938722,
+          "seconds": 0.10000500082969666,
+          "bytes": 390240,
+          "bits_per_second": 31217638.85904534,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 30.504094055938722,
+          "end": 30.604099055938722,
+          "seconds": 0.10000500082969666,
+          "bytes": 394560,
+          "bits_per_second": 31563221.577042155,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 30.604099055938722,
+          "end": 30.704115055938722,
+          "seconds": 0.10001599788665771,
+          "bytes": 335520,
+          "bits_per_second": 26837306.59810845,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 30.704115055938722,
+          "end": 30.80408505593872,
+          "seconds": 0.0999699980020523,
+          "bytes": 453600,
+          "bits_per_second": 36298890.39235055,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 30.80408505593872,
+          "end": 30.904092055938722,
+          "seconds": 0.10000699758529663,
+          "bytes": 367200,
+          "bits_per_second": 29373944.533176307,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 30.904092055938722,
+          "end": 31.00408505593872,
+          "seconds": 0.099992997944355,
+          "bytes": 416160,
+          "bits_per_second": 33295131.343623754,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 31.00408505593872,
+          "end": 31.10408605593872,
+          "seconds": 0.10000099986791611,
+          "bytes": 384480,
+          "bits_per_second": 30758092.45970189,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 31.10408605593872,
+          "end": 31.20412405593872,
+          "seconds": 0.10003799945116043,
+          "bytes": 391680,
+          "bits_per_second": 31322497.622813594,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 31.20412405593872,
+          "end": 31.30409805593872,
+          "seconds": 0.09997399896383286,
+          "bytes": 385920,
+          "bits_per_second": 30881629.543666653,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 31.30409805593872,
+          "end": 31.40410005593872,
+          "seconds": 0.1000019982457161,
+          "bytes": 384480,
+          "bits_per_second": 30757785.3838712,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 31.40410005593872,
+          "end": 31.50410305593872,
+          "seconds": 0.10000299662351608,
+          "bytes": 393120,
+          "bits_per_second": 31448657.6021308,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 31.50410305593872,
+          "end": 31.60409405593872,
+          "seconds": 0.09999100118875504,
+          "bytes": 387360,
+          "bits_per_second": 30991588.874584638,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 31.60409405593872,
+          "end": 31.70408805593872,
+          "seconds": 0.099993996322155,
+          "bytes": 397440,
+          "bits_per_second": 31797108.99598814,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 31.70408805593872,
+          "end": 31.80410805593872,
+          "seconds": 0.10001999884843826,
+          "bytes": 385920,
+          "bits_per_second": 30867426.87008346,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 31.80410805593872,
+          "end": 31.90413805593872,
+          "seconds": 0.10002999752759933,
+          "bytes": 390240,
+          "bits_per_second": 31209837.82028615,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 31.90413805593872,
+          "end": 32.00411305593872,
+          "seconds": 0.09997499734163284,
+          "bytes": 394560,
+          "bits_per_second": 31572694.012821335,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 32.00411305593872,
+          "end": 32.10409905593872,
+          "seconds": 0.0999860018491745,
+          "bytes": 400320,
+          "bits_per_second": 32030083.61941458,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 32.10409905593872,
+          "end": 32.20414205593872,
+          "seconds": 0.10004299879074097,
+          "bytes": 377280,
+          "bits_per_second": 30169427.5109968,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 32.20414205593872,
+          "end": 32.30414505593872,
+          "seconds": 0.10000299662351608,
+          "bytes": 388800,
+          "bits_per_second": 31103067.958151344,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 32.30414505593872,
+          "end": 32.40408505593872,
+          "seconds": 0.0999400019645691,
+          "bytes": 407520,
+          "bits_per_second": 32621172.062371958,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 32.40408505593872,
+          "end": 32.50409005593872,
+          "seconds": 0.10000500082969666,
+          "bytes": 390240,
+          "bits_per_second": 31217638.85904534,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 32.50409005593872,
+          "end": 32.604085055938725,
+          "seconds": 0.0999950021505356,
+          "bytes": 391680,
+          "bits_per_second": 31335966.12441512,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 32.604085055938725,
+          "end": 32.70409905593872,
+          "seconds": 0.10001400113105774,
+          "bytes": 375840,
+          "bits_per_second": 30062990.84125244,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 32.70409905593872,
+          "end": 32.804090055938715,
+          "seconds": 0.09999100118875504,
+          "bytes": 403200,
+          "bits_per_second": 32258902.917783268,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 32.804090055938715,
+          "end": 32.904095055938726,
+          "seconds": 0.10000500082969666,
+          "bytes": 391680,
+          "bits_per_second": 31332833.09837761,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 32.904095055938726,
+          "end": 33.004127055938724,
+          "seconds": 0.10003200173377991,
+          "bytes": 388800,
+          "bits_per_second": 31094049.365100786,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 33.004127055938724,
+          "end": 33.10424205593872,
+          "seconds": 0.10011500120162964,
+          "bytes": 385920,
+          "bits_per_second": 30838135.773300525,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 33.10424205593872,
+          "end": 33.204117055938724,
+          "seconds": 0.09987500309944153,
+          "bytes": 367200,
+          "bits_per_second": 29412765.04467439,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 33.204117055938724,
+          "end": 33.30409905593872,
+          "seconds": 0.09998200088739395,
+          "bytes": 427680,
+          "bits_per_second": 34220559.39702029,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 33.30409905593872,
+          "end": 33.40410405593872,
+          "seconds": 0.10000500082969666,
+          "bytes": 371520,
+          "bits_per_second": 29720113.747725826,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 33.40410405593872,
+          "end": 33.50409505593872,
+          "seconds": 0.09999100118875504,
+          "bytes": 396000,
+          "bits_per_second": 31682851.07996571,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 33.50409505593872,
+          "end": 33.60409505593872,
+          "seconds": 0.10000000149011612,
+          "bytes": 370080,
+          "bits_per_second": 29606399.55883027,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 33.60409505593872,
+          "end": 33.704089055938724,
+          "seconds": 0.099993996322155,
+          "bytes": 416160,
+          "bits_per_second": 33294798.912465844,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 33.704089055938724,
+          "end": 33.80410605593872,
+          "seconds": 0.1000170037150383,
+          "bytes": 365760,
+          "bits_per_second": 29255825.422813,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 33.80410605593872,
+          "end": 33.90407905593872,
+          "seconds": 0.09997300058603287,
+          "bytes": 372960,
+          "bits_per_second": 29844857.936742242,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 33.90407905593872,
+          "end": 34.00411805593872,
+          "seconds": 0.10003899782896042,
+          "bytes": 345600,
+          "bits_per_second": 27637222.0834025,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 34.00411805593872,
+          "end": 34.10415405593872,
+          "seconds": 0.10003600269556046,
+          "bytes": 0,
+          "bits_per_second": 0,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 34.10415405593872,
+          "end": 34.204246055938725,
+          "seconds": 0.10009200125932693,
+          "bytes": 0,
+          "bits_per_second": 0,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 34.204246055938725,
+          "end": 34.30421705593872,
+          "seconds": 0.0999709963798523,
+          "bytes": 0,
+          "bits_per_second": 0,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 34.30421705593872,
+          "end": 34.40423205593872,
+          "seconds": 0.10001499950885773,
+          "bytes": 4320,
+          "bits_per_second": 345548.1694717124,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 34.40423205593872,
+          "end": 34.504226055938716,
+          "seconds": 0.099993996322155,
+          "bytes": 0,
+          "bits_per_second": 0,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 34.504226055938716,
+          "end": 34.60420205593872,
+          "seconds": 0.09997600317001343,
+          "bytes": 0,
+          "bits_per_second": 0,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 34.60420205593872,
+          "end": 34.70421905593872,
+          "seconds": 0.1000170037150383,
+          "bytes": 0,
+          "bits_per_second": 0,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 34.70421905593872,
+          "end": 34.80418605593872,
+          "seconds": 0.09996700286865234,
+          "bytes": 2880,
+          "bits_per_second": 230476.05048510345,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 34.80418605593872,
+          "end": 34.90410005593872,
+          "seconds": 0.09991399943828583,
+          "bytes": 2880,
+          "bits_per_second": 230598.31584693177,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 34.90410005593872,
+          "end": 35.00415805593872,
+          "seconds": 0.10005799680948257,
+          "bytes": 0,
+          "bits_per_second": 0,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 35.00415805593872,
+          "end": 35.10425705593872,
+          "seconds": 0.10009899735450745,
+          "bytes": 0,
+          "bits_per_second": 0,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 35.10425705593872,
+          "end": 35.204100055938724,
+          "seconds": 0.09984300285577774,
+          "bytes": 2880,
+          "bits_per_second": 230762.2902055646,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 35.204100055938724,
+          "end": 35.30416005593872,
+          "seconds": 0.10006000101566315,
+          "bytes": 0,
+          "bits_per_second": 0,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 35.30416005593872,
+          "end": 35.404259055938724,
+          "seconds": 0.10009899735450745,
+          "bytes": 0,
+          "bits_per_second": 0,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 35.404259055938724,
+          "end": 35.50420805593872,
+          "seconds": 0.09994900226593018,
+          "bytes": 0,
+          "bits_per_second": 0,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 35.50420805593872,
+          "end": 35.60415205593872,
+          "seconds": 0.09994400292634964,
+          "bytes": 20160,
+          "bits_per_second": 1613703.6268084024,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 35.60415205593872,
+          "end": 35.70415805593872,
+          "seconds": 0.10000599920749664,
+          "bytes": 31680,
+          "bits_per_second": 2534247.965206088,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 35.70415805593872,
+          "end": 35.80409105593872,
+          "seconds": 0.099932998418808,
+          "bytes": 84960,
+          "bits_per_second": 6801357.016743733,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 35.80409105593872,
+          "end": 35.90412405593872,
+          "seconds": 0.1000330001115799,
+          "bytes": 138240,
+          "bits_per_second": 11055551.655617872,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 35.90412405593872,
+          "end": 36.00409705593872,
+          "seconds": 0.09997300058603287,
+          "bytes": 161280,
+          "bits_per_second": 12905884.513185835,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 36.00409705593872,
+          "end": 36.10409805593872,
+          "seconds": 0.10000099986791611,
+          "bytes": 138240,
+          "bits_per_second": 11059089.42371304,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 36.10409805593872,
+          "end": 36.20413805593872,
+          "seconds": 0.100040003657341,
+          "bytes": 161280,
+          "bits_per_second": 12897240.63205111,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 36.20413805593872,
+          "end": 36.304199055938724,
+          "seconds": 0.10006099939346313,
+          "bytes": 141120,
+          "bits_per_second": 11282717.61069132,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 36.304199055938724,
+          "end": 36.404112055938725,
+          "seconds": 0.09991300106048584,
+          "bytes": 131040,
+          "bits_per_second": 10492328.214276766,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 36.404112055938725,
+          "end": 36.504127055938724,
+          "seconds": 0.10001499950885773,
+          "bytes": 136800,
+          "bits_per_second": 10942358.699937558,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 36.504127055938724,
+          "end": 36.604141055938726,
+          "seconds": 0.10001400113105774,
+          "bytes": 128160,
+          "bits_per_second": 10251364.692994127,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 36.604141055938726,
+          "end": 36.704094055938725,
+          "seconds": 0.09995300322771072,
+          "bytes": 168480,
+          "bits_per_second": 13484737.391325608,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 36.704094055938725,
+          "end": 36.80408805593872,
+          "seconds": 0.099993996322155,
+          "bytes": 145440,
+          "bits_per_second": 11635898.581865227,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 36.80408805593872,
+          "end": 36.90410205593872,
+          "seconds": 0.10001400113105774,
+          "bytes": 120960,
+          "bits_per_second": 9675445.328219175,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 36.90410205593872,
+          "end": 37.00408305593872,
+          "seconds": 0.09998100250959396,
+          "bytes": 135360,
+          "bits_per_second": 10830857.591131767,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 37.00408305593872,
+          "end": 37.104096055938726,
+          "seconds": 0.10001300275325775,
+          "bytes": 108000,
+          "bits_per_second": 8638876.708177395,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 37.104096055938726,
+          "end": 37.20411205593872,
+          "seconds": 0.10001599788665771,
+          "bytes": 86400,
+          "bits_per_second": 6910894.402946382,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 37.20411205593872,
+          "end": 37.30412705593872,
+          "seconds": 0.10001499950885773,
+          "bytes": 83520,
+          "bits_per_second": 6680597.943119773,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 37.30412705593872,
+          "end": 37.40417505593872,
+          "seconds": 0.1000479981303215,
+          "bytes": 97920,
+          "bits_per_second": 7829841.822318156,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 37.40417505593872,
+          "end": 37.504200055938725,
+          "seconds": 0.1000249981880188,
+          "bytes": 125280,
+          "bits_per_second": 10019895.207756678,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 37.504200055938725,
+          "end": 37.60408905593872,
+          "seconds": 0.09988900274038315,
+          "bytes": 126720,
+          "bits_per_second": 10148864.961990023,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 37.60408905593872,
+          "end": 37.70414305593872,
+          "seconds": 0.10005400329828262,
+          "bytes": 109440,
+          "bits_per_second": 8750474.455178825,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 37.70414305593872,
+          "end": 37.80411905593872,
+          "seconds": 0.09997600317001343,
+          "bytes": 118080,
+          "bits_per_second": 9448667.38064733,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 37.80411905593872,
+          "end": 37.90417605593872,
+          "seconds": 0.10005699843168259,
+          "bytes": 167040,
+          "bits_per_second": 13355587.524569,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 37.90417605593872,
+          "end": 38.00414305593872,
+          "seconds": 0.09996700286865234,
+          "bytes": 162720,
+          "bits_per_second": 13021896.852408346,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 38.00414305593872,
+          "end": 38.10414605593872,
+          "seconds": 0.10000299662351608,
+          "bytes": 190080,
+          "bits_per_second": 15205944.335096212,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 38.10414605593872,
+          "end": 38.20413905593872,
+          "seconds": 0.099992997944355,
+          "bytes": 180000,
+          "bits_per_second": 14401008.36661927,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 38.20413905593872,
+          "end": 38.30416105593872,
+          "seconds": 0.10002200305461884,
+          "bytes": 224640,
+          "bits_per_second": 17967246.656904582,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 38.30416105593872,
+          "end": 38.40414005593872,
+          "seconds": 0.0999789983034134,
+          "bytes": 159840,
+          "bits_per_second": 12789886.09307104,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 38.40414005593872,
+          "end": 38.50411005593872,
+          "seconds": 0.0999699980020523,
+          "bytes": 165600,
+          "bits_per_second": 13251975.857524803,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 38.50411005593872,
+          "end": 38.60409605593872,
+          "seconds": 0.0999860018491745,
+          "bytes": 172800,
+          "bits_per_second": 13825935.37528687,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 38.60409605593872,
+          "end": 38.70412805593872,
+          "seconds": 0.10003200173377991,
+          "bytes": 197280,
+          "bits_per_second": 15777350.974143732,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 38.70412805593872,
+          "end": 38.80410005593872,
+          "seconds": 0.0999720022082329,
+          "bytes": 217440,
+          "bits_per_second": 17400071.635823928,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 38.80410005593872,
+          "end": 38.90411105593872,
+          "seconds": 0.10001099854707718,
+          "bytes": 260640,
+          "bits_per_second": 20848906.92315698,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 38.90411105593872,
+          "end": 39.00415005593872,
+          "seconds": 0.10003899782896042,
+          "bytes": 282240,
+          "bits_per_second": 22570398.03477871,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 39.00415005593872,
+          "end": 39.10409605593872,
+          "seconds": 0.0999459996819496,
+          "bytes": 331200,
+          "bits_per_second": 26510315.654769737,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 39.10409605593872,
+          "end": 39.20409505593872,
+          "seconds": 0.09999900311231613,
+          "bytes": 254880,
+          "bits_per_second": 20390603.271412678,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 39.20409505593872,
+          "end": 39.30409205593872,
+          "seconds": 0.09999699890613556,
+          "bytes": 306720,
+          "bits_per_second": 24538336.418508694,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 39.30409205593872,
+          "end": 39.40409805593872,
+          "seconds": 0.10000599920749664,
+          "bytes": 259200,
+          "bits_per_second": 20734756.0789589,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 39.40409805593872,
+          "end": 39.50408605593872,
+          "seconds": 0.09998799860477448,
+          "bytes": 311040,
+          "bits_per_second": 24886186.689621184,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 39.50408605593872,
+          "end": 39.60410005593872,
+          "seconds": 0.10001400113105774,
+          "bytes": 276480,
+          "bits_per_second": 22115303.607358117,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 39.60410005593872,
+          "end": 39.70410505593872,
+          "seconds": 0.10000500082969666,
+          "bytes": 240480,
+          "bits_per_second": 19237437.9684892,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 39.70410505593872,
+          "end": 39.80413205593872,
+          "seconds": 0.10002700239419937,
+          "bytes": 240480,
+          "bits_per_second": 19233206.57374378,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 39.80413205593872,
+          "end": 39.90410105593872,
+          "seconds": 0.0999689996242523,
+          "bytes": 283680,
+          "bits_per_second": 22701437.530934714,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 39.90410105593872,
+          "end": 40.00409205593872,
+          "seconds": 0.09999100118875504,
+          "bytes": 285120,
+          "bits_per_second": 22811652.77757531,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 40.00409205593872,
+          "end": 40.10409605593872,
+          "seconds": 0.10000400245189667,
+          "bytes": 207360,
+          "bits_per_second": 16588136.06783333,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 40.10409605593872,
+          "end": 40.20408505593872,
+          "seconds": 0.09998899698257446,
+          "bytes": 600480,
+          "bits_per_second": 48043686.255170524,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    },
+    {
+      "streams": [
+        {
+          "socket": "2:iperf3.phoenixremoteaccess.uk",
+          "start": 40.20408505593872,
+          "end": 40.24621305593872,
+          "seconds": 0.042128000408411026,
+          "bytes": 315360,
+          "bits_per_second": 59886060.946208514,
+          "omitted": false,
+          "sender": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+	"start":	{
+		"connected":	[],
+		"version":	"iperf 3.9",
+		"system_info":	"Linux mihai.inf.susx.ac.uk 6.13.7_SOCKOPTS+MUTANT-2026_04_06-15_32_45 #15 SMP PREEMPT_DYNAMIC Mon Apr  6 16:39:04 BST 2026 x86_64"
+	},
+	"intervals":	[],
+	"end":	{
+	}
+}

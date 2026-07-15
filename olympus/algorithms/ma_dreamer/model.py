@@ -23,8 +23,12 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from olympus.common.action_plugins import (
-    assert_action_compatible,
     current_action_meta,
+)
+from olympus.common.state_plugins import (
+    assert_state_compatible,
+    current_state_name,
+    load_state_module,
 )
 from olympus.algorithms.dreamer_v3.model import (
     ACTION_DIM,
@@ -46,14 +50,25 @@ from olympus.algorithms.dreamer_v3.model import (
     symlog,
     symexp,
 )
-from olympus.states import tempest as tempest_state
+STATE_NAME = current_state_name(default='tempest')
+_STATE_PLUGIN = load_state_module('ma_dreamer', STATE_NAME)
+STATE_DIM = int(_STATE_PLUGIN.STATE_DIM)
+STATE_FEATURES = list(_STATE_PLUGIN.STATE_FEATURES)
+STATE_FEATURE_VERSION = str(_STATE_PLUGIN.STATE_FEATURE_VERSION)
+normalize_state = _STATE_PLUGIN.normalize_state
 
 
-STATE_DIM = int(tempest_state.STATE_DIM)
-STATE_FEATURES = list(tempest_state.STATE_FEATURES)
-STATE_FEATURE_VERSION = str(tempest_state.STATE_FEATURE_VERSION)
-normalize_state = tempest_state.normalize_state
-reset_tempest_kalman = tempest_state.reset_tempest_kalman
+def reset_state(initial_rtt_us: float = None) -> None:
+    """Reset whichever per-flow state tracker the configured plugin owns."""
+    for name in ('reset_tempest_kalman', 'reset_kalman', 'reset_oracle'):
+        reset = getattr(_STATE_PLUGIN, name, None)
+        if reset is not None:
+            reset(initial_rtt_us)
+            return
+
+
+# Backward-compatible name used by older workers/importers.
+reset_tempest_kalman = reset_state
 
 Experience = namedtuple(
     'Experience',
@@ -89,7 +104,7 @@ GlobalWorldModelInfo = namedtuple(
 
 def state_meta() -> dict:
     return {
-        'state_name': 'tempest',
+        'state_name': STATE_NAME,
         'state_dim': STATE_DIM,
         'state_feature_version': STATE_FEATURE_VERSION,
         'state_features': STATE_FEATURES,
@@ -98,18 +113,7 @@ def state_meta() -> dict:
 
 
 def assert_checkpoint_state_compatible(ckpt: dict, source='checkpoint') -> None:
-    assert_action_compatible(current_action_meta(), ckpt, source=source)
-    meta = dict((ckpt or {}).get('state_meta') or {})
-    if not meta:
-        raise ValueError(f'{source} has no state metadata')
-    if int(meta.get('state_dim', -1)) != STATE_DIM:
-        raise ValueError(
-            f'{source} state_dim={meta.get("state_dim")} does not match {STATE_DIM}')
-    if str(meta.get('state_feature_version', '')) != STATE_FEATURE_VERSION:
-        raise ValueError(
-            f'{source} state feature version '
-            f'{meta.get("state_feature_version")!r} does not match '
-            f'{STATE_FEATURE_VERSION!r}')
+    assert_state_compatible(state_meta(), ckpt, source=source)
 
 
 # The team-reward helpers live in common/ so the multi-agent fairness reward

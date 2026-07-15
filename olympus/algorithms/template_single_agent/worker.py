@@ -42,6 +42,8 @@ sys.path.insert(0, _REPO)
 from olympus.algorithms.template_single_agent import model   # TODO: your package
 from olympus.common import flow_backend, runtime_config
 from olympus.common.action_plugins import load_action_module
+from olympus.common.async_pusher import AsyncPusher
+from olympus.common.pace import sleep_to_grid
 from olympus.common.registry import reward_module
 
 _ACTION_PLUGIN = load_action_module()
@@ -166,6 +168,14 @@ def run():
 
     mgr = _connect_manager()
 
+    # Push batches off-thread so the blocking manager RPC never stalls the
+    # fixed-cadence control loop (was gapping the emitted signal every
+    # `push_every` steps).
+    pusher = AsyncPusher(
+        lambda exps: mgr.push_exp_batch(exps),
+        lambda e: mgr.push_exp(e),
+    ) if mgr else None
+
     stop_drain = threading.Event()
     if state_fd >= 0:
         threading.Thread(target=_drain_state_fd, args=(state_fd, stop_drain),
@@ -186,6 +196,9 @@ def run():
 
     reward_calc = reward_plugin.make_reward_calc()
     t0 = float(os.environ.get('SAO_EPISODE_START', '0')) or time.monotonic()
+    # Pace against the shared episode-start grid (t0 + k*interval) so co-active
+    # flows sample in phase; see common/pace.sleep_to_grid.
+    next_tick = t0
     traj_id = f'template_{cport}_{episode}_{flow_id}'   # algo_cport_episode_flow
 
     prev_state = None
@@ -268,14 +281,7 @@ def run():
                 ))
                 step_in_traj += 1
                 if len(exp_buf) >= push_every:
-                    try:
-                        mgr.push_exp_batch(list(exp_buf))
-                    except Exception:
-                        for e in exp_buf:
-                            try:
-                                mgr.push_exp(e)
-                            except Exception:
-                                pass
+                    pusher.submit(exp_buf)
                     exp_buf.clear()
 
             # TODO: select an action with your policy. act() returns the bounded
@@ -329,23 +335,19 @@ def run():
                     log_file.flush()
 
             # Hold the control interval.
-            sleep_t = interval_s - (time.monotonic() - t_step_start)
-            if sleep_t > 0 and not simulation_backend:
-                time.sleep(sleep_t)
+            if not simulation_backend:
+                next_tick = sleep_to_grid(next_tick, interval_s)
 
     finally:
         # Flush whatever is buffered, then push a terminal done transition so the
         # learner can close the trajectory.
-        if mgr and exp_buf:
-            try:
-                mgr.push_exp_batch(list(exp_buf))
-            except Exception:
-                for e in exp_buf:
-                    try:
-                        mgr.push_exp(e)
-                    except Exception:
-                        pass
-            exp_buf.clear()
+        if pusher:
+            if exp_buf:
+                pusher.submit(exp_buf)
+                exp_buf.clear()
+            # Drain queued batches before the terminal done-marker below so
+            # ordering to the learner is preserved.
+            pusher.close()
         if prev_state is not None and mgr:
             try:
                 mgr.push_exp(model.Experience(

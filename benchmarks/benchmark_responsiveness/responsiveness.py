@@ -312,7 +312,7 @@ def _run_link_schedule(env, changes: list, episode_start: float, stop) -> None:
             stop.wait(timeout=min(remaining, 0.05))
         if stop.is_set():
             return
-        env.set_link(bw=entry.get('bw'), delay=entry.get('delay'))
+        env.change_link(bw=entry.get('bw'), delay=entry.get('delay'))
         print(f'[resp_bench] link change t={time.monotonic() - episode_start:.1f}s '
               f'bw={entry.get("bw")} delay={entry.get("delay")}', flush=True)
 
@@ -1365,23 +1365,12 @@ def _run_kernel_baseline(instance_id: int, approach: dict, bench: dict,
             cc_algo=kernel_cc,
             instance_id=instance_id,
         )
-        sched_stop = threading.Event()
-        sched_thread = None
         try:
             env.start()
-            env.run_iperf(monitor_interval=measure_interval_s)
-            episode_start = time.monotonic()
-            sched_thread = threading.Thread(
-                target=_run_link_schedule,
-                args=(env, schedule['changes'], episode_start, sched_stop),
-                daemon=True,
-            )
-            sched_thread.start()
-            time.sleep(float(duration_s) + 3.0)
+            env.setup_environment(link_schedule=schedule['changes'])
+            env.start_episode(monitor_interval=measure_interval_s)
+            env.wait()
         finally:
-            sched_stop.set()
-            if sched_thread:
-                sched_thread.join(timeout=2)
             env.stop()
             time.sleep(0.5)
 
@@ -1474,6 +1463,7 @@ def _run_orca_baseline(instance_id: int, approach: dict, bench: dict,
         sched_thread = None
         try:
             env.start()
+            env.setup_environment()
             episode_start = time.monotonic()
             sched_thread = threading.Thread(
                 target=_run_link_schedule,

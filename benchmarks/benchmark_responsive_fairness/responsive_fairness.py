@@ -224,7 +224,7 @@ def _run_link_schedule(env, changes: list, episode_start: float, stop) -> None:
             stop.wait(timeout=min(remaining, 0.05))
         if stop.is_set():
             return
-        env.set_link(bw=entry.get('bw'), delay=entry.get('delay'))
+        env.change_link(bw=entry.get('bw'), delay=entry.get('delay'))
 
 
 def _iperf_client_tmp(cport: int, flow: int) -> str:
@@ -669,25 +669,15 @@ def _run_kernel_trial(instance_id: int, approach: dict, bench: dict,
             cport=cport,
             cc_algo=cc,
             instance_id=instance_id)
-        stop = threading.Event()
-        thread = None
         try:
             env.start()
-            env.run_iperf(
+            env.setup_environment(link_schedule=schedule['changes'])
+            env.start_episode(
                 monitor_interval=float(bench['measure_interval_s']),
                 start_delays=[item['start'] for item in flow_plan],
                 flow_durations=[item['duration'] for item in flow_plan])
-            episode_start = time.monotonic()
-            thread = threading.Thread(
-                target=_run_link_schedule,
-                args=(env, schedule['changes'], episode_start, stop),
-                daemon=True)
-            thread.start()
-            time.sleep(float(bench['duration_s']) + 3.0)
+            env.wait()
         finally:
-            stop.set()
-            if thread:
-                thread.join(timeout=2)
             env.stop()
             time.sleep(0.5)
         parse_error = _copy_receiver_outputs(
@@ -722,6 +712,7 @@ def _run_orca_trial(instance_id: int, approach: dict, bench: dict,
         thread = None
         try:
             env.start()
+            env.setup_environment()
             episode_start = time.monotonic()
             thread = threading.Thread(
                 target=_run_link_schedule,

@@ -1,0 +1,10 @@
+{
+  "run_id": "20260714-203559-efca7d87",
+  "label": "smoke-test",
+  "url": "https://jellyfin.phoenixremoteaccess.uk/web/#/details?id=762277cc91effea4c30f648c3c106797&serverId=676fc56ba97448b3a598c30f8be4a1ce",
+  "target_media_s": 30.0,
+  "sample_interval_ms": 250,
+  "browser": "chromium",
+  "headless": true,
+  "created_epoch_ns": 1784057759111048601
+}

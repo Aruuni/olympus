@@ -50,12 +50,12 @@
   lbl/.style={font=\scriptsize\itshape,fill=white,inner sep=1pt},
 ]
 
-% ---- one rollout (= instance i): env  ->  worker(state/action/reward) ----
+% ---- one rollout (= instance i): env  ->  agent(state/action/reward) ----
 \node[net,minimum width=44mm,minimum height=17mm] (env) {};
 \node[align=center,anchor=north,inner sep=0pt] at ([yshift=-1.4mm]env.north)
      {\textbf{TCP Environment} $\rightleftarrows$\\[-1pt]\scriptsize scheduled bandwidth, delay, loss};
 
-% dashed background copies of the env -- one per environment type (x M)
+% dashed background copies of the env -- one per environment (x M)
 \begin{scope}[on background layer]
   \node[draw,densely dashed,thin,rounded corners=2pt,draw=green!50!black,
         fill=green!6,minimum width=44mm,minimum height=17mm]
@@ -64,18 +64,21 @@
         fill=green!8,minimum width=44mm,minimum height=17mm]
         at ([xshift=1.2mm,yshift=1.2mm]env) {};
 \end{scope}
+\node[font=\scriptsize\itshape,anchor=south west,fill=white,inner sep=1pt]
+      at ([xshift=2.8mm,yshift=0.8mm]env.north west)
+      {$\times\,M$ environment backends};
 
 % tcp flow deck inside the env: stacked cards = possibly several flows
 \node[flowbg,anchor=south,fill=green!7] at ([xshift=2.4mm,yshift=4.9mm]env.south) {};
 \node[flowbg,anchor=south,fill=green!12] at ([xshift=1.2mm,yshift=3.7mm]env.south) {};
 \node[flowbox,anchor=south] at ([xshift=0mm,yshift=2.5mm]env.south) (tcpflow) {tcp flow $\rightleftarrows$};
 
-% worker shell, with internal state + action + reward module decks
+% agent shell, with internal state + action + reward module decks
 \node[agent,right=24mm of env,minimum width=64mm,minimum height=17mm] (worker) {};
 \node[align=center,anchor=north,inner sep=0pt] at ([yshift=-1.4mm]worker.north)
-     {\textbf{Worker}\\[-1pt]\scriptsize policy + agent state + control loop};
+     {\textbf{Agent}\\[-1pt]\scriptsize policy control loop + experience collector};
 
-% three swappable module decks across the worker bottom: state | action | reward
+% three swappable module decks across the agent bottom: state | action | reward
 
 % -- state
 \node[subbg,anchor=south,fill=violet!7] at ([xshift=-18.6mm,yshift=4.9mm]worker.south) {};
@@ -102,9 +105,9 @@
 \node[subbg,anchor=south,fill=violet!9] at ([xshift=-12.8mm,yshift=3.7mm]learner.south) {};
 \node[subbox,anchor=south] at ([xshift=-14mm,yshift=2.5mm]learner.south) (lmodel) {model $\rightleftarrows$};
 
-% experience buffers: a solid pile of identical buffers -- one per environment
-% type. The up-right stacking echoes the "x M environment types" pile, and the
-% "x M" multiplier calls out that there are as many buffers as environment types.
+% experience buffers: a solid pile of identical buffers -- one per environment.
+% The up-right stacking echoes the "x M environments" pile, and the "x M"
+% multiplier calls out that there are as many buffers as environments.
 \node[subbg,anchor=south,fill=blue!6,minimum width=20mm] at ([xshift=11.4mm,yshift=4.9mm]learner.south) {};
 \node[subbg,anchor=south,fill=blue!9,minimum width=20mm] at ([xshift=10.2mm,yshift=3.7mm]learner.south) {};
 \node[subbox,anchor=south,minimum width=20mm] at ([xshift=9mm,yshift=2.5mm]learner.south) (lbuffer) {experience buffer};
@@ -115,7 +118,7 @@
 % area reserved below the decks so the control-loop arrows stay inside the card
 \coordinate (dataarea) at ([yshift=-11mm]env.south);
 
-% ---- stack the rollout row into N parallel workers ----
+% ---- stack the rollout row into N parallel agents ----
 \begin{scope}[on background layer]
   % rear wide boxes are dashed
   \node[ghostcard,fit=(env)(worker)(dataarea),inner sep=4mm,xshift=5mm,yshift=5mm]   (roll3) {};
@@ -141,12 +144,12 @@
         ([xshift=5mm]learner.south) -- ([shift={(5mm,5mm)}]w1);
 \end{scope}
 
-% "x M different environment backends" -- sits on top of the TCP environment
-\node[font=\scriptsize\itshape,anchor=south west,inner sep=1pt]
+% "x N parallel episodes" -- marks the stacked rollout cards.
+\node[font=\scriptsize\itshape,anchor=south west,fill=white,inner sep=1pt]
       at ([xshift=3mm,yshift=1.5mm]rollout.north -| env)
-      {$\times\,M$ environment backends};
+      {$\times\,N$ parallel episodes};
 
-% ---- extra worker agents — present ONLY in the multi-agent case ----
+% ---- extra agents -- present ONLY in the multi-agent case ----
 \begin{scope}[on background layer]
   \node[maonly,fit=(worker),inner sep=0mm,xshift=3.2mm,yshift=3.2mm,fill=white] (maWorkerB) {};
   \node[maonly,fit=(worker),inner sep=0mm,xshift=1.5mm,yshift=1.5mm,fill=white] (maWorkerA) {};
@@ -166,7 +169,7 @@
       node[lbl]{push experience /\\pull parameters}
       (learner);
 
-% the control loop lives between the worker and the environment's tcp flow(s).
+% the control loop lives between the agent and the environment's tcp flow(s).
 % Right-angle (orthogonal) routing: two 90-degree turns per line. The lines are
 % NESTED -- the lower getsockopt line brackets the upper setsockopt line on both
 % sides -- so they never cross or overlap. Both terminate on the tcp flow deck.
@@ -174,21 +177,21 @@
 \coordinate (setline) at ([yshift=-5mm]env.south);
 \coordinate (getline) at ([yshift=-8.5mm]env.south);
 
-% setsockopt(cwnd): worker action deck -> tcp flow   (upper line)
+% setsockopt(cwnd): agent action deck -> tcp flow   (upper line)
 \draw[data,->] (waction.south) -- (waction.south |- setline)
       -- node[lbl,below=0.2mm]{set congestion window $\downarrow$}
          ([xshift=3mm]tcpflow.south |- setline)
       -- ([xshift=3mm]tcpflow.south);
 
-% getsockopt(tcp_info): tcp flow -> worker state deck   (lower line)
+% getsockopt(tcp_info): tcp flow -> agent state deck   (lower line)
 \draw[data,->] ([xshift=-3mm]tcpflow.south) -- ([xshift=-3mm]tcpflow.south |- getline)
       -- node[lbl,below=0.2mm]{get TCP states $\uparrow$}
          (wstate.south |- getline)
       -- (wstate.south);
 
-% structural 1:1 assignment: each tcp flow is driven by exactly one worker
+% structural 1:1 assignment: each tcp flow is driven by exactly one agent
 \draw[<->,thin,densely dashed,draw=black!55]
-      (tcpflow.east) -- node[lbl,align=center]{one worker\\per flow}
+      (tcpflow.east) -- node[lbl,align=center]{one agent\\per flow}
       (worker.west |- tcpflow);
 
 \end{tikzpicture}
