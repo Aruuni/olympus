@@ -5,7 +5,7 @@ shuffle: true
 sweep:
   bws: [10, 20, 40, 60, 80, 100]
   delays: [10, 20, 40, 60, 80]
-  bdp_mult: 4
+  bdp_mult: [4]
   flows: 1
   duration: 120
   link_schedules:

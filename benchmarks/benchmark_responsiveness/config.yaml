@@ -15,7 +15,7 @@ benchmark:
   rtt_max_ms: 100
   seed_offset: 0
   flows: 1
-  bdp_mult: 4
+  bdp_mult: [4]
   measure_interval_s: 1.0
   kernel_cport_base: 33000
   # Learned-model episode PDFs are produced once by the orchestrator.

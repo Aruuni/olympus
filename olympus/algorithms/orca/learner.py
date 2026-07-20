@@ -178,6 +178,13 @@ class Learner:
         self.target_noise_std = float(t.get('target_noise_std', 0.1))
         self.target_noise_clip = float(t.get('target_noise_clip', 0.2))
         self.grad_clip = float(t.get('grad_clip', 0.0))
+        # Orca's reward ((thr - 5*loss)/max_bw * delay_metric) caps at +1 but
+        # its -5*loss term is unbounded below; on hard-loss episodes that feeds
+        # large negatives into the MSE critic target and the value runs away
+        # (Q -> -20, critic_loss -> hundreds in orca_20260718-013336). Clip the
+        # per-step reward to +/-reward_clip so the target is bounded; the y
+        # clamp below then follows from it. 0 disables (raw Orca reward).
+        self.reward_clip = float(t.get('reward_clip', 0.0) or 0.0)
         self.save_every = int(t.get('save_every', 500))
         self.save_every_episodes = max(0, int(t.get('save_every_episodes', 0) or 0))
         self.param_broadcast_every = int(t.get('param_broadcast_every', 50))
@@ -392,6 +399,7 @@ class Learner:
             gamma=self.gamma,
             target_noise_std=self.target_noise_std,
             target_noise_clip=self.target_noise_clip,
+            reward_clip=self.reward_clip,
         )
         if not torch.isfinite(c_info.loss):
             print('[orca learner] non-finite critic loss; skip update', flush=True)

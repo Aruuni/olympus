@@ -3,7 +3,6 @@
 import csv
 import io
 import os
-import signal
 import sys
 import threading
 import time
@@ -33,6 +32,7 @@ from olympus.common.async_pusher import AsyncPusher
 from olympus.common.pace import sleep_to_grid
 from olympus.common.bbr_probe import BbrProbe
 from olympus.common import flow_backend, runtime_config
+from olympus.common.registry import reward_module
 
 _ACTION_PLUGIN = load_action_module()
 
@@ -110,33 +110,29 @@ def run():
     interval_ms = float(os.environ.get('SAO_INTERVAL_MS', '20'))
     cwnd_min = int(os.environ.get('SAO_CWND_MIN', '4'))
     cwnd_max = int(os.environ.get('SAO_CWND_MAX', '10000'))
+    # Orca CUBIC->agent handoff: CUBIC owns slow start, the agent takes over
+    # once slow start ends (real Orca gates on cwnd>ssthresh; see the loop for
+    # the loss-based proxy used here). cubic_warmup_max_s caps the wait so the
+    # agent still engages on links that never lose during warmup.
+    cubic_warmup = runtime_config.bool_value(runtime_config.agent_value(
+        cfg, 'cubic_warmup', env='SAO_ORCA_CUBIC_WARMUP', default=True), True)
+    cubic_warmup_max_s = float(runtime_config.agent_value(
+        cfg, 'cubic_warmup_max_s', env='SAO_ORCA_CUBIC_WARMUP_MAX_S',
+        default=10.0))
     hidden = int(runtime_config.agent_value(
         cfg, 'hidden', env='SAO_HIDDEN', default=256))
     head_hidden = int(runtime_config.agent_value(
         cfg, 'head_hidden', env='SAO_HEAD_HIDDEN', default=hidden))
     noise_std = float(os.environ.get('SAO_NOISE_STD', '0.2'))
     require_checkpoint = os.environ.get('SAO_REQUIRE_CHECKPOINT', '0') == '1'
-    delay_margin_coef = float(runtime_config.reward_value(
-        cfg, 'delay_margin_coef', env='OC_ORCA_DELAY_MARGIN_COEF',
-        default=1.25))
-    target = float(runtime_config.state_option_value(
-        cfg, 'orca_target_ms', env='SAO_ORCA_TARGET_MS',
-        default=os.environ.get('OC_ORCA_TARGET_MS', '50.0')))
-    use_normalizer = runtime_config.bool_value(runtime_config.agent_value(
-        cfg, 'use_normalizer', env='SAO_ORCA_USE_NORMALIZER', default=False))
+    # delay_margin_coef (OC_ORCA_DELAY_MARGIN_COEF) and orca_target_ms
+    # (SAO_ORCA_TARGET_MS) are read directly from the environment by the state
+    # and reward plugins; the orchestrator exports both.
     simulation_backend = flow_backend.is_simulation_backend()
 
     deterministic = os.environ.get('SAO_DETERMINISTIC', '0') == '1'
     if deterministic:
         noise_std = 0.0
-
-    # Orca persists running normalizer stats next to the checkpoint as
-    # stats.json — see envwrapper.py:430. Default to that path so resume
-    # picks up where we left off; SAO_ORCA_STATS_PATH overrides for tests.
-    stats_path = os.environ.get('SAO_ORCA_STATS_PATH', '')
-    if not stats_path and ckpt_path:
-        stats_path = os.path.join(os.path.dirname(os.path.abspath(ckpt_path)),
-                                  model.STATS_FILENAME)
 
     state_log_path = os.environ.get('SAO_TRACE_LOG', '')
     if state_log_path and os.environ.get('SAO_TRACE_LOG_SUFFIX_BY_FLOW', '0') == '1':
@@ -215,11 +211,12 @@ def run():
             'act_mu', 'act_sig',
         ] + [f's{i}' for i in range(model.STATE_DIM)])
 
-    transform = model.OrcaRepoTransform(
-        delay_margin_coef=delay_margin_coef,
-        use_normalizer=use_normalizer,
-    )
-    history = model.HistoryStack(model.REC_DIM)
+    # State and reward are both runtime plugins (runtime.state / runtime.reward,
+    # defaulting to orca_repo / orca) rather than a transform baked into the
+    # learner — see algorithms/orca/states/orca_repo.py and rewards/orca.py.
+    # model.normalize_state is the selected state plugin (7 features + rec_dim
+    # history stacking, returning the STATE_DIM policy input).
+    reward_calc = reward_module(reward_name).make_reward_calc()
 
     t0 = float(os.environ.get('SAO_EPISODE_START', '0')) or time.monotonic()
     # Pace against the shared episode-start grid (t0 + k*interval) so co-active
@@ -233,6 +230,8 @@ def run():
     prev_action = 0.0
     step_in_traj = 0
     ever_alive = False
+    # False while CUBIC owns startup; flips permanently at slow-start exit.
+    agent_ready = not cubic_warmup
     dead_steps = 0
     dead_flow_ms = float(runtime_config.agent_value(
         cfg, 'dead_flow_ms', env='SAO_DEAD_FLOW_MS', default=1000))
@@ -265,32 +264,10 @@ def run():
           f'factor={probe.probe_factor} min_rtt_window={probe.min_rtt_window_s}s',
           flush=True)
 
-    # envwrapper.py:135 — when resuming, the normalizer reloads stats.json.
-    loaded_stats = transform.load_stats(stats_path) if use_normalizer else False
-
-    def _save_stats_quiet():
-        if not use_normalizer or not stats_path:
-            return
-        try:
-            transform.save_stats(stats_path)
-        except Exception as e:
-            print(f'[orca worker] save_stats failed: {e}', flush=True)
-
-    # envwrapper.py:138 — SIGTERM / SIGINT persists normalizer stats.
-    def _stats_signal_handler(_signum, _frame):
-        _save_stats_quiet()
-        sys.exit(0)
-    if use_normalizer and stats_path:
-        try:
-            signal.signal(signal.SIGTERM, _stats_signal_handler)
-            signal.signal(signal.SIGINT, _stats_signal_handler)
-        except (ValueError, OSError):
-            pass
-
-    print(f'[worker alg=orca reward={reward_name} cport={cport} flow={flow_id}] '
+    print(f'[worker alg=orca reward={reward_name} state={model.STATE_NAME} '
+          f'cport={cport} flow={flow_id}] '
           f'started interval={interval_ms}ms det={int(deterministic)} '
-          f'noise={noise_std:.2f} rec_dim={model.REC_DIM} '
-          f'normalizer={int(use_normalizer)} stats_loaded={int(loaded_stats)}',
+          f'noise={noise_std:.2f} rec_dim={model.REC_DIM}',
           flush=True)
 
     try:
@@ -347,67 +324,94 @@ def run():
             interval_s, last_sample_t = flow_backend.interval_seconds(
                 raw, last_sample_t, wall_now=t_step_start)
             # Orca's envwrapper.py:240 only updates Welford stats in training mode.
-            base_state, reward = transform.step(raw, interval_s=interval_s,
-                                                target=target,
-                                                evaluation=deterministic)
-            norm_s = history.push(base_state)
+            # Pass the worker's measured interval into the state plugin so its
+            # delta_t feature / loss-rate fallback match the reward's.
+            raw['interval_s'] = interval_s
+            norm_s = model.normalize_state(raw)
+            reward = reward_calc.step(raw)
             t_s = flow_backend.episode_seconds(
                 raw, t0, wall_now=t_step_start)
             flow_backend.wait_collection_step(raw)
 
-            if prev_state is not None and flow_active and mgr:
-                exp_buf.append(model.Experience(
-                    state=prev_state,
-                    action=prev_action,
-                    reward=reward,
-                    next_state=norm_s,
-                    done=False,
-                    traj_id=traj_id,
-                    step_in_traj=step_in_traj,
-                ))
-                step_in_traj += 1
-                if len(exp_buf) >= push_every:
-                    pusher.submit(exp_buf)
-                    exp_buf.clear()
+            # ── Orca CUBIC -> agent handoff ────────────────────────────────
+            # CUBIC owns the connection through slow start; the agent takes
+            # over — permanently — the moment slow start ends. Real Orca gates
+            # on cwnd > ssthresh, but the kernel struct here exposes no
+            # ssthresh, so trigger on the first loss (exactly what sets ssthresh
+            # and ends slow start), with cubic_warmup_max_s as a safety for
+            # links that never lose. reward_calc.step() above keeps updating
+            # max_bw through the warmup, so the throughput reward is normalized
+            # against the link rate CUBIC discovers, not the agent's suppressed
+            # peak (the ~49% util collapse in orca_20260718-* runs).
+            if not agent_ready:
+                loss_now = float(
+                    raw.get('loss_bytes', raw.get('lost_bytes', 0.0)) or 0.0) > 0.0
+                if loss_now or t_s >= cubic_warmup_max_s:
+                    agent_ready = True
+                    print(f'[orca worker flow={flow_id}] CUBIC->agent handoff '
+                          f'at t={t_s:.2f}s cwnd={cur_cwnd} '
+                          f'({"loss" if loss_now else "timeout"})', flush=True)
 
-            a, mult = actor.act(norm_s, noise_std=noise_std)
-            raw_raynet_action = (
-                flow_backend.is_simulation_backend()
-                and getattr(_ACTION_PLUGIN, 'ACTION_OUTPUT', '') == 'raynet_action')
-            if raw_raynet_action:
-                new_cwnd = float(_ACTION_PLUGIN.apply_cwnd(
-                    cur_cwnd, a, cwnd_min, cwnd_max))
-                agent_locked = False
-            else:
-                desired_cwnd = _ACTION_PLUGIN.apply_cwnd(
-                    cur_cwnd, a, cwnd_min, cwnd_max)
-
-                # Feed the BBR-style min-RTT filter with the kernel's persistent
-                # srtt (srtt_us is in usec<<3; divide by 8). Falls back to avg_urtt
-                # only if srtt isn't populated yet (pre-handshake).
-                srtt_raw_us = float(raw.get('srtt_us', 0) or 0)
-                filter_rtt_us = (srtt_raw_us / 8.0) if srtt_raw_us > 0 else float(raw.get('avg_urtt', 0) or 0)
-                clock_t = flow_backend.observation_clock(raw, wall_now=t_step_start)
-                probe.observe_rtt(clock_t, filter_rtt_us)
-
-                actual_cwnd, agent_locked, _probe_transition = probe.decide(
-                    clock_t, cur_cwnd, desired_cwnd)
-                new_cwnd = int(np.clip(actual_cwnd, cwnd_min, cwnd_max))
-            try:
-                flow_backend.set_cwnd(flow_fd, new_cwnd)
-            except Exception as e:
-                print(f'[orca worker] set_cwnd failed: {e} - exiting', flush=True)
-                break
-
-            if agent_locked:
-                # Probe owned this step. Invalidate prev_state so the next
-                # iteration skips its push — the (s_pre, a_pre, r_probe,
-                # s_probe) tuple would lie about causality.
+            if not agent_ready:
+                # Slow start: CUBIC drives cwnd (no override) and we push no
+                # experience — the agent didn't cause these transitions.
                 prev_state = None
                 prev_action = 0.0
+                a, mult, new_cwnd = 0.0, 1.0, cur_cwnd
             else:
-                prev_state = norm_s
-                prev_action = a
+                if prev_state is not None and flow_active and mgr:
+                    exp_buf.append(model.Experience(
+                        state=prev_state,
+                        action=prev_action,
+                        reward=reward,
+                        next_state=norm_s,
+                        done=False,
+                        traj_id=traj_id,
+                        step_in_traj=step_in_traj,
+                    ))
+                    step_in_traj += 1
+                    if len(exp_buf) >= push_every:
+                        pusher.submit(exp_buf)
+                        exp_buf.clear()
+
+                a, mult = actor.act(norm_s, noise_std=noise_std)
+                raw_raynet_action = (
+                    flow_backend.is_simulation_backend()
+                    and getattr(_ACTION_PLUGIN, 'ACTION_OUTPUT', '') == 'raynet_action')
+                if raw_raynet_action:
+                    new_cwnd = float(_ACTION_PLUGIN.apply_cwnd(
+                        cur_cwnd, a, cwnd_min, cwnd_max))
+                    agent_locked = False
+                else:
+                    desired_cwnd = _ACTION_PLUGIN.apply_cwnd(
+                        cur_cwnd, a, cwnd_min, cwnd_max)
+
+                    # Feed the BBR-style min-RTT filter with the kernel's
+                    # persistent srtt (srtt_us is usec<<3; divide by 8). Falls
+                    # back to avg_urtt only if srtt isn't populated yet.
+                    srtt_raw_us = float(raw.get('srtt_us', 0) or 0)
+                    filter_rtt_us = (srtt_raw_us / 8.0) if srtt_raw_us > 0 else float(raw.get('avg_urtt', 0) or 0)
+                    clock_t = flow_backend.observation_clock(raw, wall_now=t_step_start)
+                    probe.observe_rtt(clock_t, filter_rtt_us)
+
+                    actual_cwnd, agent_locked, _probe_transition = probe.decide(
+                        clock_t, cur_cwnd, desired_cwnd)
+                    new_cwnd = int(np.clip(actual_cwnd, cwnd_min, cwnd_max))
+                try:
+                    flow_backend.set_cwnd(flow_fd, new_cwnd)
+                except Exception as e:
+                    print(f'[orca worker] set_cwnd failed: {e} - exiting', flush=True)
+                    break
+
+                if agent_locked:
+                    # Probe owned this step. Invalidate prev_state so the next
+                    # iteration skips its push — the (s_pre, a_pre, r_probe,
+                    # s_probe) tuple would lie about causality.
+                    prev_state = None
+                    prev_action = 0.0
+                else:
+                    prev_state = norm_s
+                    prev_action = a
 
             weight_pull_counter += 1
             if mgr and weight_pull_counter >= weight_pull_every:
@@ -473,9 +477,6 @@ def run():
             except Exception:
                 pass
             log_file.close()
-        # Mirror envwrapper.py save-on-exit so the next run resumes the
-        # running normalizer stats.
-        _save_stats_quiet()
         print(f'[orca worker cport={cport} flow={flow_id}] done', flush=True)
 
 

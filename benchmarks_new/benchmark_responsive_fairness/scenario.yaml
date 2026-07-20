@@ -6,7 +6,7 @@ sweep:
   delays: [50]
   flows: [2, 4, 5, 7]
   duration: 345
-  bdp_mult: 4
+  bdp_mult: [4]
   flow_schedule:
     arrival: {evenly_spaced_over_s: 45}
     duration: {until_episode_end: true}

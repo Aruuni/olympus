@@ -26,7 +26,7 @@ benchmark:
   rtt_min_ms: 10
   rtt_max_ms: 100
   seed_offset: 0
-  bdp_mult: 4
+  bdp_mult: [4]
   measure_interval_s: 1.0
   kernel_cport_base: 56000
   deterministic_inference: true

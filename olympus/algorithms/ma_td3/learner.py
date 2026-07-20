@@ -1,4 +1,4 @@
-"""Astraea multi-agent TD3 learner (centralized training).
+"""Multi-agent TD3 learner for centralized Astraea-style training.
 
 Recreates the paper's training algorithm (section 3.4, Algorithm 1): a
 MADDPG-style variant of TD3 where the parameter-shared deterministic actor
@@ -16,7 +16,7 @@ delayed policy updates — the released agent used policy_delay=20, Huber loss,
 tau=0.005, gamma=0.98).
 
 Usage (started by the orchestrator):
-  python olympus/algorithms/astraea/learner.py --config <resolved.yaml> --port 6301
+  python olympus/algorithms/ma_td3/learner.py --config <resolved.yaml> --port 6301
 """
 
 import argparse
@@ -45,7 +45,7 @@ _ROOT = os.path.dirname(_PKG)
 sys.path.insert(0, _ROOT)
 sys.path.insert(0, _HERE)
 
-from olympus.algorithms.astraea.model import (
+from olympus.algorithms.ma_td3.model import (
     ACTION_DIM,
     ACTION_MAX,
     ACTION_MIN,
@@ -176,7 +176,7 @@ def _max_flow_count(spec, default=2):
         values = spec
     else:
         values = [spec]
-    return max(max(1, min(int(v), 5)) for v in (values or [default]))
+    return max(max(1, int(v)) for v in (values or [default]))
 
 
 # ── Joint replay (group/agent/step indexed, like ma_dreamer) ──────────────────
@@ -387,18 +387,9 @@ class Learner:
         # collected representative transitions.
         self.actor_warmup_steps = max(
             0, int(training.get('actor_warmup_steps', 1_000)))
-        monitor = training.get('collapse_monitor', {}) or {}
-        self.collapse_monitor_enabled = bool(monitor.get('enabled', True))
-        self.collapse_utilization = float(
-            monitor.get('utilization_threshold', 0.05))
-        self.collapse_floor_fraction = float(
-            monitor.get('cwnd_floor_fraction', 0.90))
-        self.collapse_negative_fraction = float(
-            monitor.get('negative_action_fraction', 0.90))
-        self.collapse_action_threshold = float(
-            monitor.get('negative_action_threshold', -0.90))
-        self.collapse_patience = max(1, int(monitor.get('patience', 5)))
-        self._collapse_streak = 0
+        # Threshold below which a policy action counts as "negative" for the
+        # logged actor_negative_fraction metric.
+        self.negative_action_threshold = -0.90
 
         # TD3 hyperparameters — defaults from the released astraea.json.
         self.gamma = float(training.get('gamma', 0.98))
@@ -422,6 +413,15 @@ class Learner:
         self.max_agents = _max_flow_count(
             (cfg.get('sweep', {}) or {}).get('flows', 2))
         self.reward_weights = reward_weights(cfg)
+        # Hard bound on the TD target: the per-step reward is clipped to
+        # +/-reward_clip, so the discounted return — and therefore the true
+        # Q — cannot leave [-reward_clip/(1-gamma), +reward_clip/(1-gamma)].
+        # Any target outside that is impossible for this MDP; clamping y there
+        # stops the pessimistic-min bootstrap from amplifying an off-policy
+        # extrapolation into an unbounded runaway (Q -> -1e4 in
+        # ma_td3_20260717-152353). It never fires on a legitimate value.
+        reward_clip = float(self.reward_weights.get('reward_clip', 0.1))
+        self._y_bound = reward_clip / max(1.0 - self.gamma, 1e-6)
 
         torch_threads = int(training.get('torch_threads', 0) or 0)
         torch_interop_threads = int(
@@ -467,7 +467,7 @@ class Learner:
         self.ckpt_path = training.get(
             'checkpoint',
             os.path.join(_PKG, 'data', 'checkpoints',
-                         'astraea_cwnd_model.pt'),
+                         'ma_td3_cwnd_model.pt'),
         )
         resume_from = training.get('resume_from', '')
         if self.ckpt_path:
@@ -516,7 +516,7 @@ class Learner:
             self._service.set_action_count(self.action_count)
             print(
                 f'[learner] manager on port {port} '
-                f'(Astraea TD3 agents<={self.max_agents} '
+                f'(MA-TD3/Astraea agents<={self.max_agents} '
                 f'history={self.history_len} h1={self.h1} h2={self.h2} '
                 f'norm={self.actor_norm} warmup={self.actor_warmup_steps} '
                 f'gamma={self.gamma:g} tau={self.target_tau:g} '
@@ -707,6 +707,8 @@ class Learner:
             a2 = (a2 + noise).clamp(ACTION_MIN, ACTION_MAX)
             q1_next, q2_next = self.critic_target(sg2_t, a2)
             y = r_t + self.gamma * (1.0 - d_t) * torch.min(q1_next, q2_next)
+            # Refuse to regress toward a value the reward clip makes impossible.
+            y = y.clamp(-self._y_bound, self._y_bound)
 
         q1, q2 = self.critic(sg_t, a_t)
         critic_loss = F.huber_loss(q1, y) + F.huber_loss(q2, y)
@@ -738,9 +740,17 @@ class Learner:
                     torch.nn.utils.clip_grad_norm_(
                         self.actor.parameters(), self.grad_clip)
                 self.opt_actor.step()
-                soft_update(self.actor, self.actor_target, self.target_tau)
                 actor_loss_value = float(actor_loss.detach().item())
             self.actor.eval()
+
+        # Glide the actor target toward the online actor EVERY step (like the
+        # critic target above), not only on delayed-policy steps. Throttling it
+        # to policy_delay made the target lurch by ~tau*policy_delay=0.1 per
+        # cycle, so the TD3 target action a2=actor_target(s2) jumped in 10%
+        # steps and injected variance straight into the critic regression
+        # target — a driver of the Q-divergence collapse. On non-policy steps
+        # the online actor is unchanged, so this is a harmless smooth nudge.
+        soft_update(self.actor, self.actor_target, self.target_tau)
 
         if self.step % 10 == 0:
             valid_local = batch['local_reward'][:, -1, :][
@@ -758,7 +768,7 @@ class Learner:
                 policy_actions = self.actor(s_t).squeeze(-1)
             actor_action_mean = float(policy_actions.mean().item())
             actor_negative_fraction = float((
-                policy_actions <= self.collapse_action_threshold
+                policy_actions <= self.negative_action_threshold
             ).float().mean().item())
             valid_now = (mask[:, -1, :] * mask[:, -2, :]) > 0.0
             current_cwnd = batch['cwnd'][:, -1, :][valid_now]
@@ -780,24 +790,6 @@ class Learner:
             )
             jain_fairness = float(np.mean(jain))
 
-            collapse_signal = (
-                comp_means['r_thr'] <= self.collapse_utilization
-                and cwnd_floor >= self.collapse_floor_fraction
-                and actor_negative_fraction >= self.collapse_negative_fraction
-            )
-            self._collapse_streak = (
-                self._collapse_streak + 1 if collapse_signal else 0)
-            if (self.collapse_monitor_enabled
-                    and self._collapse_streak == self.collapse_patience):
-                print(
-                    '[learner] COLLAPSE WARNING: low utilization, CWND-floor '
-                    'lock, and negative actor saturation persisted for '
-                    f'{self.collapse_patience} checks '
-                    f'(util={comp_means["r_thr"]:.3f} '
-                    f'floor={cwnd_floor:.3f} '
-                    f'negative={actor_negative_fraction:.3f})',
-                    flush=True,
-                )
             print(
                 f'[learner] step={self.step:6d} '
                 f'critic={critic_loss_value:.4f} '

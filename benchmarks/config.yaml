@@ -126,6 +126,37 @@ approaches:
     kind: astraea
     plot_label: Astraea
 
+  # Astraea recreation trained in Olympus (multi-agent TD3 learner in
+  # olympus/algorithms/ma_td3). Unlike `kind: astraea` above — which runs the
+  # released TF1 agent via the listener daemon — this loads an Olympus
+  # checkpoint like any other learned model. The learner is `ma_td3`; its
+  # state/reward/action/environment components remain named `astraea`.
+  - data_folder: astraea-olympus
+    name: astraea-olympus
+    kind: model
+    algorithm: ma_td3
+    state: astraea
+    reward: astraea
+    environment: astraea
+    plot_label: Astraea (Olympus)
+    config: olympus/astraea.yaml
+    checkpoint: olympus/models/ma_td3_20260717-152353/checkpoints/ma_td3_1800_cwnd_model.pt
+
+  # Orca recreation trained in Olympus (single-agent TD3 learner in
+  # olympus/algorithms/orca). Loads an Olympus checkpoint like any other
+  # learned model; its state/reward/action/environment components are named
+  # orca (olympus/orca.yaml).
+  - data_folder: orca-olympus
+    name: orca-olympus
+    kind: model
+    algorithm: orca
+    state: orca_repo
+    reward: orca
+    environment: dynamic
+    plot_label: Orca (Olympus)
+    config: olympus/orca.yaml
+    checkpoint: olympus/models/reps/orca_20260718-165340/checkpoints/orca_1200_cwnd_model.pt
+
 # Curated subset every benchmark draws into its `*_specific` comparison plot,
 # alongside the usual all-approaches output. Each benchmark filters its
 # completed runs down to these data folders and writes a parallel report:
@@ -144,3 +175,5 @@ specific_plots:
   - bbr1
   - frcc
   - astraea
+  - astraea-olympus
+  - orca-olympus

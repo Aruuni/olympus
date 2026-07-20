@@ -5,7 +5,7 @@ shuffle: true
 sweep:
   bws: [10, 20]
   delays: [10, 20]
-  bdp_mult: 4
+  bdp_mult: [4]
   flows: 1
   duration: 15
   observation_fields:

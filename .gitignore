@@ -14,6 +14,7 @@ models_raynet_smoke/
 .continue
 oc_listener
 venv*
+.venv*
 *.pdf
 *.png
 # Keep generated multi-agent runs ignored while allowing the MA-Dreamer

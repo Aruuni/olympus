@@ -21,6 +21,7 @@ from olympus.algorithms.ma_dreamer.model import (
 )
 from olympus.common.marl_team_reward import over_share_fraction
 from olympus.plots.multi_flow_episode_plot import (
+    _aligned_matrix,
     _r_fair_matrix,
     plot as plot_multi_flow_episode,
 )
@@ -53,6 +54,38 @@ def _experience(agent_id, group_step, throughput, reward=5.0):
 
 
 class FairnessMetricTest(unittest.TestCase):
+    def test_plot_alignment_uses_absolute_time_and_each_flow_lifetime(self):
+        traces = [
+            {'data': {
+                't_s': np.asarray([0.0, 2.0]),
+                'avg_thr_mbps': np.asarray([10.0, 12.0]),
+            }},
+            {'data': {
+                't_s': np.asarray([1.0, 3.0]),
+                'avg_thr_mbps': np.asarray([20.0, 22.0]),
+            }},
+        ]
+
+        times, throughput = _aligned_matrix(traces, 'avg_thr_mbps')
+
+        np.testing.assert_allclose(times, [0.0, 1.0, 2.0, 3.0])
+        np.testing.assert_allclose(
+            throughput,
+            [[10.0, 10.0, 12.0, np.nan],
+             [np.nan, 20.0, 20.0, 22.0]],
+            equal_nan=True,
+        )
+        np.testing.assert_allclose(
+            np.nansum(throughput, axis=0), [10.0, 30.0, 32.0, 22.0])
+
+    def test_plot_fairness_excludes_flows_outside_their_lifetime(self):
+        throughput = np.asarray([
+            [10.0, 10.0, np.nan],
+            [np.nan, 10.0, 20.0],
+        ])
+
+        np.testing.assert_allclose(_r_fair_matrix(throughput), 0.0)
+
     def test_attached_metric_uses_average_throughput(self):
         self.assertAlmostEqual(
             float(r_fair_from_avg_throughput(
@@ -331,8 +364,11 @@ class TcpCongestionControlPreflightTest(unittest.TestCase):
 
 
 class FlowCountTest(unittest.TestCase):
-    def test_training_flow_counts_remain_capped_at_four(self):
-        self.assertEqual(orchestrator._flow_values([2, 4, 5, 7]), [2, 4])
+    def test_training_flow_counts_are_not_silently_capped(self):
+        self.assertEqual(
+            orchestrator._flow_values([2, 4, 5, 7]),
+            [2, 4, 5, 7],
+        )
 
     def test_evaluation_flow_count_is_not_capped(self):
         self.assertEqual(orchestrator._execution_flow_value(5), 5)
@@ -599,6 +635,43 @@ class PerFlowRttDelaysTest(unittest.TestCase):
     def test_disabled_returns_none(self):
         self.assertIsNone(orchestrator._per_flow_rtt_delays(
             4, 50.0, {}, {}, random.Random(7)))
+
+    def test_bins_draws_every_flow_from_the_delay_grid(self):
+        ecfg = {'per_flow_rtt_bins': True,
+                'per_flow_rtt_bin_range': [10, 140],
+                'per_flow_rtt_bin_step': 10.0}
+        grid = {float(v) for v in range(10, 150, 10)}
+        seen = set()
+        for seed in range(50):
+            delays = orchestrator._per_flow_rtt_delays(
+                5, 50.0, ecfg, {}, random.Random(seed))
+            self.assertEqual(len(delays), 5)
+            seen.update(delays)
+        self.assertTrue(seen <= grid, seen - grid)
+        self.assertGreater(len(seen), 1)
+
+    def test_bins_take_precedence_over_mult(self):
+        ecfg = {'per_flow_rtt_bins': True,
+                'per_flow_rtt_bin_range': [30, 30],
+                'per_flow_rtt_mult': True,
+                'per_flow_rtt_mult_min': 5.0,
+                'per_flow_rtt_mult_max': 5.0}
+        self.assertEqual(orchestrator._per_flow_rtt_delays(
+            2, 50.0, ecfg, {}, random.Random(7)), [30.0, 30.0])
+
+    def test_bins_anchor_first_pins_flow0_to_base(self):
+        ecfg = {'per_flow_rtt_bins': True,
+                'per_flow_rtt_bin_range': [10, 140],
+                'per_flow_rtt_bin_step': 10.0,
+                'per_flow_rtt_anchor_first': True}
+        delays = orchestrator._per_flow_rtt_delays(
+            4, 55.0, ecfg, {}, random.Random(7))
+        self.assertEqual(delays[0], 55.0)
+
+    def test_bins_without_range_raises(self):
+        with self.assertRaises(ValueError):
+            orchestrator._per_flow_rtt_delays(
+                2, 50.0, {'per_flow_rtt_bins': True}, {}, random.Random(7))
 
 
 class PerFlowRewardReferenceTest(unittest.TestCase):

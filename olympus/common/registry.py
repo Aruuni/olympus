@@ -1,7 +1,7 @@
 """Small import registry for hot-swappable algorithms, rewards, and actions.
 
 One flat namespace holds both single-agent algorithms (td3, orca, dreamer_v3,
-…) and multi-agent ones (mat, ma_dreamer). Each algorithm package declares its
+…) and multi-agent ones (ma_dreamer, ma_td3). Each algorithm package declares its
 nature with a module-level ``MULTI_AGENT`` flag in ``algorithms/<name>/__init__
 .py`` (default ``False``). The orchestrator reads that flag via
 ``is_multi_agent`` to decide between true multi-agent rollouts and single-agent

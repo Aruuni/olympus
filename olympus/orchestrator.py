@@ -4,7 +4,7 @@ orchestrator.py — parallel episode manager for olympus.
 One orchestrator drives both modes; the selected algorithm decides which:
   * single-agent algorithms (MULTI_AGENT = False) run the chosen `environment`,
     and any environment with >1 flow becomes lagged self-play automatically.
-  * multi-agent algorithms (MULTI_AGENT = True: mat, ma_dreamer) train every
+  * multi-agent algorithms (MULTI_AGENT = True: ma_dreamer, ma_td3) train every
     flow jointly using the `sweep` block.
 
 The learner, reward, state, and action are hot-swappable through config.yaml:
@@ -632,6 +632,23 @@ def _prepare_run(cfg: dict, config_path: str) -> str:
     return resolved_config
 
 
+def normalize_bdp_mult(spec, default=4.0):
+    """Normalize a ``bdp_mult`` config value to a list of float factors.
+
+    ``bdp_mult`` is canonically an array of queue-depth factors swept across
+    pool entries (e.g. Astraea's ``[0.1, 0.5, 1, 2, 4, 8, 16]``). A bare scalar
+    is accepted for backward compatibility and treated as a single-element
+    list; ``None``/empty falls back to ``default``. Fixed-condition consumers
+    (benchmarks) take element ``[0]``.
+    """
+    if spec is None:
+        spec = default
+    if isinstance(spec, (list, tuple)):
+        vals = [float(v) for v in spec]
+        return vals or [float(default)]
+    return [float(spec)]
+
+
 def _build_sweep_pool(sw: dict, env_meta: dict):
     bws       = sw.get('bws',    [sw.get('bw',    100.0)])
     delays    = sw.get('delays', [sw.get('delay',  20.0)])
@@ -639,13 +656,18 @@ def _build_sweep_pool(sw: dict, env_meta: dict):
     if not isinstance(flows, (list, tuple)):
         flows = [flows]
     schedules = sw.get('link_schedules', [[]])
+    # bdp_mult is an array of queue-depth factors swept across pool entries
+    # (single-agent parity with _build_pool_marl); each episode receives one
+    # scalar so the env never sees a list.
+    bdp_vals  = normalize_bdp_mult(sw.get('bdp_mult'))
     base      = {k: v for k, v in sw.items()
                  if k not in ('bws', 'delays', 'flows', 'link_schedules',
-                              'bw', 'delay', 'flow')}
+                              'bw', 'delay', 'flow', 'bdp_mult')}
     pool = []
-    for bw, delay, n_flows, sched in itertools.product(
-            bws, delays, flows, schedules):
-        ep = dict(base, bw=float(bw), delay=float(delay), flows=int(n_flows))
+    for bw, delay, n_flows, bdp_mult, sched in itertools.product(
+            bws, delays, flows, bdp_vals, schedules):
+        ep = dict(base, bw=float(bw), delay=float(delay), flows=int(n_flows),
+                  bdp_mult=float(bdp_mult))
         resolved = []
         for entry in sched:
             e = dict(entry)
@@ -1156,34 +1178,7 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
         # unreachable from other state plugins.
         'SAO_ORACLE_BASE_RTT_US':   str(oracle_base_rtt_us) if oracle_state_active else '',
         'SAO_ORACLE_LINK_CONTEXT_PATH': oracle_link_context_path,
-        # Option-Critic compatibility aliases. These let the option_critic
-        # algorithm keep its richer worker/learner contract while the
-        # orchestrator remains shared.
-        'OC_CHECKPOINT':     os.path.abspath(ckpt),
-        'OC_MANAGER_ADDR':   mgr_addr,
-        'OC_MANAGER_KEY':    mgr_key,
-        'OC_STATE_LOG':      state_log,
-        'OC_EPISODE':        str(int(episode)),
         'SAO_TRACE_LOG_SUFFIX_BY_FLOW': '1' if ecfg.get('per_flow_state_logs') else '0',
-        'OC_STATE_LOG_SUFFIX_BY_FLOW':  '1' if ecfg.get('per_flow_state_logs') else '0',
-        'OC_CWND_MIN':       str(int(a_cfg.get('cwnd_min', 10))),
-        'OC_CWND_MAX':       str(int(a_cfg.get('cwnd_max', 10000))),
-        'OC_N_OPTIONS':      str(int(a_cfg.get('n_options', 3))),
-        'OC_HIDDEN':         str(int(a_cfg.get('hidden', 128))),
-        'OC_ARCH':           str(a_cfg.get('arch', 'mlp')),
-        'OC_ACTION_INIT':    str(a_cfg.get('action_init', 'small_spread')),
-        'OC_ACTION_INIT_SCALE': str(float(a_cfg.get('action_init_scale', 0.05))),
-        'OC_ACTION_LOGSIG_MIN': str(float(a_cfg.get('action_logsig_min', -1.0))),
-        'OC_Q_VALUE_CLIP':   str(float(a_cfg.get('q_value_clip', 1500.0))),
-        'OC_BETA_TEMPERATURE': str(float(a_cfg.get('beta_temperature', 1.0))),
-        'OC_BETA_FLOOR':     str(float(a_cfg.get('beta_floor', 0.0))),
-        'OC_EPS_START':      ('0.0' if _eval_mode(cfg) else str(float(a_cfg.get('epsilon_start', 0.20)))),
-        'OC_EPS_END':        ('0.0' if _eval_mode(cfg) else str(float(a_cfg.get('epsilon_end', 0.03)))),
-        'OC_EPS_DECAY':      str(float(a_cfg.get('epsilon_decay', 30000))),
-        'OC_DWELL_MIN_STEPS': str(int(a_cfg.get('dwell_min_steps', 1))),
-        'OC_DWELL_MAX_STEPS': str(int(a_cfg.get('dwell_max_steps', 0))),
-        'OC_TERM_THRESHOLD': str(float(a_cfg.get('term_threshold', 0.5))),
-        'OC_DEAD_FLOW_MS':   str(int(a_cfg.get('dead_flow_ms', 1000))),
         'OC_PUSH_EVERY':     str(int(t_cfg.get('worker_push_every', 16))),
         # Compatibility aliases for the current Orca reward plugin.
         'OC_LINK_BW':          str(worker_link_bw),
@@ -1230,6 +1225,10 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
         'unique_cports': bool(ecfg.get('unique_cports', False)),
         'per_flow_delays': ecfg.get('per_flow_delays'),
     }
+    if ecfg.get('qsize') is not None:
+        env_kwargs['qsize'] = int(ecfg['qsize'])
+    if ecfg.get('disable_offload') is not None and not is_raynet:
+        env_kwargs['disable_offload'] = bool(ecfg['disable_offload'])
     if is_raynet:
         raynet_ecfg = dict(ecfg)
         for key, value in _raynet_config_overrides(cfg).items():
@@ -1385,7 +1384,7 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
 
 # ── Multi-agent (MARL) path ───────────────────────────────────────────────────
 #
-# Used when the selected algorithm declares MULTI_AGENT = True (mat, ma_dreamer).
+# Used when the selected algorithm declares MULTI_AGENT = True (ma_dreamer, ma_td3).
 # One worker (and one oc_bridge) is launched per flow, each carrying its agent
 # index, and the learner trains every flow jointly. Single-agent algorithms in
 # multi-flow environments do NOT come through here — they run as lagged
@@ -1620,13 +1619,8 @@ def _parsed_flow_values(spec, default=2):
 
 
 def _flow_values(spec, default=2):
-    """Return flow counts supported by the four-agent training model."""
-    out = []
-    for value in _parsed_flow_values(spec, default=default):
-        n = min(value, 4)
-        if n not in out:
-            out.append(n)
-    return out
+    """Return every configured training flow count without truncation."""
+    return _parsed_flow_values(spec, default=default)
 
 
 def _flow_value(spec, default=2):
@@ -1723,36 +1717,66 @@ def _per_flow_rtt_delays(n_flows: int, base_delay: float, ecfg: dict,
                          sweep_cfg: dict, rng):
     """Per-flow one-way propagation delays for inter-RTT-diversity episodes.
 
-    When the environment sets ``per_flow_rtt_mult: true`` each flow propagates
-    at its own base RTT: the one-way delay of flow i is
-    ``base_delay * U(min_mult, max_mult)``, sampled once per flow per episode
-    (default range 0.20x .. 5.0x; a min of 1.0 means no flow ever sits below
-    the shared episode base). With ``per_flow_rtt_anchor_first: true`` flow 0
-    is pinned at exactly the base delay and only the remaining flows draw the
-    random multiplier. The Mininet backend applies these on each
-    sender's access link (see ``per_flow_delays`` in
-    environments/mininet/env.py), so every flow shares the one bottleneck but
-    propagates at its own RTT. Returns ``None`` when disabled, leaving the
-    single shared-delay topology untouched (legacy behaviour).
+    Two modes, sampled once per flow per episode:
+
+    * ``per_flow_rtt_bins: true`` — each flow draws its delay from the same
+      discretized ``delay_range``/``delay_step`` grid the episode base delay
+      is sampled from, so no flow ever leaves the environment's published
+      delay range (a multiplier on top of the base can, e.g. 140ms * 2).
+      The grid is forwarded from the sweep as ``per_flow_rtt_bin_range`` /
+      ``per_flow_rtt_bin_step`` because pool materialization strips the raw
+      sweep keys. Takes precedence over the multiplier mode.
+    * ``per_flow_rtt_mult: true`` — the one-way delay of flow i is
+      ``base_delay * U(min_mult, max_mult)`` (default range 0.20x .. 5.0x;
+      a min of 1.0 means no flow ever sits below the shared episode base).
+
+    With ``per_flow_rtt_anchor_first: true`` flow 0 is pinned at exactly the
+    base delay and only the remaining flows draw randomly. The Mininet
+    backend applies these on each sender's access link (see
+    ``per_flow_delays`` in environments/mininet/env.py), so every flow shares
+    the one bottleneck but propagates at its own RTT. Returns ``None`` when
+    disabled, leaving the single shared-delay topology untouched (legacy
+    behaviour).
     """
+    if n_flows < 1:
+        return None
+    base = max(0.0, float(base_delay))
+    anchor_first = _as_bool(
+        ecfg.get('per_flow_rtt_anchor_first',
+                 sweep_cfg.get('per_flow_rtt_anchor_first', False)),
+        default=False,
+    )
+
+    bins_enabled = _as_bool(
+        ecfg.get('per_flow_rtt_bins', sweep_cfg.get('per_flow_rtt_bins', False)),
+        default=False,
+    )
+    if bins_enabled:
+        spec = ecfg.get('per_flow_rtt_bin_range',
+                        ecfg.get('delay_range', sweep_cfg.get('delay_range')))
+        if spec is None:
+            raise ValueError(
+                'per_flow_rtt_bins requires a delay_range to draw from')
+        step = ecfg.get('per_flow_rtt_bin_step',
+                        ecfg.get('delay_step', sweep_cfg.get('delay_step')))
+        delays = [_sample_range(spec, step=step, rng=rng)
+                  for _ in range(n_flows)]
+        if anchor_first:
+            delays[0] = round(base, 3)
+        return delays
+
     enabled = _as_bool(
         ecfg.get('per_flow_rtt_mult', sweep_cfg.get('per_flow_rtt_mult', False)),
         default=False,
     )
-    if not enabled or n_flows < 1:
+    if not enabled:
         return None
     lo = float(ecfg.get('per_flow_rtt_mult_min',
                         sweep_cfg.get('per_flow_rtt_mult_min', 0.20)))
     hi = float(ecfg.get('per_flow_rtt_mult_max',
                         sweep_cfg.get('per_flow_rtt_mult_max', 5.0)))
     lo, hi = sorted((max(0.0, lo), max(0.0, hi)))
-    base = max(0.0, float(base_delay))
     delays = [round(base * rng.uniform(lo, hi), 3) for _ in range(n_flows)]
-    anchor_first = _as_bool(
-        ecfg.get('per_flow_rtt_anchor_first',
-                 sweep_cfg.get('per_flow_rtt_anchor_first', False)),
-        default=False,
-    )
     if anchor_first:
         delays[0] = round(base, 3)
     return delays
@@ -1792,11 +1816,9 @@ def _build_pool_marl(cfg):
         delays    = [None] if delay_range is not None else sw.get('delays', [sw.get('delay', 20.0)])
         schedules = sw.get('link_schedules', [[]])
         flow_vals = _flow_values(sw.get('flows', 2), default=2)
-        # bdp_mult may be a single factor or a list to sweep queue depths
-        # (e.g. Astraea's 0.1-16 BDP buffer factors) across pool entries.
-        bdp_spec = sw.get('bdp_mult', 4.0)
-        bdp_vals = ([float(v) for v in bdp_spec]
-                    if isinstance(bdp_spec, (list, tuple)) else [float(bdp_spec)])
+        # bdp_mult is an array of queue-depth factors swept across pool entries
+        # (e.g. Astraea's 0.1-16 BDP buffer factors).
+        bdp_vals = normalize_bdp_mult(sw.get('bdp_mult'))
         base      = {k: v for k, v in sw.items()
                      if k not in (
                          'bws', 'delays', 'link_schedules', 'bw', 'delay',
@@ -1824,6 +1846,13 @@ def _build_pool_marl(cfg):
                     delay_step = sw.get('delay_step', sw.get('rtt_step'))
                     if delay_step is not None:
                         ep['_sample_delay_step'] = float(delay_step)
+                    # per_flow_rtt_bins draws per-flow delays from this same
+                    # grid at episode time; keep it under keys that survive
+                    # the _sample_* strip in materialize_episode_config.
+                    if _as_bool(sw.get('per_flow_rtt_bins'), default=False):
+                        ep['per_flow_rtt_bin_range'] = list(delay_range)
+                        if delay_step is not None:
+                            ep['per_flow_rtt_bin_step'] = float(delay_step)
                 else:
                     ep['delay'] = float(delay)
                 if sw.get('sample_round_digits') is not None:
@@ -2002,6 +2031,10 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
         'unique_cports': True,
         'per_flow_delays': per_flow_delays,
     }
+    if ecfg.get('qsize') is not None:
+        env_kwargs['qsize'] = int(ecfg['qsize'])
+    if ecfg.get('disable_offload') is not None and not is_raynet:
+        env_kwargs['disable_offload'] = bool(ecfg['disable_offload'])
     if is_raynet:
         raynet_ecfg = dict(ecfg)
         for key, value in _raynet_config_overrides(cfg).items():

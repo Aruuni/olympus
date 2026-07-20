@@ -1,0 +1,65 @@
+# IFIP Networking 2026 fairness benchmarks — MASTER config.
+#
+# This file owns ONLY the shared approach list.  Every dumbbell parameter
+# (bandwidth, RTT sweep, bdp_mult, duration, timing, parallelism, buffers…)
+# lives in each experiment's sub-config, so a benchmark is fully described by
+# its own `benchmarks_paper/<suite>/config.yaml`.  Sub-configs point here with
+# `approaches_config: ../config.yaml`.  Edit approaches ONCE, here.
+
+approaches:
+  - data_folder: astraea-paper
+    name: astraea-paper
+    enabled: true
+    kind: astraea
+    plot_label: Astraea (paper)
+    protocol: astraea
+
+  - data_folder: astraea-olympus
+    name: astraea-olympus
+    enabled: true
+    kind: model
+    algorithm: ma_td3
+    state: astraea
+    reward: astraea
+    environment: astraea
+    plot_label: Astraea (Olympus)
+    protocol: astraea
+    marker: '2'
+    config: olympus/astraea.yaml
+    checkpoint: olympus/models/reps/ma_td3_20260720-053858/checkpoints/ma_td3_700_cwnd_model.pt
+
+  - data_folder: orca-paper
+    name: orca-paper
+    enabled: true
+    kind: orca
+    plot_label: Orca (original)
+    protocol: orca
+    orca:
+      install_dir: /its/home/mm2350/Desktop/mininettestbed/CC/Orca
+
+  - data_folder: orca-olympus
+    name: orca-olympus
+    enabled: true
+    kind: model
+    algorithm: orca
+    state: orca_repo
+    reward: orca
+    environment: dynamic
+    plot_label: Orca (Olympus)
+    color: '#0C5DA5'
+    marker: o
+    config: olympus/orca.yaml
+    checkpoint: olympus/models/reps/orca_20260718-165340/checkpoints/orca_1000_cwnd_model.pt
+
+  # - data_folder: dreamer-single
+  #   name: dreamer-single
+  #   enabled: false
+  #   kind: model
+  #   algorithm: dreamer_v3
+  #   state: CHANGE_ME
+  #   reward: CHANGE_ME
+  #   environment: CHANGE_ME
+  #   plot_label: DREAMER (single agent)
+  #   protocol: dreamer
+  #   config: CHANGE_ME/config.resolved.yaml
+  #   checkpoint: CHANGE_ME/dreamer_v3_cwnd_model.pt

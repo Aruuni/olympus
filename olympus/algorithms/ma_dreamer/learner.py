@@ -144,7 +144,7 @@ def _max_flow_count(spec, default=2):
         values = spec
     else:
         values = [spec]
-    return max(max(1, min(int(v), 4)) for v in (values or [default]))
+    return max(max(1, int(v)) for v in (values or [default]))
 
 
 class JointReplayBuffer:

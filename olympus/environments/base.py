@@ -140,6 +140,15 @@ class NetworkEnv(ABC):
         replay calls it from a background thread.
         """
 
+    def interrupt_link(self, outage_ms=0.0) -> None:
+        """Briefly interrupt the bottleneck link.
+
+        This optional primitive represents a hard LEO link reconfiguration.
+        Backends that cannot model an outage may leave the default no-op in
+        place.  Live emulation backends should block until the link has been
+        restored so schedule entries remain ordered.
+        """
+
     # ------------------------------------------------------------------
     # Shared link-schedule replay (drives change_link; live backends only)
     # ------------------------------------------------------------------
@@ -183,13 +192,19 @@ class NetworkEnv(ABC):
             if stop.is_set():
                 return
             try:
-                self.change_link(
-                    bw=entry.get('bw'),
-                    delay=entry.get('delay'),
-                    loss=entry.get('loss'),
-                )
-                print(f'[env] link change t={time.monotonic() - anchor:.1f}s '
-                      f'bw={entry.get("bw")} delay={entry.get("delay")}',
-                      flush=True)
+                outage_ms = float(entry.get('outage_ms', 0.0) or 0.0)
+                if outage_ms > 0.0:
+                    self.interrupt_link(outage_ms=outage_ms)
+                    print(f'[env] link outage t={time.monotonic() - anchor:.1f}s '
+                          f'duration={outage_ms:.1f}ms', flush=True)
+                else:
+                    self.change_link(
+                        bw=entry.get('bw'),
+                        delay=entry.get('delay'),
+                        loss=entry.get('loss'),
+                    )
+                    print(f'[env] link change t={time.monotonic() - anchor:.1f}s '
+                          f'bw={entry.get("bw")} delay={entry.get("delay")}',
+                          flush=True)
             except Exception as e:
                 print(f'[env] link change failed: {e}', flush=True)

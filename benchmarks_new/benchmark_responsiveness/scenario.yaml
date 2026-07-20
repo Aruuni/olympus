@@ -6,7 +6,7 @@ sweep:
   delays: [50]
   flows: [1]
   duration: 300
-  bdp_mult: 4
+  bdp_mult: [4]
   link_schedule_generator:
     interval_s: 15
     sample_initial: true

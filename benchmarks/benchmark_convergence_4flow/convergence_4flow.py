@@ -73,6 +73,7 @@ from olympus.common.bench_utils import (
     _parse_iperf_json,
     _prepare_runtime_cfg,
     _resolve_from,
+    normalize_bdp_mult,
     _restore_sudo_user_ownership,
     _resume_rows_by_key,
     _run_orca_on_env,
@@ -127,7 +128,7 @@ def _conv_cfg(cfg: dict) -> dict:
     bench['rtt_ms_values'] = [float(v) for v in bench['rtt_ms_values']]
     bench['bw_mbps'] = float(bench['bw_mbps_values'][0])
     bench['rtt_ms'] = float(bench['rtt_ms_values'][0])
-    bench.setdefault('bdp_mult', 4)
+    bench['bdp_mult'] = normalize_bdp_mult(bench.get('bdp_mult', 4))[0]
     bench.setdefault('measure_interval_s', 1.0)
     bench.setdefault('kernel_cport_base', 44000)
     bench.setdefault('plot_episodes', True)

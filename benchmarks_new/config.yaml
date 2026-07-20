@@ -18,3 +18,18 @@ approaches:
     environment: static
     plot_label: Tempest static
     checkpoint: olympus/models/unify_testing/tempest_static/checkpoints/dreamer_v3_cwnd_model.pt
+
+  # Orca recreation trained in Olympus (single-agent TD3 learner in
+  # olympus/algorithms/orca). Loads an Olympus checkpoint like any other
+  # learned model; its state/reward/action/environment components are named
+  # orca (olympus/orca.yaml).
+  - name: orca-olympus
+    data_folder: orca-olympus
+    kind: model
+    algorithm: orca
+    state: orca_repo
+    reward: orca
+    environment: dynamic
+    plot_label: Orca (Olympus)
+    config: olympus/orca.yaml
+    checkpoint: olympus/models/reps/orca_20260718-165340/checkpoints/orca_1200_cwnd_model.pt

@@ -15,7 +15,7 @@ broadcast/save — with two multi-agent additions:
 The model size is taken from max_agents = sweep.flows (the orchestrator surfaces
 sweep.flows into the resolved config) so the joint model is wide enough for the
 largest episode. The buffer/extract and the update step are the algorithm-specific
-parts (`# TODO`); see mat/learner.py (on-policy CTDE) for a complete reference.
+parts (`# TODO`); see ma_td3/learner.py (off-policy CTDE) for a complete reference.
 
 Usage (started by the orchestrator):
   python olympus/algorithms/<your_alg>/learner.py --config olympus/config.yaml --port 6301
@@ -98,7 +98,7 @@ def _max_flow_count(spec, default=2) -> int:
         vals = [spec]
     if not vals:
         vals = [default]
-    return max(max(1, min(int(v), 4)) for v in vals)
+    return max(max(1, int(v)) for v in vals)
 
 
 # ── Rollout buffer (per-agent trajectories, group-aware) ──────────────────────

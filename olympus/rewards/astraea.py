@@ -12,7 +12,7 @@ with (Eq. 4-6):
     R_stab = mean_i(std_w(thr_i) / avg_thr_i)        (across w MTPs)
 
 and is bounded to (-c0, c0). Only the learner sees all flows, so the true
-team reward is assembled there (``algorithms/astraea/model.astraea_team_reward``)
+team reward is assembled there (``algorithms/ma_td3/model.astraea_team_reward``)
 from the per-flow statistics each worker pushes. This worker-side plugin
 provides:
 
@@ -28,7 +28,7 @@ Weights default to the paper's tech-report Table 4 values: c0=0.1, c1=0.02,
 c2=1.0, c3=0.02, c4=0.01, with the reward bounded to (-0.1, 0.1) as stated
 in section 3.3. beta is not published; default 0.5. d0 is taken as the
 flow's observed min_rtt (its propagation-delay baseline). Override any of
-them in the config under ``algorithms.astraea.reward``.
+them in the config under ``algorithms.ma_td3.reward``.
 """
 
 from olympus.common import runtime_config
@@ -48,6 +48,16 @@ DEFAULT_WEIGHTS = {
     'stability_weight': 0.01,   # c4 (learner-side only)
     'delay_coefficient': 0.5,   # beta
     'reward_clip': 0.1,         # bound of Eq. 8
+    # Upper bound on the raw R_lat term (before c1). R_lat = excess_delay_s *
+    # pacing_rate_pkts_per_s, so on deep-buffer episodes (bdp_mult up to 16) a
+    # few ms of bufferbloat with zero loss drives R_lat into the tens, and
+    # c1*R_lat then dwarfs the 0.1 throughput ceiling — an ordinary CWND
+    # overshoot gets stored as the maximum -reward_clip penalty, which pushes
+    # TD3's pessimistic actor into the CWND-floor corner (the collapse seen in
+    # astraea_20260715-* runs). Any R_lat above reward_clip/latency_weight
+    # already saturates the clip, so bounding it there removes no gradient.
+    # Default inf keeps the paper-faithful Eq. 5; astraea.yaml sets it to 5.0.
+    'latency_cap': float('inf'),
 }
 
 
@@ -110,7 +120,7 @@ class RewardCalc(FairShareRewardCalc):
             lat_excess_s = max(avg_urtt - threshold_us, 0.0) / 1e6
         else:
             lat_excess_s = 0.0
-        r_lat = lat_excess_s * (pacing_rate / MSS_BYTES)
+        r_lat = min(lat_excess_s * (pacing_rate / MSS_BYTES), w['latency_cap'])
         r_loss = loss_ratio / avg_thr if avg_thr > 0.0 else 0.0
 
         unclipped = (

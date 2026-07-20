@@ -1,11 +1,12 @@
-# Astraea recreation (EuroSys '24, Liao et al.) — full training configuration.
+# MA-TD3 learner with Astraea components (EuroSys '24, Liao et al.).
 #
 # Run:
 #   sudo mn -c
 #   sudo -E env PATH="$PATH" HOME="$HOME" python3 olympus/orchestrator.py --config olympus/astraea.yaml
 #
-# Everything is named astraea: the multi-agent TD3 learner
-# (olympus/algorithms/astraea), the 10-feature local state
+# The learner is named for its architecture (olympus/algorithms/ma_td3).
+# Its Astraea-specific components retain their protocol names: the 10-feature
+# local state
 # (olympus/states/astraea.py — the released agent's transform), the global
 # convergence reward (olympus/rewards/astraea.py worker side, Eq. 8 assembled
 # in the learner), the +/-2.5% relative-cwnd action (olympus/actions/astraea.py),
@@ -14,7 +15,7 @@
 # astraea.json where the paper is silent.
 
 runtime:
-  algorithm: astraea
+  algorithm: ma_td3
   reward: astraea
   state: astraea
   action: astraea
@@ -33,7 +34,7 @@ environment:
   environment_setup: astraea
 
 # Global reward defaults are unused by the astraea reward plugin (it reads the
-# algorithms.astraea.reward block below); kept for config-shape compatibility.
+# algorithms.ma_td3.reward block below); kept for config-shape compatibility.
 reward: {}
 
 # BBR-style probe stays off: Astraea's agent has full cwnd control.
@@ -51,14 +52,14 @@ paths:
   py: ./venv_training/bin/python
 
 outputs:
-  root: olympus/models
-  # run_name: astraea_recreation
+  root: olympus/models/reps
+  # run_name: ma_td3_astraea_recreation
   plot_episodes: true
 
 orchestrator:
-  n_parallel: 20
-  episodes: 5000
-  save_every_episodes: 500
+  n_parallel: 8
+  episodes: 2000
+  save_every_episodes: 100
   learner_port: 6301
   scan_ms: 20
   listener_single_flow: true
@@ -69,7 +70,7 @@ orchestrator:
 
 algorithms:
 
-  astraea:
+  ma_td3:
     training:
       resume_from: null
       # Off-policy TD3 (the paper's MADDPG variant). Values from the tech
@@ -77,8 +78,8 @@ algorithms:
       # batch_size counts sampled joint windows; each contributes up to
       # `flows` per-agent transitions (~2-5x); 64 joint windows produce a
       # paper-sized batch near 192 transitions at the average flow count.
-      batch_size: 64
-      min_replay: 20000
+      batch_size: 192
+      min_replay: 40000
       replay_capacity: 400000      # astraea.json memsize
       gamma: 0.98                  # Table 4 gamma
       target_tau: 0.005            # astraea.json tau
@@ -90,19 +91,10 @@ algorithms:
       # The released learner starts delayed actor updates as soon as replay
       # training starts; it has no additional critic-only warm-up phase.
       actor_warmup_steps: 0
-      # Diagnostic only: warn loudly if the deterministic actor again combines
-      # negative saturation with low utilization and CWND-floor lock.
-      collapse_monitor:
-        enabled: true
-        utilization_threshold: 0.05
-        cwnd_floor_fraction: 0.90
-        negative_action_threshold: -0.90
-        negative_action_fraction: 0.90
-        patience: 5
       policy_delay: 20             # astraea.json policy_delay
-      # Table 4 training cadence: `model update step` (20) gradient
-      # iterations every `model update interval` (5 s). Set the interval to 0
-      # for continuous updates (updates_per_step per loop) instead.
+      # Paper values (Table 4): model_update_interval_s: 5,
+      # model_update_steps: 20 — 20 gradient iterations per 5 s of
+      # collection. 0 = continuous mode (updates_per_step per loop) instead.
       model_update_interval_s: 0
       model_update_steps: 20
       # Target policy smoothing exactly as in the released agent
@@ -110,13 +102,13 @@ algorithms:
       target_noise_std: 0.05
       target_noise_clip: 0.1
       # 0 disables gradient clipping (the original agent used none).
-      grad_clip: 0.0
+      grad_clip: 1.0
       # In continuous mode (interval 0) the loop alternates queue-drain and
-      # this many gradient steps; 4 keeps drains frequent enough while not
-      # pausing between every single update.
-      updates_per_step: 4
+      # this many gradient steps. Not a paper parameter (the paper uses the
+      # interval cadence above).
+      updates_per_step: 8
       worker_push_every: 16
-      save_every: 500
+      save_every: 100
       param_broadcast_every: 50
       torch_threads: 4
       torch_interop_threads: 1
@@ -125,7 +117,9 @@ algorithms:
       # (astraea.json h1_shape/h2_shape; paper says 256/128/64).
       hidden: 256
       hidden2: 128
-      # Released Astraea actor: BatchNorm after each hidden dense layer.
+      # Paper/released value: batchnorm (TF layers.batch_normalization,
+      # scale=False, after each hidden dense layer). layernorm is a non-paper
+      # alternative kept for loading earlier Olympus checkpoints.
       actor_norm: batchnorm
       # w — MTPs of stacked local-state history (astraea.json rec_dim) and
       # the window of the fairness/stability reward metrics (Eq. 6-7).
@@ -140,19 +134,22 @@ algorithms:
       # actor output with U(-1, 1). Small action-index blocks are leased from
       # the learner so a new episode does not reset exploration.
       #
-      # random_exploration_steps is PER ACTOR (the original's 1.5M budget was
-      # per one of its ~2 actor processes). The effective global budget is
-      # random_exploration_steps * random_exploration_actors; 'auto' scales by
-      # this run's concurrency (n_parallel slots x mean sweep flows = ~60), so
-      # epsilon decays over hours as intended rather than burning out in ~15
-      # minutes when 60 flows drain one shared 1.5M counter (the
-      # astraea_20260714-070159 failure). At ~2000 actions/s globally the
-      # auto-scaled budget (~90M) reaches the 0.05 floor after ~12.5h; lower
-      # random_exploration_steps for a shorter random phase.
+      # The effective global anneal budget is
+      # random_exploration_steps * random_exploration_actors, with
+      # epsilon = max(epsilon_end, 1 - global_action / effective_budget).
+      # It must be sized against how many actions the RUN actually produces,
+      # not wall-clock time.
+      #
+      # Calibrated for 2000 episodes with 2-5 flows: the completed 2-4-flow run
+      # emitted 16.82M actions; scaling mean flows from 3.0 to 3.5 projects
+      # ~19.63M actions. A 1.5M x 5 = 7.5M budget reaches epsilon=0.10 at
+      # action 6.75M (~34% through the run), leaving ~66% at the exploration
+      # floor for near-greedy refinement. Do not use 'auto' here: with
+      # n_parallel=20 and mean_flows=3.5 it would select 70 and never anneal.
       exploration_mode: random_replacement
       random_exploration_steps: 1500000
-      random_exploration_actors: auto
-      random_epsilon_end: 0.05
+      random_exploration_actors: 5
+      random_epsilon_end: 0.10
       exploration_allocation_block: 256
     reward:
       # Paper Eq. 8 coefficients, confirmed by the tech report's Table 4:
@@ -162,9 +159,25 @@ algorithms:
       throughput_weight: 0.1    # c0
       latency_weight: 0.02      # c1
       loss_weight: 1.0          # c2
-      fairness_weight: 0.02     # c3
+      # Doubled from the Table 4 value 0.02: with per-flow heterogeneous RTTs
+      # our episodes put fairness and utilization in conflict, and at 0.02 the
+      # fairness gradient (~0.003) loses to the utilization headroom (~0.02) —
+      # jain sat flat at ~0.78 for both 20260719 runs. Still inside the
+      # paper's robust c3/c0 range [0.05, 0.35] (0.04/0.1 = 0.4 is just past
+      # it; the paper range was measured in RTT-homogeneous scenarios).
+      fairness_weight: 0.30     # c3
       stability_weight: 0.01    # c4
       # beta in the (1+beta)*d0 latency threshold; d0 = the flow's observed
       # min_rtt (beta itself is not published in the paper/Table 4).
       delay_coefficient: 0.5
       reward_clip: 0.1
+      # Upper bound on the raw R_lat term (before latency_weight). Deviation
+      # from paper Eq. 5: on deep-buffer episodes (bdp_mult up to 16) a few ms
+      # of bufferbloat with zero loss drives R_lat into the tens, so
+      # latency_weight*R_lat (0.02*60 = 1.2) swamps the 0.1 throughput ceiling
+      # and stores an ordinary CWND overshoot as the maximum -reward_clip
+      # penalty. TD3's pessimistic actor then flees high CWND everywhere and
+      # collapses to the CWND floor. reward_clip/latency_weight = 0.1/0.02 = 5
+      # is where the clip already saturates, so capping here loses no gradient
+      # and only removes the crater depth. Set very high to restore Eq. 5.
+      latency_cap: 5.0

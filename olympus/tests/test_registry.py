@@ -8,16 +8,16 @@ class RegistryTest(unittest.TestCase):
     def test_multi_agent_flag(self):
         # Algorithms that train every flow jointly declare MULTI_AGENT = True.
         self.assertTrue(registry.is_multi_agent('ma_dreamer'))
-        self.assertTrue(registry.is_multi_agent('mat'))
+        self.assertTrue(registry.is_multi_agent('ma_td3'))
 
     def test_single_agent_flag(self):
         # Everything else is single-agent (lagged self-play in multi-flow envs).
         for name in ('td3', 'mbpo_td3', 'dreamer_v3', 'orca',
-                     'orca_td3', 'option_critic', 'recurrent_ppo'):
+                     'orca_td3', 'recurrent_ppo'):
             self.assertFalse(registry.is_multi_agent(name), name)
 
     def test_worker_script_resolves(self):
-        for name in ('ma_dreamer', 'dreamer_v3'):
+        for name in ('ma_dreamer', 'ma_td3', 'dreamer_v3'):
             self.assertIn(
                 os.path.join('olympus', 'algorithms', name, 'worker.py'),
                 registry.worker_script(name))

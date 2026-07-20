@@ -1,0 +1,142 @@
+# Orca recreation (Abbasloo, Yen & Chao, "Classic Meets Learning", SIGCOMM '20).
+#
+# Run:
+#   sudo mn -c
+#   sudo -E env PATH="$PATH" HOME="$HOME" python3 olympus/orchestrator.py --config olympus/orca.yaml
+#
+# Orca is a single-agent deep-RL congestion controller. The learner is the
+# ORCA-repo-style TD3 in olympus/algorithms/orca (MULTI_AGENT = False); with a
+# multi-flow environment it runs as lagged self-play, matching Orca's
+# single-policy-per-flow deployment.
+#
+# State and reward are both Orca's own, but each lives in a runtime plugin
+# (selected by runtime.state / runtime.reward below), not baked into the
+# learner:
+#   * state  (olympus/algorithms/orca/states/orca_repo.py): 7 compact features
+#     per step (thr/max_bw, pacing/max_bw, loss penalty, samples/cwnd, delta_t,
+#     min_rtt/srtt, delay_metric) stacked over a flat rec_dim=10 history
+#     (70-dim policy input) — Orca's flat-history analogue of an LSTM.
+#   * reward (olympus/rewards/orca.py):
+#     R = ((throughput - 5*loss_rate) / max_bw) * delay_metric.
+
+runtime:
+  algorithm: orca
+  reward: orca
+  state: orca_repo
+  action: cwnd_multiplier
+
+actions:
+  # Orca's action (repo map_action: 4**action): a in [-1, 1] with
+  # cwnd <- cwnd * 4^a, i.e. -1 -> 0.25x, 0 -> hold, +1 -> 4.0x. The geometric
+  # cwnd_multiplier reproduces this exactly at multiplier_min/max = 0.25/4.0
+  # (mid = sqrt(0.25*4) = 1.0, so a=0 holds and to_multiplier(a) = 4^a).
+  cwnd_multiplier:
+    action_min: -1.0
+    action_max: 1.0
+    multiplier_min: 0.25
+    multiplier_max: 4.0
+    min_cwnd_change: 1
+
+environment:
+  # Orca was trained across varying link conditions. `dynamic` is one flow
+  # under changing BW/RTT schedules; swap to `static` for a steady link.
+  type: mininet
+  environment_setup: orca
+
+# Orca's fixed delay target feature (ms) — its reward/state reference, not the
+# emulated RTT. Read via state_options.orca_target_ms by the orca worker.
+state_options:
+  orca_target_ms: 50.0
+
+# delay_metric margin coefficient used by the orca transform (envwrapper.py
+# default 1.25). Placed under reward for config-shape compatibility.
+reward:
+  delay_margin_coef: 1.25
+
+# BBR-style probe off: Orca's agent has full cwnd control.
+bbr_probe:
+  enabled: false
+  interval_s: 5.0
+  duration_s: 0.2
+  factor: 0.5
+  min_rtt_window_s: 5.0
+
+paths:
+  listener: olympus/oc_bridge
+  py: ./venv_training/bin/python
+
+outputs:
+  root: olympus/models/reps
+  # run_name: orca_recreation
+  plot_episodes: true
+
+orchestrator:
+  n_parallel: 10
+  episodes: 2000
+  save_every_episodes: 200
+  learner_port: 6301
+  scan_ms: 20
+  # Single flow per listener lifetime (Orca controls one flow per policy).
+  listener_single_flow: true
+  listener_state_pipe: false
+  # The astraea kernel module is the fixed deepcc-info / cwnd-control provider
+  # for all Olympus workers (bench_utils.py); Orca reads TCP_DEEPCC_INFO from it.
+  listener_cc: cubic
+  cport_base: 23000
+
+algorithms:
+
+  orca:
+    training:
+      resume_from: null
+      # TD3 settings from the released Orca agent (Soheil-ab/Orca). replay
+      # capacity follows the Olympus convention (the repo's memsize is far
+      # larger); gamma/tau/lr are the repo values.
+      batch_size: 8096
+      min_replay: 50000
+      replay_capacity: 400000
+      gamma: 0.995
+      target_tau: 0.001
+      lr_actor: 1.0e-4
+      lr_critic: 1.0e-3
+      # TD3 delayed policy + target-policy smoothing (repo values).
+      actor_update_every: 2
+      target_noise_std: 0.1
+      target_noise_clip: 0.2
+      # Deviation from the repo (which used no clipping): with an MSE critic,
+      # gamma=0.995, and Orca's unbounded-below reward, the value diverges
+      # (Q -> -20, critic_loss -> hundreds; orca_20260718-013336). grad_clip
+      # bounds each critic step; reward_clip bounds the per-step reward fed to
+      # the MSE target (and, via reward_clip/(1-gamma), the y-target clamp).
+      grad_clip: 1.0
+      reward_clip: 1.0
+      updates_per_step: 1
+      save_every: 500
+      param_broadcast_every: 50
+      persist_replay_on_stop: true
+    agent:
+      # Actor/critic hidden widths (repo h1_shape/h2_shape).
+      hidden: 256
+      head_hidden: 256
+      # Orca's flat state history depth: 10 stacked 7-feature frames.
+      rec_dim: 10
+      # Monitoring/action interval.
+      interval_ms: 20
+      cwnd_min: 4
+      cwnd_max: 10000
+      dead_flow_ms: 500
+      # Orca's CUBIC->agent handoff: CUBIC runs the flow through slow start
+      # (letting it discover the link rate and pin the reward's max_bw), then
+      # the agent takes over permanently at slow-start exit (first loss; see
+      # worker.py). Without this the per-step cwnd override smothers CUBIC's
+      # probe, max_bw stays low, and the self-normalized reward settles at
+      # ~49% utilization. cubic_warmup_max_s caps the wait for links that
+      # never lose during warmup: handoff fires at first loss or this many
+      # seconds, whichever comes first.
+      cubic_warmup: true
+      cubic_warmup_max_s: 1.0
+      # Gaussian exploration noise on the actor output during collection.
+      # Paper Table 3: fixed N(0, 0.2), no decay (start == end).
+      noise_start: 0.2
+      noise_end: 0.2
+      noise_decay_episodes: 300

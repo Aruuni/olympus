@@ -7,6 +7,6 @@ defaults:
   logging: standard
   output_root: data
 matrix:
-  checkpoints: [test-protocol]
+  checkpoints: [test-protocol, orca-olympus]
   scenarios: [scenario.yaml]
   environments: [raynet]

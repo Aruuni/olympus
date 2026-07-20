@@ -1,18 +1,17 @@
-"""ORCA-repo-style actor, critic, state transform, and TD3 losses.
+"""ORCA-repo-style actor, critic, and TD3 losses.
 
 This follows the public Soheil-ab/Orca implementation more closely than the
 generic recurrent TD3 path:
 
-* 15 raw TCP/ORCA inputs are transformed into the repo's 7 compact features.
-* A flat `rec_dim=10` history is the policy input instead of an LSTM.
+* The observation (repo's 7 compact features + flat `rec_dim` history, instead
+  of an LSTM) is a runtime state plugin — algorithms/orca/states/orca_repo.py —
+  loaded here via `load_state_module`; the reward is likewise a runtime plugin
+  (rewards/orca.py). Neither is baked into this model.
 * Actor actions remain bounded in `[-1, 1]`; the selected Olympus action
   plugin maps them to live CWND updates.
 * The actor is a TensorFlow-style MLP: Dense + BatchNorm + LeakyReLU.
 """
 
-import json
-import math
-import os
 from collections import namedtuple
 
 import numpy as np
@@ -24,295 +23,35 @@ from olympus.common.action_plugins import (
     current_action_meta,
     load_action_module,
 )
-from olympus.common import runtime_config
-from olympus.common.state_plugins import assert_state_compatible
+from olympus.common.state_plugins import (
+    assert_state_compatible,
+    current_state_name,
+    load_state_module,
+)
 
 _ACTION_PLUGIN = load_action_module()
-_RUNTIME_CFG = runtime_config.load_config()
 
-STATS_FILENAME = 'stats.json'
+# The observation (Orca's 7 features + rec_dim flat history) is a runtime state
+# plugin, resolved through the normal state-plugin system — see
+# algorithms/orca/states/orca_repo.py. It defaults to orca_repo but is swappable
+# via runtime.state; the learner only needs STATE_DIM / normalize_state / meta.
+STATE_NAME = current_state_name(default='orca_repo')
+_STATE_PLUGIN = load_state_module('orca', STATE_NAME)
+STATE_FEATURE_VERSION = _STATE_PLUGIN.STATE_FEATURE_VERSION
+STATE_FEATURES = list(getattr(_STATE_PLUGIN, 'STATE_FEATURES', []))
+STATE_DIM = int(_STATE_PLUGIN.STATE_DIM)
+REC_DIM = int(getattr(_STATE_PLUGIN, 'REC_DIM', 1))
+normalize_state = _STATE_PLUGIN.normalize_state
 
-
-RAW_FEATURES = [
-    'delay_ms',
-    'throughput',
-    'samples',
-    'delta_t',
-    'target',
-    'cwnd',
-    'pacing_rate',
-    'loss_rate',
-    'srtt_ms',
-    'snd_ssthresh',
-    'packets_out',
-    'retrans_out',
-    'max_packets_out',
-    'mss',
-    'min_rtt_ms',
-]
-BASE_STATE_FEATURES = [
-    'thr_over_max_bw',
-    'pacing_over_max_bw',
-    'loss_penalty_over_max_bw',
-    'samples_over_cwnd',
-    'delta_t',
-    'min_rtt_over_srtt',
-    'delay_metric',
-]
-
-RAW_DIM = 15
-BASE_STATE_DIM = 7
-REC_DIM = int(runtime_config.agent_value(
-    _RUNTIME_CFG, 'rec_dim', env='SAO_ORCA_REC_DIM',
-    default=os.environ.get('SAO_REC_DIM', '10')))
-STATE_DIM = BASE_STATE_DIM * REC_DIM
 ACTION_DIM = int(_ACTION_PLUGIN.ACTION_DIM)
 ACTION_MIN = float(_ACTION_PLUGIN.ACTION_MIN)
 ACTION_MAX = float(_ACTION_PLUGIN.ACTION_MAX)
-STATE_NAME = 'orca_repo'
-STATE_FEATURE_VERSION = f'orca_repo_state_v1_rec{REC_DIM}'
-STATE_FEATURES = [
-    f'h{hist}:{name}'
-    for hist in range(REC_DIM)
-    for name in BASE_STATE_FEATURES
-]
 
 Experience = namedtuple('Experience',
     ['state', 'action', 'reward', 'next_state', 'done', 'traj_id', 'step_in_traj'])
 CriticInfo = namedtuple('CriticInfo', ['loss', 'q1_mean', 'q2_mean', 'td_abs'])
 ActorInfo = namedtuple('ActorInfo', ['loss', 'q_mean', 'a_mean', 'a_abs'])
 
-
-def _finite(value: float, default: float = 0.0) -> float:
-    try:
-        value = float(value)
-    except (TypeError, ValueError):
-        return default
-    return value if math.isfinite(value) else default
-
-
-class OnlineNormalizer:
-    """The upstream ORCA Welford normalizer with per-dimension min tracking.
-
-    Mirrors Normalizer in Soheil-ab/Orca rl-module/envwrapper.py, including the
-    stats.json save/load protocol so workers can resume the running statistics
-    across runs.
-    """
-
-    def __init__(self, dim: int = RAW_DIM):
-        self.dim = int(dim)
-        self.n = 1e-5
-        self.mean = np.zeros(self.dim, dtype=np.float64)
-        self.mean_diff = np.zeros(self.dim, dtype=np.float64)
-        self.var = np.zeros(self.dim, dtype=np.float64)
-        self.min = np.zeros(self.dim, dtype=np.float64)
-
-    def observe(self, x: np.ndarray) -> None:
-        self.n += 1.0
-        last_mean = self.mean.copy()
-        self.mean += (x - self.mean) / self.n
-        self.mean_diff += (x - last_mean) * (x - self.mean)
-        self.var = self.mean_diff / self.n
-
-    def normalize(self, x: np.ndarray) -> np.ndarray:
-        if self.n <= 2.0:
-            return np.zeros_like(x, dtype=np.float64)
-        std = np.sqrt(np.maximum(self.var, 1e-12))
-        z = (x - self.mean) / std
-        self.min = np.minimum(self.min, z)
-        return z
-
-    def stats(self) -> np.ndarray:
-        return self.min
-
-    def save_stats(self, path: str) -> None:
-        os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
-        payload = {
-            'n': float(self.n),
-            'mean': self.mean.tolist(),
-            'mean_diff': self.mean_diff.tolist(),
-            'var': self.var.tolist(),
-            'min': self.min.tolist(),
-        }
-        tmp = f'{path}.tmp'
-        with open(tmp, 'w') as fp:
-            json.dump(payload, fp)
-        os.replace(tmp, path)
-
-    def load_stats(self, path: str) -> bool:
-        if not path or not os.path.isfile(path):
-            return False
-        try:
-            with open(path) as fp:
-                history = json.load(fp)
-        except (OSError, ValueError):
-            return False
-        try:
-            mean = np.asarray(history['mean'], dtype=np.float64)
-            if mean.shape != (self.dim,):
-                return False
-            self.n = float(history['n'])
-            self.mean = mean
-            self.mean_diff = np.asarray(history['mean_diff'], dtype=np.float64)
-            self.var = np.asarray(history['var'], dtype=np.float64)
-            self.min = np.asarray(history['min'], dtype=np.float64)
-        except (KeyError, TypeError, ValueError):
-            return False
-        return True
-
-
-class OrcaRepoTransform:
-    """State/reward transform from Soheil-ab/Orca rl-module/envwrapper.py."""
-
-    def __init__(self, delay_margin_coef: float = 1.25,
-                 use_normalizer: bool = False):
-        self.delay_margin_coef = float(delay_margin_coef)
-        self.use_normalizer = bool(use_normalizer)
-        self.normalizer = OnlineNormalizer(RAW_DIM) if self.use_normalizer else None
-        self.max_bw = 0.0
-        self.max_cwnd = 0.0
-        self.max_smp = 0.0
-        self.min_del = 9_999_999.0
-        self.last_components = {}
-
-    def raw_vector(self, info: dict, interval_s: float, target: float = 0.0) -> np.ndarray:
-        avg_urtt_us = _finite(info.get('avg_urtt', info.get('delay_us', 0.0)))
-        delay_ms = avg_urtt_us / 1000.0
-        throughput = max(_finite(info.get('throughput', info.get('avg_thr', 0.0))), 0.0)
-        samples = max(_finite(info.get('count', info.get('cnt', 0.0))), 0.0)
-        delta_t = max(float(interval_s or 0.0), 1e-6)
-        cwnd = max(_finite(info.get('cwnd', 1.0), 1.0), 1.0)
-        pacing_rate = max(_finite(info.get('pacing_rate', 0.0)), 0.0)
-
-        loss_rate = max(_finite(info.get('lost_rate',
-                                          info.get('loss_rate', 0.0))), 0.0)
-        if loss_rate <= 0.0:
-            loss_bytes = max(_finite(info.get('loss_bytes',
-                                              info.get('lost_bytes', 0.0))), 0.0)
-            loss_rate = loss_bytes / delta_t
-
-        srtt_raw = _finite(info.get('srtt_us', 0.0))
-        srtt_ms = ((srtt_raw / 8.0) if srtt_raw > 0.0 else avg_urtt_us) / 1000.0
-        min_rtt_ms = _finite(info.get('min_rtt_ms', None), None)
-        if min_rtt_ms is None:
-            min_rtt_ms = _finite(info.get('min_rtt',
-                                          info.get('min_rtt_us', 0.0))) / 1000.0
-
-        return np.array([
-            delay_ms,
-            throughput,
-            samples,
-            delta_t,
-            max(_finite(info.get('target', target)), 0.0),
-            cwnd,
-            pacing_rate,
-            loss_rate,
-            max(srtt_ms, 0.0),
-            max(_finite(info.get('snd_ssthresh', 0.0)), 0.0),
-            max(_finite(info.get('packets_out', 0.0)), 0.0),
-            max(_finite(info.get('retrans_out', 0.0)), 0.0),
-            max(_finite(info.get('max_packets_out', 0.0)), 0.0),
-            max(_finite(info.get('mss', info.get('mss_cache', 0.0))), 0.0),
-            max(min_rtt_ms, 0.0),
-        ], dtype=np.float64)
-
-    def transform_raw(self, raw: np.ndarray, evaluation: bool = False):
-        if self.use_normalizer:
-            if not evaluation:
-                self.normalizer.observe(raw)
-            norm = self.normalizer.normalize(raw)
-            mins = self.normalizer.stats()
-        else:
-            norm = raw.astype(np.float64, copy=True)
-            mins = np.zeros_like(norm)
-
-        d_n = norm[0] - mins[0]
-        thr_n_min = norm[1] - mins[1]
-        samples_n_min = norm[2] - mins[2]
-        # Matches envwrapper.py:253 — delta_t_n is the normalized value, not
-        # the min-shifted one. With use_normalizer=False (Orca's default),
-        # norm[3] == raw[3] because transform_raw copies raw into norm.
-        delta_t_n = norm[3]
-        cwnd_n_min = norm[5] - mins[5]
-        pacing_rate_n_min = norm[6] - mins[6]
-        loss_rate_n_min = norm[7] - mins[7]
-        srtt_ms_min = norm[8] - mins[8]
-        min_rtt_min = raw[14] - mins[14]
-
-        self.max_bw = max(self.max_bw, thr_n_min)
-        self.max_cwnd = max(self.max_cwnd, cwnd_n_min)
-        self.max_smp = max(self.max_smp, samples_n_min)
-        self.min_del = min(self.min_del, d_n)
-
-        if srtt_ms_min > 1e-12:
-            delay_metric = min(1.0, self.delay_margin_coef * min_rtt_min / srtt_ms_min)
-        else:
-            delay_metric = 1.0
-
-        if self.max_bw > 1e-12:
-            reward = ((thr_n_min - 5.0 * loss_rate_n_min) / self.max_bw
-                      * delay_metric)
-            state0 = thr_n_min / self.max_bw
-            pacing = min(pacing_rate_n_min / self.max_bw, 10.0)
-            loss = 5.0 * loss_rate_n_min / self.max_bw
-        else:
-            reward = 0.0
-            state0 = pacing = loss = 0.0
-
-        samples = raw[2]
-        cwnd = max(raw[5], 1.0)
-        min_over_srtt = min_rtt_min / srtt_ms_min if srtt_ms_min > 1e-12 else 0.0
-        state = np.array([
-            state0,
-            pacing,
-            loss,
-            samples / cwnd,
-            delta_t_n,
-            min_over_srtt,
-            delay_metric,
-        ], dtype=np.float32)
-        state = np.nan_to_num(state, nan=0.0, posinf=10.0, neginf=-10.0)
-        self.last_components = {
-            'reward': float(reward),
-            'thr_n_min': float(thr_n_min),
-            'loss_rate_n_min': float(loss_rate_n_min),
-            'max_bw': float(self.max_bw),
-            'delay_metric': float(delay_metric),
-            'min_rtt_min': float(min_rtt_min),
-            'srtt_ms_min': float(srtt_ms_min),
-        }
-        return state, float(reward)
-
-    def step(self, info: dict, interval_s: float, target: float = 0.0,
-             evaluation: bool = False):
-        return self.transform_raw(
-            self.raw_vector(info, interval_s=interval_s, target=target),
-            evaluation=evaluation,
-        )
-
-    def save_stats(self, path: str) -> bool:
-        if not self.use_normalizer or self.normalizer is None or not path:
-            return False
-        self.normalizer.save_stats(path)
-        return True
-
-    def load_stats(self, path: str) -> bool:
-        if not self.use_normalizer or self.normalizer is None or not path:
-            return False
-        return self.normalizer.load_stats(path)
-
-
-class HistoryStack:
-    """Flat rec_dim history buffer used by upstream ORCA recurrent mode."""
-
-    def __init__(self, rec_dim: int = REC_DIM):
-        self.rec_dim = int(rec_dim)
-        self.state = np.zeros(self.rec_dim * BASE_STATE_DIM, dtype=np.float32)
-
-    def push(self, base_state: np.ndarray) -> np.ndarray:
-        base_state = np.asarray(base_state, dtype=np.float32).reshape(BASE_STATE_DIM)
-        self.state = np.concatenate([self.state[BASE_STATE_DIM:], base_state]).astype(np.float32)
-        return self.state.copy()
 
 
 def model_state_meta() -> dict:
@@ -467,6 +206,7 @@ def critic_loss(
     gamma: float = 0.995,
     target_noise_std: float = 0.1,
     target_noise_clip: float = 0.2,
+    reward_clip: float = 0.0,
 ) -> CriticInfo:
     with torch.no_grad():
         a_next = actor_target(s2_batch).squeeze(-1)
@@ -475,7 +215,20 @@ def critic_loss(
         a_next = (a_next + noise).clamp(ACTION_MIN, ACTION_MAX)
         q1_next, q2_next = critic_target(s2_batch, a_next)
         q_next = torch.min(q1_next, q2_next)
-        y = r_batch + gamma * q_next * (1.0 - d_batch)
+        r = r_batch
+        if reward_clip > 0.0:
+            # Bound Orca's unbounded-below reward (-5*loss term) so hard-loss
+            # episodes cannot drive the MSE target to large negatives.
+            r = r.clamp(-reward_clip, reward_clip)
+        y = r + gamma * q_next * (1.0 - d_batch)
+        if reward_clip > 0.0:
+            # With reward in [-reward_clip, reward_clip], the true return — and
+            # thus Q — cannot leave +/-reward_clip/(1-gamma). Clamp the target
+            # to that hard ceiling so a diverging bootstrap has nowhere to run.
+            # (At gamma=0.995 the bound is loose; grad_clip and the reward clip
+            # do the primary work — this is the backstop.)
+            y_bound = reward_clip / max(1.0 - gamma, 1e-6)
+            y = y.clamp(-y_bound, y_bound)
 
     q1, q2 = critic(s_batch, a_batch)
     loss = F.mse_loss(q1, y) + F.mse_loss(q2, y)

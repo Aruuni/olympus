@@ -1,0 +1,15 @@
+name: orca
+
+# Single fixed config: nothing to shuffle across the pool.
+shuffle: true
+
+
+sweep:
+  bws: [6, 12, 24, 48, 96, 192 ] 
+  delays: [4, 10, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200]
+  bdp_mult: [2]
+  flows: 1
+  duration: 60
+  link_schedules:
+  # Orca has no changes
+    - []

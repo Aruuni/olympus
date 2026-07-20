@@ -6,9 +6,11 @@ description: >
   training characteristics). Flow count is sampled per episode from the
   paper's 2-5 range, and flows join at randomized
   times with randomized lifetimes, approximating the paper's Poisson flow
-  arrivals ("randomization in flow starting points and running time"). Per-flow
-  base-RTT multipliers add the paper's RTT heterogeneity between competing
-  flows. The bottleneck queue sweeps the paper's buffer size factors (Table 3:
+  arrivals ("randomization in flow starting points and running time"). Each
+  flow draws its own base RTT from the delay grid for the paper's RTT
+  heterogeneity between competing flows, so every flow stays inside the
+  published 10-140 ms range.
+  The bottleneck queue sweeps the paper's buffer size factors (Table 3:
   0.1-16 BDP) via the bdp_mult list — one queue depth per pool entry.
   Links are static within an episode — Astraea randomizes across episodes, not
   within them.
@@ -25,15 +27,17 @@ sweep:
   # Concurrent flows (agents) per slot; paper trains 2-5.
   flows:    [2, 3, 4, 5]
   # Per-flow base-RTT diversity ("flows with different RTTs to include
-  # heterogeneity", section 4).
-  per_flow_rtt_mult: true
-  per_flow_rtt_mult_min: 0.5
-  per_flow_rtt_mult_max: 2.0
+  # heterogeneity", section 4): each flow draws its own delay from the
+  # delay_range/delay_step bins above. Replaces the earlier 0.5-2.0x base
+  # multiplier, which pushed flows to 280 ms RTTs — past the paper's training
+  # range and past where the released agent itself stays fair (it collapses
+  # to starvation at >=160 ms in benchmarks_paper/intra).
+  per_flow_rtt_bins: true
   # Randomized flow arrivals and lifetimes (one flow survives to episode end).
   agent_join_pattern: random
   agent_join_max_frac: 0.3
   flow_lifetime_pattern: random
-  flow_lifetime_min_frac: 0.25
+  flow_lifetime_min_frac: 0.5
   flow_lifetime_max_frac: 0.9
   flow_lifetime_keep_one: true
   duration: 120

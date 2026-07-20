@@ -69,6 +69,7 @@ from olympus.common.bench_utils import (
     _parse_iperf_json,
     _prepare_runtime_cfg as _prepare_runtime_cfg_base,
     _resolve_from,
+    normalize_bdp_mult,
     _restore_sudo_user_ownership,
     _run_orca_on_env,
     _safe_overwrite_dir,
@@ -149,7 +150,7 @@ def _bench_cfg(cfg: dict) -> dict:
     bench.setdefault('rtt_min_ms', 10)
     bench.setdefault('rtt_max_ms', 100)
     bench.setdefault('seed_offset', 0)
-    bench.setdefault('bdp_mult', 4)
+    bench['bdp_mult'] = normalize_bdp_mult(bench.get('bdp_mult', 4))[0]
     bench.setdefault('measure_interval_s', 1.0)
     bench.setdefault('kernel_cport_base', 56000)
     bench.setdefault('deterministic_inference', True)

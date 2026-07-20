@@ -103,7 +103,7 @@ class RewardCalc:
     def min_rtt_us(self) -> float:
         return self._last_min_rtt_us
 
-    # Alias so option_critic / td3 workers that log reward_calc.kalman_min_rtt_us
+    # Alias so td3 workers that log reward_calc.kalman_min_rtt_us
     # keep working unchanged.
     @property
     def kalman_min_rtt_us(self) -> float:

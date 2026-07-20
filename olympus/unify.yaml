@@ -11,7 +11,7 @@
 #     BDP-stratified simulation replay buffer (see experience_collection below).
 #   - td3 / mbpo_td3 / dreamer_v3: single-agent, single backend. Set
 #     experience_collection.enabled: false and pick an `environment` below.
-#   - ma_dreamer / mat: multi-agent (MULTI_AGENT = True), joint training over the
+#   - ma_dreamer / ma_td3: multi-agent (MULTI_AGENT = True), joint training over the
 #     `sweep` flow counts defined in the environment files.
 #
 # Run (mixed Orca needs root for the Mininet pool; RayNet tolerates it):
@@ -392,43 +392,3 @@ algorithms:
       per_agent_credit: true
       team_alpha: 0.5
       over_weight: 50.0
-
-  mat:
-    training:
-      resume_from: null
-      rollout_steps: 8000
-      n_epochs: 5
-      minibatches_per_epoch: 8
-      clip_eps: 0.2
-      value_clip: 0.2
-      gamma: 0.99
-      lam: 0.95
-      c_value: 0.25
-      c_entropy: 0.02
-      lr: 5.0e-4
-      grad_clip: 0.3
-      target_kl: 0.05
-      use_reward_normalizer: true
-      torch_threads: 2
-      torch_interop_threads: 1
-      fairness_weight: 2.0
-      fairness_centered: true
-      team_reward_aggregation: mean
-      worker_push_every: 32
-      save_every: 5
-      param_broadcast_every: 1
-    agent:
-      hidden: 128
-      n_layers: 2
-      n_heads: 4
-      interval_ms: 20
-      cwnd_min: 10
-      cwnd_max: 10000
-      dead_flow_ms: 500
-      noise_start: 0.2
-      noise_end: 0.05
-      noise_decay_episodes: 300
-    reward:
-      fairness_metric: r_fair_avg_throughput
-      fairness_weight: 25.0
-      fairness_cap: 1.0

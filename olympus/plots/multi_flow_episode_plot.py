@@ -140,21 +140,56 @@ def _step_series(t_s, base_val, schedule, key, scale=1.0):
 
 
 def _aligned_matrix(traces, key):
+    """Align per-flow values on their shared *absolute* episode clock.
+
+    Agent traces do not necessarily start together, end together, or sample at
+    exactly the same instants.  Values are therefore carried forward to the
+    union of all trace timestamps.  A flow is NaN before its first sample and
+    after its last sample so callers can exclude it outside its lifetime.
+
+    This is deliberately step interpolation: each observation describes the
+    latest throughput/state known until that flow's next observation.
+    """
     if not traces:
-        return np.asarray([]), np.asarray([[]])
-    min_len = min(len(t['data'][key]) for t in traces)
-    if min_len == 0:
-        return np.asarray([]), np.asarray([[]])
-    t_ref = traces[0]['data']['t_s'][:min_len]
-    mat = np.vstack([t['data'][key][:min_len] for t in traces])
+        return np.asarray([]), np.empty((0, 0), dtype=np.float32)
+
+    series = []
+    for item in traces:
+        times = np.asarray(item['data']['t_s'], dtype=np.float64)
+        values = np.asarray(item['data'][key], dtype=np.float64)
+        size = min(len(times), len(values))
+        times = times[:size]
+        values = values[:size]
+        finite_time = np.isfinite(times)
+        times = times[finite_time]
+        values = values[finite_time]
+        if len(times):
+            order = np.argsort(times, kind='stable')
+            times = times[order]
+            values = values[order]
+        series.append((times, values))
+
+    populated = [times for times, _ in series if len(times)]
+    if not populated:
+        return np.asarray([]), np.empty((len(traces), 0), dtype=np.float32)
+
+    t_ref = np.unique(np.concatenate(populated))
+    mat = np.full((len(traces), len(t_ref)), np.nan, dtype=np.float64)
+    for row, (times, values) in enumerate(series):
+        if not len(times):
+            continue
+        active = (t_ref >= times[0]) & (t_ref <= times[-1])
+        sample_idx = np.searchsorted(times, t_ref[active], side='right') - 1
+        mat[row, active] = values[sample_idx]
     return t_ref, mat
 
 
 def _jains_matrix(values: np.ndarray) -> np.ndarray:
     if values.size == 0:
         return np.asarray([], dtype=np.float32)
-    x = np.clip(values.astype(np.float64), 0.0, None)
-    n = float(x.shape[0])
+    valid = np.isfinite(values)
+    x = np.where(valid, np.clip(values.astype(np.float64), 0.0, None), 0.0)
+    n = valid.sum(axis=0).astype(np.float64)
     num = np.square(x.sum(axis=0))
     den = np.maximum(n * np.square(x).sum(axis=0), 1e-9)
     return (num / den).astype(np.float32)
@@ -164,11 +199,13 @@ def _r_fair_matrix(values: np.ndarray) -> np.ndarray:
     """Attached unfairness metric over each column of average throughputs."""
     if values.size == 0:
         return np.asarray([], dtype=np.float32)
-    x = np.clip(values.astype(np.float64), 0.0, None)
-    n = float(x.shape[0])
+    valid_values = np.isfinite(values)
+    x = np.where(
+        valid_values, np.clip(values.astype(np.float64), 0.0, None), 0.0)
+    n = valid_values.sum(axis=0).astype(np.float64)
     total = x.sum(axis=0)
-    mean = total / max(n, 1.0)
-    numerator = np.square(x - mean).sum(axis=0)
+    mean = total / np.maximum(n, 1.0)
+    numerator = (np.square(x - mean) * valid_values).sum(axis=0)
     denominator = n * np.square(total)
     out = np.zeros_like(total, dtype=np.float64)
     valid = (n > 1.0) & (total > 1e-9)
@@ -231,8 +268,8 @@ def plot(state_log_path: str, output: str, bw: float, delay: float,
 
     ep_return = episode_return(
         state_log_path, n_agents=n_agents, trim_tail_s=trim_tail_s)
-    t_ref = max((item['data']['t_s'] for item in traces),
-                key=lambda arr: len(arr))
+    agg_t, agg_thr = _aligned_matrix(traces, 'avg_thr_mbps')
+    t_ref = agg_t
     bw_ref = _step_series(t_ref, bw, link_schedule or [], 'bw')
     delay_ref = _step_series(t_ref, delay, link_schedule or [], 'delay')
     fair_t, fair = r_fair_series(
@@ -275,9 +312,9 @@ def plot(state_log_path: str, output: str, bw: float, delay: float,
         aid = item['agent_id']
         ax.plot(d['t_s'], d['avg_thr_mbps'], linewidth=0.8,
                 color=colors[aid], alpha=0.75, label=_agent_label(aid))
-    agg_t, agg_thr = _aligned_matrix(traces, 'avg_thr_mbps')
     if agg_thr.size:
-        ax.plot(agg_t, agg_thr.sum(axis=0), color='black', linewidth=1.4,
+        ax.plot(agg_t, np.nansum(agg_thr, axis=0),
+                color='black', linewidth=1.4,
                 label='sum throughput')
     fair_bw = traces[0]['data'].get('fair_bw_mbps', np.asarray([]))
     fair_bw_t = traces[0]['data']['t_s']

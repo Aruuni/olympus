@@ -1,0 +1,26 @@
+# Inter-RTT fairness sub-config (IFIP 2026, Figure 4).
+#
+# Inherits shared benchmark params + the full approach list from the master
+# config; only the inter-RTT suite block and output_root live here.
+
+approaches_config: ../config.yaml
+output_root: data
+
+benchmark:
+  bandwidth_mbps: 100
+  rtt_ms_values: [20, 40, 60, 80, 100, 120, 140, 160, 180, 200]
+  runs_per_cell: 5
+  duration_s: 200
+  first_flow_start_s: 0
+  second_flow_start_s: 50
+  score_window_s: 100
+  measure_interval_s: 1.0
+  n_parallel: 10
+  kernel_cport_base: 55000
+  deterministic_inference: true
+  tcp_buffer_multiplier: 22
+  disable_offload: true
+
+  inter_rtt:
+    fixed_flow_rtt_ms: 20
+    bdp_multipliers: [1]

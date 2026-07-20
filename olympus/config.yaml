@@ -5,14 +5,14 @@
 #   sudo -E env PATH="$PATH" HOME="$HOME" python3 olympus/orchestrator.py --config olympus/config.yaml
 #
 # The mode is chosen entirely by runtime.algorithm. Algorithms that declare
-# MULTI_AGENT = True (mat, ma_dreamer) run as true multi-agent over the `sweep`
+# MULTI_AGENT = True (ma_dreamer, ma_td3) run as true multi-agent over the `sweep`
 # flow counts; single-agent algorithms (td3, orca, dreamer_v3, …) run the
 # selected `environment`, and any environment with >1 flow becomes lagged
 # self-play automatically.
 #
 #   Single-agent preset (default):  algorithm: dreamer_v3  reward: tempest               state: oracle
 #   Multi-agent preset:             algorithm: ma_dreamer  reward: tempest_fairness_ma   state: tempest
-#                                   (or algorithm: mat) — multi-agent uses the `sweep` block at the bottom.
+#                                   (or algorithm: ma_td3) — multi-agent uses the `sweep` block at the bottom.
 #   Multi-agent credit variant:     reward: tempest_fairness_ma_symetric — worker throughput
 #                                   term peaks AT the fair share (overshoot penalized, like
 #                                   the RTT term); learner keeps the Astraea-style single
@@ -98,7 +98,7 @@ reward:
   w_jain: 25.0         # weight for (1 - Jain) (in [0, ~1-1/n])
 
 # BBR3-style independent cwnd probe. Algorithm- and reward-agnostic — every
-# worker (orca, td3, mbpo_td3, option_critic, recurrent_ppo, dreamer_v3)
+# worker (orca, td3, mbpo_td3, recurrent_ppo, dreamer_v3)
 # honours it when enabled. Every interval_s the worker drops cwnd to
 # factor*cwnd for duration_s, then restores it; the agent cannot change cwnd
 # while the probe is active. Maintains a windowed min-RTT filter internally
@@ -409,48 +409,6 @@ algorithms:
       per_agent_credit: true
       team_alpha: 0.5
       over_weight: 50.0
-
-  mat:
-    training:
-      resume_from: null
-      # On-policy: collect this many real transitions across all agents,
-      # then run K epochs of MAPPO updates.
-      rollout_steps: 8000
-      n_epochs: 5
-      minibatches_per_epoch: 8
-      clip_eps: 0.2
-      value_clip: 0.2
-      gamma: 0.99
-      lam: 0.95
-      c_value: 0.25
-      c_entropy: 0.02
-      lr: 5.0e-4
-      grad_clip: 0.3
-      target_kl: 0.05
-      use_reward_normalizer: true
-      torch_threads: 2
-      torch_interop_threads: 1
-      fairness_weight: 2.0
-      fairness_centered: true
-      team_reward_aggregation: mean
-      worker_push_every: 32
-      save_every: 5
-      param_broadcast_every: 1
-    agent:
-      hidden:        128
-      n_layers:      2          # transformer encoder depth
-      n_heads:       4
-      interval_ms:   20
-      cwnd_min:      10
-      cwnd_max:      10000
-      dead_flow_ms:  500
-      noise_start:   0.2
-      noise_end:     0.05
-      noise_decay_episodes: 300
-    reward:
-      fairness_metric: r_fair_avg_throughput
-      fairness_weight: 25.0
-      fairness_cap: 1.0
 
 # The episode pool — base bottleneck/RTT sweep, flow counts, join/leave churn, and
 # link schedules — now lives in olympus/environments/<type>/*.yaml and is chosen by

@@ -83,7 +83,7 @@ _STATE_HIGH = np.array(
 def normalize_state(info: dict) -> np.ndarray:
     """11-dim observation: TCP/kernel fields + worker-injected history.
 
-    Identical contract to option_critic/model.py.normalize_state — duplicated
+    Identical contract to mbpo_td3/model.py.normalize_state — duplicated
     here so each algorithm is the authoritative source for its own state.
     """
     cwnd        = max(int(info.get('cwnd', 1)), 1)

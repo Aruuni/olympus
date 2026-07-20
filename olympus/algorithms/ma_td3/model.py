@@ -1,4 +1,4 @@
-"""Networks and reward/global-state math for the Astraea recreation.
+"""MA-TD3 networks and reward/global-state math for the Astraea recreation.
 
 Follows "Astraea: Towards Fair and Efficient Learning-based Congestion
 Control" (EuroSys '24) and the released inference agent
@@ -51,7 +51,7 @@ ACTION_MIN = float(_ACTION_PLUGIN.ACTION_MIN)
 ACTION_MAX = float(_ACTION_PLUGIN.ACTION_MAX)
 
 STATE_NAME = current_state_name(default='astraea')
-_STATE_PLUGIN = load_state_module('astraea', STATE_NAME)
+_STATE_PLUGIN = load_state_module('ma_td3', STATE_NAME)
 STATE_DIM = int(_STATE_PLUGIN.STATE_DIM)
 STATE_FEATURES = list(_STATE_PLUGIN.STATE_FEATURES)
 STATE_FEATURE_VERSION = str(_STATE_PLUGIN.STATE_FEATURE_VERSION)
@@ -178,16 +178,18 @@ class Actor(nn.Module):
                 return PaperBatchNorm1d(width)
             return nn.LayerNorm(width)
 
+        # negative_slope=0.2 matches the released agent's tf.nn.leaky_relu
+        # (TF default alpha=0.2); PyTorch's nn.LeakyReLU() default is 0.01.
         self.net = nn.Sequential(
             nn.Linear(self.input_dim, h1),
             norm(h1),
-            nn.LeakyReLU(),
+            nn.LeakyReLU(negative_slope=0.2),
             nn.Linear(h1, h2),
             norm(h2),
-            nn.LeakyReLU(),
+            nn.LeakyReLU(negative_slope=0.2),
             nn.Linear(h2, h3),
             norm(h3),
-            nn.LeakyReLU(),
+            nn.LeakyReLU(negative_slope=0.2),
         )
         self.action_head = nn.Linear(h3, ACTION_DIM)
         # TensorFlow dense layers use Glorot initialization by default.
@@ -223,7 +225,8 @@ class SingleCritic(nn.Module):
         self.fc2 = nn.Linear(h1 + ACTION_DIM, h2)
         self.fc3 = nn.Linear(h2, h3)
         self.q_head = nn.Linear(h3, 1)
-        self.act_fn = nn.LeakyReLU()
+        # negative_slope=0.2 matches the released agent's tf.nn.leaky_relu.
+        self.act_fn = nn.LeakyReLU(negative_slope=0.2)
         for module in (self.fc1, self.fc2, self.fc3, self.q_head):
             nn.init.xavier_uniform_(module.weight)
             nn.init.zeros_(module.bias)
@@ -388,6 +391,13 @@ def astraea_team_reward(throughput, latency_us, loss_ratio, pacing_rate,
     mean_pacing_pkts = (
         (pacing_rate[:, -1, :] / MSS_BYTES) * now).sum(axis=-1) / n_now
     r_lat = mean_excess * mean_pacing_pkts
+    # Bound R_lat before weighting: on deep-buffer episodes a few ms of queue
+    # with no loss sends this into the tens, and c1*R_lat then dwarfs the 0.1
+    # throughput ceiling, storing an ordinary CWND overshoot as the maximum
+    # penalty and driving the pessimistic TD3 actor to the CWND floor. Any
+    # value above reward_clip/latency_weight already saturates the clip, so
+    # this loses no gradient. Cap is inf by default (paper Eq. 5); see config.
+    r_lat = np.minimum(r_lat, w['latency_cap'])
 
     # R_loss: mean per-flow loss-to-throughput ratio.
     thr_now = throughput[:, -1, :]

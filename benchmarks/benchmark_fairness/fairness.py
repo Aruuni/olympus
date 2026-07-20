@@ -65,6 +65,7 @@ from olympus.common.bench_utils import (
     _parse_iperf_json,
     _prepare_runtime_cfg,
     _resolve_from,
+    normalize_bdp_mult,
     _restore_sudo_user_ownership,
     _resume_rows_by_key,
     _run_orca_on_env,
@@ -121,7 +122,7 @@ def _fairness_cfg(cfg: dict) -> dict:
     bench.setdefault('score_window_s', 20)
     bench.setdefault('bw_mbps_values', [20, 50, 100, 150, 200])
     bench.setdefault('rtt_ms_values', [10, 20, 30, 40, 50])
-    bench.setdefault('bdp_mult', 4)
+    bench['bdp_mult'] = normalize_bdp_mult(bench.get('bdp_mult', 4))[0]
     bench.setdefault('measure_interval_s', 1.0)
     bench.setdefault('kernel_cport_base', 53000)
     bench.setdefault('n_parallel', 5)

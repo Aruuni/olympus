@@ -328,9 +328,9 @@ Use an existing package with the closest learning style as the starting point:
 | New algorithm style | Closest examples |
 | --- | --- |
 | Off-policy actor-critic | `td3`, `orca`, `mbpo_td3` |
+| Multi-agent off-policy CTDE | `ma_td3` |
 | On-policy recurrent actor-critic | `recurrent_ppo` |
 | Single-agent world model | `dreamer_v3` |
-| Multi-agent on-policy CTDE | `mat` |
 | Multi-agent world model | `ma_dreamer` |
 
 ### 3. Implement `worker.py`

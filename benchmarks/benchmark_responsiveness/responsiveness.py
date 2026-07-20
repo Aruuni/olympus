@@ -99,6 +99,7 @@ from olympus.common.bench_utils import (
     _read_metrics,
     _resolve_astraea_python,
     _resolve_from,
+    normalize_bdp_mult,
     _restore_sudo_user_ownership,
     _resume_rows_by_key,
     _row_in_specific,
@@ -178,7 +179,7 @@ def _benchmark_cfg(cfg: dict) -> dict:
     b.setdefault('rtt_max_ms', 100)
     b.setdefault('seed_offset', 0)
     b.setdefault('flows', 1)
-    b.setdefault('bdp_mult', 4)
+    b['bdp_mult'] = normalize_bdp_mult(b.get('bdp_mult', 4))[0]
     b.setdefault('measure_interval_s', 1.0)
     b.setdefault('kernel_cport_base', 33000)
     b.setdefault('plot_episodes', True)

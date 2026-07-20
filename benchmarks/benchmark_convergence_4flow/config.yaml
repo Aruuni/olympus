@@ -32,7 +32,7 @@ benchmark:
   rtt_ms_values: [20, 50]
   bw_mbps: 100               # fallback if *_values omitted
   rtt_ms: 50                 # fallback if *_values omitted
-  bdp_mult: 4                # environment invariant for OC-CWND; do not tune
+  bdp_mult: [4]                # environment invariant for OC-CWND; do not tune
   measure_interval_s: 1.0
   kernel_cport_base: 44000
   plot_episodes: true

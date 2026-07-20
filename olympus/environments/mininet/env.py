@@ -133,7 +133,8 @@ class MininetEnv(NetworkEnv):
 
     def __init__(self, n=1, bw=10, delay=20, qsize=None, bdp_mult=1.0,
                  loss=None, duration=60, cport=11111, cc_algo='mutant',
-                 instance_id=None, unique_cports=False, per_flow_delays=None):
+                 instance_id=None, unique_cports=False, per_flow_delays=None,
+                 disable_offload=False):
         self.n        = n
         self.bw       = bw
         self.delay    = delay
@@ -147,6 +148,7 @@ class MininetEnv(NetworkEnv):
         self.unique_cports = unique_cports
         self.per_flow_delays = (
             [float(d) for d in per_flow_delays] if per_flow_delays else None)
+        self.disable_offload = bool(disable_offload)
         # Episode base delay, kept immutable so scheduled delay changes can
         # scale per-flow delays as a fraction of it (change_link mutates
         # self.delay for BDP sizing).
@@ -232,10 +234,10 @@ class MininetEnv(NetworkEnv):
         if delay is not None: self.delay = delay
         if loss  is not None: self.loss  = loss
 
-        if bw is not None or delay is not None:
-            bdp = self.bw * (2 ** 20) * self.delay * 1e-3 / 8
-            self.qsize = max(int(self.bdp_mult * bdp), 1500)
-
+        # self.qsize is intentionally NOT recomputed here: the bottleneck
+        # queue stays fixed at its episode-start size (initial BDP * bdp_mult,
+        # or the explicit qsize) so mid-episode bw/delay schedules only move
+        # the link parameters, not the buffer depth.
         if bw is not None or delay is not None:
             s2, s2_intf, s3, s3_intf = self._s2s3_intfs()
             _change_bw(s2, s2_intf, self.bw, self.qsize)
@@ -262,6 +264,23 @@ class MininetEnv(NetworkEnv):
             else:
                 s1, s1_intf, s2, s2_intf = self._s1s2_intfs()
                 _change_delay(s1, s1_intf, self.delay, self.loss)
+
+    def interrupt_link(self, outage_ms=0.0):
+        """Take the bottleneck down briefly, then always restore it.
+
+        Bringing down one endpoint is sufficient to interrupt both flows on
+        the shared s2--s3 bottleneck.  The interface name is slot-prefixed, so
+        parallel benchmark instances remain isolated.
+        """
+        outage_s = max(0.0, float(outage_ms)) / 1000.0
+        if outage_s <= 0.0:
+            return
+        s2, s2_intf, _s3, _s3_intf = self._s2s3_intfs()
+        s2.cmd(f'ip link set dev {s2_intf} down')
+        try:
+            time.sleep(outage_s)
+        finally:
+            s2.cmd(f'ip link set dev {s2_intf} up')
 
     def _ci_s1_intf(self, i):
         """Return (host, intf_name) for sender c{i}'s link toward s1."""
@@ -300,7 +319,7 @@ class MininetEnv(NetworkEnv):
         # With per-flow delays, every flow's full propagation delay lives on
         # its own sender access link (c_i -> s1), so the shared s1-s2 link
         # carries no netem. self.delay is then used only to size the
-        # bottleneck BDP buffer (qsize, computed in __init__/change_link).
+        # bottleneck BDP buffer (qsize, computed once in __init__).
         if not self.per_flow_delays:
             for intf in s1.intfList():
                 if intf.link:
@@ -318,6 +337,18 @@ class MininetEnv(NetworkEnv):
                     break
 
         self._configure_per_flow_delays()
+        if self.disable_offload:
+            self._disable_offloads()
+
+    def _disable_offloads(self):
+        """Disable segmentation/coalescing exactly as the paper testbed does."""
+        for node in self.net.values():
+            for intf_name in node.intfNames():
+                if intf_name == 'lo':
+                    continue
+                node.cmd(
+                    f'ethtool -K {intf_name} tso off gro off gso off lro off '
+                    f'2>/dev/null || true')
 
     def start_episode(self, monitor_interval=0.1, start_delays=None,
                       flow_durations=None, episode_start=None):

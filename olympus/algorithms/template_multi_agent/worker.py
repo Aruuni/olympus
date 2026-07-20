@@ -8,8 +8,8 @@ the joint picture at training time by grouping experiences on
 (group_id, group_step).
 
 Everything here is generic multi-agent scaffolding; the algorithm-specific parts
-are marked `# TODO` and live in model.py. See mat/worker.py (on-policy CTDE) for
-a complete reference, or ma_dreamer/worker.py for the off-policy variant.
+are marked `# TODO` and live in model.py. See ma_td3/worker.py (off-policy CTDE)
+or ma_dreamer/worker.py (off-policy world model) for complete references.
 """
 
 import csv

@@ -1,4 +1,4 @@
-"""Per-flow decentralized worker for the Astraea recreation.
+"""Per-flow decentralized worker for the MA-TD3 Astraea recreation.
 
 Decentralized execution exactly as in the paper: each flow runs the
 parameter-shared deterministic actor on its OWN stacked local state (the
@@ -36,7 +36,7 @@ _PKG = os.path.dirname(_ALG_DIR)
 _ROOT = os.path.dirname(_PKG)
 sys.path.insert(0, _ROOT)
 
-from olympus.algorithms.astraea import model
+from olympus.algorithms.ma_td3 import model
 from olympus.common.action_plugins import load_action_module
 from olympus.common.async_pusher import AsyncPusher
 from olympus.common.bbr_probe import BbrProbe
@@ -359,7 +359,7 @@ def run():
         or time.monotonic()
     )
     next_tick = episode_start
-    traj_id = f'astraea_{group_id}_a{agent_id}_f{flow_id}'
+    traj_id = f'ma_td3_{group_id}_a{agent_id}_f{flow_id}'
 
     # Astraea recurrent local state: zero history, newest frame shifted in
     # each MTP (the original s0_rec_buffer semantics).
@@ -392,7 +392,7 @@ def run():
     probe = BbrProbe.from_env()
 
     print(
-        f'[worker alg=astraea reward={reward_name} cport={cport} '
+        f'[worker alg=ma_td3 reward={reward_name} cport={cport} '
         f'agent={agent_id} group={group_id} flow={flow_id}] '
         f'started interval={interval_ms:g}ms det={int(deterministic)} '
         f'exploration={exploration_mode} noise={noise_std:.2f} '

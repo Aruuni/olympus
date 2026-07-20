@@ -20,7 +20,7 @@ benchmark:
   fixed_flow_rtt_ms: 20
   bw_mbps_values: [20, 40, 60, 80, 100]
   rtt_ms_values: [20, 40, 60, 80, 100]
-  bdp_mult: 4
+  bdp_mult: [4]
   measure_interval_s: 1.0
   kernel_cport_base: 53000
   plot_episodes: true

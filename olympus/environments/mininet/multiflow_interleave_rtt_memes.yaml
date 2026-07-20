@@ -19,7 +19,7 @@ sweep:
   bw_step:     10
   delay_range: [10, 100]
   delay_step:  10
-  bdp_mult: 4
+  bdp_mult: [4]
   # Concurrent flows (agents) per slot. A list sweeps all listed counts, padding
   # smaller-N episodes with masks. The count is NOT hard-coded — adjust freely:
   #   [1, 2, 3, 4]  up to 4 (default)   |   [1, 2]  up to 2   |   [4]  exactly 4.

@@ -84,9 +84,10 @@ class TemplateEnv(NetworkEnv):
 
         Delete this override to inherit the accept-and-ignore default.
         Implement it if your backend can retune in place: update only the
-        parameters that are not None, recompute the queue size from the new
-        BDP, and stay thread-safe — the base-class schedule replay calls this
-        from a background thread. Then start the replay with
+        parameters that are not None, keep the bottleneck queue at its
+        episode-start size (mid-episode changes move bw/delay only, never the
+        buffer depth), and stay thread-safe — the base-class schedule replay
+        calls this from a background thread. Then start the replay with
         ``self._begin_link_schedule(episode_start)`` at the end of
         ``start_episode`` and stop it with ``self._stop_link_schedule()`` at
         the top of ``stop`` (see MininetEnv)."""

@@ -4,7 +4,7 @@ model.py — PROVIDE YOUR OWN.
 This file is intentionally a stub. The worker and learner in this template are
 generic multi-agent scaffolding; the actual algorithm (the joint/parameter-shared
 policy, the centralized critic, the losses) lives here and is the one part you
-must write. See algorithms/mat/model.py (on-policy CTDE) or
+must write. See algorithms/ma_td3/model.py (off-policy CTDE) or
 algorithms/ma_dreamer/model.py (off-policy world model) for complete references.
 
 ────────────────────────────────────────────────────────────────────────────
@@ -72,5 +72,5 @@ for the largest episode, and passes n_agents to each worker via SAO_N_AGENTS.
 # ── Implement the contract above, then delete this guard. ─────────────────────
 raise NotImplementedError(
     'template_multi_agent/model.py is a stub — copy this package, rename it, '
-    'and implement model.py. See algorithms/mat/model.py for a reference.'
+    'and implement model.py. See algorithms/ma_td3/model.py for a reference.'
 )

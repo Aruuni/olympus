@@ -6,7 +6,7 @@ sweep:
   delays: [20, 40, 60, 80, 100]
   flows: [2]
   duration: 60
-  bdp_mult: 4
+  bdp_mult: [4]
   per_flow_delays: [10, $half_delay]
   flow_schedule:
     arrival: {start_delays: [0, 20]}

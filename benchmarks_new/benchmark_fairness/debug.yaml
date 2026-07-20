@@ -9,7 +9,7 @@ scenario:
   sweep:
     bws: [20, 30, 40]
     delays: [20, 30, 40]
-    bdp_mult: 1
+    bdp_mult: [1]
     duration: 20
     flow_schedule:
       arrival:

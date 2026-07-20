@@ -35,6 +35,7 @@ from olympus.orchestrator import (
     _as_bool,
     _resolve_repo_path,
     _slug,
+    normalize_bdp_mult,
 )
 from olympus.common.checkpoint_config import (
     apply_model_config_from_checkpoint,
@@ -447,6 +448,17 @@ def _parse_iperf_json(json_path: str, csv_path: str = None,
 def _prepare_runtime_cfg(base_cfg: dict, approach: dict, checkpoint: str,
                          approach_dir: str, run_dir: str, plot_episodes: bool) -> dict:
     cfg = copy.deepcopy(base_cfg)
+    # Fold the optional `orchestrator:` block into flat top-level keys, exactly
+    # as the training entrypoint's _apply_orchestrator_block does. The shared
+    # episode runners (run_episode_marl et al.) read runner knobs like
+    # cport_base, scan_ms and listener_* as flat cfg keys; without this the
+    # benchmark and the episode runner fall back to divergent defaults (e.g.
+    # cport_base 21000 vs 24000), so the iperf server JSON is written under one
+    # port range and looked for under another. Grouped value wins.
+    _orch_block = cfg.get('orchestrator')
+    if isinstance(_orch_block, dict):
+        for _k, _v in _orch_block.items():
+            cfg[_k] = _v
     approach_algorithm = str(approach['algorithm'])
     approach_state = str(approach['state'])
     approach_reward = str(approach['reward'])
@@ -485,12 +497,6 @@ def _deterministic_env(cfg: dict) -> None:
     os.environ['SAO_NOISE_STD'] = '0.0'
     os.environ['SAO_REQUIRE_CHECKPOINT'] = '1'
     os.environ['OC_ORACLE_RTT'] = '0'
-    agent_cfg = cfg.setdefault('agent', {})
-    if 'term_threshold_inf' in agent_cfg:
-        agent_cfg['term_threshold'] = agent_cfg['term_threshold_inf']
-    if 'epsilon_test' in agent_cfg:
-        agent_cfg['epsilon_start'] = agent_cfg['epsilon_test']
-        agent_cfg['epsilon_end'] = agent_cfg['epsilon_test']
 
 
 def _append_csv(path: str, fields: list, row: dict) -> None:
