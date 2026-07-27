@@ -32,6 +32,7 @@ import torch
 import torch.nn as nn
 
 from olympus.common.action_plugins import load_action_module
+from olympus.common import policy as policy_contract
 from olympus.common.state_plugins import (
     assert_state_compatible,
     current_state_name,
@@ -459,6 +460,7 @@ __all__ = [
     'SingleCritic',
     'TwinCritic',
     'assert_checkpoint_state_compatible',
+    'build_policy',
     'astraea_team_reward',
     'global_state_from_stats',
     'model_state_meta',
@@ -467,3 +469,34 @@ __all__ = [
     'set_expected_actor_norm',
     'soft_update',
 ]
+
+
+# ── Deployment factory ────────────────────────────────────────────────────────
+
+def build_policy(ckpt, agent_cfg=None, training_cfg=None, device='cpu',
+                 deterministic=True):
+    """Load this checkpoint's actor as an inference Policy.
+
+    The Astraea actor takes a stacked window of `history_len` frames rather
+    than a single observation, and its width and normalization are baked into
+    the weights — so the checkpoint wins over config for both, and the expected
+    values are registered before any compatibility check runs. See
+    olympus/common/policy.py for the contract.
+    """
+    agent_cfg = agent_cfg or {}
+    history_len = int(
+        (ckpt or {}).get('history_len')
+        or agent_cfg.get('history_len')
+        or HISTORY_LEN_DEFAULT)
+    actor_norm = str(
+        (ckpt or {}).get('actor_norm')
+        or agent_cfg.get('actor_norm', 'batchnorm')).strip().lower()
+    set_expected_history(history_len)
+    set_expected_actor_norm(actor_norm)
+    h1 = policy_contract.resolved_hidden(agent_cfg, 'hidden', 256)
+    h2 = policy_contract.resolved_hidden(agent_cfg, 'hidden2', 128)
+    actor = Actor(STATE_DIM, history_len, h1, h2, actor_norm)
+    actor.load_state_dict(policy_contract.actor_state_dict(ckpt), strict=False)
+    actor.to(device).eval()
+    return policy_contract.StackedHistoryPolicy(
+        'ma_td3', STATE_DIM, actor, history_len, deterministic)

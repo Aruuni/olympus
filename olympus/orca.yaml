@@ -71,9 +71,9 @@ outputs:
   plot_episodes: true
 
 orchestrator:
-  n_parallel: 10
-  episodes: 2000
-  save_every_episodes: 200
+  n_parallel: 30
+  episodes: 1000
+  save_every_episodes: 100
   learner_port: 6301
   scan_ms: 20
   # Single flow per listener lifetime (Orca controls one flow per policy).
@@ -112,7 +112,7 @@ algorithms:
       reward_clip: 1.0
       updates_per_step: 1
       save_every: 500
-      param_broadcast_every: 50
+      param_broadcast_every: 20
       persist_replay_on_stop: true
     agent:
       # Actor/critic hidden widths (repo h1_shape/h2_shape).
@@ -120,7 +120,10 @@ algorithms:
       head_hidden: 256
       # Orca's flat state history depth: 10 stacked 7-feature frames.
       rec_dim: 10
-      # Monitoring/action interval.
+      # MTP (Monitoring Time Period) — the agent's decision cadence: state is
+      # aggregated over one MTP and one action applied per MTP. Orca paper
+      # base MTP: 20ms. Distinct from the benchmarks' measure_interval_s
+      # (iperf3 goodput sampling) and the listener's scan_ms (socket polling).
       interval_ms: 20
       cwnd_min: 4
       cwnd_max: 10000

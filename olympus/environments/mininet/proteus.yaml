@@ -1,0 +1,16 @@
+name: proteus
+description: >
+  Proteus single-flow SAC training environment. Each episode uses a static
+  bottleneck sampled without replacement from the shuffled 1, 10, 20, ...,
+  100 grid for Mbps bandwidth and ms RTT, with six BDP-scaled queue depths.
+shuffle: true
+
+sweep:
+  bws: [1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+  delays: [1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+  # Queue depth as a multiple of the episode's bandwidth-delay product.
+  bdp_mult: [0.5, 1, 2, 3, 6, 12]
+  flows: 1
+  duration: 30
+  link_schedules:
+    - []

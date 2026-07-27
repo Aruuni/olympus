@@ -66,6 +66,9 @@ FIELDS = [
     'goodput_ratio_total_samples', 'goodput_ratio_total_sum',
     'goodput_ratio_total_sumsq',
     'delay_ratio_mean', 'delay_ratio_std', 'delay_ratio_samples',
+    'norm_throughput_mean', 'norm_throughput_std',
+    'norm_delay_mean', 'norm_delay_std',
+    'retr_mbps_mean', 'retr_mbps_std',
     'goodput_source', 'flow_schedule_csv', 'state_logs', 'run_dir',
     'checkpoint', 'error',
 ]
@@ -75,6 +78,8 @@ SUMMARY_FIELDS = [
     'runs_completed', 'runs_expected', 'goodput_ratio_total_mean',
     'goodput_ratio_total_std', 'goodput_ratio_total_samples',
     'delay_ratio_mean', 'delay_ratio_std',
+    'norm_throughput_mean', 'norm_throughput_std',
+    'norm_delay_mean', 'norm_delay_std', 'retr_mbps_mean',
     'mean_jain_fairness', 'mean_total_goodput_mbps',
 ]
 
@@ -130,11 +135,27 @@ def _bench_cfg(cfg: dict) -> dict:
     intra.setdefault('bdp_multipliers', [1])
     bench['inter_rtt'] = inter
     bench['intra_rtt'] = intra
+    efficiency = dict(bench.get('efficiency') or {})
+    efficiency.setdefault('bdp_multipliers', [0.2, 1, 4])
+    efficiency.setdefault('flows', 4)
+    efficiency.setdefault('flow_stagger_s', 25)
+    efficiency.setdefault('flow_duration_s', 125)
+    bench['efficiency'] = efficiency
     return bench
 
 
-def _flow_plan(bench: dict) -> list:
+def _flow_plan(bench: dict, suite: str) -> list:
     duration = float(bench['duration_s'])
+    if suite == 'efficiency':
+        eff = bench['efficiency']
+        stagger = float(eff['flow_stagger_s'])
+        flow_duration = float(eff['flow_duration_s'])
+        return [
+            {'flow': index + 1, 'start': index * stagger,
+             'duration': flow_duration,
+             'end': min(duration, index * stagger + flow_duration)}
+            for index in range(int(eff['flows']))
+        ]
     starts = [float(bench['first_flow_start_s']),
               float(bench['second_flow_start_s'])]
     return [
@@ -144,10 +165,10 @@ def _flow_plan(bench: dict) -> list:
     ]
 
 
-def _rtt_pair(suite: str, rtt_ms: float, bench: dict) -> tuple:
+def _flow_rtts(suite: str, rtt_ms: float, bench: dict, n_flows: int) -> list:
     if suite == 'inter_rtt':
-        return float(bench['inter_rtt']['fixed_flow_rtt_ms']), float(rtt_ms)
-    return float(rtt_ms), float(rtt_ms)
+        return [float(bench['inter_rtt']['fixed_flow_rtt_ms']), float(rtt_ms)]
+    return [float(rtt_ms)] * int(n_flows)
 
 
 def _queue_bytes(bandwidth_mbps: float, joining_rtt_ms: float,
@@ -159,7 +180,7 @@ def _queue_bytes(bandwidth_mbps: float, joining_rtt_ms: float,
 
 
 def _seed(suite: str, qmult: float, rtt_ms: float, run: int) -> int:
-    suite_offset = 1_000_000 if suite == 'intra_rtt' else 0
+    suite_offset = {'intra_rtt': 1_000_000, 'efficiency': 2_000_000}.get(suite, 0)
     return suite_offset + int(round(qmult * 1000)) * 10_000 + int(round(rtt_ms)) * 10 + int(run)
 
 
@@ -213,10 +234,10 @@ def _run_trial(instance_id: int, approach: dict, bench: dict,
     run = int(case['run'])
     seed = int(case['seed'])
     bw = float(bench['bandwidth_mbps'])
-    f1_rtt, f2_rtt = _rtt_pair(suite, rtt, bench)
-    per_flow_delays = [f1_rtt, f2_rtt]
+    flow_plan = _flow_plan(bench, suite)
+    per_flow_delays = _flow_rtts(suite, rtt, bench, len(flow_plan))
+    f1_rtt, f2_rtt = per_flow_delays[0], per_flow_delays[-1]
     qsize = _queue_bytes(bw, f2_rtt, qmult)
-    flow_plan = _flow_plan(bench)
     kind = str(approach.get('kind', 'model')).lower()
     kernel_cport = int(bench.get('kernel_cport_base', 55000)) + int(instance_id) * 100
     metrics = {}
@@ -247,6 +268,9 @@ def _run_trial(instance_id: int, approach: dict, bench: dict,
 
     if not error and suite == 'intra_rtt':
         metrics.update(runtime.delay_ratio_stats(flows, rtt, bench))
+    if not error and suite == 'efficiency':
+        metrics.update(runtime.efficiency_stats(
+            flows, flow_plan, bench, rtt, run_dir, state_logs=state_logs))
 
     if flows:
         try:
@@ -332,7 +356,7 @@ def _approach_rows(approach: dict, bench: dict, cases: list,
 
     work_q = multiprocessing.Queue()
     result_q = multiprocessing.Queue()
-    flow_plan = _flow_plan(bench)
+    flow_plan = _flow_plan(bench, cases[0]['suite'])
     for case in missing:
         run_dir = os.path.join(
             approach_dir, case['suite'], f'q{case["qmult"]:g}',

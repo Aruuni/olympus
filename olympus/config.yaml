@@ -86,6 +86,18 @@ environment:
 
 reward:
   delay_margin_coef: 1.25
+  # proteus: sender-observable, ground-truth-free utility terms.
+  # Select with `runtime.reward: proteus`. Throughput values are
+  # bits/s; RTT is compared with the connection's observed minimum RTT.
+  throughput_reference_bps: 1.0e6
+  throughput_epsilon_bps: 1.0e4
+  rtt_headroom: 0.05
+  delay_weight: 2.0
+  loss_weight: 1.0
+  loss_scale: 100.0
+  stall_goodput_bps: 1.0e4
+  stall_penalty: 1.0
+  reward_clip: 10.0
   # Fairness penalty (tempest_fairness reward only). Both metrics are
   # single-agent surrogates (link fully utilized; other n-1 flows split the
   # rest equally) and are always logged; fairness_metric picks which one is
@@ -217,6 +229,45 @@ algorithms:
       noise_start: 0.3
       noise_end: 0.05
       noise_decay_episodes: 300
+
+  sac:
+    # Recurrent Soft Actor-Critic (SAC v2, automatic temperature tuning).
+    # Same LSTM trunk / replay / state pipeline as td3, but a stochastic
+    # squashed-Gaussian actor with an entropy bonus. Exploration is learned
+    # (no injected noise schedule), and there is no policy_delay / target actor.
+    training:
+      resume_from: null
+      batch_size: 256
+      seq_len: 32
+      min_replay: 5000
+      replay_capacity: 400000
+      gamma: 0.99
+      target_tau: 0.005
+      # SAC conventionally uses one shared LR for actor and critic (3e-4).
+      lr_actor: 3.0e-4
+      lr_critic: 3.0e-4
+      lr_alpha: 3.0e-4
+      # Optional critic-LR step decay (0 disables). Off by default for SAC.
+      lr_critic_decay_after_steps: 0
+      lr_critic_final: 3.0e-4
+      # Automatic temperature tuning drives entropy toward target_entropy.
+      # Leave target_entropy null to use the SAC heuristic (-action_dim).
+      autotune_alpha: true
+      alpha_init: 0.2
+      target_entropy: null
+      grad_clip: 5.0
+      updates_per_step: 1
+      save_every: 500
+      param_broadcast_every: 50
+      # Set false to train on raw reward magnitudes instead of dividing TD
+      # targets by the running reward std.
+      use_reward_normalizer: true
+    agent:
+      hidden: 128
+      interval_ms: 20
+      cwnd_min: 10
+      cwnd_max: 10000
+      dead_flow_ms: 500
 
   mbpo_td3:
     training:

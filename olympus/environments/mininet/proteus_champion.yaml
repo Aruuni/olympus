@@ -1,0 +1,21 @@
+name: proteus_champion
+description: >
+  Champion (seed) policy sweep for the continual-learning exhibition. This is
+  the `proteus` environment with the exhibition's target regime deliberately
+  held out: bandwidth stops at 40 Mbps, RTT stops at 30 ms, and the 0.5x BDP
+  shallow-buffer depth is removed. The champion is therefore genuinely blind
+  to the 100 Mbps / 100 ms / 0.5x BDP corner the CRL service is deployed into,
+  which is what gives the exhibition a gap to close. Episodes remain static
+  30 s bottlenecks sampled without replacement from the shuffled grid.
+shuffle: true
+
+sweep:
+  bws: [1, 10, 20, 30, 40]
+  delays: [1, 10, 20, 30]
+  # Queue depth as a multiple of the episode's bandwidth-delay product.
+  # 0.5 is held out for the deployment regime.
+  bdp_mult: [1, 2, 3, 6, 12]
+  flows: 1
+  duration: 30
+  link_schedules:
+    - []

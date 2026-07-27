@@ -36,6 +36,7 @@ from olympus.common.state_plugins import (
     state_meta,
 )
 from olympus.common.action_plugins import load_action_module
+from olympus.common import policy as policy_contract
 
 
 # ── State / action constants ──────────────────────────────────────────────────
@@ -313,3 +314,23 @@ def ppo_loss(net: RecurrentPPONet,
         explained_var = float(explained.item()),
         approx_ent_bits = float(ent_bits.item()),
     )
+
+
+# ── Deployment factory ────────────────────────────────────────────────────────
+
+def build_policy(ckpt, agent_cfg=None, training_cfg=None, device='cpu',
+                 deterministic=True):
+    """Load this checkpoint's net as an inference Policy.
+
+    PPO shares one trunk for actor and critic, and `act` returns a PRE-tanh
+    action; worker.py squashes it before touching cwnd, so the policy adapter
+    does the same. See olympus/common/policy.py for the contract.
+    """
+    hidden = policy_contract.resolved_hidden(agent_cfg, 'hidden', 256)
+    net = RecurrentPPONet(STATE_DIM, hidden)
+    net.load_state_dict(policy_contract.actor_state_dict(
+        ckpt, 'model', 'state_dict', 'actor'))
+    net.to(device).eval()
+    return policy_contract.TanhGaussianRecurrentPolicy(
+        'recurrent_ppo', STATE_DIM, net, hidden_index=4,
+        deterministic=deterministic)

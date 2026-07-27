@@ -56,6 +56,7 @@ create_file() {
     mv "$partial" "$target"
 }
 
+create_file "file-50MiB.bin" 50
 create_file "file-100MiB.bin" 100
 create_file "file-500MiB.bin" 500
 create_file "file-1GiB.bin" 1024

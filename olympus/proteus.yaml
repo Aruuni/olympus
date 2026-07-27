@@ -1,0 +1,92 @@
+# Proteus: recurrent SAC with the Proteus state and network-utility reward.
+#
+# Train:
+#   sudo mn -c
+#   sudo -E ./venv_training/bin/python olympus/train.py \
+#     --config olympus/proteus.yaml
+
+runtime:
+  algorithm: sac
+  reward: proteus
+  state: proteus
+  action: cwnd_multiplier
+
+actions:
+  cwnd_multiplier:
+    action_min: -1.0
+    action_max: 1.0
+    multiplier_min: 0.8
+    multiplier_max: 1.2
+    min_cwnd_change: 1
+
+environment:
+  type: mininet
+  environment_setup: proteus
+
+reward:
+  throughput_reference_bps: 1.0e6
+  throughput_epsilon_bps: 1.0e4
+  rtt_headroom: 0.05
+  delay_weight: 2.0
+  loss_weight: 1.0
+  loss_scale: 100.0
+  stall_goodput_bps: 1.0e4
+  stall_penalty: 1.0
+  reward_clip: 10.0
+
+bbr_probe:
+  enabled: false
+
+state_options: {}
+
+paths:
+  listener: olympus/oc_bridge
+  py: ./venv_training/bin/python
+
+outputs:
+  root: olympus/models/proteus
+  run_name:
+  plot_episodes: true
+  plot_every_n: 1
+  require_state_logs: true
+
+orchestrator:
+  n_parallel: 6
+  episodes: 500
+  save_every_episodes: 100
+  learner_port: 6301
+  scan_ms: 20
+  listener_single_flow: true
+  listener_state_pipe: false
+  listener_cc: astraea
+  cport_base: 23000
+
+algorithms:
+  sac:
+    training:
+      resume_from: null
+      batch_size: 256
+      seq_len: 32
+      min_replay: 5000
+      replay_capacity: 400000
+      gamma: 0.99
+      target_tau: 0.005
+      lr_actor: 3.0e-4
+      lr_critic: 3.0e-4
+      lr_alpha: 3.0e-4
+      lr_critic_decay_after_steps: 0
+      lr_critic_final: 3.0e-4
+      autotune_alpha: true
+      alpha_init: 0.2
+      target_entropy: null
+      grad_clip: 5.0
+      updates_per_step: 1
+      save_every: 500
+      param_broadcast_every: 50
+      use_reward_normalizer: true
+    agent:
+      hidden: 128
+      interval_ms: 20
+      cwnd_min: 10
+      cwnd_max: 10000
+      dead_flow_ms: 500

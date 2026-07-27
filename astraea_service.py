@@ -147,7 +147,10 @@ class AstraeaService:
             action_range,
         )
 
-        self.interval_sec = 0.020
+        # Astraea's 30 ms MTP decision interval — matches the Olympus
+        # recreation's agent interval_ms so both benchmark arms act at the
+        # same cadence.
+        self.interval_sec = 0.030
         self.idle_exit_ms = int(idle_exit_ms) if idle_exit_ms is not None else 0
         self.lock = threading.RLock()
 

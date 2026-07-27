@@ -2536,11 +2536,13 @@ def main():
         for gname, gcfg in _build_collection_subconfigs(cfg):
             gbin = '' if _env_backend_type(gcfg) == 'raynet' else listener_bin
             gpool, gshuf = _build_pool(gcfg)
+            gblock = _collection_grps.get(gname) or {}
             groups.append({
                 'name': gname, 'cfg': gcfg, 'listener_bin': gbin,
                 'n_parallel': max(1, int(gcfg.get('n_parallel', 1))),
                 'pool': gpool, 'shuffle': gshuf,
                 'work_q': multiprocessing.Queue(),
+                'warmup_episodes': int(gblock.get('warmup_episodes', 0) or 0),
             })
         env_meta = {}
         for g in groups:
@@ -2787,12 +2789,53 @@ def main():
         if has_pending:
             _flush_episode_checkpoints_async()
 
-    for g in groups:
-        for _ in range(g['n_parallel']):
-            item = _next_for(g)
-            if item is not None:
+    # Optional warmup phasing: a collection group may declare `warmup_episodes`
+    # to run first (e.g. RayNet simulation) before the run switches to the
+    # remaining groups (e.g. Mininet emulation). Both phases feed the same
+    # learner, so the warmup experience persists in the (mixed) replay buffer.
+    # With no warmup group declared this is a no-op (every group stays active,
+    # matching the original concurrent behaviour).
+    warmup_total = sum(int(g.get('warmup_episodes', 0) or 0) for g in groups)
+    if n_episodes is not None:
+        warmup_total = min(warmup_total, n_episodes)
+    warmup_done = 0
+
+    def _group_active(g) -> bool:
+        if warmup_total <= 0:
+            return True
+        is_warmup = int(g.get('warmup_episodes', 0) or 0) > 0
+        if is_warmup:
+            return episode_counter < warmup_total
+        # Main groups wait until every warmup episode has *completed*, so the
+        # warmup and main backends never collect concurrently.
+        return warmup_done >= warmup_total
+
+    def _inflight_for(g) -> int:
+        return sum(1 for grp in ep_to_group.values() if grp is g)
+
+    def _fill_active() -> bool:
+        """Top every currently-active group up to its slot count. Returns True
+        if the global episode cap was hit while a group still had free slots
+        (used to shrink the RayNet sync target as the run drains)."""
+        nonlocal in_flight
+        capped = False
+        for g in groups:
+            while _group_active(g) and _inflight_for(g) < g['n_parallel']:
+                item = _next_for(g)
+                if item is None:
+                    capped = True
+                    break
                 g['work_q'].put(item)
                 in_flight += 1
+        return capped
+
+    if warmup_total > 0:
+        warm = [g['name'] for g in groups if int(g.get('warmup_episodes', 0) or 0) > 0]
+        main_g = [g['name'] for g in groups if int(g.get('warmup_episodes', 0) or 0) <= 0]
+        print(f'[orch] warmup phasing: {warmup_total} episode(s) from {warm} '
+              f'then switch to {main_g}', flush=True)
+
+    _fill_active()
 
     completed_episodes = 0
     try:
@@ -2804,11 +2847,10 @@ def main():
             _maybe_save_episode_checkpoint(completed_episodes)
 
             g = ep_to_group.pop(ep, groups[0])
-            item = _next_for(g)
-            if item is not None:
-                g['work_q'].put(item)
-                in_flight += 1
-            elif raynet_sync_handle is not None and in_flight > 0:
+            if int(g.get('warmup_episodes', 0) or 0) > 0:
+                warmup_done += 1
+            capped = _fill_active()
+            if capped and raynet_sync_handle is not None and in_flight > 0:
                 raynet_sync_handle['service'].set_target_slots(in_flight)
 
     except KeyboardInterrupt:

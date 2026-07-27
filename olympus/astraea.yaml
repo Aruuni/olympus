@@ -58,8 +58,8 @@ outputs:
 
 orchestrator:
   n_parallel: 8
-  episodes: 2000
-  save_every_episodes: 100
+  episodes: 1000
+  save_every_episodes: 25
   learner_port: 6301
   scan_ms: 20
   listener_single_flow: true
@@ -80,7 +80,7 @@ algorithms:
       # paper-sized batch near 192 transitions at the average flow count.
       batch_size: 192
       min_replay: 40000
-      replay_capacity: 400000      # astraea.json memsize
+      replay_capacity: 4000000     # astraea.json memsize
       gamma: 0.98                  # Table 4 gamma
       target_tau: 0.005            # astraea.json tau
       # Released astraea.json uses a much slower actor than critic.  Keeping
@@ -95,8 +95,14 @@ algorithms:
       # Paper values (Table 4): model_update_interval_s: 5,
       # model_update_steps: 20 — 20 gradient iterations per 5 s of
       # collection. 0 = continuous mode (updates_per_step per loop) instead.
-      model_update_interval_s: 0
-      model_update_steps: 20
+      # WARNING: interval 0 with updates_per_step 0 means the learner never
+      # trains (this silently disabled learning in ma_td3_20260721-024424).
+      # 10x hotter than Table 4 (20 steps / 5 s): same 20-step bursts, 10x
+      # more often — ~40 updates/s, ~1 gradient step per ~23 fresh
+      # transitions at 8 slots. Watch q_mean/critic_loss for drift; back off
+      # to 1-2 s if Q slides while returns don't.
+      model_update_interval_s: 5
+      model_update_steps: 150
       # Target policy smoothing exactly as in the released agent
       # (get_target_actor_policy: N(0, 0.05) clipped to +/-0.1).
       target_noise_std: 0.05
@@ -124,8 +130,12 @@ algorithms:
       # w — MTPs of stacked local-state history (astraea.json rec_dim) and
       # the window of the fairness/stability reward metrics (Eq. 6-7).
       history_len: 5
-      # Monitoring Time Period: Table 4 trains at 30ms (the deployed
-      # inference service acts at 20ms).
+      # MTP (Monitoring Time Period) — the agent's decision cadence: state is
+      # aggregated over one MTP and one action applied per MTP. Table 4
+      # value: 30ms. astraea_service.py (paper-baseline inference) is pinned
+      # to the same 30ms so both benchmark arms act at this cadence.
+      # Distinct from the benchmarks' measure_interval_s (iperf3 goodput
+      # sampling) and the listener's scan_ms (socket discovery polling).
       interval_ms: 30
       cwnd_min: 10
       cwnd_max: 10000
@@ -165,7 +175,7 @@ algorithms:
       # jain sat flat at ~0.78 for both 20260719 runs. Still inside the
       # paper's robust c3/c0 range [0.05, 0.35] (0.04/0.1 = 0.4 is just past
       # it; the paper range was measured in RTT-homogeneous scenarios).
-      fairness_weight: 0.30     # c3
+      fairness_weight: 0.25     # c3
       stability_weight: 0.01    # c4
       # beta in the (1+beta)*d0 latency threshold; d0 = the flow's observed
       # min_rtt (beta itself is not published in the paper/Table 4).

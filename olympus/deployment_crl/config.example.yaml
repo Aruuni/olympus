@@ -1,0 +1,85 @@
+runtime:
+  algorithm: sac
+  reward: proteus
+  state: proteus
+  action: cwnd_multiplier
+
+actions:
+  cwnd_multiplier:
+    action_min: -1.0
+    action_max: 1.0
+    multiplier_min: 0.8
+    multiplier_max: 1.2
+    min_cwnd_change: 1
+
+reward:
+  throughput_reference_bps: 1.0e6
+  throughput_epsilon_bps: 1.0e4
+  rtt_headroom: 0.05
+  delay_weight: 2.0
+  loss_weight: 1.0
+  loss_scale: 100.0
+  stall_goodput_bps: 1.0e4
+  stall_penalty: 1.0
+  reward_clip: 10.0
+
+algorithms:
+  sac:
+    training:
+      resume_from: null
+      batch_size: 256
+      seq_len: 32
+      min_replay: 5000
+      replay_capacity: 400000
+      gamma: 0.99
+      target_tau: 0.005
+      lr_actor: 3.0e-4
+      lr_critic: 3.0e-4
+      lr_alpha: 3.0e-4
+      autotune_alpha: true
+      alpha_init: 0.2
+      target_entropy: null
+      grad_clip: 5.0
+      save_every: 500
+      param_broadcast_every: 50
+      use_reward_normalizer: true
+    agent:
+      hidden: 128
+      interval_ms: 20
+      cwnd_min: 10
+      cwnd_max: 10000
+      dead_flow_ms: 1000
+
+deployment:
+  checkpoint: /absolute/path/to/sac_cwnd_model.pt
+  lock_path: /tmp/olympus-deployment.lock
+  discovery:
+    listener: ./astraea_listener
+    mode: mininet
+    cc_algorithm: astraea
+    scan_ms: 10
+    ipv4_only: true
+  continual:
+    state_dir: olympus/models/crl_sac_service
+    learner_port: 6401
+    updates_per_transition: 0.25
+    max_update_burst: 100
+    persist_replay: true
+    replay_save_every_s: 300
+    # False serves the policy mean. True enables stochastic SAC actions on all
+    # attached flows and should only be used in a controlled experiment.
+    exploration: false
+    weight_pull_every: 50
+    worker_push_every: 16
+    # Retain the seed policy on a lifetime reservoir of recurrent sequences.
+    # The teacher is restored across restarts and remains frozen when
+    # teacher_update_every is zero.
+    distillation:
+      enabled: true
+      actor_weight: 0.05
+      critic_weight: 0.05
+      anchor_capacity: 2048
+      anchor_min_sequences: 64
+      batch_sequences: 8
+      capture_every_updates: 25
+      teacher_update_every: 0

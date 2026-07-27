@@ -50,6 +50,7 @@ from olympus.common.state_plugins import (
     state_meta,
 )
 from olympus.common.action_plugins import load_action_module
+from olympus.common import policy as policy_contract
 
 
 # ── State / action constants ──────────────────────────────────────────────────
@@ -427,3 +428,24 @@ def actor_loss(
         a_mean = float(a_mean.item()),
         a_abs  = float(a_abs.item()),
     )
+
+
+# ── Deployment factory ────────────────────────────────────────────────────────
+
+def build_policy(ckpt, agent_cfg=None, training_cfg=None, device='cpu',
+                 deterministic=True):
+    """Load this checkpoint's actor as an inference Policy.
+
+    Mirrors the construction in worker.py (checkpoint widths win over config)
+    minus exploration noise, replay and hot-reload. See olympus/common/policy.py
+    for the contract.
+    """
+    hidden = policy_contract.resolved_hidden(agent_cfg, 'hidden', 128)
+    head_hidden = (agent_cfg or {}).get('head_hidden')
+    head_hidden = int(head_hidden) if head_hidden not in (None, '') else None
+    hidden, head_hidden = actor_arch_from_checkpoint(ckpt, hidden, head_hidden)
+    actor = Actor(STATE_DIM, hidden, head_hidden)
+    actor.load_state_dict(policy_contract.actor_state_dict(ckpt))
+    actor.to(device).eval()
+    return policy_contract.RecurrentActorPolicy(
+        'td3', STATE_DIM, actor, deterministic)

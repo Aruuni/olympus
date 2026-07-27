@@ -109,6 +109,22 @@ def run():
     flow_id = _env(
         "OLYMPUS_FLOW_ID", "OC_FLOW_ID", "ASTRAEA_FLOW_ID")
 
+    # Orca hands the connection to the agent only after startup: the base CC
+    # (cubic, per `listener_cc` in olympus/orca.yaml) owns cwnd for a fixed
+    # warmup, then the agent takes over permanently. Deploying without this
+    # puts the actor in a regime it never saw in replay.
+    #
+    # Unlike algorithms/orca/worker.py, the handoff here is purely time-based:
+    # the training worker also releases on the first loss (its proxy for the
+    # end of slow start), which on a lossy link can fire in tens of ms.
+    warmup_default = algorithm == "orca"
+    cubic_warmup = bool(worker_cfg.get(
+        "cubic_warmup", agent_cfg.get("cubic_warmup", warmup_default)))
+    cubic_warmup_s = float(worker_cfg.get(
+        "cubic_warmup_s",
+        worker_cfg.get("cubic_warmup_max_s",
+                       agent_cfg.get("cubic_warmup_max_s", 1.0))))
+
     action_name = str(runtime.get("action", "cwnd_multiplier"))
     action_options = (cfg.get("actions", {}) or {}).get(
         action_name, {}) or {}
@@ -141,16 +157,19 @@ def run():
             "sampled_avg_thr_bps", "sampled_avg_urtt_us",
             "sampled_cnt", "sampled_thr_cnt",
             "held_avg_thr", "held_avg_urtt", "held_cnt", "held_thr_cnt",
-            "inference_ms",
+            "warmup", "inference_ms",
         ] + [f"s{i}" for i in range(state_dim)])
 
     seq = 0
     prev_urtt, prev_cwnd, peak_thr = 0.0, cwnd_min, 0.0
+    agent_ready = not cubic_warmup
     drained_history = {}
     next_tick = time.monotonic()
     started = next_tick
     print(f"[deployment-worker flow={flow_id} pid={os.getpid()}] "
-          f"loaded {algorithm} checkpoint={os.path.basename(checkpoint)}",
+          f"loaded {algorithm} checkpoint={os.path.basename(checkpoint)}"
+          + (f"; base CC owns the first {cubic_warmup_s}s"
+             if cubic_warmup else ""),
           flush=True)
     try:
         while True:
@@ -175,15 +194,30 @@ def run():
                     f"{normalized_state.size} values; expected {state_dim}")
             state_payload = normalized_state.tolist()
             seq += 1
-            inference_started = time.monotonic()
-            action = policy.infer(state_payload)
-            inference_ms = (
-                time.monotonic() - inference_started) * 1000.0
             current = int(raw.get("cwnd", prev_cwnd))
-            new_cwnd = action_plugin.apply_cwnd(
-                current, action, cwnd_min, cwnd_max)
-            flow_backend.set_cwnd(
-                flow_fd, int(np.clip(new_cwnd, cwnd_min, cwnd_max)))
+            elapsed = time.monotonic() - started
+
+            if not agent_ready and elapsed >= cubic_warmup_s:
+                # Fixed warmup: the base CC keeps the connection for the whole
+                # window whether or not it has already lost a packet.
+                agent_ready = True
+                print(f"[deployment-worker flow={flow_id}] base CC -> "
+                      f"agent handoff at t={elapsed:.2f}s cwnd={current} "
+                      f"(warmup {cubic_warmup_s}s elapsed)", flush=True)
+
+            if not agent_ready:
+                # Hands off: no set_cwnd at all, so the kernel CC keeps driving
+                # the ramp exactly as it does during training.
+                action, new_cwnd, inference_ms = 0.0, current, 0.0
+            else:
+                inference_started = time.monotonic()
+                action = policy.infer(state_payload)
+                inference_ms = (
+                    time.monotonic() - inference_started) * 1000.0
+                new_cwnd = action_plugin.apply_cwnd(
+                    current, action, cwnd_min, cwnd_max)
+                flow_backend.set_cwnd(
+                    flow_fd, int(np.clip(new_cwnd, cwnd_min, cwnd_max)))
 
             if trace_writer:
                 trace_writer.writerow([
@@ -197,7 +231,7 @@ def run():
                     sampled["cnt"], sampled["thr_cnt"],
                     int(held["avg_thr"]), int(held["avg_urtt"]),
                     int(held["cnt"]), int(held["thr_cnt"]),
-                    f"{inference_ms:.4f}",
+                    int(not agent_ready), f"{inference_ms:.4f}",
                 ] + state_payload)
                 if seq % 50 == 0:
                     trace_file.flush()

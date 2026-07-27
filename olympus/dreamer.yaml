@@ -1,0 +1,193 @@
+# Olympus protocol training configuration.
+#
+# Based on unify.yaml. Single-agent DreamerV3 trained on Mininet emulation only
+# (no RayNet simulation, no mixed collection): one Mininet collection pool feeds
+# one learner via the `environment` block below. The Dreamer observation matches
+# the first ten Tempest features and intentionally has no Kalman filter or
+# min_rtt input.
+
+
+
+# Run (emulation needs root for the Mininet pool):
+#   sudo mn -c
+#   sudo -E env PATH="$PATH" HOME="$HOME" ./venv_training/bin/python olympus/train.py --config olympus/dreamer.yaml
+
+runtime:
+  algorithm: dreamer_v3
+  reward: dreamer
+  state: dreamer
+  action: cwnd_multiplier
+
+# Action mappings are selected independently of the learner. Both plugins keep
+# the policy output one-dimensional in [-1, 1].
+actions:
+  # Exponential relative CWND multiplier. With the range below,
+  # -1 -> 0.5x, 0 -> 1.0x, +1 -> 2.0x.
+  cwnd_multiplier:
+    action_min: -1.0
+    action_max: 1.0
+    multiplier_min: 0.5
+    multiplier_max: 2.0
+    min_cwnd_change: 1
+  # Original Astraea-style small relative adjustment.
+  astraea:
+    action_min: -1.0
+    action_max: 1.0
+    step: 0.025
+
+# Warmup-then-emulation run. Both phases feed the SAME learner, so the sim
+# experience collected during warmup persists in the replay buffer and keeps
+# contributing to training after the switch (no checkpoint/buffer round-trip).
+#
+# Phase 1 (warmup): the `raynet` group runs `warmup_episodes` RayNet simulation
+#   episodes to bootstrap the world model / seed the buffer.
+# Phase 2: once all warmup episodes have COMPLETED, collection switches to the
+#   `mininet` (emulation) group only. The orchestrator never collects both
+#   backends at once (hard barrier at the phase boundary).
+#
+# `environment` mirrors phase 1 (the primary/warmup backend); the actual pools
+# are driven by `experience_collection` below.
+environment:
+  type: raynet
+  environment_setup: dreamer
+
+experience_collection:
+  enabled: true
+  raynet:
+    environment_setup: dreamer
+    n_parallel: 20
+    buffer_capacity: 400000
+    # Sampling blend AFTER the switch: 0.5 keeps the frozen sim experience as a
+    # permanent anchor alongside live emulation. Lower it (e.g. 0.25) to lean
+    # harder on emulation while retaining sim coverage; both fractions must
+    # sum to 1. During warmup the mininet buffer is empty, so the learner
+    # samples 100% sim automatically.
+    batch_fraction: 0.5
+    # Run this group first, for this many episodes, then switch to mininet.
+    warmup_episodes: 150
+    # BDP-stratified sim buffer (as in the original sim run) so fast low-BDP
+    # episodes cannot evict high-BDP experience.
+    strata:
+      n_buckets: 20
+  mininet:
+    environment_setup: dreamer
+    n_parallel: 20
+    buffer_capacity: 400000
+    batch_fraction: 0.5
+
+reward:
+  delay_margin_coef: 1.25
+  # Every three seconds, reward the ratio-based closeness of raw min_rtt to the
+  # current scheduled base RTT. There is no tolerance or cutoff.
+  min_rtt_bonus: 20.0
+  # Fairness fields below are used only by fairness rewards (multi-agent); inert
+  # for the single-agent Dreamer reward, kept for a unified superset.
+  fairness_metric: r_fair
+  w_r_fair: 25.0
+  r_fair_cap: 1.0
+  w_jain: 25.0
+
+# BBR3-style independent cwnd probe. Algorithm- and reward-agnostic; every worker
+# honours it when enabled.
+bbr_probe:
+  enabled: false
+  interval_s: 5.0
+  duration_s: 0.2
+  factor: 0.5
+
+state_options:
+  # Used only by runtime.state: orca — Orca's fixed delay target feature.
+  orca_target_ms: 50.0
+  # Dreamer is stateless and has no Kalman/min_rtt options.
+
+paths:
+  listener: olympus/oc_bridge
+  py: ./venv_training/bin/python
+
+outputs:
+  root: olympus/models/olympus
+  run_name: 
+  # Worker CSV traces always go to episodes/. Render every completed emulation
+  # episode into plots/.
+  plot_episodes: true
+  plot_every_n: 1
+  require_state_logs: true
+
+# ── Orchestrator ──────────────────────────────────────────────────────────────
+# Runner-level knobs: episode dispatch, checkpoint snapshots, the learner RPC
+# port, and the oc_bridge listener. (Older configs may keep these keys flat at
+# the top level; the orchestrator reads both layouts.)
+orchestrator:
+  # Number of parallel Mininet collection slots.
+  n_parallel: 20
+  # Hard cap on total dispatched episodes; omit / null to run until interrupted.
+  episodes: 1000
+  # Copy an immutable snapshot of the rolling checkpoint (e.g.
+  # checkpoints/<alg>_<N>_cwnd_model.pt) every N completed episodes, whatever
+  # the algorithm. The copy runs in a background thread so it never delays the
+  # rolling checkpoint or episode dispatch. 0 / null disables snapshots.
+  save_every_episodes: 100
+  # TCP port of the learner's parameter/replay manager.
+  learner_port: 6301
+  # oc_bridge listener: `ss` scan period.
+  scan_ms: 20
+  # When true, oc_bridge attaches the first matching worker and never connects
+  # another during that listener lifetime.
+  listener_single_flow: true
+  # Workers read TCP state from tcp_sockopt directly; the listener need not emit.
+  listener_state_pipe: false
+  # Congestion-control name that the local listener scans for.
+  listener_cc: astraea
+  cport_base: 23000
+
+algorithms:
+
+
+  dreamer_v3:
+    training:
+      resume_from: null
+      batch_size: 16
+      seq_len: 48
+      min_replay: 1
+      replay_capacity: 400000
+      grad_clip: 1000.0
+      updates_per_step: 1
+      save_every: 500
+      param_broadcast_every: 50
+      kl_weight: 1.0
+      kl_balance: 0.8
+      kl_free_bits: 1.0
+      recon_weight: 1.0
+      reward_weight: 1.0
+      continue_weight: 1.0
+      lr_world: 1.0e-4
+      lr_actor: 3.0e-5
+      lr_critic: 3.0e-5
+      horizon: 15
+      gamma: 0.99
+      lam: 0.95
+      entropy_coef: 3.0e-3
+      action_l2_coef: 2.0e-2
+      action_smooth_coef: 2.0e-2
+      actor_log_std_min: -2.0
+      actor_log_std_max: 0.0
+      target_tau: 0.02
+      actor_warmup_steps: 1000
+      value_bins: 255
+      value_low: -20.0
+      value_high: 20.0
+      reward_bins: 255
+    agent:
+      hidden: 256
+      embed_dim: 128
+      h_dim: 256
+      latent_groups: 8
+      latent_classes: 8
+      reward_bins: 255
+      interval_ms: 20
+      cwnd_min: 10
+      cwnd_max: 10000
+      dead_flow_ms: 500
+      noise_start: 0.2
+      noise_end: 0.05
+      noise_decay_episodes: 300

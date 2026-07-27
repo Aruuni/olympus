@@ -1,0 +1,38 @@
+name: dreamer
+description: >
+  Dreamer single-flow training sweep. Episodes last 30 seconds and have at most
+  one link event at 15 seconds. The four equally represented modes are a
+  bandwidth-only change, an RTT-only change, both changing, or neither.
+  Multipliers follow the ranges used by the Tempest dynamic scenarios.
+shuffle: true
+
+sweep:
+  bws: [10, 20, 40, 60, 80, 100]
+  delays: [10, 20, 40, 60, 80]
+  bdp_mult: [4]
+  flows: 1
+  duration: 30
+  link_schedules:
+    # Bandwidth only (4/16 conditions).
+    - [{t: 15, bw_frac: 0.5}]
+    - [{t: 15, bw_frac: 0.75}]
+    - [{t: 15, bw_frac: 1.5}]
+    - [{t: 15, bw_frac: 2.0}]
+
+    # RTT only (4/16 conditions).
+    - [{t: 15, delay_frac: 0.5}]
+    - [{t: 15, delay_frac: 1.5}]
+    - [{t: 15, delay_frac: 2.0}]
+    - [{t: 15, delay_frac: 3.0}]
+
+    # Bandwidth and RTT together (4/16 conditions).
+    - [{t: 15, bw_frac: 0.5, delay_frac: 0.5}]
+    - [{t: 15, bw_frac: 0.5, delay_frac: 2.0}]
+    - [{t: 15, bw_frac: 2.0, delay_frac: 0.5}]
+    - [{t: 15, bw_frac: 2.0, delay_frac: 2.0}]
+
+    # Neither changes (duplicated to give this mode the same 4/16 weight).
+    - []
+    - []
+    - []
+    - []

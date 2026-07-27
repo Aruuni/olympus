@@ -164,8 +164,9 @@ class BatchPolicy:
         state = torch.as_tensor(states, device=self.device)
         with torch.inference_mode():
             embedding = self.world.encoder(state)
-            h, z, _, _ = self.world.rssm.step(
-                h, z, a_prev, embedding, sample=not self.deterministic)
+            # The worker never passes `sample=`, i.e. it always samples the
+            # posterior; `deterministic` selects the actor's mean action only.
+            h, z, _, _ = self.world.rssm.step(h, z, a_prev, embedding)
             action, _, _, _ = self.actor.act(
                 h, z, deterministic=self.deterministic)
         for index, key in enumerate(keys):

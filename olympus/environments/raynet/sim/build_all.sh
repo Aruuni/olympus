@@ -21,6 +21,10 @@
 #   ./build_all.sh -c|--clean-all  clean and rebuild EVERYTHING from scratch
 #   ./build_all.sh -s|--stage S    build a single stage:
 #                                  omnet | inet | ext | venv | raynet
+#   ./build_all.sh -e|--extensions a,b,c
+#                                  restrict the ext stage to these INET
+#                                  extensions (default: all). Useful when the
+#                                  satellite suite's apt deps are unavailable.
 #   ./build_all.sh -j N            parallel jobs (default: nproc)
 #   ./build_all.sh -h|--help
 #
@@ -43,7 +47,8 @@ export TCPPACED_PATH="$OMNET_PATH/samples/tcpPaced"
 export CUBIC_PATH="$OMNET_PATH/samples/cubic"
 export RAYNET_VENV_PATH=$RAYNET_PATH/.venv
 export CCACHE_DIR="${CCACHE_DIR:-/tmp/olympus-ccache}"
-mkdir -p "$CCACHE_DIR"
+export CCACHE_TEMPDIR="${CCACHE_TEMPDIR:-$CCACHE_DIR/tmp}"
+mkdir -p "$CCACHE_DIR" "$CCACHE_TEMPDIR"
 
 INET_REPO="https://github.com/Avian688/inet4.5.git"
 
@@ -76,6 +81,7 @@ JOBS="$(nproc)"
 STAGE=""
 REBUILD="false"
 CLEAN_ALL="false"
+EXTENSIONS=""
 
 log() { echo -e "\n=== [build_all] $* ($(date '+%H:%M:%S')) ==="; }
 die() { echo "ERROR: $*" >&2; exit 1; }
@@ -89,6 +95,9 @@ Usage:
   ./build_all.sh -c|--clean-all  clean and rebuild EVERYTHING from scratch
   ./build_all.sh -s|--stage S    build a single stage:
                                  omnet | inet | ext | venv | raynet
+  ./build_all.sh -e|--extensions a,b,c
+                                 restrict the ext stage to these INET
+                                 extensions (default: all)
   ./build_all.sh -j N            parallel jobs (default: nproc)
   ./build_all.sh -h|--help
 EOF
@@ -102,6 +111,7 @@ while [[ $# -gt 0 ]]; do
         -r|--rebuild)   REBUILD="true"; shift ;;
         -c|--clean-all) CLEAN_ALL="true"; shift ;;
         -s|--stage)     STAGE="${2:-}"; shift 2 ;;
+        -e|--extensions) EXTENSIONS="${2:-}"; shift 2 ;;
         -j)             JOBS="${2:-}"; shift 2 ;;
         -h|--help)      show_help; exit 0 ;;
         *)              die "unknown option: $1 (try --help)" ;;
@@ -185,6 +195,12 @@ ensure_extension_repo() {
     git clone "$repo" "$dir"
 }
 
+extension_selected() {
+    local name="$1"
+    [[ -z "$EXTENSIONS" ]] && return 0
+    [[ ",$EXTENSIONS," == *",$name,"* ]]
+}
+
 ensure_inet_extensions() {
     [[ -d "$OMNET_SAMPLES_PATH" ]] || die "OMNeT++ samples directory missing: $OMNET_SAMPLES_PATH"
 
@@ -194,6 +210,7 @@ ensure_inet_extensions() {
     for item in "${INET_EXTENSION_REPOS[@]}"; do
         name="${item%%:*}"
         repo="${item#*:}"
+        extension_selected "$name" || continue
         ensure_extension_repo "$name" "$repo"
     done
 }
@@ -205,11 +222,32 @@ install_apt_packages_if_needed() {
     local package
     local sudo_cmd=()
 
+    package_capability_available() {
+        case "$1" in
+            pkg-config)
+                command -v pkg-config >/dev/null 2>&1
+                ;;
+            libcurl4-openssl-dev)
+                command -v pkg-config >/dev/null 2>&1 && pkg-config --exists libcurl
+                ;;
+            libigraph-dev)
+                command -v pkg-config >/dev/null 2>&1 && pkg-config --exists igraph
+                ;;
+            libboost-dev)
+                [[ -f /usr/include/boost/version.hpp ]]
+                ;;
+            *)
+                return 1
+                ;;
+        esac
+    }
+
     command -v apt-get >/dev/null 2>&1 || return 0
     command -v dpkg-query >/dev/null 2>&1 || return 0
 
     for package in "$@"; do
-        if ! dpkg-query -W -f='${Status}' "$package" 2>/dev/null | grep -q 'install ok installed'; then
+        if ! dpkg-query -W -f='${Status}' "$package" 2>/dev/null | grep -q 'install ok installed' &&
+                ! package_capability_available "$package"; then
             missing+=("$package")
         fi
     done
@@ -238,11 +276,6 @@ build_extension_project() {
     local dir
     dir="$(extension_dir "$name")"
 
-    [[ -f "$dir/Makefile" ]] || {
-        log "extension: $name has no top-level Makefile; skipping build"
-        return 0
-    }
-
     [[ "$name" == "os3" ]] && install_apt_packages_if_needed os3 "${OS3_APT_PACKAGES[@]}"
     [[ "$name" == "leosatellites" ]] && install_apt_packages_if_needed leosatellites "${LEOSATELLITES_APT_PACKAGES[@]}"
     [[ "$name" == "bbr" ]] && install_apt_packages_if_needed bbr "${BBR_APT_PACKAGES[@]}"
@@ -254,7 +287,7 @@ build_extension_project() {
 
     log "extension: $name"
     cd "$dir"
-    [[ "$CLEAN_ALL" == "true" ]] && make cleanall || true
+    [[ "$CLEAN_ALL" == "true" && -f Makefile ]] && make cleanall || true
 
     local makemake_args
     makemake_args=(-f --deep --make-so -o "$name" -O out)
@@ -341,7 +374,13 @@ build_extension_project() {
     find src \( -name '*_m.cc' -o -name '*_m.h' \) -delete
     rm -rf out
     ( cd src && opp_makemake "${makemake_args[@]}" )
-    make -j"$JOBS" MODE=release
+    # Some extension repos (e.g. tcpGoodputApplications) ship no top-level
+    # Makefile; build from src/ directly in that case.
+    if [[ -f Makefile ]]; then
+        make -j"$JOBS" MODE=release
+    else
+        make -C src -j"$JOBS" MODE=release
+    fi
     [[ -f "src/lib${name}.so" ]] || die "lib${name}.so not produced"
 }
 
@@ -430,6 +469,7 @@ build_ext() {
     local name
     for item in "${INET_EXTENSION_REPOS[@]}"; do
         name="${item%%:*}"
+        extension_selected "$name" || { log "extension: $name not selected; skipping"; continue; }
         build_extension_project "$name"
     done
 }

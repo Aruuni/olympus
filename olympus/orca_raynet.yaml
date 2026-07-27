@@ -1,0 +1,178 @@
+# Orca recreation on RayNet (Abbasloo, Yen & Chao, "Classic Meets Learning",
+# SIGCOMM '20) — the RayNet/OMNeT++ twin of olympus/orca.yaml.
+#
+# Identical Orca learner, state, reward and action to olympus/orca.yaml; the ONLY
+# difference is the collection backend: link conditions come from the RayNet
+# OMNeT++ simulator instead of Mininet.  RayNet tolerates running without root.
+#
+# Run:
+#   ./venv_training/bin/python olympus/train.py --config olympus/orca_raynet.yaml
+#   # (or, matching the emulation recipe, via the orchestrator:)
+#   sudo -E env PATH="$PATH" HOME="$HOME" python3 olympus/orchestrator.py --config olympus/orca_raynet.yaml
+#
+# Orca is a single-agent deep-RL congestion controller. The learner is the
+# ORCA-repo-style TD3 in olympus/algorithms/orca (MULTI_AGENT = False), running
+# as one policy per flow — Orca's single-policy-per-flow deployment.
+#
+# State and reward are both Orca's own runtime plugins (selected below):
+#   * state  (olympus/algorithms/orca/states/orca_repo.py): 7 compact features
+#     per step (thr/max_bw, pacing/max_bw, loss penalty, samples/cwnd, delta_t,
+#     min_rtt/srtt, delay_metric) stacked over a flat rec_dim=10 history
+#     (70-dim policy input). On RayNet these are derived from the raw TCP metrics
+#     named by `observation_fields` in environments/raynet/orca.yaml.
+#   * reward (olympus/rewards/orca.py):
+#     R = ((throughput - 5*loss_rate) / max_bw) * delay_metric.
+
+runtime:
+  algorithm: orca
+  reward: orca
+  state: orca_repo
+  action: cwnd_multiplier
+
+actions:
+  # Orca's action (repo map_action: 4**action): a in [-1, 1] with
+  # cwnd <- cwnd * 4^a, i.e. -1 -> 0.25x, 0 -> hold, +1 -> 4.0x. The geometric
+  # cwnd_multiplier reproduces this exactly at multiplier_min/max = 0.25/4.0
+  # (mid = sqrt(0.25*4) = 1.0, so a=0 holds and to_multiplier(a) = 4^a).
+  cwnd_multiplier:
+    action_min: -1.0
+    action_max: 1.0
+    multiplier_min: 0.25
+    multiplier_max: 4.0
+    min_cwnd_change: 1
+
+environment:
+  # RayNet/OMNeT++ backend. `orca` is the scenario at
+  # environments/raynet/orca.yaml — the same static-link Orca sweep as the
+  # Mininet `orca` setup, plus the raw-TCP observation_fields the bridge needs.
+  # Used by the single-process train.py path; the orchestrator uses the
+  # `experience_collection` block below instead (which selects the same env).
+  type: raynet
+  environment_setup: orca
+
+# BDP-stratified simulation replay for the orchestrator/learner path. RayNet
+# finishes low-bandwidth episodes far faster in wall-clock, so a single FIFO sim
+# buffer fills with low-BDP / low-cwnd transitions and evicts the rare high-BDP
+# experience. One reserved sub-buffer per bandwidth-delay-product class (bw*rtt
+# in Mbps*ms), sampled evenly, keeps every link regime represented regardless of
+# how quickly it is produced. Single collection group, so batch_fraction = 1.0.
+# `n_buckets` lets the orchestrator auto-derive quantile edges from the `orca`
+# sweep (bws x delays), capped at the number of distinct BDP products; pin exact
+# edges instead with `bdp_edges: [...]`.
+experience_collection:
+  enabled: true
+  raynet:
+    environment_setup: orca
+    n_parallel: 24
+    # Total capacity, split evenly across the BDP classes; matches the flat
+    # replay_capacity so the stratified footprint is unchanged.
+    buffer_capacity: 400000
+    batch_fraction: 1.0
+    strata:
+      n_buckets: 20
+
+# Orca's fixed delay target feature (ms) — its reward/state reference, not the
+# emulated RTT. Read via state_options.orca_target_ms by the orca worker.
+state_options:
+  orca_target_ms: 50.0
+
+# delay_metric margin coefficient used by the orca transform (envwrapper.py
+# default 1.25). Placed under reward for config-shape compatibility.
+reward:
+  delay_margin_coef: 1.25
+
+# BBR-style probe off: Orca's agent has full cwnd control.
+bbr_probe:
+  enabled: false
+  interval_s: 5.0
+  duration_s: 0.2
+  factor: 0.5
+  min_rtt_window_s: 5.0
+
+paths:
+  listener: olympus/oc_bridge
+  py: ./venv_training/bin/python
+  # RayNet/OMNeT++ paths auto-resolve to the vendored submodules under
+  # olympus/environments/raynet/sim/ ; set raynet_path/omnet_path here to override.
+
+outputs:
+  root: olympus/models/reps
+  # run_name: orca_raynet_recreation
+  plot_episodes: true
+
+orchestrator:
+  n_parallel: 24
+  episodes: 1000
+  save_every_episodes: 100
+  learner_port: 6301
+  scan_ms: 20
+  # Single flow per listener lifetime (Orca controls one flow per policy).
+  listener_single_flow: true
+  listener_state_pipe: false
+  # On RayNet the listener_cc name selects the underlying tcpAlgorithmClass under
+  # the DeepCC RL wrapper (RAYNET_CC_ALGO_BY_LISTENER in environments/raynet/env.py):
+  # `orca` -> TcpCubic, i.e. Cubic runs slow start and the agent takes over cwnd
+  # at slow-start exit — Orca's CUBIC->agent handoff. (Astraea/CleanSlate use
+  # TcpPacedNoCC instead.)
+  listener_cc: orca
+  cport_base: 23000
+
+algorithms:
+
+  orca:
+    training:
+      resume_from: null
+      # TD3 settings from the released Orca agent (Soheil-ab/Orca). replay
+      # capacity follows the Olympus convention (the repo's memsize is far
+      # larger); gamma/tau/lr are the repo values.
+      batch_size: 256
+      min_replay: 50000
+      replay_capacity: 400000
+      gamma: 0.995
+      target_tau: 0.001
+      lr_actor: 1.0e-4
+      lr_critic: 1.0e-3
+      # TD3 delayed policy + target-policy smoothing (repo values).
+      actor_update_every: 2
+      target_noise_std: 0.1
+      target_noise_clip: 0.2
+      # Deviation from the repo (which used no clipping): with an MSE critic,
+      # gamma=0.995, and Orca's unbounded-below reward, the value diverges
+      # (Q -> -20, critic_loss -> hundreds; orca_20260718-013336). grad_clip
+      # bounds each critic step; reward_clip bounds the per-step reward fed to
+      # the MSE target (and, via reward_clip/(1-gamma), the y-target clamp).
+      grad_clip: 1.0
+      reward_clip: 1.0
+      updates_per_step: 1
+      save_every: 500
+      param_broadcast_every: 20
+      persist_replay_on_stop: true
+    agent:
+      # Actor/critic hidden widths (repo h1_shape/h2_shape).
+      hidden: 256
+      head_hidden: 256
+      # Orca's flat state history depth: 10 stacked 7-feature frames.
+      rec_dim: 10
+      # MTP (Monitoring Time Period) — the agent's decision cadence: state is
+      # aggregated over one MTP and one action applied per MTP. Orca paper
+      # base MTP: 20ms. On RayNet this is the simulator's fixedIntervalDuration
+      # (interval_ms), distinct from the socket scan cadence.
+      interval_ms: 30
+      cwnd_min: 4
+      cwnd_max: 4000
+      dead_flow_ms: 500
+      # Orca's CUBIC->agent handoff: CUBIC runs the flow through slow start
+      # (letting it discover the link rate and pin the reward's max_bw), then
+      # the agent takes over permanently at slow-start exit (first loss; see
+      # worker.py). Without this the per-step cwnd override smothers CUBIC's
+      # probe, max_bw stays low, and the self-normalized reward settles at
+      # ~49% utilization. cubic_warmup_max_s caps the wait for links that
+      # never lose during warmup: handoff fires at first loss or this many
+      # seconds, whichever comes first.
+      cubic_warmup: true
+      cubic_warmup_max_s: 1.0
+      # Gaussian exploration noise on the actor output during collection.
+      # Paper Table 3: fixed N(0, 0.2), no decay (start == end).
+      noise_start: 0.2
+      noise_end: 0.2
+      noise_decay_episodes: 300

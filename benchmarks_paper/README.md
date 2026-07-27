@@ -7,6 +7,7 @@ Congestion Control in LEO Satellite Networks*](https://dl.ifip.org/db/conf/netwo
 ```
 benchmarks_paper/
   config.yaml      # MASTER: the shared approach list
+  paper_figure.py  # equal-size intra/inter/efficiency paper figure
   paper_style.py   # shared SciencePlots/LaTeX styling (matches core/plotting.py)
   runtime.py       # self-contained trial engine (no orchestrator)
   common.py        # suite driver: case grid, resume, summaries
@@ -14,6 +15,8 @@ benchmarks_paper/
   inter/           # Figure 4 — inter-RTT fairness
     benchmark.py  config.yaml  plot.py  data/
   intra/           # Figure 5 — intra-RTT fairness (goodput + delay ratio)
+    benchmark.py  config.yaml  plot.py  data/
+  efficiency/      # Figure 9 — efficiency scatter (4 staggered flows)
     benchmark.py  config.yaml  plot.py  data/
 ```
 
@@ -47,6 +50,14 @@ multiplier and disables NIC offloads (restored on exit).
   queue to 0.2x, 1x, and 4x the joining flow's BDP.
 - **intra** sweeps both flows together at a 1x BDP queue. It also records a
   per-cell delay ratio (SRTT / reference RTT) for the paper's delay figure.
+- **efficiency** reproduces the mininettestbed figure-9 setup: four
+  same-protocol flows staggered 25 s apart (each 125 s) at 20/200 ms RTT on
+  the FIFO (drop-tail) bottleneck with a 1x BDP queue. Each run records
+  normalized throughput (aggregate goodput / BW), normalized delay (pooled
+  SRTT / RTT over each flow's 100 s window), and the retransmission rate. The
+  figure is the scatter of normalized throughput vs normalized delay
+  (x inverted) with per-run confidence ellipses:
+  `efficiency_scatter_qmult1.{pdf,png}`.
 
 ## Run
 
@@ -78,7 +89,15 @@ Regenerate only the figures from existing data:
 
 ```bash
 ./venv_training/bin/python -m benchmarks_paper.inter.plot
+./venv_training/bin/python -m benchmarks_paper.efficiency.plot
 ./venv_training/bin/python -m benchmarks_paper.intra.plot
+```
+
+Build the combined, equal-size three-panel figure (written to
+`benchmarks_paper/paper_figure.{pdf,png}`):
+
+```bash
+./venv_training/bin/python -m benchmarks_paper.paper_figure
 ```
 
 ## Styling

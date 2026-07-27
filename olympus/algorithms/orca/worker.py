@@ -358,6 +358,23 @@ def run():
                 prev_state = None
                 prev_action = 0.0
                 a, mult, new_cwnd = 0.0, 1.0, cur_cwnd
+                # An action-gated simulation backend (RayNet) only advances when
+                # the worker submits a cwnd; unlike a real kernel socket under
+                # emulation, its CUBIC cannot ramp on its own while we stay
+                # silent. Write the just-observed cwnd straight back — a no-op
+                # override, since the sim's CUBIC has already grown snd_cwnd from
+                # ACKs within the interval — so CUBIC keeps driving the rampup
+                # while the episode still steps and t_s advances toward
+                # cubic_warmup_max_s. Without this the run deadlocks at the reset
+                # frame and the handoff timeout never fires. Emulation keeps the
+                # hands-off behaviour (the kernel advances on its own).
+                if simulation_backend:
+                    try:
+                        flow_backend.set_cwnd(flow_fd, cur_cwnd)
+                    except Exception as e:
+                        print(f'[orca worker] warmup set_cwnd failed: {e} - '
+                              'exiting', flush=True)
+                        break
             else:
                 if prev_state is not None and flow_active and mgr:
                     exp_buf.append(model.Experience(

@@ -23,6 +23,7 @@ import json
 import math
 import os
 from pathlib import Path
+import re
 import signal
 import subprocess
 import sys
@@ -297,6 +298,124 @@ def delay_ratio_stats(flows: list, rtt_ref_ms: float, bench: dict) -> dict:
     }
 
 
+def _state_srtt_flows(state_logs: list, flow_plan: list) -> list:
+    """Per-flow SRTT traces from RL state logs, shaped like iperf_rtt_flows."""
+    out = []
+    for path in state_logs or []:
+        match = re.search(r'_(?:flow|a)(\d+)\.csv$', path)
+        flow = int(match.group(1)) + 1 if match else len(out) + 1
+        plan = (flow_plan[flow - 1] if flow - 1 < len(flow_plan)
+                else {'start': 0.0, 'end': float('inf')})
+        t, srtt = [], []
+        try:
+            with open(path, newline='') as handle:
+                for row in csv.DictReader(handle):
+                    t_s = _finite_float(row.get('t_s'))
+                    value = _finite_float(row.get('srtt_ms'))
+                    if not math.isfinite(value):
+                        value = _finite_float(row.get('avg_urtt_ms'))
+                    if math.isfinite(t_s) and math.isfinite(value):
+                        t.append(t_s)
+                        srtt.append(value)
+        except (OSError, ValueError):
+            continue
+        out.append({
+            'flow': flow, 'start': float(plan['start']),
+            'end': float(plan['end']),
+            't': np.asarray(t, dtype=float),
+            'iperf_rtt': np.asarray(srtt, dtype=float),
+        })
+    return out
+
+
+def _retr_mbps_samples(run_dir: str, flow_plan: list) -> np.ndarray:
+    """Pooled per-interval retransmission rate (Mbps) from iperf client JSONs.
+
+    Follows the paper's segment conversion (1500 B * 8 / 2^20 per retransmit).
+    Empty when no client JSON carries retransmit counts (original Orca).
+    """
+    pooled = []
+    for item in flow_plan:
+        client_json = os.path.join(
+            run_dir, f'iperf_client_flow{int(item["flow"])}.json')
+        try:
+            with open(client_json) as handle:
+                data = json.load(handle)
+        except (OSError, ValueError):
+            continue
+        for interval in data.get('intervals', []) or []:
+            summary = interval.get('sum', {}) or {}
+            retr = summary.get('retransmits')
+            span = _finite_float(summary.get('end'), 0.0) - _finite_float(
+                summary.get('start'), 0.0)
+            if retr is None or span <= 0:
+                continue
+            pooled.append(float(retr) * 1500.0 * 8.0 / (2 ** 20) / span)
+    return np.asarray(pooled, dtype=float)
+
+
+def efficiency_stats(flows: list, flow_plan: list, bench: dict,
+                     rtt_ref_ms: float, run_dir: str,
+                     state_logs: list = None) -> dict:
+    """Per-run efficiency metrics, following the paper's figure-9 pipeline.
+
+    - normalized throughput: per-second aggregate receiver goodput / link BW,
+      over every second with at least one scheduled flow;
+    - normalized delay: pooled per-flow SRTT / configured RTT, each flow scored
+      over its own ``[start, start + score_window_s]`` window (SRTT comes from
+      RL state logs when present, else iperf client RTT / the Orca ss sidecar);
+    - retransmission rate in Mbps (paper's segment conversion), when the
+      capture exposes retransmit counts.
+    """
+    bw = float(bench['bandwidth_mbps'])
+    window = float(bench.get('score_window_s', 100.0))
+    out = {}
+
+    series = _binned_series(flows, flow_plan, {
+        'duration_s': int(bench['duration_s']),
+        'bw_mbps': bw,
+        'score_window_s': window,
+    })
+    total = np.asarray(series.get('total', []), dtype=float)
+    active = np.asarray(series.get('active_count', []), dtype=float)
+    if active.size != total.size:
+        active = np.ones(total.size, dtype=float)
+    mask = np.isfinite(total) & (active > 0)
+    if mask.any():
+        norm_thr = total[mask] / bw
+        out['norm_throughput_mean'] = float(np.mean(norm_thr))
+        out['norm_throughput_std'] = (
+            float(np.std(norm_thr, ddof=1)) if norm_thr.size > 1 else 0.0)
+
+    rtt_flows = _state_srtt_flows(state_logs, flow_plan) if state_logs else []
+    if not any(np.asarray(f.get('t', [])).size for f in rtt_flows):
+        rtt_flows = iperf_rtt_flows(run_dir, flow_plan)
+    pooled = []
+    for flow in rtt_flows:
+        t = np.asarray(flow.get('t', []), dtype=float)
+        rtt = np.asarray(flow.get('iperf_rtt', []), dtype=float)
+        if t.size == 0 or t.size != rtt.size:
+            continue
+        start = float(flow.get('start', 0.0))
+        sel = (np.isfinite(t) & np.isfinite(rtt) & (rtt > 0)
+               & (t >= start) & (t < start + window))
+        if sel.any():
+            pooled.append(rtt[sel] / float(rtt_ref_ms))
+    if pooled and rtt_ref_ms and rtt_ref_ms > 0:
+        values = np.concatenate(pooled)
+        out['norm_delay_mean'] = float(np.mean(values))
+        out['norm_delay_std'] = (
+            float(np.std(values, ddof=1)) if values.size > 1 else 0.0)
+
+    retr = _retr_mbps_samples(run_dir, flow_plan)
+    retr = retr[np.isfinite(retr)]
+    if retr.size:
+        out['retr_mbps_mean'] = float(np.mean(retr))
+        out['retr_mbps_std'] = (
+            float(np.std(retr, ddof=1)) if retr.size > 1 else 0.0)
+    return out
+
+
 def copy_and_measure(cport: int, run_dir: str, flow_plan: list,
                      bench: dict) -> tuple:
     error = copy_receiver_iperf_outputs(cport, run_dir, flow_plan, bench)
@@ -319,7 +438,7 @@ def _mininet_env(bench: dict, cc_algo: str, cport: int, instance_id: int,
                  qsize: int, qmult: float, per_flow_delays: list,
                  unique_cports: bool = False) -> MininetEnv:
     return MininetEnv(
-        n=2,
+        n=len(per_flow_delays),
         bw=float(bench['bandwidth_mbps']),
         delay=min(per_flow_delays),
         qsize=qsize,
@@ -337,8 +456,8 @@ def _mininet_env(bench: dict, cc_algo: str, cport: int, instance_id: int,
 def run_kernel_trial(cc_algo: str, bench: dict, flow_plan: list, cport: int,
                      instance_id: int, run_dir: str, qsize: int,
                      qmult: float, per_flow_delays: list) -> tuple:
-    """Two identical kernel-CC flows (also the released-Astraea path)."""
-    clear_iperf_tmp_outputs(cport, 2)
+    """N identical kernel-CC flows (also the released-Astraea path)."""
+    clear_iperf_tmp_outputs(cport, len(flow_plan))
     env = _mininet_env(bench, cc_algo, cport, instance_id, qsize, qmult,
                        per_flow_delays)
     try:
@@ -361,7 +480,7 @@ def run_orca_paper_trial(approach: dict, bench: dict, flow_plan: list,
                          cport: int, instance_id: int, run_dir: str,
                          qsize: int, qmult: float,
                          per_flow_delays: list) -> tuple:
-    """Two original-Orca flows (sender.sh/receiver.sh per flow)."""
+    """N original-Orca flows (sender.sh/receiver.sh per flow)."""
     settings = _orca_settings(approach, bench)
     env = _mininet_env(bench, 'cubic', cport, instance_id, qsize, qmult,
                        per_flow_delays)
@@ -378,7 +497,7 @@ def run_orca_paper_trial(approach: dict, bench: dict, flow_plan: list,
         measure_interval_s=float(bench['measure_interval_s']),
         settings=settings)
     flows = receiver_iperf_flows(run_dir, flow_plan)
-    if not error and flows_have_receiver_goodput(flows, 2):
+    if not error and flows_have_receiver_goodput(flows, len(flow_plan)):
         metrics = fairness_metrics_from_flows(flows, flow_plan, {
             'duration_s': int(bench['duration_s']),
             'bw_mbps': float(bench['bandwidth_mbps']),

@@ -1,0 +1,36 @@
+# Orca RayNet scenario — the RayNet/OMNeT++ twin of environments/mininet/orca.yaml.
+#
+# Same sweep as the Mininet Orca environment (Abbasloo et al., "Classic Meets
+# Learning", SIGCOMM '20): a single flow over a static link, no mid-episode
+# changes, swept across the Orca bandwidth/RTT grid at a 2x BDP queue.  The only
+# RayNet-specific addition is `observation_fields`, which names the raw TCP
+# metrics the CleanSlate/DeepCC bridge emits so the Olympus `orca_repo` state
+# and `orca` reward plugins can derive Orca's seven features exactly as they do
+# on Mininet.
+name: orca
+description: RayNet twin of the Mininet Orca sweep (static links, Orca BW/RTT grid).
+
+# Single fixed config per cell; the pool still shuffles cell order.
+shuffle: true
+
+sweep:
+  bws: [6, 12, 24, 48, 96, 192]
+  delays: [4, 10, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200]
+  bdp_mult: [2]
+  flows: 1
+  duration: 60
+  # Raw TCP observation vector emitted by the RayNet DeepCC bridge, mapped to the
+  # named fields the orca_repo state reads (throughput, srtt, min_rtt, cwnd,
+  # pacing_rate, …).  Matches environments/raynet/dynamic.yaml / dreamer.yaml.
+  observation_fields:
+    - {name: avg_thr, index: 0, aliases: [throughput]}
+    - {name: avg_urtt, index: 1, aliases: [delay_us]}
+    - {name: min_rtt, index: 2, aliases: [min_rtt_us]}
+    - {name: srtt_us, index: 3}
+    - {name: cwnd, index: 4}
+    - {name: packets_out, index: 5}
+    - {name: pacing_rate, index: 6}
+    - {name: retrans_out, index: 7}
+  link_schedules:
+    # Orca has no changes — static link for the whole episode.
+    - []

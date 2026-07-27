@@ -45,6 +45,11 @@ def main():
     parser.add_argument(
         "--trace-dir", default="/tmp/olympus-deployment-traces",
         help="directory where per-socket model workers write CSV traces")
+    parser.add_argument(
+        "--cc-name",
+        help="attach only to sockets already using this congestion control; "
+             "defaults to deployment.discovery.cc_algorithm, else the "
+             "config's listener_cc, else astraea")
     args = parser.parse_args()
 
     config = os.path.abspath(args.config)
@@ -85,17 +90,23 @@ def main():
         OLYMPUS_TRACE_DIR=os.path.abspath(args.trace_dir),
         PYTHONPATH=pythonpath,
     )
+    # The training side names this `listener_cc`; honour it so a resolved
+    # training config deploys against the same base CC it was trained on.
+    cc_name = str(args.cc_name
+                  or discovery.get("cc_algorithm")
+                  or cfg.get("listener_cc")
+                  or "astraea")
     command = [
         listener,
         "--mode", str(discovery.get("mode", "mininet")),
-        "--cc-name", str(discovery.get("cc_algorithm", "astraea")),
+        "--cc-name", cc_name,
         "--script", worker,
         "--config", config,
         "--model", checkpoint,
         "--scan-ms", str(discovery.get("scan_ms", 10)),
         "--ipv4-only", "1" if discovery.get("ipv4_only", True) else "0",
     ]
-    print(f"[deployment] per-socket {algorithm} workers; "
+    print(f"[deployment] per-socket {algorithm} workers; cc={cc_name}; "
           f"checkpoint={checkpoint}", flush=True)
     child = subprocess.Popen(
         command, env=env, cwd=root, start_new_session=True)

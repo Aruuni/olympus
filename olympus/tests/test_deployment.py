@@ -275,6 +275,81 @@ class DeploymentPerFlowTest(unittest.TestCase):
             set_cwnd.assert_called_once_with(7, 11)
 
 
+    def _run_orca_warmup_worker(self, samples, warmup_s):
+        """Drive the per-flow worker over `samples`, returning its set_cwnd calls."""
+        state_module = mock.Mock()
+        state_module.STATE_DIM = 2
+        state_module.normalize_state.return_value = np.asarray(
+            [0.25, -0.5], dtype=np.float32)
+        action_module = mock.Mock()
+        action_module.apply_cwnd.return_value = 11
+        policy = mock.Mock()
+        policy.infer.return_value = 0.1
+
+        with tempfile.TemporaryDirectory() as directory:
+            directory = Path(directory)
+            config = directory / "config.yaml"
+            config.write_text(yaml.safe_dump({
+                "runtime": {"algorithm": "orca", "state": "fake",
+                            "action": "cwnd_multiplier"},
+                "agent": {"interval_ms": 20, "cwnd_min": 4, "cwnd_max": 10000,
+                          "cubic_warmup": True,
+                          "cubic_warmup_max_s": warmup_s},
+            }))
+            environ = {
+                "OLYMPUS_CONFIG": str(config),
+                "OLYMPUS_CHECKPOINT": str(directory / "model.pt"),
+                "OLYMPUS_FLOW_FD": "7",
+                "OLYMPUS_FLOW_ID": "99",
+            }
+            finished = local_worker.flow_backend.SimulationFinished()
+            # Each poll advances the clock by half the warmup window.
+            clock = [0.0]
+
+            def tick():
+                clock[0] += warmup_s / 2.0
+                return clock[0]
+
+            with mock.patch.dict(os.environ, environ), \
+                    mock.patch.object(local_worker, "load_state_module",
+                                      return_value=state_module), \
+                    mock.patch.object(local_worker, "load_action_module",
+                                      return_value=action_module), \
+                    mock.patch.object(local_worker, "FlowPolicy",
+                                      return_value=policy), \
+                    mock.patch.object(
+                        local_worker.flow_backend, "get_tcp_deepcc_info",
+                        side_effect=list(samples) + [finished]), \
+                    mock.patch.object(
+                        local_worker.flow_backend, "set_cwnd") as set_cwnd, \
+                    mock.patch.object(local_worker.time, "monotonic",
+                                      side_effect=tick), \
+                    mock.patch.object(local_worker, "sleep_to_grid",
+                                      side_effect=lambda t, _i: t):
+                local_worker.run()
+        return policy, set_cwnd
+
+    def test_orca_warmup_ignores_loss_and_holds_for_the_full_window(self):
+        """Loss inside the window must NOT hand over early."""
+        lossy = {"cwnd": 10, "avg_thr": 1_000_000, "avg_urtt": 20_000,
+                 "cnt": 4, "thr_cnt": 3, "srtt_us": 160_000,
+                 "min_rtt": 20_000, "loss_bytes": 4344}
+        policy, set_cwnd = self._run_orca_warmup_worker([dict(lossy)], 1.0)
+        policy.infer.assert_not_called()
+        set_cwnd.assert_not_called()
+
+    def test_orca_warmup_hands_over_once_the_window_elapses(self):
+        raw = {"cwnd": 10, "avg_thr": 1_000_000, "avg_urtt": 20_000,
+               "cnt": 4, "thr_cnt": 3, "srtt_us": 160_000, "min_rtt": 20_000}
+        policy, set_cwnd = self._run_orca_warmup_worker(
+            [dict(raw), dict(raw), dict(raw)], 1.0)
+        # Samples land at t=0.5/1.0/1.5s (the clock also ticks once at setup),
+        # so the agent owns the tail of the run but not its start.
+        self.assertGreater(policy.infer.call_count, 0)
+        self.assertLess(policy.infer.call_count, 3)
+        set_cwnd.assert_called_with(7, 11)
+
+
 class PublicIperfTest(unittest.TestCase):
     def test_parallel_stream_interval_series(self):
         stream = lambda bps: {

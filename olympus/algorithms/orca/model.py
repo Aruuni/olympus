@@ -28,6 +28,7 @@ from olympus.common.state_plugins import (
     current_state_name,
     load_state_module,
 )
+from olympus.common import policy as policy_contract
 
 _ACTION_PLUGIN = load_action_module()
 
@@ -252,3 +253,24 @@ def actor_loss(actor: Actor, critic: TwinCritic, s_batch: torch.Tensor) -> Actor
         a_mean=float(a.mean().item()),
         a_abs=float(a.abs().mean().item()),
     )
+
+
+# ── Deployment factory ────────────────────────────────────────────────────────
+
+def build_policy(ckpt, agent_cfg=None, training_cfg=None, device='cpu',
+                 deterministic=True):
+    """Load this checkpoint's actor as an inference Policy.
+
+    Orca's actor is feedforward: no state is carried between steps. The
+    CUBIC->agent handoff is a worker/service concern, not a policy one. See
+    olympus/common/policy.py for the contract.
+    """
+    hidden = policy_contract.resolved_hidden(agent_cfg, 'hidden', 256)
+    head_hidden = policy_contract.resolved_hidden(
+        agent_cfg, 'head_hidden', hidden)
+    hidden, head_hidden = actor_arch_from_checkpoint(ckpt, hidden, head_hidden)
+    actor = Actor(STATE_DIM, hidden, head_hidden)
+    actor.load_state_dict(policy_contract.actor_state_dict(ckpt))
+    actor.to(device).eval()
+    return policy_contract.StatelessActorPolicy(
+        'orca', STATE_DIM, actor, deterministic)

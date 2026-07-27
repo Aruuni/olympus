@@ -1,0 +1,24 @@
+name: proteus
+description: >
+  RayNet twin of the Proteus Mininet environment: static single-flow episodes
+  over the same 1, 10, 20, ..., 100 Mbps and ms RTT grid, with BDP-scaled
+  queue depths.
+shuffle: true
+
+sweep:
+  bws: &range_1_100_step_10 [1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+  delays: *range_1_100_step_10
+  bdp_mult: [0.5, 1, 2, 3, 6, 12]
+  flows: 1
+  duration: 30
+  observation_fields:
+    - {name: avg_thr, index: 0, aliases: [throughput]}
+    - {name: avg_urtt, index: 1, aliases: [delay_us]}
+    - {name: min_rtt, index: 2, aliases: [min_rtt_us]}
+    - {name: srtt_us, index: 3}
+    - {name: cwnd, index: 4}
+    - {name: packets_out, index: 5}
+    - {name: pacing_rate, index: 6}
+    - {name: retrans_out, index: 7}
+  link_schedules:
+    - []

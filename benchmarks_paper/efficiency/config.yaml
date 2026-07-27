@@ -1,0 +1,34 @@
+# Efficiency sub-config (mininettestbed figure-9 reproduction).
+#
+# Inherits the shared approach list from the master config; every dumbbell
+# parameter lives here.  Four same-protocol flows staggered 25 s apart (each
+# 125 s) at 10/100 ms RTT on a FIFO (drop-tail) bottleneck with a 1x BDP
+# queue; each flow is scored over its own 100 s window.
+
+approaches_config: ../config.yaml
+output_root: data
+
+benchmark:
+  bandwidth_mbps: 100
+  rtt_ms_values: [10, 100]
+  runs_per_cell: 5
+  duration_s: 200
+  first_flow_start_s: 0
+  second_flow_start_s: 25
+  score_window_s: 100
+  # Receiver goodput sampling interval (iperf3 -i) — measurement only.
+  # The agent decision cadence (MTP) is interval_ms in each approach's
+  # training config (olympus/orca.yaml, olympus/astraea.yaml) and, for the
+  # paper Astraea baseline, astraea_service.py — not set here.
+  measure_interval_s: 1.0
+  n_parallel: 5
+  kernel_cport_base: 55000
+  deterministic_inference: true
+  tcp_buffer_multiplier: 22
+  disable_offload: true
+
+  efficiency:
+    bdp_multipliers: [1]
+    flows: 4
+    flow_stagger_s: 25
+    flow_duration_s: 125

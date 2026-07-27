@@ -11,7 +11,7 @@ approaches:
     name: astraea-paper
     enabled: true
     kind: astraea
-    plot_label: Astraea (paper)
+    plot_label: Astraea (Original)
     protocol: astraea
 
   - data_folder: astraea-olympus
@@ -26,13 +26,14 @@ approaches:
     protocol: astraea
     marker: '2'
     config: olympus/astraea.yaml
-    checkpoint: olympus/models/reps/ma_td3_20260720-053858/checkpoints/ma_td3_700_cwnd_model.pt
+    checkpoint: olympus/models/reps/ma_td3_20260723-234929/checkpoints/ma_td3_450_cwnd_model.pt
+
 
   - data_folder: orca-paper
     name: orca-paper
     enabled: true
     kind: orca
-    plot_label: Orca (original)
+    plot_label: Orca (Original)
     protocol: orca
     orca:
       install_dir: /its/home/mm2350/Desktop/mininettestbed/CC/Orca
@@ -49,17 +50,18 @@ approaches:
     color: '#0C5DA5'
     marker: o
     config: olympus/orca.yaml
-    checkpoint: olympus/models/reps/orca_20260718-165340/checkpoints/orca_1000_cwnd_model.pt
+    checkpoint: olympus/models/reps/orca_20260720-213851/checkpoints/orca_400_cwnd_model.pt
 
-  # - data_folder: dreamer-single
-  #   name: dreamer-single
-  #   enabled: false
-  #   kind: model
-  #   algorithm: dreamer_v3
-  #   state: CHANGE_ME
-  #   reward: CHANGE_ME
-  #   environment: CHANGE_ME
-  #   plot_label: DREAMER (single agent)
-  #   protocol: dreamer
-  #   config: CHANGE_ME/config.resolved.yaml
-  #   checkpoint: CHANGE_ME/dreamer_v3_cwnd_model.pt
+  - data_folder: dreamer
+    name: dreamer
+    enabled: true
+    kind: model
+    algorithm: dreamer_v3
+    state: dreamer
+    reward: dreamer
+    environment: dreamer
+    plot_label: Dreamer
+    protocol: dreamer
+    marker: s
+    config: olympus/dreamer.yaml
+    checkpoint: olympus/models/olympus/dreamer_v3_20260723-044304/checkpoints/dreamer_v3_cwnd_model.pt

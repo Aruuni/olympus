@@ -30,6 +30,7 @@ from olympus.common.state_plugins import (
     current_state_name,
     load_state_module,
 )
+from olympus.common import policy as policy_contract
 from olympus.algorithms.dreamer_v3.model import (
     ACTION_DIM,
     Actor,
@@ -375,6 +376,7 @@ __all__ = [
     'STATE_FEATURES',
     'STATE_FEATURE_VERSION',
     'TwoHot',
+    'build_policy',
     'actor_log_prob',
     'assert_checkpoint_state_compatible',
     'lambda_return',
@@ -389,3 +391,37 @@ __all__ = [
     'symlog',
     'symexp',
 ]
+
+
+# ── Deployment factory ────────────────────────────────────────────────────────
+
+def build_policy(ckpt, agent_cfg=None, training_cfg=None, device='cpu',
+                 deterministic=True):
+    """Load this checkpoint's world model + actor as an inference Policy.
+
+    Decentralized execution: local_world_model plus the shared actor, exactly what
+    worker.py runs. The RSSM posterior is always sampled (worker.py never
+    passes `sample=`); `deterministic` only selects the actor's mean action.
+    See olympus/common/policy.py for the contract.
+    """
+    agent_cfg = agent_cfg or {}
+    training_cfg = training_cfg or {}
+    hidden = policy_contract.resolved_hidden(agent_cfg, 'hidden', 256)
+    embed = policy_contract.resolved_hidden(agent_cfg, 'embed_dim', 128)
+    h_dim = policy_contract.resolved_hidden(agent_cfg, 'h_dim', 256)
+    groups = policy_contract.resolved_hidden(agent_cfg, 'latent_groups', 8)
+    classes = policy_contract.resolved_hidden(agent_cfg, 'latent_classes', 8)
+    bins = policy_contract.resolved_hidden(agent_cfg, 'reward_bins', 255)
+    world = LocalWorldModel(
+        STATE_DIM, ACTION_DIM, hidden, embed, h_dim, groups, classes, bins)
+    actor = Actor(
+        h_dim, world.latent_dim, hidden,
+        log_std_min=float(training_cfg.get('actor_log_std_min', -2.0)),
+        log_std_max=float(training_cfg.get('actor_log_std_max', 0.0)))
+    world.load_state_dict(ckpt['local_world_model'], strict=False)
+    actor.load_state_dict(ckpt['actor'], strict=False)
+    world.to(device).eval()
+    actor.to(device).eval()
+    return policy_contract.LatentWorldModelPolicy(
+        'ma_dreamer', STATE_DIM, world, actor, ACTION_DIM, device,
+        deterministic)

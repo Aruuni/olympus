@@ -22,11 +22,10 @@ APT_PACKAGES=(
 ASTRAEA_VENV="$ROOT/astraea/venv_astraea"
 TRAINING_VENV="$ROOT/venv_training"
 SIM_BUILD_ALL="$ROOT/olympus/environments/raynet/sim/build_all.sh"
+# inet4.5 and the INET extensions are no longer submodules; build_all.sh clones
+# them into omnetpp/samples/ itself.
 SIM_SUBMODULES=(
     "$ROOT/olympus/environments/raynet/sim/omnetpp"
-    "$ROOT/olympus/environments/raynet/sim/inet4.5"
-    "$ROOT/olympus/environments/raynet/sim/tcpPaced"
-    "$ROOT/olympus/environments/raynet/sim/cubic"
     "$ROOT/olympus/environments/raynet/sim/raynet"
 )
 

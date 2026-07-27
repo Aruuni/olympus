@@ -33,6 +33,7 @@ from olympus.common.state_plugins import (
     state_meta,
 )
 from olympus.common.action_plugins import load_action_module
+from olympus.common import policy as policy_contract
 
 
 # ── State / action constants ──────────────────────────────────────────────────
@@ -406,3 +407,20 @@ class ForwardModelEnsemble(nn.Module):
         delta_s = sample[..., :self.state_dim]
         reward  = sample[..., self.state_dim]
         return delta_s, reward
+
+
+# ── Deployment factory ────────────────────────────────────────────────────────
+
+def build_policy(ckpt, agent_cfg=None, training_cfg=None, device='cpu',
+                 deterministic=True):
+    """Load this checkpoint's actor as an inference Policy.
+
+    Mirrors worker.py: a single `hidden` width, no head override. See
+    olympus/common/policy.py for the contract.
+    """
+    hidden = policy_contract.resolved_hidden(agent_cfg, 'hidden', 128)
+    actor = Actor(STATE_DIM, hidden)
+    actor.load_state_dict(policy_contract.actor_state_dict(ckpt))
+    actor.to(device).eval()
+    return policy_contract.RecurrentActorPolicy(
+        'mbpo_td3', STATE_DIM, actor, deterministic)
