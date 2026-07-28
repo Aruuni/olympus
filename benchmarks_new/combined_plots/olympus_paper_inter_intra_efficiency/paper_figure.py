@@ -5,19 +5,19 @@ import argparse
 from pathlib import Path
 import sys
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from benchmarks_new.paper_efficiency import (
+from benchmarks_new.combined_plots.olympus_paper_inter_intra_efficiency.paper_efficiency import (
     efficiency_groups,
     scenario_settings as efficiency_settings,
 )
-from benchmarks_new.paper_fairness import (
+from benchmarks_new.combined_plots.olympus_paper_inter_intra_efficiency.paper_fairness import (
     metric_groups,
     scenario_settings as fairness_settings,
 )
-from benchmarks_new.paper_plotting import (
+from benchmarks_new.combined_plots.olympus_paper_inter_intra_efficiency.paper_plotting import (
     add_run_legend,
     draw_efficiency,
     draw_fairness,
@@ -30,12 +30,14 @@ import matplotlib.pyplot as plt
 
 
 HERE = Path(__file__).resolve().parent
+BENCHMARKS_DIR = HERE.parents[1]
 DEFAULT_CONFIGS = {
     'intra': (
-        HERE / 'benchmark_PAPER_intra_rtt_fairness' / 'config.yaml'),
+        BENCHMARKS_DIR / 'benchmark_PAPER_intra_rtt_fairness' / 'config.yaml'),
     'inter': (
-        HERE / 'benchmark_PAPER_inter_rtt_fairness' / 'config.yaml'),
-    'efficiency': HERE / 'benchmark_paper_efficiency' / 'config.yaml',
+        BENCHMARKS_DIR / 'benchmark_PAPER_inter_rtt_fairness' / 'config.yaml'),
+    'efficiency': (
+        BENCHMARKS_DIR / 'benchmark_paper_efficiency' / 'config.yaml'),
 }
 
 

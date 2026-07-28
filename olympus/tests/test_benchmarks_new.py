@@ -6,7 +6,7 @@ from unittest import mock
 import numpy as np
 
 from benchmarks_new import common
-from benchmarks_new.paper_efficiency import episode_efficiency
+from benchmarks_new.combined_plots.olympus_paper_inter_intra_efficiency.paper_efficiency import episode_efficiency
 
 
 class PaperEfficiencyTests(unittest.TestCase):

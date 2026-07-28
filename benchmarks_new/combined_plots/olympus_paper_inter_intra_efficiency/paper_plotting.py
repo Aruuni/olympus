@@ -15,8 +15,8 @@ from matplotlib.ticker import AutoMinorLocator, FormatStrFormatter, ScalarFormat
 import matplotlib.transforms as mtransforms
 import numpy as np
 
-from benchmarks_new.paper_efficiency import group_points
-from benchmarks_new.paper_fairness import series
+from benchmarks_new.combined_plots.olympus_paper_inter_intra_efficiency.paper_efficiency import group_points
+from benchmarks_new.combined_plots.olympus_paper_inter_intra_efficiency.paper_fairness import series
 from benchmarks_new.plot_data import run_environment, run_label
 
 

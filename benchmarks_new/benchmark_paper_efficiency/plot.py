@@ -12,11 +12,11 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-from benchmarks_new.paper_efficiency import (
+from benchmarks_new.combined_plots.olympus_paper_inter_intra_efficiency.paper_efficiency import (
     efficiency_groups,
     scenario_settings,
 )
-from benchmarks_new.paper_plotting import (
+from benchmarks_new.combined_plots.olympus_paper_inter_intra_efficiency.paper_plotting import (
     add_run_legend,
     draw_efficiency,
     ordered_runs,

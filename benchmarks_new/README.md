@@ -32,7 +32,10 @@ Use `--debug` for the short two-condition smoke-test versions.
 Render the three paper experiments as one shared figure from their existing
 episode data:
 
-    ./venv_training/bin/python benchmarks_new/paper_figure.py
+    ./venv_training/bin/python \
+      benchmarks_new/combined_plots/olympus_paper_inter_intra_efficiency/paper_figure.py
 
-This writes `benchmarks_new/paper_figure.pdf` and a matching PNG. Use
-`--debug` to read each experiment's `data_debug` output instead.
+This writes
+`benchmarks_new/combined_plots/olympus_paper_inter_intra_efficiency/paper_figure.pdf`
+and a matching PNG. Use `--debug` to read each experiment's `data_debug`
+output instead.
