@@ -169,7 +169,52 @@ def _requires_mininet_privileges(manifest: dict) -> bool:
     return any(str(environment).lower() != 'raynet' for environment in selected)
 
 
-def run_eval(config: Path, extra=None, debug=False):
+def _checkpoint_manifest(manifest: dict, checkpoint_name: str) -> dict:
+    """Return one checkpoint slice of an already canonical eval manifest."""
+    result = copy.deepcopy(manifest)
+    checkpoints = result.get('checkpoints') or {}
+    if checkpoint_name not in checkpoints:
+        raise ValueError(f'unknown checkpoint {checkpoint_name!r}')
+    result['checkpoints'] = {checkpoint_name: checkpoints[checkpoint_name]}
+    result.setdefault('matrix', {})['checkpoints'] = [checkpoint_name]
+    result['runs'] = [
+        run for run in (result.get('runs') or [])
+        if run.get('checkpoint') == checkpoint_name
+    ]
+    return result
+
+
+def _run_manifest(manifest: dict, extra=None) -> int:
+    """Materialize and run one canonical eval manifest."""
+    handle = tempfile.NamedTemporaryFile(
+        mode='w', prefix='olympus_benchmark_', suffix='.yaml', delete=False)
+    try:
+        with handle:
+            yaml.safe_dump(manifest, handle, sort_keys=False)
+        manifest_path = Path(handle.name)
+    except Exception:
+        Path(handle.name).unlink(missing_ok=True)
+        raise
+
+    command = [sys.executable, str(ROOT / 'olympus' / 'eval.py'),
+               '--config', str(manifest_path)] + list(extra or [])
+    if (hasattr(os, 'geteuid') and os.geteuid() != 0
+            and _requires_mininet_privileges(manifest)):
+        sudo = shutil.which('sudo')
+        if not sudo:
+            print('[benchmarks_new] Mininet evaluation requires sudo -E, but sudo was not found',
+                  file=sys.stderr)
+            manifest_path.unlink(missing_ok=True)
+            return 2
+        print('[benchmarks_new] Mininet selected; launching evaluation with sudo -E')
+        command = [sudo, '-E', *command]
+    try:
+        return subprocess.run(command, cwd=str(ROOT)).returncode
+    finally:
+        manifest_path.unlink(missing_ok=True)
+
+
+def run_eval(config: Path, extra=None, debug=False, after_checkpoint=None):
     temporary_paths = []
     try:
         manifest, temporary_paths = _canonical_manifest(config, debug=debug)
@@ -195,34 +240,22 @@ def run_eval(config: Path, extra=None, debug=False):
                 path.unlink(missing_ok=True)
             return 2
 
-    handle = tempfile.NamedTemporaryFile(
-        mode='w', prefix='olympus_benchmark_', suffix='.yaml', delete=False)
     try:
-        with handle:
-            yaml.safe_dump(manifest, handle, sort_keys=False)
-        manifest_path = Path(handle.name)
-    except Exception:
-        Path(handle.name).unlink(missing_ok=True)
-        raise
-
-    command = [sys.executable, str(ROOT / 'olympus' / 'eval.py'),
-               '--config', str(manifest_path)] + list(extra or [])
-    if (hasattr(os, 'geteuid') and os.geteuid() != 0
-            and _requires_mininet_privileges(manifest)):
-        sudo = shutil.which('sudo')
-        if not sudo:
-            print('[benchmarks_new] Mininet evaluation requires sudo -E, but sudo was not found',
-                  file=sys.stderr)
-            manifest_path.unlink(missing_ok=True)
-            for path in temporary_paths:
-                path.unlink(missing_ok=True)
-            return 2
-        print('[benchmarks_new] Mininet selected; launching evaluation with sudo -E')
-        command = [sudo, '-E', *command]
-    try:
-        return subprocess.run(command, cwd=str(ROOT)).returncode
+        checkpoint_names = list((manifest.get('matrix') or {}).get('checkpoints') or [])
+        for checkpoint_name in checkpoint_names:
+            print(f'[benchmarks_new] running checkpoint {checkpoint_name}')
+            code = _run_manifest(
+                _checkpoint_manifest(manifest, checkpoint_name),
+                extra=extra,
+            )
+            if code:
+                return code
+            if after_checkpoint is not None:
+                code = after_checkpoint(checkpoint_name)
+                if code:
+                    return code
+        return 0
     finally:
-        manifest_path.unlink(missing_ok=True)
         for path in temporary_paths:
             path.unlink(missing_ok=True)
 
@@ -238,15 +271,27 @@ def suite_main(suite_file, argv=None):
     parser.add_argument('--debug', action='store_true')
     args = parser.parse_args(argv)
     config = Path(args.config).resolve()
+    plotter = Path(suite_file).with_name('plot.py')
+
+    def update_plot(checkpoint_name=None):
+        if checkpoint_name is not None:
+            print(f'[benchmarks_new] updating aggregate plot after {checkpoint_name}')
+        return subprocess.run(
+            [sys.executable, str(plotter), '--config', str(config)]
+            + (['--debug'] if args.debug else []),
+            cwd=str(ROOT),
+        ).returncode
+
     if not args.plot_only:
-        code = run_eval(config, ['--verbose'] if args.verbose else [], debug=args.debug)
+        code = run_eval(
+            config,
+            ['--verbose'] if args.verbose else [],
+            debug=args.debug,
+            after_checkpoint=None if args.no_plot else update_plot,
+        )
         if code:
             return code
+        return 0
     if args.no_plot:
         return 0
-    plotter = Path(suite_file).with_name('plot.py')
-    return subprocess.run(
-        [sys.executable, str(plotter), '--config', str(config)]
-        + (['--debug'] if args.debug else []),
-        cwd=str(ROOT),
-    ).returncode
+    return update_plot()

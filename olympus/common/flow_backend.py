@@ -205,3 +205,16 @@ def set_cwnd(flow_fd, cwnd):
         flow_id = int(os.environ.get('OC_FLOW_ID', flow_fd))
         return _raynet_service().set_cwnd(flow_id, float(cwnd))
     return _tcp_sockopt().set_cwnd(flow_fd, cwnd)
+
+
+def advance_without_action(flow_fd):
+    """Release one RayNet MTP without applying a CWND override.
+
+    Kernel-backed flows keep progressing without worker input, so this is a
+    no-op outside RayNet.  The simulation broker, however, needs an explicit
+    acknowledgement from each flow before it can consume the next event.
+    """
+    if _backend_name() == 'raynet':
+        flow_id = int(os.environ.get('OC_FLOW_ID', flow_fd))
+        return _raynet_service().advance_without_action(flow_id)
+    return None

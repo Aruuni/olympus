@@ -13,7 +13,7 @@ from pathlib import Path
 from olympus.environments.base import NetworkEnv
 
 
-RAYNET_BASE_ENVIRONMENT = Path('_environments') / 'base_environment.ini'
+RAYNET_BASE_ENVIRONMENT = Path('workspace') / 'configs' / 'base_environment.ini'
 RAYNET_DEFAULT_SECTION = 'General'
 # RayNet/OMNeT++ are vendored as git submodules under this file's sibling sim/
 # directory, so the defaults resolve correctly wherever the repo is checked out.
@@ -23,11 +23,11 @@ OMNET_DEFAULT_PATH = RAYNET_SIM_DIR / 'omnetpp'
 RAYNET_CC_ALGO_BY_LISTENER = {
     # base_environment.ini runs the DeepCC RL wrapper (tcp.typename=DeepCC); the
     # listener selects the *underlying* CC algo via tcpAlgorithmClass (!CC_ALGO!):
-    #   pure-RL cwnd (CleanSlate-style) -> TcpPacedNoCC ;  Orca-style -> TcpCubic.
-    'astraea': 'TcpPacedNoCC',
+    #   pure-RL cwnd (CleanSlate-style) -> CleanSlate ;  Orca-style -> TcpCubic.
+    'astraea': 'CleanSlate',
     'orca': 'TcpCubic',
     'cubic': 'TcpCubic',
-    'cleanslate': 'TcpPacedNoCC',
+    'cleanslate': 'CleanSlate',
 }
 
 
@@ -261,6 +261,7 @@ class _RayNetFlowService:
         self.observations = {}
         self.consumed = set()
         self.pending_actions = {}
+        self.pending_no_actions = set()
         self.expected_flows = set()
         self.agent_by_flow = {}
         self.flow_by_agent = {}
@@ -290,11 +291,35 @@ class _RayNetFlowService:
                 return None
             if flow_id not in self.expected_flows:
                 return None
+            self.pending_no_actions.discard(flow_id)
             self.pending_actions[flow_id] = float(cwnd)
-            if self.expected_flows <= set(self.pending_actions):
+            if self._actions_complete_locked():
                 self._advance_locked()
             self.condition.notify_all()
         return None
+
+    def advance_without_action(self, flow_id):
+        """Acknowledge one simulation MTP without changing that flow's CWND.
+
+        Simulation workers must answer every broker step so OMNeT++ can leave
+        its event pause.  Unlike ``set_cwnd()``, this emits no action for the
+        corresponding RayNet agent, allowing its native TCP controller to
+        continue unmodified during a warm-up or other no-control interval.
+        """
+        flow_id = int(flow_id)
+        with self.condition:
+            if self.done or flow_id not in self.expected_flows:
+                return None
+            if flow_id not in self.pending_actions:
+                self.pending_no_actions.add(flow_id)
+            if self._actions_complete_locked():
+                self._advance_locked()
+            self.condition.notify_all()
+        return None
+
+    def _actions_complete_locked(self):
+        return self.expected_flows <= (
+            set(self.pending_actions) | self.pending_no_actions)
 
     def start_episode(self):
         try:
@@ -340,11 +365,12 @@ class _RayNetFlowService:
 
     def _advance_locked(self):
         actions = {}
-        for flow_id in sorted(self.expected_flows):
+        for flow_id, cwnd in self.pending_actions.items():
             agent_id = self.agent_by_flow.get(flow_id)
             if agent_id is not None:
-                actions[agent_id] = float(self.pending_actions[flow_id])
+                actions[agent_id] = float(cwnd)
         self.pending_actions.clear()
+        self.pending_no_actions.clear()
         self.consumed.clear()
         self._step_locked(actions)
         # Carry on through any subsequent no-observation interval (warm-up gaps)
@@ -401,6 +427,7 @@ class _RayNetFlowService:
         self.expected_flows = set(raw_by_flow)
         self.consumed = set()
         self.pending_actions = {}
+        self.pending_no_actions = set()
 
     def set_flow_schedule(self, start_delays=None):
         delays = list(start_delays or [])[:self.env.n]
@@ -493,8 +520,23 @@ class RaynetEnv(NetworkEnv):
             or os.environ.get('RAYNET_PATH')
             or RAYNET_DEFAULT_PATH
         ).expanduser()
-        self.section = RAYNET_DEFAULT_SECTION
-        self.ini_path = self.raynet_path / RAYNET_BASE_ENVIRONMENT
+        # A direct single-run evaluation supplies its already-materialized INI
+        # through the environment definition. Normal Olympus runs use the base
+        # RayNet template and continue to materialize variants as before.
+        self.section = str(
+            extra.get('section')
+            or environment_config.get('section')
+            or section
+            or RAYNET_DEFAULT_SECTION
+        )
+        self.ini_path = Path(
+            ini_path
+            or extra.get('ini_path')
+            or environment_config.get('ini_path')
+            or self.raynet_path / RAYNET_BASE_ENVIRONMENT
+        ).expanduser()
+        self.direct_ini = bool(
+            extra.get('direct_ini', environment_config.get('direct_ini', False)))
         self.raynet_runner = Path(
             raynet_runner
             or extra.get('runner')
@@ -648,10 +690,14 @@ class RaynetEnv(NetworkEnv):
             '**.fixedIntervalDuration': f'{interval_s:.12g}',
             '**.step_duration': f'{interval_s:.12g}s',
         }
+        if self.environment_config.get('simulation_seed') is not None:
+            overrides['seed-set'] = str(
+                int(self.environment_config['simulation_seed']))
         config = {
             'protocol': self.protocol,
             'ini_path': str(Path(self.ini_path).expanduser()),
             'section': self.section,
+            'direct_ini': self.direct_ini,
             'bw': self.bw,
             'delay': self.delay,
             'flows': int(self.n),
@@ -720,7 +766,13 @@ class RaynetEnv(NetworkEnv):
         if self.qsize is not None:
             bits = float(self.qsize) * 8.0
             return f'{max(1, round(bits))}b'
-        bits = max(1.0, self.bw * self.delay * 1000.0 * float(self.bdp_mult))
+        # Match Mininet's BDP convention exactly: bw is expressed using a
+        # binary megabit (2**20 bits) and delay is milliseconds.
+        bits = max(
+            1.0,
+            self.bw * (2 ** 20) * self.delay * 1e-3
+            * float(self.bdp_mult),
+        )
         return f'{max(1, round(bits))}b'
 
     def _start_flow_service(self):

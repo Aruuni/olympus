@@ -59,5 +59,337 @@ index 40267b2..10d4f8b 100644
 +# INET's DropTailQueue, so use that instead.
 +**.ppp[*].queue.typename = "DropTailQueue"
  
- # RL component settings
- **.printDebugMessages = true
+diff --git a/_environments/multiflow_interleave/config_multiflow_interleave.ini b/_environments/multiflow_interleave/config_multiflow_interleave.ini
+index 7ca27a6..dc4cb64 100644
+--- a/_environments/multiflow_interleave/config_multiflow_interleave.ini
++++ b/_environments/multiflow_interleave/config_multiflow_interleave.ini
+@@ -1,5 +1,5 @@
+ [General]
+-ned-path = !HOME!/raynet/_topologies:!HOME!/inet4.5/examples:!HOME!/inet4.5/showcases:!HOME!/inet4.5/src:!HOME!/inet4.5/tests/validation:!HOME!/inet4.5/tests/networks:!HOME!/inet4.5/tutorials:!HOME!/omnetpp/samples/tcpPaced/src:!HOME!/omnetpp/samples/tcpGoodputApplications/src:!HOME!/omnetpp/samples/cubic/src:!HOME!/raynet/simlibs/RLComponents/src:!HOME!/raynet/simlibs/Orca/src:!HOME!/raynet/simlibs/Astraea/src:!HOME!/raynet/simlibs/CleanSlate/src:
++ned-path = !RAYNET_PATH!/_topologies:!INET!/examples:!INET!/showcases:!INET!/src:!INET!/tests/validation:!INET!/tests/networks:!INET!/tutorials:!OMNET_PATH!/samples/tcpPaced/src:!OMNET_PATH!/samples/tcpGoodputApplications/src:!OMNET_PATH!/samples/cubic/src:!RAYNET_PATH!/simlibs/RLComponents/src:!RAYNET_PATH!/simlibs/Orca/src:!RAYNET_PATH!/simlibs/Astraea/src:!RAYNET_PATH!/simlibs/CleanSlate/src:
+ 
+ **.scenarioManager.script = xmldoc("!SCENARIO!") # used to modify the bottleneck link over time.
+ 
+diff --git a/_environments/multiflow_interleave_rtt/config_multiflow_interleave_rtt.ini b/_environments/multiflow_interleave_rtt/config_multiflow_interleave_rtt.ini
+index 7ca27a6..dc4cb64 100644
+--- a/_environments/multiflow_interleave_rtt/config_multiflow_interleave_rtt.ini
++++ b/_environments/multiflow_interleave_rtt/config_multiflow_interleave_rtt.ini
+@@ -1,5 +1,5 @@
+ [General]
+-ned-path = !HOME!/raynet/_topologies:!HOME!/inet4.5/examples:!HOME!/inet4.5/showcases:!HOME!/inet4.5/src:!HOME!/inet4.5/tests/validation:!HOME!/inet4.5/tests/networks:!HOME!/inet4.5/tutorials:!HOME!/omnetpp/samples/tcpPaced/src:!HOME!/omnetpp/samples/tcpGoodputApplications/src:!HOME!/omnetpp/samples/cubic/src:!HOME!/raynet/simlibs/RLComponents/src:!HOME!/raynet/simlibs/Orca/src:!HOME!/raynet/simlibs/Astraea/src:!HOME!/raynet/simlibs/CleanSlate/src:
++ned-path = !RAYNET_PATH!/_topologies:!INET!/examples:!INET!/showcases:!INET!/src:!INET!/tests/validation:!INET!/tests/networks:!INET!/tutorials:!OMNET_PATH!/samples/tcpPaced/src:!OMNET_PATH!/samples/tcpGoodputApplications/src:!OMNET_PATH!/samples/cubic/src:!RAYNET_PATH!/simlibs/RLComponents/src:!RAYNET_PATH!/simlibs/Orca/src:!RAYNET_PATH!/simlibs/Astraea/src:!RAYNET_PATH!/simlibs/CleanSlate/src:
+ 
+ **.scenarioManager.script = xmldoc("!SCENARIO!") # used to modify the bottleneck link over time.
+ 
+diff --git a/_environments/static/config_static.ini b/_environments/static/config_static.ini
+index 35c8db5..2b4d6b9 100644
+--- a/_environments/static/config_static.ini
++++ b/_environments/static/config_static.ini
+@@ -1,7 +1,7 @@
+ # Two-minute run, a single isolated flow sending data to a server.
+ 
+ [General]
+-ned-path = !HOME!/raynet/_topologies:!HOME!/inet4.5/examples:!HOME!/inet4.5/showcases:!HOME!/inet4.5/src:!HOME!/inet4.5/tests/validation:!HOME!/inet4.5/tests/networks:!HOME!/inet4.5/tutorials:!HOME!/omnetpp/samples/tcpPaced/src:!HOME!/omnetpp/samples/tcpGoodputApplications/src:!HOME!/omnetpp/samples/cubic/src:!HOME!/raynet/simlibs/RLComponents/src:!HOME!/raynet/simlibs/Orca/src:!HOME!/raynet/simlibs/Astraea/src:!HOME!/raynet/simlibs/CleanSlate/src:
++ned-path = !RAYNET_PATH!/_topologies:!INET!/examples:!INET!/showcases:!INET!/src:!INET!/tests/validation:!INET!/tests/networks:!INET!/tutorials:!OMNET_PATH!/samples/tcpPaced/src:!OMNET_PATH!/samples/tcpGoodputApplications/src:!OMNET_PATH!/samples/cubic/src:!RAYNET_PATH!/simlibs/RLComponents/src:!RAYNET_PATH!/simlibs/Orca/src:!RAYNET_PATH!/simlibs/Astraea/src:!RAYNET_PATH!/simlibs/CleanSlate/src:
+ # General
+ sim-time-limit = !DURATION!s
+ 
+diff --git a/build_paths.sh b/build_paths.sh
+index f90c90c..2463c54 100644
+--- a/build_paths.sh
++++ b/build_paths.sh
+@@ -1,7 +1,12 @@
+-# ! SET YOUR ENVIRONMENT VARIABLES HERE ! #
+-export RAYNET_PATH=$HOME/raynet
+-export OMNET_PATH=$HOME/omnetpp
+-export INET_PATH=$OMNET_PATH/samples/inet4.5
++# Paths are derived automatically from this file's location.
++# RayNet and OMNeT++ are vendored as sibling git submodules under sim/:
++#   sim/raynet   <- this file lives here (RAYNET_PATH)
++#   sim/omnetpp  <- OMNET_PATH
++#   sim/inet4.5  <- symlinked into $OMNET_PATH/samples/inet4.5
++# So the stack builds/runs wherever the Olympus repo is checked out.
++_RAYNET_SELF="${BASH_SOURCE[0]:-$0}"
++export RAYNET_PATH="$(cd "$(dirname "$_RAYNET_SELF")" && pwd)"
++export OMNET_PATH="$(cd "$RAYNET_PATH/.." && pwd)/omnetpp"
++export INET_PATH="$OMNET_PATH/samples/inet4.5"
+ 
+-export RAYNET_VENV_PATH=$RAYNET_PATH/.venv
+-# ! BUILD WILL FAIL IF THESE ARE INCORRECT ! #
+\ No newline at end of file
++export RAYNET_VENV_PATH="$RAYNET_PATH/.venv"
+diff --git a/simlibs/Astraea/Makefile b/simlibs/Astraea/Makefile
+index 9f265d8..26ce83b 100644
+--- a/simlibs/Astraea/Makefile
++++ b/simlibs/Astraea/Makefile
+@@ -17,7 +17,7 @@ cleanall: checkmakefiles
+ 	rm -f src/Makefile
+ 
+ makefiles:
+-	cd src && opp_makemake -o Astraea --make-so -f --deep --mode ${MODE} -I${RAYNET_PATH}/simlibs/RLComponents/src -L${RAYNET_PATH}/simlibs/RLComponents/src -lRLComponents${LIB_SUFFIX} -I${INET_PATH}/src -L${INET_PATH}/src -lINET${LIB_SUFFIX} -I${OMNET_PATH}/samples/tcpPaced/src -L${OMNET_PATH}/samples/tcpPaced/src -ltcpPaced${LIB_SUFFIX} -I${OMNET_PATH}/samples/cubic/src -L${OMNET_PATH}/samples/cubic/src -lcubic${LIB_SUFFIX} -I${HOME}/raynet/simlibs/tcpPacedNoCC/src -L${HOME}/raynet/simlibs/tcpPacedNoCC/src -ltcpPacedNoCC${LIB_SUFFIX}   
++	cd src && opp_makemake -o Astraea --make-so -f --deep --mode ${MODE} -I${RAYNET_PATH}/simlibs/RLComponents/src -L${RAYNET_PATH}/simlibs/RLComponents/src -lRLComponents${LIB_SUFFIX} -I${INET_PATH}/src -L${INET_PATH}/src -lINET${LIB_SUFFIX} -I${OMNET_PATH}/samples/tcpPaced/src -L${OMNET_PATH}/samples/tcpPaced/src -ltcpPaced${LIB_SUFFIX} -I${OMNET_PATH}/samples/cubic/src -L${OMNET_PATH}/samples/cubic/src -lcubic${LIB_SUFFIX} -I${RAYNET_PATH}/simlibs/CleanSlate/src -L${RAYNET_PATH}/simlibs/CleanSlate/src -lCleanSlate${LIB_SUFFIX}
+ 
+ checkmakefiles:
+ 	@if [ ! -f src/Makefile ]; then \
+diff --git a/simlibs/Astraea/src/training/AstraeaTraining.ini b/simlibs/Astraea/src/training/AstraeaTraining.ini
+index f214652..ebf27c7 100644
+--- a/simlibs/Astraea/src/training/AstraeaTraining.ini
++++ b/simlibs/Astraea/src/training/AstraeaTraining.ini
+@@ -1,5 +1,5 @@
+ [General]
+-ned-path = !HOME!/raynet/_topologies:!HOME!/inet4.5/examples:!HOME!/inet4.5/showcases:!HOME!/inet4.5/src:!HOME!/inet4.5/tests/validation:!HOME!/inet4.5/tests/networks:!HOME!/inet4.5/tutorials:!HOME!/omnetpp/samples/tcpPaced/src:!HOME!/omnetpp/samples/tcpGoodputApplications/src:!HOME!/omnetpp/samples/cubic/src:!HOME!/raynet/simlibs/RLComponents/src:!HOME!/raynet/simlibs/Astraea/src:
++ned-path = !RAYNET_PATH!/_topologies:!INET!/examples:!INET!/showcases:!INET!/src:!INET!/tests/validation:!INET!/tests/networks:!INET!/tutorials:!OMNET_PATH!/samples/tcpPaced/src:!OMNET_PATH!/samples/tcpGoodputApplications/src:!OMNET_PATH!/samples/cubic/src:!RAYNET_PATH!/simlibs/RLComponents/src:!RAYNET_PATH!/simlibs/Astraea/src:
+ 
+ 
+ # Outputs/verbosity
+diff --git a/simlibs/CleanSlate/Makefile b/simlibs/CleanSlate/Makefile
+index 3d989e8..2186db1 100644
+--- a/simlibs/CleanSlate/Makefile
++++ b/simlibs/CleanSlate/Makefile
+@@ -17,7 +17,7 @@ cleanall: checkmakefiles
+ 	rm -f src/Makefile
+ 
+ makefiles:
+-	cd src && opp_makemake -o CleanSlate --make-so -f --deep --mode ${MODE} -I${RAYNET_PATH}/simlibs/RLComponents/src -L${RAYNET_PATH}/simlibs/RLComponents/src -lRLComponents${LIB_SUFFIX} -I${INET_PATH}/src -L${INET_PATH}/src -lINET${LIB_SUFFIX} -I${OMNET_PATH}/samples/tcpPaced/src -L${OMNET_PATH}/samples/tcpPaced/src -ltcpPaced${LIB_SUFFIX} -I${OMNET_PATH}/samples/cubic/src -L${OMNET_PATH}/samples/cubic/src -lcubic${LIB_SUFFIX} -I${HOME}/raynet/simlibs/tcpPacedNoCC/src -L${HOME}/raynet/simlibs/tcpPacedNoCC/src -ltcpPacedNoCC${LIB_SUFFIX}   
++	cd src && opp_makemake -o CleanSlate --make-so -f --deep --mode ${MODE} -I${RAYNET_PATH}/simlibs/RLComponents/src -L${RAYNET_PATH}/simlibs/RLComponents/src -lRLComponents${LIB_SUFFIX} -I${INET_PATH}/src -L${INET_PATH}/src -lINET${LIB_SUFFIX} -I${OMNET_PATH}/samples/tcpPaced/src -L${OMNET_PATH}/samples/tcpPaced/src -ltcpPaced${LIB_SUFFIX} -I${OMNET_PATH}/samples/cubic/src -L${OMNET_PATH}/samples/cubic/src -lcubic${LIB_SUFFIX} -I${RAYNET_PATH}/simlibs/CleanSlate/src -L${RAYNET_PATH}/simlibs/CleanSlate/src -lCleanSlate${LIB_SUFFIX}
+ 
+ checkmakefiles:
+ 	@if [ ! -f src/Makefile ]; then \
+diff --git a/simlibs/CleanSlate/src/CleanSlate.cc b/simlibs/CleanSlate/src/CleanSlate.cc
+index cc40c23..fd608b0 100644
+--- a/simlibs/CleanSlate/src/CleanSlate.cc
++++ b/simlibs/CleanSlate/src/CleanSlate.cc
+@@ -2,6 +2,7 @@
+ #include "omnetpp/ccomponent.h"
+ #include "omnetpp/simtime_t.h"
+ #include "transportlayer/tcp/TcpPacedConnection.h"
++#include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
+ #include "transportlayer/tcp/TcpPaced.h"
+ #include <algorithm>
+ #include <numeric>
+@@ -86,74 +87,52 @@ void CleanSlate::connectionClosed() {
+     }
+ }
+ 
+-// Return an observation to the broker, based on the current state
++// Return an observation to the broker, based on the current state.
++// Olympus uses the same raw transport metric contract as Astraea/DeepCC.
+ std::optional<ObsType> CleanSlate::computeObservation(){
+     if (debug) cout << "\tCleanSlate: computeObservation()" << endl; 
+     double lastIntervalDuration = (simTime() - this->lastIntervalTime).dbl();
++    if (lastIntervalDuration <= 0.0) {
++        lastIntervalDuration = this->fixedIntervalDuration;
++    }
+ 
+     this->delta_snd_max = state->snd_max - this->last_snd_max;
+     this->delta_snd_una = state->snd_una - this->last_snd_una;
+     this->delta_ack_cnt = state->ack_cnt - this->last_ack_cnt;
+-    
+-    // Initialize empty obs to populate as we go
+-    double obs[7] = {0,0,0,0,0,0,};
+ 
+-    // Throughput: How many bytes were DELIVERED this interval (basically goodput?)
++    TcpPacedConnection* pacedConnection = dynamic_cast<TcpPacedConnection*>(conn);
+     this->cleanSlateThroughput = this->bytesDelivered / lastIntervalDuration;
+     this->cleanSlateMaxThroughput = std::max(this->cleanSlateMaxThroughput, this->cleanSlateThroughput);
+-    if (this->cleanSlateMaxThroughput == 0.0) {
+-        obs[0] = obs[1] = obs[2] = 0.0;
+-    } else {
+-        // Throughput
+-        obs[0] = this->cleanSlateThroughput / this->cleanSlateMaxThroughput;
+-
+-        // Pacerate
+-        double paceRate = (1.0/dynamic_cast<TcpPacedConnection*>(conn)->intersendingTime.dbl()) * (double) state->snd_mss;
+-        obs[1] = std::min(10.0, paceRate / this->cleanSlateMaxThroughput);
+-
+-        // Lossrate: What percentage of bytes sent this interval were retransmissions
+-        this->cleanSlateLossRate = 0.0;
+-        if (this->retransmissionRate > 0.0) {  // Avoid division by 0
+-            double transmissionRate = delta_snd_max/lastIntervalDuration; // How many non-retransmits occurred this interval in bytes/s
+-            this->cleanSlateLossRate = this->retransmissionRate / (this->retransmissionRate + transmissionRate); // What percentage of interval's sent data was retransmissions
+-        }
+-        obs[2] = this->retransmissionRate / this->cleanSlateMaxThroughput;
++    this->cleanSlateLossRate = this->retransmissionRate;
++    this->cleanSlateACKTotal = state->snd_mss > 0 ? this->bytesDelivered / (double)state->snd_mss : 0.0;
++
++    double averageRttUs = this->rttReportCount > 0 ? (this->cleanSlateDelaySum / this->rttReportCount) * 1e6 : 0.0;
++    double minRttUs = this->cleanSlateMinDelay * 1e6;
++    double srttUs = state->srtt.dbl() * 1e6 * 8.0;
++    double cwndPackets = state->snd_mss > 0 ? state->snd_cwnd / (double)state->snd_mss : 0.0;
++    double packetsOut = state->snd_mss > 0 ? pacedConnection->getBytesInFlight() / (double)state->snd_mss : 0.0;
++    double pacingRateBytesPerSecond = pacedConnection->intersendingTime.dbl() > 0.0 ? state->snd_mss / pacedConnection->intersendingTime.dbl() : 0.0;
++    double retransOutPackets = 0.0;
++    if (state->snd_mss > 0 && pacedConnection->getRexmitQueue() != nullptr) {
++        retransOutPackets = pacedConnection->getRexmitQueue()->getTotalRetransmitted() / (double)state->snd_mss;
+     }
+ 
+-    // ACKed: How many bytes were ACKed this interval
+-    this->cleanSlateACKTotal= this->bytesDelivered/(double)state->snd_mss;
+-    obs[3] = this->cleanSlateACKTotal /  state->snd_cwnd;
+-    
+-    // Interval Duration: How many seconds passed since last interval
+-    obs[4] = lastIntervalDuration;
+-
+-    // Delay: Tracked in overridden method above. Only update the minimum if delay reports were received this interval.
+-    if (this->rttReportCount == 0 || state->srtt.dbl() == 0.0) {
+-        // No RTT reports were received this interval. Set all RTT related values to 0 to represent lack of data.
+-        this->cleanSlateDelayMetric = 0.0;    // Delay is unobserved, not 0. Do not report as optimal.
+-        obs[5] = 0.0;                   // SRTT
+-        obs[6] = 0.0;                   // Delay metric
++    if (this->rttReportCount > 0 && state->srtt.dbl() > 0.0 && state->srtt > this->cleanSlateMinDelay * this->delayCoefficient) {
++        this->cleanSlateDelayMetric = this->cleanSlateMinDelay * this->delayCoefficient / state->srtt;
++    } else if (this->rttReportCount > 0 && state->srtt.dbl() > 0.0) {
++        this->cleanSlateDelayMetric = 1.0;
+     } else {
+-        // Observation is valid, compute the delay metric (0.0 is poor, 1.0 is optimal. Report as optimal if within the delay budget)
+-        if (state->srtt > this->cleanSlateMinDelay * this->delayCoefficient) {                                             
+-            this->cleanSlateDelayMetric = this->cleanSlateMinDelay * this->delayCoefficient / state->srtt;
+-        } else {
+-            this->cleanSlateDelayMetric = 1.0;
+-        }
+-        obs[5] = this->cleanSlateMinDelay / std::max(state->srtt.dbl(), this->cleanSlateMinDelay); // sRTT is lower than it should be at startup. The max prevents this obs from being > 1 when that happens.
+-        obs[6] = this->cleanSlateDelayMetric;
++        this->cleanSlateDelayMetric = 0.0;
+     }
+-    
+ 
+-    // Schedule next step if episode not done
++    // Schedule next step if episode not done.
+     RLStepsTaken++;
+     if (RLStepsTaken >= this->maxRLSteps && this->maxRLSteps > 0) {
+         done = true;
+     } else {
+         scheduleNextStep(this->fixedIntervals ? this->fixedIntervalDuration : state->srtt.dbl());
+     }
+-    
+-    // Debug prints
++
+     if(debug) {
+         cout << "-" << endl;
+         cout << "! STEP: " << RLStepsTaken << " !" << endl;
+@@ -162,34 +141,35 @@ std::optional<ObsType> CleanSlate::computeObservation(){
+             cout << "\t\tdelta_snd_una: " << delta_snd_una << endl;
+             cout << "\t\tcwnd: " << state->snd_cwnd << endl;
+             cout << "\t\tsnd_max: " << state->snd_max << endl;
+-            cout << "\t\tSRTT: " << state->srtt << endl;
++            cout << "\t\tavg_thr: " << this->cleanSlateThroughput << endl;
++            cout << "\t\tmax_tput: " << this->cleanSlateMaxThroughput << endl;
++            cout << "\t\tavg_urtt: " << averageRttUs << endl;
++            cout << "\t\tmin_rtt: " << minRttUs << endl;
++            cout << "\t\tsrtt_us: " << srttUs << endl;
++            cout << "\t\tcwnd_packets: " << cwndPackets << endl;
++            cout << "\t\tloss_rate: " << this->cleanSlateLossRate << endl;
++            cout << "\t\tpackets_out: " << packetsOut << endl;
++            cout << "\t\tpacing_rate: " << pacingRateBytesPerSecond << endl;
++            cout << "\t\tretrans_out: " << retransOutPackets << endl;
+             cout << "\t\tack_cnt: " << state->ack_cnt << endl;
+             cout << "\t\tdelta_ack_cnt: " << this->delta_ack_cnt << endl;
+             cout << "\t\tACKTotal: " << this->cleanSlateACKTotal << endl;
+-            cout << "\t\tpacketsDelivered" << this->bytesDelivered/state->snd_mss << endl;
++            cout << "\t\tpacketsDelivered" << this->cleanSlateACKTotal << endl;
+             cout << "\t\trttReportCount: " << this->rttReportCount << endl;
+             cout << "\t\tDone: " << done << endl;
+-        cout << "\tObservations:" << endl;
+-            cout << "\t\tThroughput: " << obs[0] << endl;
+-            cout << "\t\tPacerate: " << obs[1] << endl;
+-            cout << "\t\tLossRate: " << obs[2] << endl;
+-            cout << "\t\tAcksCount: " << obs[3] << endl;
+-            cout << "\t\tIntervalDuration: " << obs[4] << endl;
+-            cout << "\t\tRaw SRTT: " << obs[5] << endl;
+-            cout << "\t\tSRTT Metric: " << obs[6] << endl;
+     } 
+ 
+-    // Plotting metrics
+     owner->emit(throughputSignal, this->cleanSlateThroughput);
+ 
+     return ObsType({
+-            obs[0],                   // Normalized throughput
+-            obs[1],               // Normalized pacerate
+-            obs[2],               // Normalized lossrate
+-            obs[3],              // Normalized ACKs count (maybe use tcp_cwnd? ask aiden)     
+-            obs[4],              // Monitor interval duration
+-            obs[5],             // Normalized SRTT (delay)
+-            obs[6]              // Normalized SRTT (possibly forgiven, if within the forgiveness window)
++        {"avg_thr", this->cleanSlateThroughput},
++        {"avg_urtt", averageRttUs},
++        {"min_rtt", minRttUs},
++        {"srtt_us", srttUs},
++        {"cwnd", cwndPackets},
++        {"packets_out", packetsOut},
++        {"pacing_rate", pacingRateBytesPerSecond},
++        {"retrans_out", retransOutPackets},
+     });
+ }
+ 
+@@ -209,28 +189,23 @@ RewardType CleanSlate::computeReward(){
+ void CleanSlate::decisionMade(ActionType action) {
+     if (debug) cout << "\tCleanSlate: decisionMade()" << endl;
+ 
+-    // Compute new cwnd from the given action (cwnd *= 2^action)
+-    double multiplier = std::pow(2.0, (double) action);
+-    uint32_t newCwnd = ceil(((double) state->snd_cwnd) * multiplier);
+-    newCwnd = max(newCwnd, state->snd_mss);
++    // Olympus/Astraea sends the target congestion window in packets.
++    double requestedPackets = std::max((double)action, 1.0);
++    double requestedBytes = std::ceil(requestedPackets * (double)state->snd_mss);
++    double requestedCwnd = std::max(requestedBytes, (double)state->snd_mss);
++    uint32_t newCwnd = (uint32_t)requestedCwnd;
++    double multiplier = (double) newCwnd / (double) state->snd_cwnd;
+     
+     // Attempt to change cwnd and pacing rate
+-    if (this->takeActions && this->rttReportCount > 0 && newCwnd <= 1000000) {
++    if (this->takeActions) {
+         if (debug) cout << "\t\tChanging cwnd from " << state->snd_cwnd << " to " << newCwnd << "(" << multiplier << "x)" << endl;
+         state->snd_cwnd = newCwnd;
+ 
+-        // Update pacing rate
+-        if(state->snd_cwnd > 0) {
+-            double paceFactor;
+-            if (state->snd_cwnd < state->ssthresh/2) {
+-                paceFactor = 2;
+-            }
+-            else{
+-                paceFactor = 1.2;
+-            }
+-        uint32_t maxWindow = std::max(state->snd_cwnd, dynamic_cast<TcpPacedConnection*>(conn)->getBytesInFlight());
+-        double pace = state->srtt.dbl()/(((double) (maxWindow) / (double)state->snd_mss) * paceFactor);
+-        dynamic_cast<TcpPacedConnection*>(conn)->changeIntersendingTime(pace);
++        // Pace one max(cwnd, bytes-in-flight) window per RTT, matching Astraea.
++        if(state->snd_cwnd > 0 && state->srtt > SIMTIME_ZERO) {
++            uint32_t maxWindow = std::max(state->snd_cwnd, dynamic_cast<TcpPacedConnection*>(conn)->getBytesInFlight());
++            double pace = state->srtt.dbl() / ((double) maxWindow / (double) state->snd_mss);
++            dynamic_cast<TcpPacedConnection*>(conn)->changeIntersendingTime(pace);
+         }
+         owner->emit(actionSignal, multiplier); // Emit action for plotting
+     } else {
+@@ -242,8 +217,6 @@ void CleanSlate::decisionMade(ActionType action) {
+ 
+     if (debug) {
+         cout << "\t\t" << (this->takeActions) << endl;
+-        cout << "\t\t" << (this->rttReportCount > 0) << endl;
+-        cout << "\t\t" << (newCwnd < 1000000) << endl;
+         cout << "-" << endl;
+     }
+ }
+diff --git a/simlibs/CleanSlate/src/training/CleanSlateTraining.ini b/simlibs/CleanSlate/src/training/CleanSlateTraining.ini
+index 97e863f..65b2016 100644
+--- a/simlibs/CleanSlate/src/training/CleanSlateTraining.ini
++++ b/simlibs/CleanSlate/src/training/CleanSlateTraining.ini
+@@ -1,5 +1,5 @@
+ [General]
+-ned-path = !HOME!/raynet/_topologies:!HOME!/inet4.5/examples:!HOME!/inet4.5/showcases:!HOME!/inet4.5/src:!HOME!/inet4.5/tests/validation:!HOME!/inet4.5/tests/networks:!HOME!/inet4.5/tutorials:!HOME!/omnetpp/samples/tcpPaced/src:!HOME!/omnetpp/samples/tcpGoodputApplications/src:!HOME!/omnetpp/samples/cubic/src:!HOME!/raynet/simlibs/RLComponents/src:!HOME!/raynet/simlibs/CleanSlate/src:
++ned-path = !RAYNET_PATH!/_topologies:!INET!/examples:!INET!/showcases:!INET!/src:!INET!/tests/validation:!INET!/tests/networks:!INET!/tutorials:!OMNET_PATH!/samples/tcpPaced/src:!OMNET_PATH!/samples/tcpGoodputApplications/src:!OMNET_PATH!/samples/cubic/src:!RAYNET_PATH!/simlibs/RLComponents/src:!RAYNET_PATH!/simlibs/CleanSlate/src:
+ 
+ 
+ # Outputs/verbosity
+diff --git a/simlibs/Orca/src/training/OrcaTraining.ini b/simlibs/Orca/src/training/OrcaTraining.ini
+index 42d9216..bc8a7f0 100644
+--- a/simlibs/Orca/src/training/OrcaTraining.ini
++++ b/simlibs/Orca/src/training/OrcaTraining.ini
+@@ -1,5 +1,5 @@
+ [General]
+-ned-path = !HOME!/raynet/_topologies:!HOME!/inet4.5/examples:!HOME!/inet4.5/showcases:!HOME!/inet4.5/src:!HOME!/inet4.5/tests/validation:!HOME!/inet4.5/tests/networks:!HOME!/inet4.5/tutorials:!HOME!/omnetpp/samples/tcpPaced/src:!HOME!/omnetpp/samples/tcpGoodputApplications/src:!HOME!/omnetpp/samples/cubic/src:!HOME!/raynet/simlibs/RLComponents/src:!HOME!/raynet/simlibs/Orca/src:
++ned-path = !RAYNET_PATH!/_topologies:!INET!/examples:!INET!/showcases:!INET!/src:!INET!/tests/validation:!INET!/tests/networks:!INET!/tutorials:!OMNET_PATH!/samples/tcpPaced/src:!OMNET_PATH!/samples/tcpGoodputApplications/src:!OMNET_PATH!/samples/cubic/src:!RAYNET_PATH!/simlibs/RLComponents/src:!RAYNET_PATH!/simlibs/Orca/src:
+ 
+ 
+ # Outputs/verbosity

@@ -108,6 +108,30 @@ class EvalManifestTests(unittest.TestCase):
         })
         self.assertEqual(out['per_flow_delays'], [10, 40])
 
+    def test_explicit_flow_start_jitter_is_seeded_per_episode(self):
+        episode = {
+            'bw': 100, 'delay': 10, 'flows': 4, 'duration': 100, 'seed': 7,
+            'flow_schedule': {
+                'arrival': {
+                    'start_delays': [0, 25, 50, 75],
+                    'max_jitter_s': 0.005,
+                },
+                'duration': {'fixed_s': 20},
+            },
+        }
+
+        first = _materialize_scenario_generators(episode, episode=2)
+        repeated = _materialize_scenario_generators(episode, episode=2)
+        different = _materialize_scenario_generators(episode, episode=4)
+
+        self.assertEqual(first['start_delays'], repeated['start_delays'])
+        self.assertNotEqual(first['start_delays'], different['start_delays'])
+        for configured, actual in zip(
+                [0.0, 25.0, 50.0, 75.0], first['start_delays']):
+            self.assertGreaterEqual(actual, configured)
+            self.assertLessEqual(actual, configured + 0.005)
+        self.assertEqual(first['flow_durations'], [20.0] * 4)
+
     def test_rejects_unknown_matrix_name(self):
         manifest = {
             'kind': 'olympus-eval', 'version': 1,

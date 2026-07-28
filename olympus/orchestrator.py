@@ -1245,6 +1245,7 @@ def run_episode(cfg, ecfg, episode, listener_bin, python_bin,
                              f'raynet_trace_ep{episode:06d}_slot{instance_id}.jsonl'))
         raynet_ecfg['episode'] = int(episode)
         raynet_ecfg['slot'] = int(instance_id)
+        raynet_ecfg['simulation_seed'] = _episode_rng_seed(ecfg, episode)
         raynet_ecfg['link_context_path'] = link_context_path
         env_kwargs['environment_config'] = raynet_ecfg
     env = make_env(
@@ -1495,6 +1496,17 @@ def _materialize_scenario_generators(ecfg: dict, episode: int = 0,
         else:
             starts = [0.0] * n_flows
         starts = (starts + [0.0] * n_flows)[:n_flows]
+        if isinstance(arrival, dict):
+            max_jitter_s = max(
+                0.0, float(arrival.get('max_jitter_s', 0.0) or 0.0))
+            if max_jitter_s > 0.0:
+                # A seeded, delay-only offset preserves the configured flow
+                # order while preventing repeated deterministic simulations
+                # from receiving byte-identical arrival schedules.
+                starts = [
+                    start + rng.uniform(0.0, max_jitter_s)
+                    for start in starts
+                ]
         duration_spec = flow_spec.get('duration', {})
         if isinstance(duration_spec, dict) and duration_spec.get('until_episode_end'):
             lengths = [max(1.0, duration - start) for start in starts]
@@ -2051,6 +2063,7 @@ def run_episode_marl(cfg, ecfg, episode, listener_bin, python_bin,
                              f'raynet_trace_ep{episode:06d}_slot{instance_id}.jsonl'))
         raynet_ecfg['episode'] = int(episode)
         raynet_ecfg['slot'] = int(instance_id)
+        raynet_ecfg['simulation_seed'] = _episode_rng_seed(ecfg, episode)
         raynet_ecfg['link_context_path'] = link_context_path
         env_kwargs['environment_config'] = raynet_ecfg
     env = make_env(backend_type, **env_kwargs)

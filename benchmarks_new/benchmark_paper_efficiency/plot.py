@@ -1,0 +1,86 @@
+#!/usr/bin/env python3
+import argparse
+import os
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+os.environ.setdefault('MPLCONFIGDIR', f'/tmp/matplotlib-{os.getuid()}')
+
+import matplotlib
+
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
+from benchmarks_new.paper_efficiency import (
+    efficiency_groups,
+    scenario_settings,
+)
+from benchmarks_new.paper_plotting import (
+    add_run_legend,
+    draw_efficiency,
+    ordered_runs,
+    save_figure,
+    use_paper_style,
+)
+from benchmarks_new.plot_data import (
+    environment_output,
+    load_benchmark,
+    output_root,
+    run_environment,
+)
+
+
+def _write_plot(groups, runs, output, environment=None):
+    fig, axis = plt.subplots(figsize=(3, 1.5))
+    if not draw_efficiency(
+            axis,
+            groups,
+            runs,
+            connect_environments=environment is None,
+    ):
+        plt.close(fig)
+        return False
+    add_run_legend(fig, runs, bbox_y=1.14, ncol=min(3, len(runs)))
+    save_figure(fig, output)
+    print(f'[paper_efficiency_plot] wrote {output}')
+    return True
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '--config', default=str(Path(__file__).with_name('config.yaml')))
+    parser.add_argument('--output')
+    parser.add_argument('--debug', action='store_true')
+    args = parser.parse_args(argv)
+
+    config = Path(args.config).resolve()
+    manifest, overlay = load_benchmark(config, debug=args.debug)
+    sweep = scenario_settings(config, manifest, overlay)
+    root = output_root(config, manifest)
+    output = Path(args.output) if args.output else root / 'benchmark_summary.pdf'
+    output.parent.mkdir(parents=True, exist_ok=True)
+    groups = efficiency_groups(root, sweep)
+    if not groups:
+        print(f'[paper_efficiency_plot] no per-flow traces beneath {root}')
+        return 1
+
+    use_paper_style()
+    runs = ordered_runs(groups)
+    _write_plot(groups, runs, output)
+    for environment in ('mininet', 'raynet'):
+        environment_runs = [
+            run for run in runs if run_environment(run) == environment]
+        if environment_runs:
+            _write_plot(
+                groups,
+                environment_runs,
+                environment_output(output, environment),
+                environment=environment,
+            )
+    return 0
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

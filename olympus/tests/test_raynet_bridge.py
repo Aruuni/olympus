@@ -250,7 +250,7 @@ class RayNetObservationAdapterTest(unittest.TestCase):
         qsize = env._qsize_bits()
 
         self.assertRegex(qsize, r'^\d+b$')
-        self.assertEqual(qsize, '2148505b')
+        self.assertEqual(qsize, '2252871b')
 
     def test_explicit_qsize_is_converted_to_integer_bits(self):
         env = raynet_env.RaynetEnv(qsize=1000.25)
@@ -263,6 +263,15 @@ class RayNetObservationAdapterTest(unittest.TestCase):
         )
         config = env.episode_config()
         self.assertNotIn('observation_fields', config)
+
+    def test_episode_config_forwards_simulation_seed(self):
+        env = raynet_env.RaynetEnv(
+            raynet_path='/tmp',
+            raynet_runner='/tmp/olympus_runner.sh',
+            environment_config={'simulation_seed': 12345},
+        )
+        config = env.episode_config()
+        self.assertEqual(config['overrides']['seed-set'], '12345')
 
     def test_raynet_paths_default_inside_environment(self):
         with mock.patch.dict(os.environ, {'RAYNET_PATH': '/opt/raynet-test'}, clear=False):
@@ -355,7 +364,7 @@ class RayNetFlowServiceTest(unittest.TestCase):
         self.assertEqual(fake.trace_path, '/tmp/raynet-trace.jsonl')
         self.assertEqual(
             fake.started_episode['ini_path'],
-            '/tmp/_environments/base_environment.ini')
+            '/tmp/workspace/configs/base_environment.ini')
         self.assertEqual(fake.started_episode['section'], 'General')
         self.assertEqual(
             fake.started_episode['replacements']['cc_algo'], 'TcpCubic')
@@ -365,6 +374,28 @@ class RayNetFlowServiceTest(unittest.TestCase):
         self.assertTrue(fake.step_actions)
         self.assertIn('Orca1', fake.step_actions[0])
         self.assertEqual(fake.step_actions[0]['Orca1'], 64.0)
+
+    def test_no_action_acknowledgement_advances_without_cwnd_override(self):
+        FakeRayNetClient.instances.clear()
+        env = raynet_env.RaynetEnv(
+            n=1,
+            bw=100,
+            delay=20,
+            cc_algo='orca',
+            raynet_path='/tmp',
+            raynet_runner='/tmp/olympus_runner.sh',
+            environment_config={'observation_fields': ORCA_FIELDS},
+        )
+        service = raynet_env._RayNetFlowService(env)
+        with mock.patch.object(raynet_env, 'RayNetEpisodeClient', FakeRayNetClient):
+            service.start_episode()
+            service.get_tcp_deepcc_info(0)
+            service.advance_without_action(0)
+            service.wait()
+            service.close()
+
+        fake = FakeRayNetClient.instances[-1]
+        self.assertEqual(fake.step_actions, [{}])
 
     def test_fake_astraea_episode_actions_and_ini_overrides(self):
         FakeAstraeaRayNetClient.instances.clear()
@@ -395,7 +426,7 @@ class RayNetFlowServiceTest(unittest.TestCase):
         fake = FakeAstraeaRayNetClient.instances[-1]
         self.assertEqual(fake.started_episode['observation_fields'], ASTRAEA_FIELDS)
         self.assertEqual(
-            fake.started_episode['replacements']['cc_algo'], 'TcpPacedNoCC')
+            fake.started_episode['replacements']['cc_algo'], 'CleanSlate')
         self.assertEqual(fake.started_episode['overrides']['**.numberOfFlows'], '2')
         self.assertEqual(fake.started_episode['overrides']['**.fixedIntervalDuration'], '0.03')
         self.assertEqual(fake.started_episode['overrides']['**.step_duration'], '0.03s')
@@ -412,9 +443,11 @@ class RayNetFlowServiceTest(unittest.TestCase):
     def test_raynet_env_owns_base_ini_path(self):
         with tempfile.TemporaryDirectory() as directory:
             build_dir = os.path.join(directory, 'build')
-            base_dir = os.path.join(directory, '_environments')
+            workspace_dir = os.path.join(directory, 'workspace')
+            base_dir = os.path.join(workspace_dir, 'configs')
             runner = os.path.join(directory, 'olympus_runner.sh')
             os.mkdir(build_dir)
+            os.mkdir(workspace_dir)
             os.mkdir(base_dir)
             base_ini = os.path.join(base_dir, 'base_environment.ini')
             open(runner, 'w').close()
@@ -430,6 +463,22 @@ class RayNetFlowServiceTest(unittest.TestCase):
         self.assertEqual(str(env.ini_path), base_ini)
         self.assertEqual(env.section, 'General')
 
+    def test_raynet_env_uses_direct_ini_from_environment_config(self):
+        env = raynet_env.RaynetEnv(
+            raynet_path='/tmp/raynet',
+            raynet_runner='/tmp/raynet/olympus_runner.sh',
+            environment_config={
+                'ini_path': '/tmp/raynet/direct.ini',
+                'section': 'DirectRun',
+                'direct_ini': True,
+            },
+        )
+
+        episode = env.episode_config()
+        self.assertEqual(episode['ini_path'], '/tmp/raynet/direct.ini')
+        self.assertEqual(episode['section'], 'DirectRun')
+        self.assertTrue(episode['direct_ini'])
+
     def test_listener_cc_maps_to_raynet_child_cc_algorithm(self):
         env = raynet_env.RaynetEnv(
             raynet_path='/tmp',
@@ -444,7 +493,7 @@ class RayNetFlowServiceTest(unittest.TestCase):
             cc_algo='astraea',
         )
         self.assertEqual(
-            env.episode_config()['replacements']['cc_algo'], 'TcpPacedNoCC')
+            env.episode_config()['replacements']['cc_algo'], 'CleanSlate')
 
         env = raynet_env.RaynetEnv(
             raynet_path='/tmp',

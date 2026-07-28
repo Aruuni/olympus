@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Deterministic checkpoint evaluation through the Olympus orchestrator.
 
-Accepts either a legacy training config plus ``--checkpoint`` or a versioned
-``kind: olympus-eval`` manifest describing checkpoint × scenario × backend
-experiments. Every matrix entry runs sequentially; environments remain parallel
-inside each entry.
+Supports direct single-run evaluation with ``--checkpoint`` and an optional
+config, plus versioned ``kind: olympus-eval`` manifests for multi-run
+checkpoint × scenario × backend evaluations. Every matrix entry runs
+sequentially; environments remain parallel inside each entry.
 """
 
 import argparse
@@ -71,16 +71,16 @@ def _record_episode_if_present(raw: str, dash: _Dashboard) -> None:
 def _parse_args() -> argparse.Namespace:
     ap = argparse.ArgumentParser(description='Run checkpoint evaluation via Olympus.')
     ap.add_argument('--checkpoint', default=None,
-                    help='checkpoint for legacy config mode')
+                    help='checkpoint for direct single-run evaluation')
     ap.add_argument('--config', default=None,
-                    help='training config or kind: olympus-eval manifest')
+                    help='direct evaluation config or kind: olympus-eval manifest')
     ap.add_argument('--episodes', type=int, default=None,
-                    help='legacy mode episode override')
+                    help='direct single-run episode override')
     ap.add_argument('--n-parallel', type=int, default=None)
     ap.add_argument('--environment', default=None,
-                    help='legacy environment setup name or YAML path')
+                    help='direct single-run environment setup name or YAML path')
     ap.add_argument('--env-type', default=None,
-                    help='legacy environment backend type')
+                    help='direct single-run environment backend type')
     ap.add_argument('--python', default=None)
     ap.add_argument('--output-root', default=None)
     ap.add_argument('--run-name', default=None)
@@ -96,17 +96,10 @@ def _read_yaml(path):
     return value
 
 
-def _reject_mixed_training_config(cfg):
-    mixed = cfg.get('experience_collection') or {}
-    if isinstance(mixed, dict) and mixed.get('enabled'):
-        raise SystemExit(
-            '[eval] experience_collection is a learner-side training feature; '
-            'use an olympus-eval manifest with separate environments and matrix entries')
-
-
-def _legacy_run(args):
+def _single_run(args):
+    """Build one evaluation run from a checkpoint and optional direct config."""
     if not args.checkpoint:
-        raise SystemExit('[eval] --checkpoint is required for a legacy config')
+        raise SystemExit('[eval] --checkpoint is required for direct single-run evaluation')
     checkpoint = os.path.abspath(args.checkpoint)
     if not os.path.exists(checkpoint):
         raise SystemExit(f'[eval] checkpoint not found: {checkpoint}')
@@ -119,8 +112,10 @@ def _legacy_run(args):
         if not cfg:
             raise SystemExit('[eval] no saved config found; pass --config')
         loaded_from_checkpoint = True
-    _reject_mixed_training_config(cfg)
     cfg = copy.deepcopy(cfg)
+    # Saved model configs may retain learner-only collection settings. They do
+    # not affect checkpoint inference and must never alter evaluation behavior.
+    cfg.pop('experience_collection', None)
     outputs = dict(cfg.get('outputs') or {})
     for key in ('run_dir', 'checkpoints_dir', 'episodes_dir', 'plots_dir',
                 'telemetry_dir', 'traces_dir', 'resolved_config'):
@@ -143,7 +138,7 @@ def _legacy_run(args):
         cfg['n_parallel'] = max(1, int(args.n_parallel))
         cfg.setdefault('orchestrator', {})['n_parallel'] = cfg['n_parallel']
     return [{
-        'name': args.run_name or 'legacy', 'cfg': cfg, 'checkpoint': checkpoint,
+        'name': args.run_name or 'single-run', 'cfg': cfg, 'checkpoint': checkpoint,
         'source': source, 'logging': 'standard', 'episodes': args.episodes,
         'environment_override': args.environment, 'env_type_override': args.env_type,
         'matrix_index': 0,
@@ -237,7 +232,13 @@ def _run_one(run, args, matrix_position, matrix_total):
                f'{run.get("name", "run")} preflight: {run["preflight_error"]}')
         return 2, 0, 0.0
     cfg, checkpoint = run['cfg'], run['checkpoint']
-    env_type = str((cfg.get('environment') or {}).get('type') or 'mininet')
+    # Direct single-run callers may select a backend independently of the
+    # saved training config. Validate the backend that the child will receive.
+    env_type = str(
+        run.get('env_type_override')
+        or (cfg.get('environment') or {}).get('type')
+        or 'mininet'
+    )
     if hasattr(os, 'geteuid') and os.geteuid() != 0 and env_type != 'raynet':
         _print(f'{C.RED}✗{C.RESET} [{matrix_position}/{matrix_total}] {run["name"]}: '
                'Mininet evaluation requires sudo -E')
@@ -330,10 +331,10 @@ def main() -> int:
         manifest = is_eval_manifest(candidate)
     if manifest:
         if args.checkpoint or args.environment or args.env_type or args.episodes:
-            raise SystemExit('[eval] checkpoint/environment/episodes CLI overrides are legacy-mode only')
+            raise SystemExit('[eval] checkpoint/environment/episodes CLI overrides are direct single-run only')
         runs = _manifest_runs(args)
     else:
-        runs = _legacy_run(args)
+        runs = _single_run(args)
 
     started = time.monotonic()
     results = []

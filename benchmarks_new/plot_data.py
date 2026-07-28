@@ -17,6 +17,18 @@ def run_label(run):
     return f'{label} — {parts[-1]}' if len(parts) > 1 else label
 
 
+def run_environment(run):
+    """Return the backend encoded in an evaluation run directory name."""
+    parts = str(run).split('__')
+    return parts[-1].lower() if len(parts) > 1 else None
+
+
+def environment_output(output: Path, environment: str) -> Path:
+    """Return the per-environment sibling of a combined plot path."""
+    return output.with_name(
+        f'{output.stem}_{environment.lower()}{output.suffix}')
+
+
 def number(row, key):
     try:
         return float(row.get(key, ''))

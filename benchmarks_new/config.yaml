@@ -1,4 +1,35 @@
 approaches:
+  - name: Astraea
+    data_folder: 
+    kind: model
+    algorithm: ma_td3
+    reward: astraea
+    state: astraea
+    environment: static
+    plot_label: Astraea
+    checkpoint: olympus/models/ma_td3_20260723-234929/checkpoints/ma_td3_450_cwnd_model.pt
+  - name: Orca
+    data_folder: 
+    kind: model
+    algorithm: orca
+    reward: orca
+    state: orca_repo
+    action: cwnd_multiplier
+    environment: static
+    plot_label: Orca
+    checkpoint: olympus/models/orca_20260720-213851/checkpoints/orca_400_cwnd_model.pt
+
+  - name: Dreamer
+    data_folder: 
+    kind: model
+    algorithm: dreamer_v3
+    reward: dreamer
+    state: dreamer
+    environment: static
+    plot_label: Dreamer
+    checkpoint: olympus/models/dreamer_v3_20260724-233950/checkpoints/dreamer_v3_cwnd_model.pt
+
+
   - name: test-protocol
     data_folder: test-protocol
     kind: model

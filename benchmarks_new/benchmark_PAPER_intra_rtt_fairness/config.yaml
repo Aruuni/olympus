@@ -1,0 +1,12 @@
+kind: olympus-eval
+version: 1
+defaults:
+  n_parallel: 10
+  repetitions: 5
+  seed: 0
+  logging: standard
+  output_root: data
+matrix:
+  checkpoints: [Astraea, Orca, Dreamer]
+  scenarios: [scenario.yaml]
+  environments: [mininet]

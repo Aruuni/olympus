@@ -96,6 +96,19 @@ def _srtt_ms(raw: dict) -> float:
     return max(srtt_us, 0.0) / 1e3
 
 
+def _has_valid_orca_observation(raw: dict) -> bool:
+    """Match Orca's original RTT-based observation validity gate."""
+    try:
+        avg_urtt = float(raw.get('avg_urtt', 0.0) or 0.0)
+        sample_count = float(raw.get('count', raw.get('cnt', 0.0)) or 0.0)
+        srtt_us = float(raw.get('srtt_us', 0.0) or 0.0)
+        min_rtt = float(raw.get(
+            'min_rtt', raw.get('min_rtt_us', 0.0)) or 0.0)
+    except (TypeError, ValueError):
+        return False
+    return avg_urtt > 0.0 and sample_count > 0.0 and srtt_us > 0.0 and min_rtt > 0.0
+
+
 def run():
     cfg = runtime_config.load_config()
     reward_name = str(runtime_config.runtime_value(
@@ -110,10 +123,8 @@ def run():
     interval_ms = float(os.environ.get('SAO_INTERVAL_MS', '20'))
     cwnd_min = int(os.environ.get('SAO_CWND_MIN', '4'))
     cwnd_max = int(os.environ.get('SAO_CWND_MAX', '10000'))
-    # Orca CUBIC->agent handoff: CUBIC owns slow start, the agent takes over
-    # once slow start ends (real Orca gates on cwnd>ssthresh; see the loop for
-    # the loss-based proxy used here). cubic_warmup_max_s caps the wait so the
-    # agent still engages on links that never lose during warmup.
+    # Orca CUBIC->agent handoff: Mininet retains the timing used by the deployed
+    # models; RayNet uses a flow-relative simulation-time timeout below.
     cubic_warmup = runtime_config.bool_value(runtime_config.agent_value(
         cfg, 'cubic_warmup', env='SAO_ORCA_CUBIC_WARMUP', default=True), True)
     cubic_warmup_max_s = float(runtime_config.agent_value(
@@ -224,7 +235,11 @@ def run():
     next_tick = t0
     traj_id = f'orca_{cport}_{episode}_{flow_id}'
     interval_s_cfg = interval_ms / 1000.0
-    last_sample_t = 0.0 if simulation_backend else time.monotonic()
+    # A RayNet worker blocks until the flow completes its delayed broker
+    # registration. Its first simulation timestamp is therefore absolute
+    # episode time, not an interval measured from zero.
+    last_sample_t = None if simulation_backend else time.monotonic()
+    raynet_warmup_start_t = None
 
     prev_state = None
     prev_action = 0.0
@@ -288,6 +303,34 @@ def run():
             avg_thr = float(raw.get('avg_thr', 0) or 0)
             avg_urtt = float(raw.get('avg_urtt', 0) or 0)
             sample_count = float(raw.get('count', raw.get('cnt', 0)) or 0)
+            observation_valid = _has_valid_orca_observation(raw)
+
+            observation_t = flow_backend.observation_clock(
+                raw, wall_now=t_step_start)
+            if simulation_backend and raynet_warmup_start_t is None:
+                raynet_warmup_start_t = observation_t
+
+            t_s = flow_backend.episode_seconds(
+                raw, t0, wall_now=t_step_start)
+            flow_backend.wait_collection_step(raw)
+
+            if not observation_valid:
+                # The kernel-backed worker does not apply an action when Orca
+                # has no valid RTT observation. RayNet must still acknowledge
+                # the paused broker step, but an empty action preserves the
+                # same hands-off TCP behavior.
+                prev_state = None
+                prev_action = 0.0
+                if simulation_backend:
+                    try:
+                        flow_backend.advance_without_action(flow_fd)
+                    except Exception as e:
+                        print(f'[orca worker] invalid-observation advance failed: '
+                              f'{e} - exiting', flush=True)
+                        break
+                else:
+                    next_tick = sleep_to_grid(next_tick, interval_s_cfg)
+                continue
 
             # tcp_deepcc.c resets these drain-on-read fields to 0 on every
             # getsockopt. When no ACK arrived in the polling interval we hold
@@ -321,59 +364,55 @@ def run():
                 ever_alive = True
             flow_active = (not ever_alive) or (dead_steps < dead_steps_limit)
 
-            interval_s, last_sample_t = flow_backend.interval_seconds(
-                raw, last_sample_t, wall_now=t_step_start)
+            if last_sample_t is None:
+                last_sample_t = flow_backend.observation_clock(
+                    raw, wall_now=t_step_start)
+                interval_s = interval_s_cfg
+            else:
+                interval_s, last_sample_t = flow_backend.interval_seconds(
+                    raw, last_sample_t, wall_now=t_step_start)
             # Orca's envwrapper.py:240 only updates Welford stats in training mode.
             # Pass the worker's measured interval into the state plugin so its
             # delta_t feature / loss-rate fallback match the reward's.
             raw['interval_s'] = interval_s
             norm_s = model.normalize_state(raw)
             reward = reward_calc.step(raw)
-            t_s = flow_backend.episode_seconds(
-                raw, t0, wall_now=t_step_start)
-            flow_backend.wait_collection_step(raw)
 
             # ── Orca CUBIC -> agent handoff ────────────────────────────────
-            # CUBIC owns the connection through slow start; the agent takes
-            # over — permanently — the moment slow start ends. Real Orca gates
-            # on cwnd > ssthresh, but the kernel struct here exposes no
-            # ssthresh, so trigger on the first loss (exactly what sets ssthresh
-            # and ends slow start), with cubic_warmup_max_s as a safety for
-            # links that never lose. reward_calc.step() above keeps updating
-            # max_bw through the warmup, so the throughput reward is normalized
-            # against the link rate CUBIC discovers, not the agent's suppressed
-            # peak (the ~49% util collapse in orca_20260718-* runs).
+            # Preserve Mininet's deployed handoff timing. For RayNet, measure
+            # the equivalent timeout from this flow's first simulation
+            # observation so a flow introduced later in an episode still gets
+            # its own Cubic-owned startup interval.
             if not agent_ready:
                 loss_now = float(
                     raw.get('loss_bytes', raw.get('lost_bytes', 0.0)) or 0.0) > 0.0
-                if loss_now or t_s >= cubic_warmup_max_s:
+                warmup_elapsed_s = t_s
+                if simulation_backend and raynet_warmup_start_t is not None:
+                    warmup_elapsed_s = max(
+                        observation_t - raynet_warmup_start_t, 0.0)
+                if loss_now or warmup_elapsed_s >= cubic_warmup_max_s:
                     agent_ready = True
                     print(f'[orca worker flow={flow_id}] CUBIC->agent handoff '
                           f'at t={t_s:.2f}s cwnd={cur_cwnd} '
+                          f'warmup_elapsed={warmup_elapsed_s:.2f}s '
                           f'({"loss" if loss_now else "timeout"})', flush=True)
 
             if not agent_ready:
                 # Slow start: CUBIC drives cwnd (no override) and we push no
-                # experience — the agent didn't cause these transitions.
+                # experience — the agent didn't cause these transitions. RayNet
+                # still pauses at every MTP, so acknowledge that step with an
+                # empty action dictionary; otherwise CUBIC warmup deadlocks at
+                # the first reset observation while the kernel-backed flow
+                # would have continued autonomously.
                 prev_state = None
                 prev_action = 0.0
                 a, mult, new_cwnd = 0.0, 1.0, cur_cwnd
-                # An action-gated simulation backend (RayNet) only advances when
-                # the worker submits a cwnd; unlike a real kernel socket under
-                # emulation, its CUBIC cannot ramp on its own while we stay
-                # silent. Write the just-observed cwnd straight back — a no-op
-                # override, since the sim's CUBIC has already grown snd_cwnd from
-                # ACKs within the interval — so CUBIC keeps driving the rampup
-                # while the episode still steps and t_s advances toward
-                # cubic_warmup_max_s. Without this the run deadlocks at the reset
-                # frame and the handoff timeout never fires. Emulation keeps the
-                # hands-off behaviour (the kernel advances on its own).
                 if simulation_backend:
                     try:
-                        flow_backend.set_cwnd(flow_fd, cur_cwnd)
+                        flow_backend.advance_without_action(flow_fd)
                     except Exception as e:
-                        print(f'[orca worker] warmup set_cwnd failed: {e} - '
-                              'exiting', flush=True)
+                        print(f'[orca worker] warmup advance failed: {e} - exiting',
+                              flush=True)
                         break
             else:
                 if prev_state is not None and flow_active and mgr:

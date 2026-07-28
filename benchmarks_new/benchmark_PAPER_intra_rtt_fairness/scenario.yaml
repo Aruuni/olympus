@@ -1,0 +1,18 @@
+name: paper_intra_rtt_fairness
+description: >
+  Reproduction of the paper intra-RTT experiment: both flows share the swept
+  RTT and flow 2 joins at 50s.
+shuffle: false
+sweep:
+  bws: [100]
+  delays: [20, 40, 60, 80, 100, 120, 140, 160, 180, 200]
+  flows: [2]
+  duration: 200
+  bdp_mult: [2]
+  measure_interval_s: 1.0
+  score_window_s: 100
+  disable_offload: true
+  flow_schedule:
+    arrival: {start_delays: [0, 50]}
+    duration: {until_episode_end: true}
+  link_schedules: [[]]

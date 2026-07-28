@@ -1,0 +1,17 @@
+config:
+  defaults:
+    n_parallel: 4
+    repetitions: 2
+    output_root: data_debug
+
+scenario:
+  name: paper_efficiency_debug
+  sweep:
+    delays: [10, 100]
+    duration: 40
+    score_window_s: 20
+    flow_schedule:
+      arrival:
+        start_delays: [0, 5, 10, 15]
+        max_jitter_s: 0.005
+      duration: {fixed_s: 25}

@@ -6,22 +6,28 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 SUITES = [
-    ('benchmark_responsiveness', 'responsiveness.py'),
-    ('benchmark_responsive_fairness', 'responsive_fairness.py'),
-    ('benchmark_inter_rtt_fairness', 'inter_rtt_fairness.py'),
-    ('benchmark_fairness', 'fairness.py'),
-    ('benchmark_convergence_4flow', 'convergence_4flow.py'),
+    # ('benchmark_responsiveness', 'responsiveness.py'),
+    # ('benchmark_responsive_fairness', 'responsive_fairness.py'),
+    # ('benchmark_inter_rtt_fairness', 'inter_rtt_fairness.py'),
+    # ('benchmark_fairness', 'fairness.py'),
+    # ('benchmark_convergence_4flow', 'convergence_4flow.py'),
+    # ('benchmark_PAPER_inter_rtt_fairness', 'inter_rtt_fairness.py'),
+    # ('benchmark_PAPER_intra_rtt_fairness', 'intra_rtt_fairness.py'),
+    ('benchmark_paper_efficiency', 'efficiency.py'),
 ]
 
 def main(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument('--debug', action='store_true')
+    parser.add_argument('--plot-only', action='store_true')
     args = parser.parse_args(argv)
     for suite, filename in SUITES:
         runner = HERE / suite / filename
         command = [sys.executable, str(runner)]
         if args.debug:
             command.append('--debug')
+        if args.plot_only:
+            command.append('--plot-only')
         if subprocess.run(command, cwd=HERE.parent).returncode:
             return 1
     return 0

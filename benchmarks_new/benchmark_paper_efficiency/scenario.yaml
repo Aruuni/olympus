@@ -1,0 +1,20 @@
+name: paper_efficiency
+description: >
+  Reproduction of the paper Figure 9 efficiency experiment: four flows start
+  25 seconds apart, run for 125 seconds, and share a 100 Mbps bottleneck.
+shuffle: false
+sweep:
+  bws: [100]
+  delays: [10, 100]
+  flows: [4]
+  duration: 200
+  bdp_mult: [1]
+  measure_interval_s: 1.0
+  score_window_s: 100
+  disable_offload: true
+  flow_schedule:
+    arrival:
+      start_delays: [0, 25, 50, 75]
+      max_jitter_s: 0.005
+    duration: {fixed_s: 125}
+  link_schedules: [[]]
